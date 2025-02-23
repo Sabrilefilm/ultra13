@@ -32,10 +32,10 @@ const ThemeToggle = () => {
 };
 
 const Logo = () => (
-  <div className="fixed bottom-4 right-20 opacity-50 z-50">
+  <div className="fixed bottom-4 left-1/2 -translate-x-1/2 opacity-50 z-50">
     <div className="flex items-center gap-2">
-      <span className="font-bold text-lg">
-        <span className="text-[#403E43]">Phocéen</span>
+      <span className="font-bold text-xl agency-text">
+        <span className="text-white">Phocéen</span>
         <span className="text-[#0EA5E9]">Agency</span>
       </span>
     </div>
