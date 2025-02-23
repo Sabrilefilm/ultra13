@@ -12,7 +12,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
   const canManageMatch = role === 'founder' || role === 'manager';
   const canDeleteMatch = role === 'founder';
 
-  console.log("Current role in UpcomingMatches:", role); // Debug log
+  console.log("Current role in UpcomingMatches:", role);
 
   return (
     <Card className="bg-white text-black">
@@ -21,7 +21,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
       </CardHeader>
       <CardContent>
         {matches && matches.length > 0 ? (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {matches.map((match) => (
               <MatchCard
                 key={match.id}
