@@ -24,6 +24,7 @@ interface Reward {
   diamonds_count: number;
   creator_id: string;
   created_at: string;
+  creator_username?: string;
 }
 
 export function RewardsPanel({ role, userId }: { role: string; userId: string }) {
@@ -37,26 +38,55 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
     queryFn: async () => {
       let query = supabase
         .from("creator_rewards")
-        .select("*")
+        .select(`
+          *,
+          user_accounts!creator_id(username)
+        `)
         .order("created_at", { ascending: false });
 
       if (role === "creator") {
-        query = query.eq("creator_id", userId);
+        const { data: userAccount } = await supabase
+          .from("user_accounts")
+          .select("id")
+          .eq("username", userId)
+          .single();
+
+        if (userAccount) {
+          query = query.eq("creator_id", userAccount.id);
+        }
       }
 
       const { data, error } = await query;
-      if (error) throw error;
-      return data as Reward[];
+      if (error) {
+        console.error("Error fetching rewards:", error);
+        throw error;
+      }
+
+      return (data || []).map(reward => ({
+        ...reward,
+        creator_username: reward.user_accounts?.username
+      })) as Reward[];
     },
   });
 
   const handleAddReward = async () => {
     try {
+      // Récupérer l'ID du créateur à partir de son username
+      const { data: userAccount, error: userError } = await supabase
+        .from("user_accounts")
+        .select("id")
+        .eq("username", recipientId)
+        .single();
+
+      if (userError || !userAccount) {
+        throw new Error("Créateur non trouvé");
+      }
+
       const { error } = await supabase
         .from("creator_rewards")
         .insert([
           {
-            creator_id: recipientId,
+            creator_id: userAccount.id,
             diamonds_count: parseInt(diamonds),
           }
         ]);
@@ -145,7 +175,7 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
             <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
-                <TableHead>Identifiant</TableHead>
+                <TableHead>Créateur</TableHead>
                 <TableHead>Diamants</TableHead>
               </TableRow>
             </TableHeader>
@@ -155,7 +185,7 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
                   <TableCell>
                     {new Date(reward.created_at).toLocaleDateString()}
                   </TableCell>
-                  <TableCell>{reward.creator_id}</TableCell>
+                  <TableCell>{reward.creator_username || reward.creator_id}</TableCell>
                   <TableCell>{reward.diamonds_count}</TableCell>
                 </TableRow>
               ))}

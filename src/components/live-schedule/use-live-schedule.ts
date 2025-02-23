@@ -14,27 +14,27 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
     try {
       console.log("Fetching profile for username:", username);
 
-      const { data: userAccounts, error: userError } = await supabase
+      const { data: userAccount, error: userError } = await supabase
         .from("user_accounts")
         .select("id, username")
         .eq("username", username)
-        .maybeSingle();
+        .single();
 
       if (userError) {
         console.error("Database error:", userError);
         throw userError;
       }
 
-      if (!userAccounts) {
+      if (!userAccount) {
         console.log("No user account found for username:", username);
         toast.error(`Aucun profil trouvé pour ${username}`);
         return null;
       }
 
-      console.log("User account found:", userAccounts);
-      setProfileId(userAccounts.id);
-      setCreatorName(userAccounts.username);
-      return userAccounts.id;
+      console.log("User account found:", userAccount);
+      setProfileId(userAccount.id);
+      setCreatorName(userAccount.username);
+      return userAccount.id;
 
     } catch (error) {
       console.error("Erreur lors de la récupération du profil:", error);

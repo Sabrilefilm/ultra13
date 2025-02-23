@@ -16,8 +16,13 @@ interface CreatorSelectProps {
   value?: string;
 }
 
+interface Creator {
+  username: string;
+  id: string;
+}
+
 export const CreatorSelect = ({ onSelect, value }: CreatorSelectProps) => {
-  const [creators, setCreators] = useState<{ username: string }[]>([]);
+  const [creators, setCreators] = useState<Creator[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,7 +30,8 @@ export const CreatorSelect = ({ onSelect, value }: CreatorSelectProps) => {
       try {
         const { data, error } = await supabase
           .from("user_accounts")
-          .select("username")
+          .select("id, username")
+          .eq('role', 'creator')
           .order("username");
 
         if (error) throw error;
