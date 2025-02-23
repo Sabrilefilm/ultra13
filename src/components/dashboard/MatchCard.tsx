@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import { Download, Trash2, Trophy, X, Timer, Clock, Calendar } from "lucide-react";
@@ -32,28 +33,46 @@ export const MatchCard = ({
   });
 
   const getNeonStyle = () => {
-    if (isMatchOff) return 'border-2 border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)]';
-    if (match.winner_id) return 'border-2 border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.3)]';
+    if (isMatchOff) return 'border-[3px] border-red-500/70 shadow-[0_0_20px_rgba(239,68,68,0.5)]';
+    if (match.winner_id) return 'border-[3px] border-green-500/70 shadow-[0_0_20px_rgba(34,197,94,0.5)]';
     
     const hour = new Date(match.match_date).getHours();
-    if (hour >= 22 || hour === 0) return 'border-2 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.3)]';
-    if (hour >= 12 && hour < 19) return 'border-2 border-sky-500/50 shadow-[0_0_15px_rgba(14,165,233,0.3)]';
-    return 'border-2 border-purple-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]';
+    if (hour >= 22 || hour === 0) {
+      return `
+        border-[3px] 
+        animate-[neon-pulse_4s_ease-in-out_infinite]
+        before:absolute before:inset-0 before:border-[3px] before:rounded-xl
+        before:animate-[neon-night_4s_ease-in-out_infinite]
+        after:absolute after:inset-0 after:border-[3px] after:rounded-xl
+        after:animate-[neon-night-2_4s_ease-in-out_infinite]
+      `;
+    }
+    if (hour >= 12 && hour < 19) {
+      return `
+        border-[3px]
+        animate-[neon-pulse_4s_ease-in-out_infinite]
+        before:absolute before:inset-0 before:border-[3px] before:rounded-xl
+        before:animate-[neon-day_4s_ease-in-out_infinite]
+        after:absolute after:inset-0 after:border-[3px] after:rounded-xl
+        after:animate-[neon-day-2_4s_ease-in-out_infinite]
+      `;
+    }
+    return 'border-[3px] border-purple-500/70 shadow-[0_0_20px_rgba(139,92,246,0.5)]';
   };
 
   const getHoverStyle = () => {
-    if (isMatchOff) return 'hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] hover:border-red-400/60';
-    if (match.winner_id) return 'hover:shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:border-green-400/60';
+    if (isMatchOff) return 'hover:shadow-[0_0_30px_rgba(239,68,68,0.6)] hover:border-red-400/80';
+    if (match.winner_id) return 'hover:shadow-[0_0_30px_rgba(34,197,94,0.6)] hover:border-green-400/80';
     
     const hour = new Date(match.match_date).getHours();
-    if (hour >= 22 || hour === 0) return 'hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:border-blue-400/60';
-    if (hour >= 12 && hour < 19) return 'hover:shadow-[0_0_20px_rgba(14,165,233,0.4)] hover:border-sky-400/60';
-    return 'hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] hover:border-purple-400/60';
+    if (hour >= 22 || hour === 0) return 'hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] hover:border-blue-400/80';
+    if (hour >= 12 && hour < 19) return 'hover:shadow-[0_0_30px_rgba(14,165,233,0.6)] hover:border-sky-400/80';
+    return 'hover:shadow-[0_0_30px_rgba(139,92,246,0.6)] hover:border-purple-400/80';
   };
 
   return (
     <div 
-      className={`group flex flex-col h-[280px] w-full max-w-[240px] rounded-xl transition-all duration-300 overflow-hidden backdrop-blur-sm bg-gradient-to-br from-gray-900/95 to-gray-950 ${getNeonStyle()} ${
+      className={`group relative flex flex-col h-[280px] w-full max-w-[240px] rounded-xl transition-all duration-300 overflow-hidden backdrop-blur-sm bg-gradient-to-br from-gray-900/95 to-gray-950 ${getNeonStyle()} ${
         isMatchOff ? 'opacity-75 grayscale' : ''
       } ${getHoverStyle()} hover:scale-[1.02]`}
     >
