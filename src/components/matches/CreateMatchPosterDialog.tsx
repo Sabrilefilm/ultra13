@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { downloadImage } from "@/utils/download";
 
 interface CreateMatchPosterDialogProps {
   isOpen: boolean;
@@ -16,8 +17,8 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
   const [player1Image, setPlayer1Image] = useState("");
   const [player2Image, setPlayer2Image] = useState("");
   const [backgroundImage, setBackgroundImage] = useState("");
-  const [width, setWidth] = useState("1920");
-  const [height, setHeight] = useState("1080");
+  const [width, setWidth] = useState("1080");
+  const [height, setHeight] = useState("1920");
 
   const handleGenerate = async () => {
     if (!matchTitle || !player1Image || !player2Image || !backgroundImage) {
@@ -27,7 +28,10 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
 
     try {
       // TODO: Intégrer la génération d'image
-      toast.success("Affiche générée avec succès!");
+      // Pour l'instant, on simule avec une image existante
+      const imageUrl = "/lovable-uploads/b0aeb9fd-a1a3-4a52-8a15-0009fef4e26d.png";
+      await downloadImage(imageUrl, `match-${matchTitle.toLowerCase().replace(/\s+/g, '-')}`);
+      toast.success("Affiche téléchargée avec succès!");
       onClose();
     } catch (error) {
       toast.error("Erreur lors de la génération de l'affiche");
@@ -46,7 +50,7 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
             <Label htmlFor="matchTitle">Titre du match</Label>
             <Input
               id="matchTitle"
-              placeholder="ex: Player 1 VS Player 2"
+              placeholder="ex: Match OFF 21/02 21H30"
               value={matchTitle}
               onChange={(e) => setMatchTitle(e.target.value)}
             />
@@ -109,7 +113,7 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
             Annuler
           </Button>
           <Button onClick={handleGenerate}>
-            Générer
+            Générer et Télécharger
           </Button>
         </div>
       </DialogContent>
