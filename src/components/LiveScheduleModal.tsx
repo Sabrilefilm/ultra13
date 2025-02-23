@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -43,13 +44,34 @@ export const LiveScheduleModal = ({
 }: LiveScheduleModalProps) => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profileId, setProfileId] = useState<string | null>(null);
 
-  const fetchSchedules = async () => {
+  const fetchProfileId = async (username: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("username", username)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setProfileId(data.id);
+        return data.id;
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération du profil:", error);
+      toast.error("Erreur lors de la récupération du profil");
+    }
+    return null;
+  };
+
+  const fetchSchedules = async (id: string) => {
     try {
       const { data, error } = await supabase
         .from("live_schedules")
         .select("*")
-        .eq("creator_id", creatorId);
+        .eq("creator_id", id);
 
       if (error) throw error;
 
@@ -77,12 +99,21 @@ export const LiveScheduleModal = ({
   };
 
   useEffect(() => {
-    if (isOpen) {
-      fetchSchedules();
+    if (isOpen && creatorId) {
+      setLoading(true);
+      const initializeData = async () => {
+        const id = await fetchProfileId(creatorId);
+        if (id) {
+          await fetchSchedules(id);
+        }
+      };
+      initializeData();
     }
   }, [isOpen, creatorId]);
 
   const handleSave = async () => {
+    if (!profileId) return;
+
     try {
       setLoading(true);
 
@@ -91,7 +122,7 @@ export const LiveScheduleModal = ({
           if (schedule.id.startsWith("new-")) {
             // Créer un nouvel horaire
             const { error } = await supabase.from("live_schedules").insert({
-              creator_id: creatorId,
+              creator_id: profileId,
               day_of_week: schedule.day_of_week,
               start_time: schedule.start_time,
               end_time: schedule.end_time,
@@ -148,6 +179,9 @@ export const LiveScheduleModal = ({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Configuration des Horaires de Live</DialogTitle>
+          <DialogDescription>
+            Configurez vos horaires de live pour chaque jour de la semaine
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
