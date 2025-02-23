@@ -106,9 +106,11 @@ const Index = () => {
 
   const handleCreateAccount = async (role: 'creator' | 'manager', username: string) => {
     try {
+      const email = `${username.toLowerCase()}@mydomain.com`; // Utilisation d'un domaine plus réaliste
+      
       const { data: user, error: authError } = await supabase.auth.signUp({
-        email: `${username}@example.com`,
-        password: "password123",
+        email: email,
+        password: "password123", // Vous voudrez peut-être générer un mot de passe aléatoire plus sécurisé
         options: {
           data: {
             role: role

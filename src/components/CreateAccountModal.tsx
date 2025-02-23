@@ -1,5 +1,5 @@
 
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,15 +14,17 @@ interface CreateAccountModalProps {
 
 export function CreateAccountModal({ isOpen, onClose, onSubmit }: CreateAccountModalProps) {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [role, setRole] = useState<'creator' | 'manager'>('creator');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!username) return;
+    if (!username || !email) return;
     setIsLoading(true);
     try {
       await onSubmit(role, username);
       setUsername("");
+      setEmail("");
       onClose();
     } catch (error) {
       console.error(error);
@@ -36,6 +38,9 @@ export function CreateAccountModal({ isOpen, onClose, onSubmit }: CreateAccountM
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Créer un nouveau compte</DialogTitle>
+          <DialogDescription>
+            Remplissez les informations pour créer un nouveau compte utilisateur.
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
@@ -62,12 +67,22 @@ export function CreateAccountModal({ isOpen, onClose, onSubmit }: CreateAccountM
               placeholder="Entrez le nom d'utilisateur"
             />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Entrez l'adresse email"
+            />
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             Annuler
           </Button>
-          <Button onClick={handleSubmit} disabled={!username || isLoading}>
+          <Button onClick={handleSubmit} disabled={!username || !email || isLoading}>
             {isLoading ? "Création..." : "Créer le compte"}
           </Button>
         </DialogFooter>
