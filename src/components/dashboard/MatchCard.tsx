@@ -6,6 +6,7 @@ import { Download, Trash2, Trophy, X } from "lucide-react";
 interface MatchCardProps {
   match: any;
   canManageMatch: boolean;
+  canDeleteMatch: boolean;
   role: string;
   onSetWinner: (matchId: string, winnerId: string) => void;
   onClearWinner: (matchId: string) => void;
@@ -16,6 +17,7 @@ interface MatchCardProps {
 export const MatchCard = ({
   match,
   canManageMatch,
+  canDeleteMatch,
   role,
   onSetWinner,
   onClearWinner,
@@ -114,7 +116,7 @@ export const MatchCard = ({
               Télécharger
             </Button>
           )}
-          {role === 'founder' && (
+          {canDeleteMatch && (
             <Button
               variant="destructive"
               size="sm"

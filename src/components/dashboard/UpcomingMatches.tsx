@@ -10,6 +10,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
   if (isLoading) return <div>Chargement des matchs...</div>;
 
   const canManageMatch = role === 'founder' || role === 'manager';
+  const canDeleteMatch = role === 'founder';
 
   return (
     <Card className="bg-white text-black">
@@ -24,6 +25,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
                 key={match.id}
                 match={match}
                 canManageMatch={canManageMatch}
+                canDeleteMatch={canDeleteMatch}
                 role={role}
                 onSetWinner={setWinner}
                 onClearWinner={clearWinner}
