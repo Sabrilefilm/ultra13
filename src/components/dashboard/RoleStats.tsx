@@ -1,5 +1,5 @@
 
-import { Users, Diamond, Clock, Gift, Award } from "lucide-react";
+import { Users, Diamond, Clock, Gift, Calendar } from "lucide-react";
 import { StatsCard } from "@/components/StatsCard";
 
 interface RoleStatsProps {
@@ -33,14 +33,14 @@ export const RoleStats = ({ role }: RoleStatsProps) => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatsCard
-          title="Vos Abonnés"
-          value="0"
-          icon={<Users className="w-6 h-6 text-primary" />}
+          title="Heures de Live"
+          value="0h"
+          icon={<Clock className="w-6 h-6 text-primary" />}
         />
         <StatsCard
-          title="Vos Gains"
-          value="0 €"
-          icon={<Gift className="w-6 h-6 text-primary" />}
+          title="Jours Streamés"
+          value="0j"
+          icon={<Calendar className="w-6 h-6 text-primary" />}
         />
         <StatsCard
           title="Diamants Reçus"
@@ -67,7 +67,7 @@ export const RoleStats = ({ role }: RoleStatsProps) => {
         <StatsCard
           title="Performance Moyenne"
           value="0%"
-          icon={<Award className="w-6 h-6 text-primary" />}
+          icon={<Clock className="w-6 h-6 text-primary" />}
         />
       </div>
     );
