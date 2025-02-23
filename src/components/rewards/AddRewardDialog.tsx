@@ -31,18 +31,30 @@ export function AddRewardDialog({ isOpen, onOpenChange, onSuccess }: AddRewardDi
 
   const handleAddReward = async () => {
     if (!recipientId || !diamonds || parseInt(diamonds) <= 0) {
-      toast("Veuillez sélectionner un créateur et entrer un nombre valide de diamants");
+      toast.error("Veuillez sélectionner un créateur et entrer un nombre valide de diamants");
       return;
     }
 
     setIsLoading(true);
     try {
+      // Récupérer les paramètres de la plateforme pour calculer le montant gagné
+      const { data: settings } = await supabase
+        .from('platform_settings')
+        .select('diamond_value')
+        .single();
+
+      const diamondValue = settings?.diamond_value || 0.01;
+      const diamondsCount = parseInt(diamonds);
+      const amountEarned = diamondsCount * diamondValue;
+
       const { error: insertError } = await supabase
         .from("creator_rewards")
         .insert([
           {
             creator_id: recipientId,
-            diamonds_count: parseInt(diamonds),
+            diamonds_count: diamondsCount,
+            amount_earned: amountEarned,
+            payment_status: 'pending'
           }
         ]);
 
@@ -50,7 +62,7 @@ export function AddRewardDialog({ isOpen, onOpenChange, onSuccess }: AddRewardDi
         throw insertError;
       }
 
-      toast("La récompense a été ajoutée avec succès");
+      toast.success("La récompense a été ajoutée avec succès");
       onOpenChange(false);
       setDiamonds("");
       setRecipientId("");
@@ -62,7 +74,7 @@ export function AddRewardDialog({ isOpen, onOpenChange, onSuccess }: AddRewardDi
       onSuccess();
     } catch (error) {
       console.error('Error adding reward:', error);
-      toast("Impossible d'ajouter la récompense. Veuillez réessayer.");
+      toast.error("Impossible d'ajouter la récompense. Veuillez réessayer.");
     } finally {
       setIsLoading(false);
     }
@@ -70,12 +82,6 @@ export function AddRewardDialog({ isOpen, onOpenChange, onSuccess }: AddRewardDi
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <Plus className="w-4 h-4" />
-          Ajouter des diamants
-        </Button>
-      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Ajouter des diamants</DialogTitle>
