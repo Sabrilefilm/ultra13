@@ -8,6 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { Card } from "@/components/ui/card";
 
 export default function PersonalInformation() {
   const navigate = useNavigate();
@@ -68,95 +69,114 @@ export default function PersonalInformation() {
   };
 
   if (isLoading) {
-    return <div>Chargement...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-400/20 to-pink-400/20 flex items-center justify-center">
+        <div className="animate-pulse text-xl font-medium">Chargement...</div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-400/20 to-pink-400/20 p-4 md:p-8">
+      <div className="max-w-2xl mx-auto space-y-8 animate-fade-in">
+        <div className="flex items-center gap-4 bg-white/10 p-4 rounded-lg backdrop-blur-md">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate("/")}
+            className="hover:bg-white/20"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold">Informations Personnelles</h1>
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 text-transparent bg-clip-text">
+            Informations Personnelles
+          </h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 bg-card p-6 rounded-lg border border-border/50 shadow-lg">
-          <div className="grid gap-4">
-            <div className="grid grid-cols-2 gap-4">
+        <Card className="backdrop-blur-md bg-white/10 border-white/20 shadow-xl">
+          <form onSubmit={handleSubmit} className="p-6 space-y-8">
+            <div className="grid gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="first_name" className="text-white/80">Prénom</Label>
+                  <Input
+                    id="first_name"
+                    value={formData.first_name}
+                    onChange={e => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
+                    className="bg-white/5 border-white/10 focus:border-purple-400/50 transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="last_name" className="text-white/80">Nom</Label>
+                  <Input
+                    id="last_name"
+                    value={formData.last_name}
+                    onChange={e => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
+                    className="bg-white/5 border-white/10 focus:border-purple-400/50 transition-all"
+                  />
+                </div>
+              </div>
+              
               <div className="space-y-2">
-                <Label htmlFor="first_name">Prénom</Label>
+                <Label htmlFor="address" className="text-white/80">Adresse</Label>
                 <Input
-                  id="first_name"
-                  value={formData.first_name}
-                  onChange={e => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
+                  id="address"
+                  value={formData.address}
+                  onChange={e => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                  className="bg-white/5 border-white/10 focus:border-purple-400/50 transition-all"
                 />
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="last_name">Nom</Label>
+                <Label htmlFor="id_card_number" className="text-white/80">Numéro de carte d'identité</Label>
                 <Input
-                  id="last_name"
-                  value={formData.last_name}
-                  onChange={e => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
+                  id="id_card_number"
+                  value={formData.id_card_number}
+                  onChange={e => setFormData(prev => ({ ...prev, id_card_number: e.target.value }))}
+                  className="bg-white/5 border-white/10 focus:border-purple-400/50 transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-white/80">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  className="bg-white/5 border-white/10 focus:border-purple-400/50 transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="paypal_address" className="text-white/80">Adresse PayPal</Label>
+                <Input
+                  id="paypal_address"
+                  value={formData.paypal_address}
+                  onChange={e => setFormData(prev => ({ ...prev, paypal_address: e.target.value }))}
+                  className="bg-white/5 border-white/10 focus:border-purple-400/50 transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="snapchat" className="text-white/80">Snapchat</Label>
+                <Input
+                  id="snapchat"
+                  value={formData.snapchat}
+                  onChange={e => setFormData(prev => ({ ...prev, snapchat: e.target.value }))}
+                  className="bg-white/5 border-white/10 focus:border-purple-400/50 transition-all"
                 />
               </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="address">Adresse</Label>
-              <Input
-                id="address"
-                value={formData.address}
-                onChange={e => setFormData(prev => ({ ...prev, address: e.target.value }))}
-              />
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="id_card_number">Numéro de carte d'identité</Label>
-              <Input
-                id="id_card_number"
-                value={formData.id_card_number}
-                onChange={e => setFormData(prev => ({ ...prev, id_card_number: e.target.value }))}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="paypal_address">Adresse PayPal</Label>
-              <Input
-                id="paypal_address"
-                value={formData.paypal_address}
-                onChange={e => setFormData(prev => ({ ...prev, paypal_address: e.target.value }))}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="snapchat">Snapchat</Label>
-              <Input
-                id="snapchat"
-                value={formData.snapchat}
-                onChange={e => setFormData(prev => ({ ...prev, snapchat: e.target.value }))}
-              />
-            </div>
-          </div>
-
-          <Button type="submit" className="w-full">
-            Enregistrer les modifications
-          </Button>
-        </form>
+            <Button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+            >
+              Enregistrer les modifications
+            </Button>
+          </form>
+        </Card>
       </div>
     </div>
   );
