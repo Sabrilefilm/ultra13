@@ -440,6 +440,34 @@ const Index = () => {
                     Consulter tous les identifiants et mots de passe
                   </p>
                 </Button>
+
+                <Button
+                  variant="outline"
+                  className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5"
+                  onClick={() => {}} // À implémenter
+                >
+                  <div className="flex items-center gap-2">
+                    <Settings className="w-5 h-5 text-primary" />
+                    <span className="font-semibold">Configuration Générale</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground text-left">
+                    Paramètres généraux de la plateforme
+                  </p>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5"
+                  onClick={() => {}} // À implémenter
+                >
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-primary" />
+                    <span className="font-semibold">Jours et Heures de Live</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground text-left">
+                    Configurer les plages horaires des lives
+                  </p>
+                </Button>
               </div>
             </div>
 
