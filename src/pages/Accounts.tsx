@@ -3,13 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Eye, EyeOff, Save } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Save, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface UserAccount {
   id: string;
@@ -72,6 +73,7 @@ export default function Accounts() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedAccount, setSelectedAccount] = useState<UserAccount | null>(null);
+  const [accountToDelete, setAccountToDelete] = useState<UserAccount | null>(null);
   const [passwordVisibility, setPasswordVisibility] = useState<Record<string, boolean>>({});
 
   const { data: accounts, isLoading, error, refetch } = useQuery({
@@ -116,6 +118,30 @@ export default function Accounts() {
     }
   };
 
+  const deleteAccount = async () => {
+    if (!accountToDelete) return;
+
+    const { error } = await supabase
+      .from('user_accounts')
+      .delete()
+      .eq('id', accountToDelete.id);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer le compte"
+      });
+    } else {
+      toast({
+        title: "Succès",
+        description: "Compte supprimé avec succès"
+      });
+      refetch();
+    }
+    setAccountToDelete(null);
+  };
+
   if (isLoading) return <div className="p-8">Chargement...</div>;
   if (error) return <div className="p-8 text-red-500">Une erreur est survenue</div>;
 
@@ -141,6 +167,7 @@ export default function Accounts() {
               <TableHead>Mot de passe</TableHead>
               <TableHead>Rôle</TableHead>
               <TableHead>Date de création</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -174,6 +201,15 @@ export default function Accounts() {
                 </TableCell>
                 <TableCell>{account.role}</TableCell>
                 <TableCell>{new Date(account.created_at).toLocaleDateString()}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setAccountToDelete(account)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -188,6 +224,23 @@ export default function Accounts() {
           onSave={updatePassword}
         />
       )}
+
+      <AlertDialog open={!!accountToDelete} onOpenChange={() => setAccountToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer ce compte ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. Le compte sera définitivement supprimé.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
