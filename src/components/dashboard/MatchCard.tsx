@@ -32,13 +32,31 @@ export const MatchCard = ({
     minute: '2-digit'
   });
 
+  const getNeonStyle = () => {
+    if (isMatchOff) return 'border-2 border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)]';
+    if (match.winner_id) return 'border-2 border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.3)]';
+    
+    const hour = new Date(match.match_date).getHours();
+    if (hour >= 20 || hour < 6) return 'border-2 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.3)]';
+    if (hour >= 12 && hour < 20) return 'border-2 border-sky-500/50 shadow-[0_0_15px_rgba(14,165,233,0.3)]';
+    return 'border-2 border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.3)]';
+  };
+
+  const getHoverStyle = () => {
+    if (isMatchOff) return 'hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] hover:border-red-400/60';
+    if (match.winner_id) return 'hover:shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:border-green-400/60';
+    
+    const hour = new Date(match.match_date).getHours();
+    if (hour >= 20 || hour < 6) return 'hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:border-blue-400/60';
+    if (hour >= 12 && hour < 20) return 'hover:shadow-[0_0_20px_rgba(14,165,233,0.4)] hover:border-sky-400/60';
+    return 'hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] hover:border-indigo-400/60';
+  };
+
   return (
     <div 
-      className={`group flex flex-col h-[280px] w-full max-w-[240px] rounded-xl transition-all duration-300 overflow-hidden backdrop-blur-sm ${
-        match.winner_id 
-          ? 'bg-gradient-to-br from-gray-900/95 to-gray-950 border-2 border-purple-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]' 
-          : 'bg-gradient-to-br from-gray-900/95 to-gray-950 border-2 border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.2)]'
-      } ${isMatchOff ? 'opacity-75 grayscale' : ''} hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] hover:scale-[1.02] hover:border-purple-400/60`}
+      className={`group flex flex-col h-[280px] w-full max-w-[240px] rounded-xl transition-all duration-300 overflow-hidden backdrop-blur-sm bg-gradient-to-br from-gray-900/95 to-gray-950 ${getNeonStyle()} ${
+        isMatchOff ? 'opacity-75 grayscale' : ''
+      } ${getHoverStyle()} hover:scale-[1.02]`}
     >
       {match.match_image && (
         <div className="w-full h-[120px] relative overflow-hidden">
