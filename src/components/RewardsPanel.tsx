@@ -1,142 +1,19 @@
 
-import { useQuery } from "@tanstack/react-query";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Diamond, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase";
-import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { CreatorSelect } from "@/components/live-schedule/creator-select";
+import { Diamond } from "lucide-react";
+import { AddRewardDialog } from "./rewards/AddRewardDialog";
+import { RewardsTable } from "./rewards/RewardsTable";
+import { useRewards } from "./rewards/useRewards";
 
-interface Reward {
-  id: string;
-  diamonds_count: number;
-  creator_id: string;
-  created_at: string;
-  creator_username?: string;
+interface RewardsPanelProps {
+  role: string;
+  userId: string;
 }
 
-export function RewardsPanel({ role, userId }: { role: string; userId: string }) {
+export function RewardsPanel({ role, userId }: RewardsPanelProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [diamonds, setDiamonds] = useState("");
-  const [recipientId, setRecipientId] = useState("");
-  const { toast } = useToast();
-
-  const { data: rewards, isLoading, refetch } = useQuery({
-    queryKey: ["rewards", userId, role],
-    queryFn: async () => {
-      let query = supabase
-        .from("creator_rewards")
-        .select(`
-          *,
-          user_accounts!creator_id(username)
-        `)
-        .order("created_at", { ascending: false });
-
-      // Si c'est un créateur, on filtre pour ne montrer que ses récompenses
-      if (role === "creator") {
-        const { data: userAccount, error: userError } = await supabase
-          .from("user_accounts")
-          .select("id")
-          .eq("username", userId)
-          .single();
-
-        if (userError) {
-          console.error("Error fetching user account:", userError);
-          return [];
-        }
-
-        if (userAccount) {
-          query = query.eq("creator_id", userAccount.id);
-        }
-      }
-
-      const { data, error } = await query;
-      
-      if (error) {
-        console.error("Error fetching rewards:", error);
-        throw error;
-      }
-
-      return (data || []).map(reward => ({
-        ...reward,
-        creator_username: reward.user_accounts?.username
-      }));
-    },
-  });
-
-  const handleAddReward = async () => {
-    if (!recipientId || !diamonds || parseInt(diamonds) <= 0) {
-      toast({
-        title: "Erreur de validation",
-        description: "Veuillez sélectionner un créateur et entrer un nombre valide de diamants",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Récupérer l'ID du créateur
-      const { data: userAccount, error: userError } = await supabase
-        .from("user_accounts")
-        .select("id")
-        .eq("username", recipientId)
-        .eq("role", "creator")
-        .single();
-
-      if (userError || !userAccount) {
-        toast({
-          title: "Erreur",
-          description: "Créateur non trouvé ou non autorisé",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Insérer la récompense
-      const { error: insertError } = await supabase
-        .from("creator_rewards")
-        .insert([
-          {
-            creator_id: userAccount.id,
-            diamonds_count: parseInt(diamonds),
-          }
-        ]);
-
-      if (insertError) {
-        console.error('Error inserting reward:', insertError);
-        throw insertError;
-      }
-
-      toast({
-        title: "Succès",
-        description: "La récompense a été ajoutée avec succès",
-      });
-
-      setIsDialogOpen(false);
-      setDiamonds("");
-      setRecipientId("");
-      refetch();
-    } catch (error) {
-      console.error('Error adding reward:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible d'ajouter la récompense. Veuillez réessayer.",
-        variant: "destructive",
-      });
-    }
-  };
+  const { data: rewards, isLoading, refetch } = useRewards(role, userId);
 
   if (isLoading) {
     return (
@@ -156,77 +33,15 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
           Récompenses
         </CardTitle>
         {role === 'founder' && (
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <Plus className="w-4 h-4" />
-                Ajouter des diamants
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Ajouter des diamants</DialogTitle>
-                <DialogDescription>
-                  Ajoutez des diamants pour un créateur
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>Sélectionner un créateur</Label>
-                  <CreatorSelect
-                    value={recipientId}
-                    onSelect={setRecipientId}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="diamonds">Nombre de diamants</Label>
-                  <Input
-                    id="diamonds"
-                    type="number"
-                    min="1"
-                    value={diamonds}
-                    onChange={(e) => setDiamonds(e.target.value)}
-                  />
-                </div>
-                <Button 
-                  onClick={handleAddReward} 
-                  className="w-full"
-                  disabled={!recipientId || !diamonds || parseInt(diamonds) <= 0}
-                >
-                  Ajouter les diamants
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <AddRewardDialog
+            isOpen={isDialogOpen}
+            onOpenChange={setIsDialogOpen}
+            onSuccess={refetch}
+          />
         )}
       </CardHeader>
       <CardContent>
-        {rewards && rewards.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Créateur</TableHead>
-                <TableHead>Diamants</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rewards.map((reward) => (
-                <TableRow key={reward.id}>
-                  <TableCell>
-                    {new Date(reward.created_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>{reward.creator_username || reward.creator_id}</TableCell>
-                  <TableCell>{reward.diamonds_count}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        ) : (
-          <div className="text-center text-muted-foreground py-8">
-            Aucune récompense à afficher
-          </div>
-        )}
+        <RewardsTable rewards={rewards || []} />
       </CardContent>
     </Card>
   );
