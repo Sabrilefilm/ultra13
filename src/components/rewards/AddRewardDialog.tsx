@@ -55,6 +55,7 @@ export function AddRewardDialog({ isOpen, onOpenChange, onSuccess }: AddRewardDi
       setDiamonds("");
       setRecipientId("");
       
+      // Invalider les queries pour forcer le rafraîchissement des données
       await queryClient.invalidateQueries({ queryKey: ["rewards"] });
       await queryClient.invalidateQueries({ queryKey: ["creator-stats"] });
       

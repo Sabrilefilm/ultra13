@@ -14,9 +14,16 @@ export function useRewards(role: string, userId: string) {
   return useQuery({
     queryKey: ["rewards", userId, role],
     queryFn: async () => {
+      // Pour le fondateur, récupérer toutes les récompenses
+      // Pour les créateurs, filtrer par leur ID
       let query = supabase
         .from("creator_rewards")
-        .select("*")
+        .select(`
+          *,
+          creator:creator_id (
+            username
+          )
+        `)
         .order("created_at", { ascending: false });
 
       if (role === "creator") {
@@ -32,7 +39,7 @@ export function useRewards(role: string, userId: string) {
 
       return (data || []).map(reward => ({
         ...reward,
-        creator_username: reward.creator_id
+        creator_username: reward.creator?.username || reward.creator_id
       }));
     },
   });

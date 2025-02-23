@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatDate } from "@/lib/utils";
 
 interface Reward {
   id: string;
@@ -37,29 +38,35 @@ export function RewardsTable({ rewards }: RewardsTableProps) {
       <div className="p-4 bg-accent/5 rounded-lg">
         <div className="text-center">
           <p className="text-sm font-medium text-muted-foreground">Total des diamants</p>
-          <p className="text-3xl font-bold">{totalDiamonds}</p>
+          <p className="text-3xl font-bold">{totalDiamonds.toLocaleString()}</p>
         </div>
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Créateur</TableHead>
-            <TableHead>Diamants</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {rewards.map((reward) => (
-            <TableRow key={reward.id}>
-              <TableCell>
-                {new Date(reward.created_at).toLocaleDateString()}
-              </TableCell>
-              <TableCell>{reward.creator_username || reward.creator_id}</TableCell>
-              <TableCell>{reward.diamonds_count}</TableCell>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>Créateur</TableHead>
+              <TableHead className="text-right">Diamants</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {rewards.map((reward) => (
+              <TableRow key={reward.id}>
+                <TableCell>
+                  {new Date(reward.created_at).toLocaleDateString('fr-FR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </TableCell>
+                <TableCell>{reward.creator_username || reward.creator_id}</TableCell>
+                <TableCell className="text-right">{reward.diamonds_count.toLocaleString()}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
