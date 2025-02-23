@@ -2,12 +2,15 @@
 import { Award, Clock, Diamond, Gift } from "lucide-react";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { StatsCard } from "@/components/StatsCard";
+import { WebCrawler } from "@/components/WebCrawler";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
         <ProfileHeader username="Sabri" handle="@Sabri_amd" />
+        
+        <WebCrawler />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <StatsCard
