@@ -9,13 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface CreateAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (role: 'creator' | 'manager', username: string, password: string) => Promise<void>;
+  onSubmit: (role: 'creator' | 'manager' | 'agent', username: string, password: string) => Promise<void>;
 }
 
 export function CreateAccountModal({ isOpen, onClose, onSubmit }: CreateAccountModalProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<'creator' | 'manager'>('creator');
+  const [role, setRole] = useState<'creator' | 'manager' | 'agent'>('creator');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -47,7 +47,7 @@ export function CreateAccountModal({ isOpen, onClose, onSubmit }: CreateAccountM
             <Label htmlFor="role">Rôle</Label>
             <Select
               value={role}
-              onValueChange={(value: 'creator' | 'manager') => setRole(value)}
+              onValueChange={(value: 'creator' | 'manager' | 'agent') => setRole(value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez un rôle" />
@@ -55,6 +55,7 @@ export function CreateAccountModal({ isOpen, onClose, onSubmit }: CreateAccountM
               <SelectContent>
                 <SelectItem value="creator">Créateur</SelectItem>
                 <SelectItem value="manager">Manager</SelectItem>
+                <SelectItem value="agent">Agent</SelectItem>
               </SelectContent>
             </Select>
           </div>
