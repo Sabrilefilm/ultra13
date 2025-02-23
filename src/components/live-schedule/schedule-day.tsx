@@ -32,7 +32,9 @@ export const ScheduleDay = ({
     if (!schedule.is_active) return 0;
     const start = new Date(`2000-01-01 ${schedule.start_time}`);
     const end = new Date(`2000-01-01 ${schedule.end_time}`);
-    return (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    // Arrondir à 1 décimale
+    return Math.round(hours * 10) / 10;
   };
 
   return (
@@ -54,8 +56,7 @@ export const ScheduleDay = ({
             size="sm"
             className="flex items-center gap-2"
           >
-            <Calendar className="w-4 h-4" />
-            {totalDays} jours
+            {getHoursForSlot()}H
           </Button>
 
           <Button
@@ -63,8 +64,7 @@ export const ScheduleDay = ({
             size="sm"
             className="flex items-center gap-2"
           >
-            <Clock className="w-4 h-4" />
-            {getHoursForSlot()} heures
+            {totalDays}J
           </Button>
 
           <Button
