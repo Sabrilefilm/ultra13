@@ -17,10 +17,21 @@ import { LiveScheduleModal } from "@/components/live-schedule";
 type Role = 'client' | 'creator' | 'manager' | 'founder';
 
 const Index = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [username, setUsername] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const savedAuth = localStorage.getItem('isAuthenticated');
+    const savedRole = localStorage.getItem('userRole');
+    const savedUsername = localStorage.getItem('username');
+    if (savedAuth === 'true' && savedRole) {
+      return true;
+    }
+    return false;
+  });
+  const [username, setUsername] = useState(() => localStorage.getItem('username') || "");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<Role | null>(null);
+  const [role, setRole] = useState<Role | null>(() => {
+    const savedRole = localStorage.getItem('userRole');
+    return savedRole as Role | null;
+  });
   const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
   const [isRewardSettingsModalOpen, setIsRewardSettingsModalOpen] = useState(false);
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
@@ -38,6 +49,27 @@ const Index = () => {
       fetchPlatformSettings();
     }
   }, [role]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userRole', role || '');
+      localStorage.setItem('username', username);
+    } else {
+      localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('username');
+    }
+  }, [isAuthenticated, role, username]);
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setRole(null);
+    setUsername("");
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('username');
+  };
 
   const fetchPlatformSettings = async () => {
     try {
@@ -122,7 +154,7 @@ const Index = () => {
         }
 
         if (data.password === password) {
-          setRole(data.role);
+          setRole(data.role as Role);
           setIsAuthenticated(true);
           toast({
             title: "Connexion réussie",
@@ -619,10 +651,7 @@ const Index = () => {
           />
           <Button 
             variant="outline" 
-            onClick={() => {
-              setIsAuthenticated(false);
-              setRole(null);
-            }}
+            onClick={handleLogout}
             className="ml-4"
           >
             Déconnexion
