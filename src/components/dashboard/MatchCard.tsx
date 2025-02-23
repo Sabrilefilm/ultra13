@@ -35,9 +35,9 @@ export const MatchCard = ({
 
   return (
     <div 
-      className={`flex flex-col space-y-4 p-4 border rounded-lg transition-all duration-300 ${
-        match.winner_id ? 'bg-gradient-to-r from-gray-50 to-white' : ''
-      } ${isMatchOff ? 'opacity-75 bg-gray-100' : ''}`}
+      className={`flex flex-col space-y-4 p-4 border rounded-lg transition-all duration-300 bg-[#333333] ${
+        match.winner_id ? 'bg-gradient-to-r from-gray-700 to-gray-800' : ''
+      } ${isMatchOff ? 'opacity-75 bg-gray-700' : ''}`}
     >
       {showRequirements && (
         <div className="animate-bounce bg-red-100 border-2 border-red-500 rounded-lg p-4 mb-4 shadow-lg">
@@ -72,7 +72,7 @@ export const MatchCard = ({
           />
         </div>
       )}
-      <div className="flex flex-col space-y-2">
+      <div className="flex flex-col space-y-2 text-white">
         {isMatchOff && (
           <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-red-100 text-red-600 text-sm font-medium">
             Match Off
@@ -82,8 +82,8 @@ export const MatchCard = ({
       <div className="mt-auto">
         <div className="flex justify-between items-end">
           <div>
-            <p className="font-medium text-black">{match.creator_id} vs {match.opponent_id}</p>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <p className="font-medium text-white">{match.creator_id} vs {match.opponent_id}</p>
+            <div className="flex items-center gap-2 text-sm text-gray-300">
               <Calendar className="w-4 h-4" />
               {formatDate(match.match_date)}
               <Clock className="w-4 h-4 ml-2" />
@@ -92,16 +92,16 @@ export const MatchCard = ({
           </div>
           <div className="flex items-center gap-2">
             {match.winner_id ? (
-              <div className="animate-fade-in bg-white shadow-lg border text-black px-4 py-2 rounded-full inline-flex items-center gap-2 font-bold">
+              <div className="bg-gray-600 shadow-lg text-white px-4 py-2 rounded-full inline-flex items-center gap-2 font-bold">
                 <Trophy className="w-5 h-5 text-yellow-500" />
-                <span className="text-sm text-black">
+                <span className="text-sm text-white">
                   Gagnant : {match.winner_id}
                 </span>
                 {canManageMatch && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="ml-2 h-6 w-6 p-0 text-gray-600 hover:text-black hover:bg-gray-100"
+                    className="ml-2 h-6 w-6 p-0 text-gray-300 hover:text-white hover:bg-gray-700"
                     onClick={() => onClearWinner(match.id)}
                   >
                     <X className="h-4 w-4" />
@@ -114,7 +114,7 @@ export const MatchCard = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="bg-white text-black border-gray-200 hover:bg-gray-100 hover:text-black"
+                    className="bg-gray-600 text-white border-gray-500 hover:bg-gray-700 hover:text-white"
                     onClick={() => onSetWinner(match.id, match.creator_id)}
                   >
                     {match.creator_id} gagne
@@ -122,7 +122,7 @@ export const MatchCard = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="bg-white text-black border-gray-200 hover:bg-gray-100 hover:text-black"
+                    className="bg-gray-600 text-white border-gray-500 hover:bg-gray-700 hover:text-white"
                     onClick={() => onSetWinner(match.id, match.opponent_id)}
                   >
                     {match.opponent_id} gagne
@@ -134,7 +134,7 @@ export const MatchCard = ({
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-white text-black border-gray-200 hover:bg-gray-100 hover:text-black"
+                className="bg-gray-600 text-white border-gray-500 hover:bg-gray-700 hover:text-white"
                 onClick={() => onDownload(
                   match.match_image,
                   `match_${match.creator_id}_vs_${match.opponent_id}`
@@ -148,7 +148,7 @@ export const MatchCard = ({
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-white text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
+                className="bg-gray-600 text-red-400 border-red-500 hover:bg-red-900 hover:text-red-300"
                 onClick={() => onDelete(match.id)}
               >
                 <Trash2 className="w-4 h-4" />
