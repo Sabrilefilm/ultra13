@@ -29,15 +29,12 @@ export const useIndexAuth = () => {
 
   const handleLogin = async (username: string, password: string) => {
     if (!username || !password) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez saisir un identifiant et un mot de passe",
-        variant: "destructive",
-      });
+      toast("Veuillez saisir un identifiant et un mot de passe");
       return;
     }
 
     try {
+      console.log("Tentative de connexion avec:", username);
       const { data, error } = await supabase
         .from('user_accounts')
         .select('role, username')
@@ -46,7 +43,9 @@ export const useIndexAuth = () => {
         .single();
 
       if (error || !data) {
-        throw new Error("Identifiant ou mot de passe incorrect");
+        console.error("Erreur de connexion:", error);
+        toast("Identifiant ou mot de passe incorrect");
+        return;
       }
 
       setRole(data.role as Role);
@@ -57,17 +56,11 @@ export const useIndexAuth = () => {
       localStorage.setItem('userRole', data.role);
       localStorage.setItem('username', data.username);
 
-      toast({
-        title: "Connexion réussie",
-        description: `Bienvenue dans votre espace ${data.role}`,
-      });
+      toast(`Bienvenue dans votre espace ${data.role}`);
 
     } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Identifiant ou mot de passe incorrect",
-        variant: "destructive",
-      });
+      console.error("Erreur lors de la connexion:", error);
+      toast("Identifiant ou mot de passe incorrect");
     }
   };
 

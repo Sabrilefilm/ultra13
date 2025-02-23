@@ -12,31 +12,19 @@ import { RewardSettingsModal } from "@/components/RewardSettingsModal";
 import { CreatorDetailsDialog } from "@/components/creator/CreatorDetailsDialog";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+
 function Index() {
-  const {
-    isAuthenticated,
-    username,
-    role,
-    handleLogout
-  } = useIndexAuth();
+  const { isAuthenticated, username, role, handleLogout, handleLogin } = useIndexAuth();
   const navigate = useNavigate();
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [isCreateAccountOpen, setIsCreateAccountOpen] = useState(false);
   const [isRewardSettingsOpen, setIsRewardSettingsOpen] = useState(false);
   const [showCreatorDetails, setShowCreatorDetails] = useState(false);
-  const handleLogin = async (username: string, password: string) => {
-    try {
-      // Simuler une connexion
-      console.log("Login attempt:", username, password);
-      // Ajoutez ici votre logique de connexion
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Erreur de connexion");
-    }
-  };
+
   const handleForgotPassword = () => {
     setIsForgotPasswordOpen(true);
   };
+
   const handleCreateAccount = async (role: string, username: string, password: string) => {
     try {
       // Logique de création de compte
@@ -66,15 +54,29 @@ function Index() {
     // Gérer l'ouverture du planning des lives
     console.log("Opening live schedule for creator:", creatorId);
   };
+
   if (!isAuthenticated) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-950">
+    return (
+      <div className="min-h-screen bg-[#1A1F2C] flex items-center justify-center">
         <div className="w-full max-w-sm">
-          <LoginForm onLogin={handleLogin} onForgotPassword={handleForgotPassword} />
+          <LoginForm 
+            onLogin={handleLogin}
+            onForgotPassword={handleForgotPassword}
+          />
         </div>
-        <CreateAccountModal isOpen={isCreateAccountOpen} onClose={() => setIsCreateAccountOpen(false)} onSubmit={handleCreateAccount} />
-        <ForgotPasswordModal isOpen={isForgotPasswordOpen} onClose={() => setIsForgotPasswordOpen(false)} />
-      </div>;
+        <CreateAccountModal
+          isOpen={isCreateAccountOpen}
+          onClose={() => setIsCreateAccountOpen(false)}
+          onSubmit={handleCreateAccount}
+        />
+        <ForgotPasswordModal
+          isOpen={isForgotPasswordOpen}
+          onClose={() => setIsForgotPasswordOpen(false)}
+        />
+      </div>
+    );
   }
+
   return <>
       <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 pt-16 pb-12">
         <div className="container px-4 md:px-6">
@@ -108,4 +110,5 @@ function Index() {
       <CreatorDetailsDialog isOpen={showCreatorDetails} onClose={() => setShowCreatorDetails(false)} creatorDetails={null} isFounder={role === 'founder'} />
     </>;
 }
+
 export default Index;
