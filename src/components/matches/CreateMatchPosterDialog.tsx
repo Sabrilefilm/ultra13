@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -15,7 +14,7 @@ interface CreateMatchPosterDialogProps {
 }
 
 type MatchType = 'OFF' | 'ANNIVERSAIRE';
-type BackgroundTheme = 'GAMING' | 'SPORT' | 'ABSTRACT' | 'NEON';
+type BackgroundTheme = 'GAMING' | 'SPORT' | 'NEON' | 'DISNEY' | 'ANIMALS' | 'SUPERHERO' | 'ANIME' | 'SPACE' | 'FANTASY';
 
 export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDialogProps) => {
   const [player1Name, setPlayer1Name] = useState("");
@@ -33,7 +32,7 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
     try {
       const { data: { generatedText }, error } = await supabase.functions.invoke('generate-match-poster', {
         body: {
-          prompt: `Create a professional e-sports tournament poster with a ${backgroundTheme.toLowerCase()} theme background. The poster should show "${player1Name}" (using the profile image from ${player1ImageUrl}) on the left vs "${player2Name}" (using the profile image from ${player2ImageUrl}) on the right. Include the text "${matchType} MATCH" prominently at the top. Display the date "${matchDate}" and time "${matchTime}" in the middle. Add "Phocéen Agency" at the bottom. Use a dynamic, modern style with high contrast and engaging visual effects. Make it look professional and impressive.`
+          prompt: `Create a professional e-sports tournament poster with a ${backgroundTheme.toLowerCase()} theme background. The poster should show "${player1Name}" (using the profile image from ${player1ImageUrl}) on the left vs "${player2Name}" (using the profile image from ${player2ImageUrl}) on the right. Include the text "${matchType} MATCH" prominently at the top. Display the date "${matchDate}" and time "${matchTime}" in the middle. Add "Phocéen Agency" at the bottom. Use a dynamic, modern style with high contrast and engaging visual effects. Make it look professional and impressive. Theme details: ${getThemeDetails(backgroundTheme)}`
         }
       });
 
@@ -42,6 +41,31 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
     } catch (error) {
       console.error("Erreur lors de la génération de l'image:", error);
       throw error;
+    }
+  };
+
+  const getThemeDetails = (theme: BackgroundTheme) => {
+    switch (theme) {
+      case 'GAMING':
+        return 'Include gaming elements like controllers, RGB lights, and esports-style graphics';
+      case 'SPORT':
+        return 'Use dynamic sports elements, motion effects, and athletic imagery';
+      case 'NEON':
+        return 'Create a cyberpunk atmosphere with bright neon lights and glowing effects';
+      case 'DISNEY':
+        return 'Incorporate magical Disney-inspired elements, castles, and whimsical designs';
+      case 'ANIMALS':
+        return 'Use majestic animals, nature elements, and wildlife themes';
+      case 'SUPERHERO':
+        return 'Include comic book style elements, superhero imagery, and dramatic effects';
+      case 'ANIME':
+        return 'Use anime and manga inspired art style with bold colors and dynamic effects';
+      case 'SPACE':
+        return 'Create a cosmic theme with stars, planets, and space phenomena';
+      case 'FANTASY':
+        return 'Include magical elements, mythical creatures, and fantasy world imagery';
+      default:
+        return '';
     }
   };
 
@@ -99,8 +123,13 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
               <SelectContent>
                 <SelectItem value="GAMING">Gaming</SelectItem>
                 <SelectItem value="SPORT">Sport</SelectItem>
-                <SelectItem value="ABSTRACT">Abstrait</SelectItem>
                 <SelectItem value="NEON">Néon</SelectItem>
+                <SelectItem value="DISNEY">Disney</SelectItem>
+                <SelectItem value="ANIMALS">Animaux</SelectItem>
+                <SelectItem value="SUPERHERO">Super-héros</SelectItem>
+                <SelectItem value="ANIME">Anime</SelectItem>
+                <SelectItem value="SPACE">Espace</SelectItem>
+                <SelectItem value="FANTASY">Fantasy</SelectItem>
               </SelectContent>
             </Select>
           </div>
