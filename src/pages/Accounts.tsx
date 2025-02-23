@@ -2,16 +2,20 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users, Trash2 } from "lucide-react";
+import { ArrowLeft, Users, Trash2, Eye, EyeOff } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { Input } from "@/components/ui/input";
 
 const Accounts = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [accounts, setAccounts] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [showPasswords, setShowPasswords] = React.useState<{[key: string]: boolean}>({});
+  const [newUsername, setNewUsername] = React.useState("");
+  const [newPassword, setNewPassword] = React.useState("");
 
   React.useEffect(() => {
     fetchAccounts();
@@ -62,6 +66,13 @@ const Accounts = () => {
     }
   };
 
+  const togglePasswordVisibility = (id: string) => {
+    setShowPasswords(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -95,9 +106,20 @@ const Accounts = () => {
                     <p className="text-muted-foreground">{account.username}</p>
                   </div>
                   <div className="flex items-center gap-4">
-                    <p className="text-sm px-3 py-1 rounded-full bg-primary/10 text-primary">
-                      {account.password}
-                    </p>
+                    <Button
+                      variant="ghost"
+                      className="relative group px-3 py-1 h-8"
+                      onClick={() => togglePasswordVisibility(account.id)}
+                    >
+                      <span className="text-sm font-medium">
+                        {showPasswords[account.id] ? account.password : '••••••'}
+                      </span>
+                      {showPasswords[account.id] ? (
+                        <EyeOff className="h-4 w-4 ml-2 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      ) : (
+                        <Eye className="h-4 w-4 ml-2 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      )}
+                    </Button>
                     <Button
                       variant="destructive"
                       size="icon"
