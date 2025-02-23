@@ -30,7 +30,7 @@ export const AccountCard = ({
             <h3 className={`font-medium ${isInactive ? 'text-[#ea384c]' : ''}`}>
               {account.username}
             </h3>
-            <p className="text-sm text-muted-foreground">
+            <p className={`text-sm ${isInactive ? 'text-white' : 'text-muted-foreground'}`}>
               {account.role === 'creator' ? 'Créateur' : account.role}
             </p>
           </div>
@@ -60,7 +60,7 @@ export const AccountCard = ({
             <Button
               variant="ghost"
               size="sm"
-              className="text-sm"
+              className={`text-sm ${isInactive ? 'text-white hover:text-white/90' : ''}`}
               onClick={onTogglePassword}
             >
               <span className="mr-2">
@@ -76,7 +76,7 @@ export const AccountCard = ({
               variant="ghost"
               size="icon"
               onClick={onDelete}
-              className="h-8 w-8 hover:bg-destructive hover:text-destructive-foreground"
+              className={`h-8 w-8 ${isInactive ? 'text-white hover:text-white/90' : 'hover:bg-destructive hover:text-destructive-foreground'}`}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
