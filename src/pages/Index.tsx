@@ -62,6 +62,20 @@ const Index = () => {
         title: "Connexion réussie",
         description: "Bienvenue dans l'espace Fondateur",
       });
+    } else if (password === "manager") {
+      setRole('manager');
+      setIsAuthenticated(true);
+      toast({
+        title: "Connexion réussie",
+        description: "Bienvenue dans l'espace Manager",
+      });
+    } else if (password === "creator") {
+      setRole('creator');
+      setIsAuthenticated(true);
+      toast({
+        title: "Connexion réussie",
+        description: "Bienvenue dans l'espace Créateur",
+      });
     } else {
       toast({
         title: "Erreur",
@@ -150,7 +164,7 @@ const Index = () => {
       case 'creator':
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <StatsCard
                 title="Vos Abonnés"
                 value="0"
@@ -158,20 +172,56 @@ const Index = () => {
               />
               <StatsCard
                 title="Vos Gains"
-                value="0"
+                value="0 €"
                 icon={<Gift className="w-6 h-6 text-primary" />}
               />
+              <StatsCard
+                title="Diamants Reçus"
+                value="0"
+                icon={<Diamond className="w-6 h-6 text-primary" />}
+              />
             </div>
-            <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
-              <h2 className="text-xl font-bold mb-4">Vos Statistiques</h2>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-3 bg-accent/5 rounded">
-                  <span>Temps de visionnage</span>
-                  <span>0h</span>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-primary" />
+                  Statistiques de Live
+                </h2>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center p-3 bg-accent/5 rounded">
+                    <span>Temps de live aujourd'hui</span>
+                    <span>0h</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-accent/5 rounded">
+                    <span>Temps de live cette semaine</span>
+                    <span>0h</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-accent/5 rounded">
+                    <span>Temps de live ce mois</span>
+                    <span>0h</span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-accent/5 rounded">
-                  <span>Diamants reçus</span>
-                  <span>0</span>
+              </div>
+
+              <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <Award className="w-5 h-5 text-primary" />
+                  Performance
+                </h2>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center p-3 bg-accent/5 rounded">
+                    <span>Moyenne de spectateurs</span>
+                    <span>0</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-accent/5 rounded">
+                    <span>Pics de spectateurs</span>
+                    <span>0</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-accent/5 rounded">
+                    <span>Total des vues</span>
+                    <span>0</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -181,25 +231,66 @@ const Index = () => {
       case 'manager':
         return (
           <div className="space-y-6">
-            <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
-              <h2 className="text-xl font-bold mb-4">Créateurs Assignés</h2>
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Aucun créateur assigné pour le moment
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <StatsCard
                 title="Créateurs Actifs"
                 value="0"
                 icon={<Users className="w-6 h-6 text-primary" />}
               />
               <StatsCard
-                title="Performance Globale"
+                title="Total des Gains"
+                value="0 €"
+                icon={<Gift className="w-6 h-6 text-primary" />}
+              />
+              <StatsCard
+                title="Performance Moyenne"
                 value="0%"
                 icon={<Award className="w-6 h-6 text-primary" />}
               />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-primary" />
+                  Créateurs Assignés
+                </h2>
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Aucun créateur assigné pour le moment
+                  </p>
+                  <Button className="w-full" variant="outline">
+                    Demander un nouveau créateur
+                  </Button>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <Settings className="w-5 h-5 text-primary" />
+                  Actions Rapides
+                </h2>
+                <div className="space-y-4">
+                  <Button className="w-full" variant="outline">
+                    Générer un rapport
+                  </Button>
+                  <Button className="w-full" variant="outline">
+                    Planifier une réunion
+                  </Button>
+                  <Button className="w-full" variant="outline">
+                    Contacter le support
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
+              <h2 className="text-xl font-bold mb-4">Activité Récente</h2>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Aucune activité récente à afficher
+                </p>
+              </div>
             </div>
           </div>
         );
@@ -294,9 +385,9 @@ const Index = () => {
       <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4 flex items-center justify-center">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
-            <h2 className="text-2xl font-bold">Espace Fondateurs</h2>
+            <h2 className="text-2xl font-bold">Espace de Connexion</h2>
             <p className="text-sm text-muted-foreground mt-2">
-              Veuillez vous authentifier pour accéder au panneau d'administration
+              Veuillez vous authentifier pour accéder à votre espace
             </p>
           </div>
           <div className="space-y-4">
@@ -314,7 +405,7 @@ const Index = () => {
               className="w-full"
               onClick={handleLogin}
             >
-              Accéder au panneau d'administration
+              Se connecter
             </Button>
           </div>
         </div>
