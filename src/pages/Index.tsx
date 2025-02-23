@@ -323,4 +323,42 @@ const Index = () => {
   }
 
   return (
-    <div className="min
+    <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex justify-between items-center">
+          <ProfileHeader 
+            username={role === 'founder' ? 'Fondateur' : role === 'manager' ? 'Manager' : 'Créateur'} 
+            handle={`@${role}`} 
+          />
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              setIsAuthenticated(false);
+              setRole(null);
+            }}
+            className="ml-4"
+          >
+            Déconnexion
+          </Button>
+        </div>
+        
+        {renderContentForRole()}
+
+        <CreateAccountModal
+          isOpen={isCreateAccountModalOpen}
+          onClose={() => setIsCreateAccountModalOpen(false)}
+          onSubmit={handleCreateAccount}
+        />
+
+        <RewardSettingsModal
+          isOpen={isRewardSettingsModalOpen}
+          onClose={() => setIsRewardSettingsModalOpen(false)}
+          onSubmit={handleUpdateSettings}
+          currentSettings={platformSettings ?? undefined}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default Index;
