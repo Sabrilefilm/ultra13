@@ -1,8 +1,7 @@
 
-import { award, clock } from "lucide-react";
+import { Award, Clock, Diamond, Gift } from "lucide-react";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { StatsCard } from "@/components/StatsCard";
-import { LiveDashboard } from "@/components/LiveDashboard";
 
 const Index = () => {
   return (
@@ -12,40 +11,61 @@ const Index = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <StatsCard
-            title="Total des Récompenses"
-            value="0€"
-            icon={<award className="w-6 h-6 text-primary" />}
+            title="Total des Diamants"
+            value="0"
+            icon={<Diamond className="w-6 h-6 text-primary" />}
           />
           <StatsCard
             title="Total des Heures en Direct"
             value="0 heures"
-            icon={<clock className="w-6 h-6 text-primary" />}
+            icon={<Clock className="w-6 h-6 text-primary" />}
           />
         </div>
 
-        <LiveDashboard />
-
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg animate-fadeIn">
-            <h2 className="text-xl font-bold mb-4">Récompenses Récentes</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">Diamants Reçus</h2>
+              <Diamond className="w-6 h-6 text-primary" />
+            </div>
             <p className="text-secondary mb-4">
-              Historique de vos récompenses TikTok récentes
+              Historique de vos diamants reçus
             </p>
             <div className="grid grid-cols-3 gap-4 font-medium text-secondary">
               <div>Date</div>
-              <div>Type</div>
-              <div>Montant</div>
+              <div>Quantité</div>
+              <div>Valeur</div>
             </div>
           </div>
 
           <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg animate-fadeIn">
-            <h2 className="text-xl font-bold mb-4">Heures en Direct</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">Récompenses TikTok</h2>
+              <Gift className="w-6 h-6 text-primary" />
+            </div>
             <p className="text-secondary mb-4">
-              Votre activité de streaming récente
+              Historique des récompenses TikTok
+            </p>
+            <div className="grid grid-cols-3 gap-4 font-medium text-secondary">
+              <div>Date</div>
+              <div>Type</div>
+              <div>Valeur</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6">
+          <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg animate-fadeIn">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">Statistiques des Récompenses</h2>
+              <Award className="w-6 h-6 text-primary" />
+            </div>
+            <p className="text-secondary mb-4">
+              Vue d'ensemble de vos gains
             </p>
             <div className="grid grid-cols-2 gap-4 font-medium text-secondary">
-              <div>Date</div>
-              <div>Heures</div>
+              <div>Période</div>
+              <div>Total</div>
             </div>
           </div>
         </div>
