@@ -16,10 +16,12 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { Account } from "@/types/accounts";
 import { CreatorDetailsDialog } from "@/components/creator/CreatorDetailsDialog";
+import { useIndexAuth } from "@/hooks/use-index-auth";
 
 const UserManagement = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { role } = useIndexAuth();
   const [showPasswords, setShowPasswords] = React.useState<{[key: string]: boolean}>({});
   const [selectedUser, setSelectedUser] = React.useState<string | null>(null);
   const [creatorDetails, setCreatorDetails] = React.useState(null);
@@ -170,6 +172,7 @@ const UserManagement = () => {
           isOpen={!!selectedUser}
           onClose={() => setSelectedUser(null)}
           creatorDetails={creatorDetails}
+          isFounder={role === 'founder'}
         />
       </div>
     </div>
