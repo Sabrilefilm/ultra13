@@ -25,12 +25,19 @@ export const SponsorshipList = ({ isFounder }: SponsorshipListProps) => {
   const { data: sponsorships, isLoading, refetch } = useQuery({
     queryKey: ['sponsorships'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('sponsorships')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Erreur lors de la récupération des parrainages:", error);
+        throw error;
+      }
+      
+      console.log("Parrainages récupérés:", data); // Pour le débogage
       return data as Sponsorship[];
     }
   });
@@ -52,6 +59,7 @@ export const SponsorshipList = ({ isFounder }: SponsorshipListProps) => {
 
       refetch();
     } catch (error) {
+      console.error("Erreur lors de la mise à jour du statut:", error);
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour le statut",
@@ -65,6 +73,18 @@ export const SponsorshipList = ({ isFounder }: SponsorshipListProps) => {
     return <div>Chargement des parrainages...</div>;
   }
 
+  if (!sponsorships || sponsorships.length === 0) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <p className="text-center text-muted-foreground">
+            {isFounder ? "Aucune demande de parrainage à traiter" : "Vous n'avez pas encore de demande de parrainage"}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -72,7 +92,7 @@ export const SponsorshipList = ({ isFounder }: SponsorshipListProps) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {sponsorships?.map((sponsorship) => (
+          {sponsorships.map((sponsorship) => (
             <Card key={sponsorship.id} className="p-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
