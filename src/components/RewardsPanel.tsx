@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Diamond, DollarSign, Plus } from "lucide-react";
+import { Diamond, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
@@ -21,15 +21,14 @@ import { useToast } from "@/hooks/use-toast";
 interface Reward {
   id: string;
   diamonds_count: number;
-  amount_earned: number;
-  payment_status: string;
+  creator_id: string;
   created_at: string;
 }
 
 export function RewardsPanel({ role, userId }: { role: string; userId: string }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [diamonds, setDiamonds] = useState("");
-  const [amount, setAmount] = useState("");
+  const [recipientId, setRecipientId] = useState("");
   const { toast } = useToast();
 
   const { data: rewards, isLoading, refetch } = useQuery({
@@ -42,18 +41,6 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
 
       if (role === "creator") {
         query = query.eq("creator_id", userId);
-      } else if (role === "manager") {
-        const { data: creatorIds } = await supabase
-          .from("profiles")
-          .select("id")
-          .eq("manager_id", userId);
-        
-        if (creatorIds && creatorIds.length > 0) {
-          query = query.in(
-            "creator_id",
-            creatorIds.map((c) => c.id)
-          );
-        }
       }
 
       const { data, error } = await query;
@@ -68,10 +55,8 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
         .from("creator_rewards")
         .insert([
           {
-            creator_id: userId,
+            creator_id: recipientId,
             diamonds_count: parseInt(diamonds),
-            amount_earned: parseFloat(amount),
-            payment_status: "pending"
           }
         ]);
 
@@ -84,7 +69,7 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
 
       setIsDialogOpen(false);
       setDiamonds("");
-      setAmount("");
+      setRecipientId("");
       refetch();
     } catch (error) {
       console.error('Error adding reward:', error);
@@ -118,17 +103,26 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
             <DialogTrigger asChild>
               <Button variant="outline" className="gap-2">
                 <Plus className="w-4 h-4" />
-                Ajouter une récompense
+                Ajouter des diamants
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Ajouter une récompense</DialogTitle>
+                <DialogTitle>Ajouter des diamants</DialogTitle>
                 <DialogDescription>
-                  Ajoutez une nouvelle récompense pour ce créateur
+                  Ajoutez des diamants pour un créateur
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="recipientId">Identifiant du créateur</Label>
+                  <Input
+                    id="recipientId"
+                    value={recipientId}
+                    onChange={(e) => setRecipientId(e.target.value)}
+                    placeholder="@username"
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="diamonds">Nombre de diamants</Label>
                   <Input
@@ -138,18 +132,8 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
                     onChange={(e) => setDiamonds(e.target.value)}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="amount">Montant (€)</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    step="0.01"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                  />
-                </div>
                 <Button onClick={handleAddReward} className="w-full">
-                  Ajouter la récompense
+                  Ajouter les diamants
                 </Button>
               </div>
             </DialogContent>
@@ -162,9 +146,8 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
             <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
+                <TableHead>Identifiant</TableHead>
                 <TableHead>Diamants</TableHead>
-                <TableHead>Montant (€)</TableHead>
-                <TableHead>Statut</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -173,17 +156,8 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
                   <TableCell>
                     {new Date(reward.created_at).toLocaleDateString()}
                   </TableCell>
+                  <TableCell>{reward.creator_id}</TableCell>
                   <TableCell>{reward.diamonds_count}</TableCell>
-                  <TableCell>{reward.amount_earned.toFixed(2)} €</TableCell>
-                  <TableCell>
-                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                      reward.payment_status === "paid"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}>
-                      {reward.payment_status === "paid" ? "Payé" : "En attente"}
-                    </span>
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
