@@ -33,10 +33,13 @@ const ThemeToggle = () => {
 
 const Logo = () => (
   <div className="fixed bottom-4 left-1/2 -translate-x-1/2 opacity-50 z-50">
-    <div className="flex items-center gap-2">
-      <span className="font-bold text-xl agency-text">
+    <div className="flex flex-col items-center gap-1">
+      <span className="font-bold text-2xl agency-text">
         <span className="text-white">Phocéen</span>
         <span className="text-[#0EA5E9]">Agency</span>
+      </span>
+      <span className="copyright-text">
+        © 2024 - Tous droits réservés par Phocéen Agency
       </span>
     </div>
   </div>
