@@ -10,13 +10,15 @@ export const TikTokLogin = () => {
   const handleTikTokLogin = async () => {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'tiktok',
+        provider: 'tiktok' as any, // On type cast temporairement pour éviter l'erreur TS
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: `${window.location.origin}/auth/callback`,
+          scopes: 'user.info.basic,video.list' // Ajout des scopes TikTok nécessaires
         }
       });
 
       if (error) {
+        console.error('Erreur TikTok:', error);
         toast({
           title: "Erreur de connexion",
           description: "Impossible de se connecter à TikTok",
@@ -24,6 +26,7 @@ export const TikTokLogin = () => {
         });
       }
     } catch (error) {
+      console.error('Erreur:', error);
       toast({
         title: "Erreur",
         description: "Une erreur est survenue",
