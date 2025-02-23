@@ -1,4 +1,4 @@
-import { Award, Clock, Diamond, Gift, Settings, Users } from "lucide-react";
+import { Award, Clock, Diamond, Gift, Settings, Users, Rocket } from "lucide-react";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { StatsCard } from "@/components/StatsCard";
 import { Button } from "@/components/ui/button";
@@ -482,10 +482,13 @@ const Index = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4 flex items-center justify-center">
         <div className="w-full max-w-md space-y-8">
-          <div className="text-center space-y-2">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              ULTRA
-            </h1>
+          <div className="text-center space-y-4">
+            <div className="flex items-center justify-center gap-2">
+              <Rocket className="w-8 h-8 text-primary animate-pulse" />
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                ULTRA
+              </h1>
+            </div>
             <h2 className="text-2xl font-bold">Votre Espace de Connexion</h2>
             <p className="text-sm text-muted-foreground">
               Connectez-vous pour accéder à vos données statistiques et votre tableau de bord
