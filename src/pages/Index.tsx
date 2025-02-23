@@ -418,6 +418,20 @@ const Index = () => {
                     Gérer les taux de conversion et les diamants
                   </p>
                 </Button>
+
+                <Button
+                  variant="outline"
+                  className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5"
+                  onClick={() => window.location.href = '/accounts'}
+                >
+                  <div className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-primary" />
+                    <span className="font-semibold">Espace Identifiants</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground text-left">
+                    Consulter tous les identifiants et mots de passe
+                  </p>
+                </Button>
               </div>
             </div>
 
