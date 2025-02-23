@@ -1,0 +1,100 @@
+
+import { Button } from "@/components/ui/button";
+import { Download, Trash2, Trophy, X } from "lucide-react";
+
+interface MatchCardButtonsProps {
+  match: {
+    id: string;
+    creator_id: string;
+    opponent_id: string;
+    winner_id: string | null;
+    match_image?: string;
+  };
+  canManageMatch: boolean;
+  canDeleteMatch: boolean;
+  onSetWinner: (matchId: string, winnerId: string) => void;
+  onClearWinner: (matchId: string) => void;
+  onDelete: (matchId: string) => void;
+  onDownload: (imageUrl: string, fileName: string) => void;
+}
+
+export const MatchCardButtons = ({
+  match,
+  canManageMatch,
+  canDeleteMatch,
+  onSetWinner,
+  onClearWinner,
+  onDelete,
+  onDownload,
+}: MatchCardButtonsProps) => {
+  return (
+    <div className="flex flex-wrap justify-between items-center gap-2 mt-2">
+      {match.winner_id ? (
+        <div className="flex-grow bg-purple-900/30 shadow-lg border border-purple-500/30 rounded-md p-1.5 flex items-center justify-between backdrop-blur-sm">
+          <div className="flex items-center gap-1.5">
+            <Trophy className="w-4 h-4 text-yellow-500" />
+            <span className="text-xs font-medium text-purple-100 truncate">
+              Gagnant : {match.winner_id}
+            </span>
+          </div>
+          {canManageMatch && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-5 w-5 p-0 text-purple-300 hover:text-white hover:bg-purple-800/50 rounded-full"
+              onClick={() => onClearWinner(match.id)}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          )}
+        </div>
+      ) : (
+        canManageMatch && (
+          <div className="flex gap-1.5 flex-grow">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs flex-1 bg-gray-800/50 text-white border-gray-700/50 hover:bg-purple-900/50 hover:border-purple-500/50 backdrop-blur-sm transition-colors"
+              onClick={() => onSetWinner(match.id, match.creator_id)}
+            >
+              {match.creator_id} gagne
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs flex-1 bg-gray-800/50 text-white border-gray-700/50 hover:bg-purple-900/50 hover:border-purple-500/50 backdrop-blur-sm transition-colors"
+              onClick={() => onSetWinner(match.id, match.opponent_id)}
+            >
+              {match.opponent_id} gagne
+            </Button>
+          </div>
+        )
+      )}
+      <div className="flex gap-1.5">
+        {match.match_image && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 bg-gray-800/50 text-white border-gray-700/50 hover:bg-purple-900/50 hover:border-purple-500/50 backdrop-blur-sm transition-colors"
+            onClick={() => onDownload(
+              match.match_image!,
+              `match_${match.creator_id}_vs_${match.opponent_id}`
+            )}
+          >
+            <Download className="w-3 h-3" />
+          </Button>
+        )}
+        {canDeleteMatch && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 w-7 flex items-center justify-center bg-gray-800/50 text-red-400 border-red-900/50 hover:bg-red-900/30 hover:border-red-500/50 backdrop-blur-sm transition-colors"
+            onClick={() => onDelete(match.id)}
+          >
+            <Trash2 className="w-3 h-3" />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+};
