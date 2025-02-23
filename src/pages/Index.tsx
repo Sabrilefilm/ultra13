@@ -1,4 +1,3 @@
-
 import { Award, Clock, Diamond, Gift, Settings, Users } from "lucide-react";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { StatsCard } from "@/components/StatsCard";
@@ -58,81 +57,19 @@ const Index = () => {
     }
   };
 
-  const handleLogin = () => {
-    if (!username) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez saisir un identifiant",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (username === "Sabri" && password === "Marseille@13011") {
-      setRole('founder');
-      setIsAuthenticated(true);
-      toast({
-        title: "Connexion réussie",
-        description: "Bienvenue dans l'espace Fondateur",
-      });
-    } else if (password === "manager") {
-      setRole('manager');
-      setIsAuthenticated(true);
-      toast({
-        title: "Connexion réussie",
-        description: "Bienvenue dans l'espace Manager",
-      });
-    } else if (password === "creator") {
-      setRole('creator');
-      setIsAuthenticated(true);
-      toast({
-        title: "Connexion réussie",
-        description: "Bienvenue dans l'espace Créateur",
-      });
-    } else if (password === "client") {
-      setRole('client');
-      setIsAuthenticated(true);
-      toast({
-        title: "Connexion réussie",
-        description: "Bienvenue dans votre espace",
-      });
-    } else {
-      toast({
-        title: "Erreur",
-        description: "Identifiant ou mot de passe incorrect",
-        variant: "destructive",
-      });
-      setPassword("");
-    }
-  };
-
-  const handleCreateAccount = async (role: 'creator' | 'manager', username: string) => {
+  const handleCreateAccount = async (role: 'creator' | 'manager', username: string, password: string) => {
     try {
-      const email = `${username.toLowerCase()}@mydomain.com`; // Utilisation d'un domaine plus réaliste
-      
-      const { data: user, error: authError } = await supabase.auth.signUp({
-        email: email,
-        password: "password123", // Vous voudrez peut-être générer un mot de passe aléatoire plus sécurisé
-        options: {
-          data: {
-            role: role
-          }
-        }
-      });
-
-      if (authError) throw authError;
-
-      const { error: profileError } = await supabase
-        .from('profiles')
+      const { error } = await supabase
+        .from('user_accounts')
         .insert([
           {
-            id: user.user?.id,
             username,
-            role,
+            password,
+            role
           }
         ]);
 
-      if (profileError) throw profileError;
+      if (error) throw error;
 
       toast({
         title: "Compte créé",
@@ -146,6 +83,56 @@ const Index = () => {
         variant: "destructive",
       });
       throw error;
+    }
+  };
+
+  const handleLogin = async () => {
+    if (!username) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez saisir un identifiant",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      if (username === "Sabri" && password === "Marseille@13011") {
+        setRole('founder');
+        setIsAuthenticated(true);
+        toast({
+          title: "Connexion réussie",
+          description: "Bienvenue dans l'espace Fondateur",
+        });
+      } else {
+        const { data, error } = await supabase
+          .from('user_accounts')
+          .select('role, password')
+          .eq('username', username)
+          .single();
+
+        if (error || !data) {
+          throw new Error("Identifiant ou mot de passe incorrect");
+        }
+
+        if (data.password === password) {
+          setRole(data.role);
+          setIsAuthenticated(true);
+          toast({
+            title: "Connexion réussie",
+            description: `Bienvenue dans votre espace ${data.role}`,
+          });
+        } else {
+          throw new Error("Identifiant ou mot de passe incorrect");
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Identifiant ou mot de passe incorrect",
+        variant: "destructive",
+      });
+      setPassword("");
     }
   };
 

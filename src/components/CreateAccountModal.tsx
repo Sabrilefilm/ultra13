@@ -9,22 +9,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface CreateAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (role: 'creator' | 'manager', username: string) => Promise<void>;
+  onSubmit: (role: 'creator' | 'manager', username: string, password: string) => Promise<void>;
 }
 
 export function CreateAccountModal({ isOpen, onClose, onSubmit }: CreateAccountModalProps) {
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [role, setRole] = useState<'creator' | 'manager'>('creator');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!username || !email) return;
+    if (!username || !password) return;
     setIsLoading(true);
     try {
-      await onSubmit(role, username);
+      await onSubmit(role, username, password);
       setUsername("");
-      setEmail("");
+      setPassword("");
       onClose();
     } catch (error) {
       console.error(error);
@@ -39,7 +39,7 @@ export function CreateAccountModal({ isOpen, onClose, onSubmit }: CreateAccountM
         <DialogHeader>
           <DialogTitle>Créer un nouveau compte</DialogTitle>
           <DialogDescription>
-            Remplissez les informations pour créer un nouveau compte utilisateur.
+            Créez un nouveau compte en définissant l'identifiant, le mot de passe et le rôle.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -59,22 +59,22 @@ export function CreateAccountModal({ isOpen, onClose, onSubmit }: CreateAccountM
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="username">Nom d'utilisateur</Label>
+            <Label htmlFor="username">Identifiant</Label>
             <Input
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Entrez le nom d'utilisateur"
+              placeholder="Entrez l'identifiant"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="password">Mot de passe</Label>
             <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Entrez l'adresse email"
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Entrez le mot de passe"
             />
           </div>
         </div>
@@ -82,7 +82,7 @@ export function CreateAccountModal({ isOpen, onClose, onSubmit }: CreateAccountM
           <Button variant="outline" onClick={onClose}>
             Annuler
           </Button>
-          <Button onClick={handleSubmit} disabled={!username || !email || isLoading}>
+          <Button onClick={handleSubmit} disabled={!username || !password || isLoading}>
             {isLoading ? "Création..." : "Créer le compte"}
           </Button>
         </DialogFooter>
