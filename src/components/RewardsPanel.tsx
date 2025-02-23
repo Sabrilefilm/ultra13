@@ -34,7 +34,7 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
   const { toast } = useToast();
 
   const { data: rewards, isLoading, refetch } = useQuery({
-    queryKey: ["rewards", userId],
+    queryKey: ["rewards", userId, role],
     queryFn: async () => {
       let query = supabase
         .from("creator_rewards")
@@ -44,12 +44,18 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
         `)
         .order("created_at", { ascending: false });
 
+      // Si c'est un créateur, on filtre pour ne montrer que ses récompenses
       if (role === "creator") {
-        const { data: userAccount } = await supabase
+        const { data: userAccount, error: userError } = await supabase
           .from("user_accounts")
           .select("id")
           .eq("username", userId)
           .single();
+
+        if (userError) {
+          console.error("Error fetching user account:", userError);
+          return [];
+        }
 
         if (userAccount) {
           query = query.eq("creator_id", userAccount.id);
@@ -57,6 +63,7 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
       }
 
       const { data, error } = await query;
+      
       if (error) {
         console.error("Error fetching rewards:", error);
         throw error;
@@ -65,24 +72,40 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
       return (data || []).map(reward => ({
         ...reward,
         creator_username: reward.user_accounts?.username
-      })) as Reward[];
+      }));
     },
   });
 
   const handleAddReward = async () => {
+    if (!recipientId || !diamonds || parseInt(diamonds) <= 0) {
+      toast({
+        title: "Erreur de validation",
+        description: "Veuillez sélectionner un créateur et entrer un nombre valide de diamants",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      // Récupérer l'ID du créateur à partir de son username
+      // Récupérer l'ID du créateur
       const { data: userAccount, error: userError } = await supabase
         .from("user_accounts")
         .select("id")
         .eq("username", recipientId)
+        .eq("role", "creator")
         .single();
 
       if (userError || !userAccount) {
-        throw new Error("Créateur non trouvé");
+        toast({
+          title: "Erreur",
+          description: "Créateur non trouvé ou non autorisé",
+          variant: "destructive",
+        });
+        return;
       }
 
-      const { error } = await supabase
+      // Insérer la récompense
+      const { error: insertError } = await supabase
         .from("creator_rewards")
         .insert([
           {
@@ -91,10 +114,13 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
           }
         ]);
 
-      if (error) throw error;
+      if (insertError) {
+        console.error('Error inserting reward:', insertError);
+        throw insertError;
+      }
 
       toast({
-        title: "Récompense ajoutée",
+        title: "Succès",
         description: "La récompense a été ajoutée avec succès",
       });
 
@@ -106,7 +132,7 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
       console.error('Error adding reward:', error);
       toast({
         title: "Erreur",
-        description: "Impossible d'ajouter la récompense",
+        description: "Impossible d'ajouter la récompense. Veuillez réessayer.",
         variant: "destructive",
       });
     }
@@ -157,11 +183,16 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
                   <Input
                     id="diamonds"
                     type="number"
+                    min="1"
                     value={diamonds}
                     onChange={(e) => setDiamonds(e.target.value)}
                   />
                 </div>
-                <Button onClick={handleAddReward} className="w-full">
+                <Button 
+                  onClick={handleAddReward} 
+                  className="w-full"
+                  disabled={!recipientId || !diamonds || parseInt(diamonds) <= 0}
+                >
                   Ajouter les diamants
                 </Button>
               </div>
