@@ -13,9 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 import { CreatorSelect } from "@/components/live-schedule/creator-select";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AddRewardDialogProps {
   isOpen: boolean;
@@ -26,6 +26,8 @@ interface AddRewardDialogProps {
 export function AddRewardDialog({ isOpen, onOpenChange, onSuccess }: AddRewardDialogProps) {
   const [diamonds, setDiamonds] = useState("");
   const [recipientId, setRecipientId] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleAddReward = async () => {
     if (!recipientId || !diamonds || parseInt(diamonds) <= 0) {
@@ -33,7 +35,19 @@ export function AddRewardDialog({ isOpen, onOpenChange, onSuccess }: AddRewardDi
       return;
     }
 
+    setIsLoading(true);
     try {
+      // On utilise l'ID de l'utilisateur récupéré depuis user_accounts
+      const { data: userData, error: userError } = await supabase
+        .from('user_accounts')
+        .select('id')
+        .eq('username', recipientId)
+        .single();
+
+      if (userError || !userData) {
+        throw new Error("Impossible de trouver le créateur");
+      }
+
       const { error: insertError } = await supabase
         .from("creator_rewards")
         .insert([
@@ -51,10 +65,17 @@ export function AddRewardDialog({ isOpen, onOpenChange, onSuccess }: AddRewardDi
       onOpenChange(false);
       setDiamonds("");
       setRecipientId("");
+      
+      // Invalider plusieurs requêtes pour forcer la mise à jour
+      await queryClient.invalidateQueries({ queryKey: ["rewards"] });
+      await queryClient.invalidateQueries({ queryKey: ["creator-stats"] });
+      
       onSuccess();
     } catch (error) {
       console.error('Error adding reward:', error);
       toast("Impossible d'ajouter la récompense. Veuillez réessayer.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -94,9 +115,9 @@ export function AddRewardDialog({ isOpen, onOpenChange, onSuccess }: AddRewardDi
           <Button 
             onClick={handleAddReward} 
             className="w-full"
-            disabled={!recipientId || !diamonds || parseInt(diamonds) <= 0}
+            disabled={isLoading || !recipientId || !diamonds || parseInt(diamonds) <= 0}
           >
-            Ajouter les diamants
+            {isLoading ? "Ajout en cours..." : "Ajouter les diamants"}
           </Button>
         </div>
       </DialogContent>
