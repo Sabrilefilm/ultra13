@@ -11,6 +11,8 @@ import { CreatorDashboard } from "@/components/creator/CreatorDashboard";
 import { FounderDashboard } from "@/components/dashboard/FounderDashboard";
 import { RewardSettingsModal } from "@/components/RewardSettingsModal";
 import { CreatorDetailsDialog } from "@/components/creator/CreatorDetailsDialog";
+import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 function Index() {
   const { isAuthenticated, username, role, handleLogout } = useIndexAuth();
@@ -19,6 +21,51 @@ function Index() {
   const [isCreateAccountOpen, setIsCreateAccountOpen] = useState(false);
   const [isRewardSettingsOpen, setIsRewardSettingsOpen] = useState(false);
   const [showCreatorDetails, setShowCreatorDetails] = useState(false);
+
+  const handleLogin = async (username: string, password: string) => {
+    try {
+      // Simuler une connexion
+      console.log("Login attempt:", username, password);
+      // Ajoutez ici votre logique de connexion
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("Erreur de connexion");
+    }
+  };
+
+  const handleForgotPassword = () => {
+    setIsForgotPasswordOpen(true);
+  };
+
+  const handleCreateAccount = async (role: string, username: string, password: string) => {
+    try {
+      // Logique de création de compte
+      console.log("Creating account:", { role, username, password });
+      // Ajoutez ici votre logique de création de compte
+    } catch (error) {
+      console.error("Account creation error:", error);
+      toast.error("Erreur lors de la création du compte");
+    }
+  };
+
+  const handleOpenSponsorshipForm = () => {
+    // Gérer l'ouverture du formulaire de parrainage
+    console.log("Opening sponsorship form");
+  };
+
+  const handleOpenSponsorshipList = () => {
+    // Gérer l'ouverture de la liste des parrainages
+    console.log("Opening sponsorship list");
+  };
+
+  const handleConfigureRewards = () => {
+    setIsRewardSettingsOpen(true);
+  };
+
+  const handleOpenLiveSchedule = (creatorId: string) => {
+    // Gérer l'ouverture du planning des lives
+    console.log("Opening live schedule for creator:", creatorId);
+  };
 
   if (!isAuthenticated) {
     return (
@@ -34,7 +81,10 @@ function Index() {
               </p>
             </div>
             <div className="w-full max-w-sm space-y-4">
-              <LoginForm />
+              <LoginForm 
+                onLogin={handleLogin}
+                onForgotPassword={handleForgotPassword}
+              />
               <div className="flex justify-between">
                 <Button
                   variant="link"
@@ -56,11 +106,12 @@ function Index() {
         </div>
         <CreateAccountModal
           isOpen={isCreateAccountOpen}
-          onOpenChange={setIsCreateAccountOpen}
+          onClose={() => setIsCreateAccountOpen(false)}
+          onSubmit={handleCreateAccount}
         />
         <ForgotPasswordModal
           isOpen={isForgotPasswordOpen}
-          onOpenChange={setIsForgotPasswordOpen}
+          onClose={() => setIsForgotPasswordOpen(false)}
         />
       </div>
     );
@@ -99,8 +150,21 @@ function Index() {
           </div>
 
           {/* Interface principale basée sur le rôle */}
-          {role === "creator" && <CreatorDashboard />}
-          {role === "founder" && <FounderDashboard />}
+          {role === "creator" && (
+            <CreatorDashboard
+              onOpenSponsorshipForm={handleOpenSponsorshipForm}
+              onOpenSponsorshipList={handleOpenSponsorshipList}
+            />
+          )}
+          {role === "founder" && (
+            <FounderDashboard
+              onCreateAccount={() => setIsCreateAccountOpen(true)}
+              onConfigureRewards={handleConfigureRewards}
+              onOpenLiveSchedule={handleOpenLiveSchedule}
+              onOpenSponsorships={handleOpenSponsorshipList}
+              username={username || ''}
+            />
+          )}
           {role === "client" && <WebCrawler />}
         </div>
       </div>
@@ -108,7 +172,11 @@ function Index() {
       {/* Modals */}
       <RewardSettingsModal
         isOpen={isRewardSettingsOpen}
-        onOpenChange={setIsRewardSettingsOpen}
+        onClose={() => setIsRewardSettingsOpen(false)}
+        onSubmit={async (diamondValue, minimumPayout) => {
+          // Gérer la mise à jour des récompenses
+          console.log("Updating rewards:", { diamondValue, minimumPayout });
+        }}
       />
       <CreatorDetailsDialog
         isOpen={showCreatorDetails}
