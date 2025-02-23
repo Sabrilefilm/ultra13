@@ -39,7 +39,7 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={() => {}} modal>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Créer une affiche de match</DialogTitle>
