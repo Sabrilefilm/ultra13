@@ -12,15 +12,18 @@ import { RewardSettingsModal } from "@/components/RewardSettingsModal";
 import { CreatorDetailsDialog } from "@/components/creator/CreatorDetailsDialog";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-
 function Index() {
-  const { isAuthenticated, username, role, handleLogout } = useIndexAuth();
+  const {
+    isAuthenticated,
+    username,
+    role,
+    handleLogout
+  } = useIndexAuth();
   const navigate = useNavigate();
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [isCreateAccountOpen, setIsCreateAccountOpen] = useState(false);
   const [isRewardSettingsOpen, setIsRewardSettingsOpen] = useState(false);
   const [showCreatorDetails, setShowCreatorDetails] = useState(false);
-
   const handleLogin = async (username: string, password: string) => {
     try {
       // Simuler une connexion
@@ -31,132 +34,78 @@ function Index() {
       toast.error("Erreur de connexion");
     }
   };
-
   const handleForgotPassword = () => {
     setIsForgotPasswordOpen(true);
   };
-
   const handleCreateAccount = async (role: string, username: string, password: string) => {
     try {
       // Logique de création de compte
-      console.log("Creating account:", { role, username, password });
+      console.log("Creating account:", {
+        role,
+        username,
+        password
+      });
       // Ajoutez ici votre logique de création de compte
     } catch (error) {
       console.error("Account creation error:", error);
       toast.error("Erreur lors de la création du compte");
     }
   };
-
   const handleOpenSponsorshipForm = () => {
     // Gérer l'ouverture du formulaire de parrainage
     console.log("Opening sponsorship form");
   };
-
   const handleOpenSponsorshipList = () => {
     // Gérer l'ouverture de la liste des parrainages
     console.log("Opening sponsorship list");
   };
-
   const handleConfigureRewards = () => {
     setIsRewardSettingsOpen(true);
   };
-
   const handleOpenLiveSchedule = (creatorId: string) => {
     // Gérer l'ouverture du planning des lives
     console.log("Opening live schedule for creator:", creatorId);
   };
-
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-[#1A1F2C] flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center bg-slate-950">
         <div className="w-full max-w-sm">
-          <LoginForm 
-            onLogin={handleLogin}
-            onForgotPassword={handleForgotPassword}
-          />
+          <LoginForm onLogin={handleLogin} onForgotPassword={handleForgotPassword} />
         </div>
-        <CreateAccountModal
-          isOpen={isCreateAccountOpen}
-          onClose={() => setIsCreateAccountOpen(false)}
-          onSubmit={handleCreateAccount}
-        />
-        <ForgotPasswordModal
-          isOpen={isForgotPasswordOpen}
-          onClose={() => setIsForgotPasswordOpen(false)}
-        />
-      </div>
-    );
+        <CreateAccountModal isOpen={isCreateAccountOpen} onClose={() => setIsCreateAccountOpen(false)} onSubmit={handleCreateAccount} />
+        <ForgotPasswordModal isOpen={isForgotPasswordOpen} onClose={() => setIsForgotPasswordOpen(false)} />
+      </div>;
   }
-
-  return (
-    <>
+  return <>
       <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 pt-16 pb-12">
         <div className="container px-4 md:px-6">
           <div className="flex justify-end gap-4 mb-8">
-            {role === "founder" && (
-              <Button
-                variant="outline"
-                onClick={() => navigate("/user-management")}
-                className="w-full sm:w-auto"
-              >
+            {role === "founder" && <Button variant="outline" onClick={() => navigate("/user-management")} className="w-full sm:w-auto">
                 Gestion des utilisateurs
-              </Button>
-            )}
-            {(role === "founder" || role === "manager") && (
-              <Button
-                variant="outline"
-                onClick={() => navigate("/rewards-management")}
-                className="w-full sm:w-auto"
-              >
+              </Button>}
+            {(role === "founder" || role === "manager") && <Button variant="outline" onClick={() => navigate("/rewards-management")} className="w-full sm:w-auto">
                 Gestion des récompenses
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-              className="w-full sm:w-auto"
-            >
+              </Button>}
+            <Button variant="outline" onClick={handleLogout} className="w-full sm:w-auto">
               Déconnexion
             </Button>
           </div>
 
           {/* Interface principale basée sur le rôle */}
-          {role === "creator" && (
-            <CreatorDashboard
-              onOpenSponsorshipForm={handleOpenSponsorshipForm}
-              onOpenSponsorshipList={handleOpenSponsorshipList}
-            />
-          )}
-          {role === "founder" && (
-            <FounderDashboard
-              onCreateAccount={() => setIsCreateAccountOpen(true)}
-              onConfigureRewards={handleConfigureRewards}
-              onOpenLiveSchedule={handleOpenLiveSchedule}
-              onOpenSponsorships={handleOpenSponsorshipList}
-              username={username || ''}
-            />
-          )}
+          {role === "creator" && <CreatorDashboard onOpenSponsorshipForm={handleOpenSponsorshipForm} onOpenSponsorshipList={handleOpenSponsorshipList} />}
+          {role === "founder" && <FounderDashboard onCreateAccount={() => setIsCreateAccountOpen(true)} onConfigureRewards={handleConfigureRewards} onOpenLiveSchedule={handleOpenLiveSchedule} onOpenSponsorships={handleOpenSponsorshipList} username={username || ''} />}
           {role === "client" && <WebCrawler />}
         </div>
       </div>
 
       {/* Modals */}
-      <RewardSettingsModal
-        isOpen={isRewardSettingsOpen}
-        onClose={() => setIsRewardSettingsOpen(false)}
-        onSubmit={async (diamondValue, minimumPayout) => {
-          // Gérer la mise à jour des récompenses
-          console.log("Updating rewards:", { diamondValue, minimumPayout });
-        }}
-      />
-      <CreatorDetailsDialog
-        isOpen={showCreatorDetails}
-        onClose={() => setShowCreatorDetails(false)}
-        creatorDetails={null}
-        isFounder={role === 'founder'}
-      />
-    </>
-  );
+      <RewardSettingsModal isOpen={isRewardSettingsOpen} onClose={() => setIsRewardSettingsOpen(false)} onSubmit={async (diamondValue, minimumPayout) => {
+      // Gérer la mise à jour des récompenses
+      console.log("Updating rewards:", {
+        diamondValue,
+        minimumPayout
+      });
+    }} />
+      <CreatorDetailsDialog isOpen={showCreatorDetails} onClose={() => setShowCreatorDetails(false)} creatorDetails={null} isFounder={role === 'founder'} />
+    </>;
 }
-
 export default Index;
