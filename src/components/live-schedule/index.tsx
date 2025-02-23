@@ -18,10 +18,15 @@ export const LiveScheduleModal = ({
   onClose,
   creatorId,
 }: LiveScheduleModalProps) => {
-  const { schedules, loading, updateSchedule, handleSave } = useLiveSchedule(
-    isOpen,
-    creatorId
-  );
+  const { 
+    schedules, 
+    loading, 
+    updateSchedule, 
+    handleSave,
+    totalDays,
+    totalHours,
+    creatorName,
+  } = useLiveSchedule(isOpen, creatorId);
 
   const onSave = async () => {
     const success = await handleSave();
@@ -32,7 +37,7 @@ export const LiveScheduleModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Configuration des Horaires de Live</DialogTitle>
           <DialogDescription>
@@ -57,6 +62,9 @@ export const LiveScheduleModal = ({
                     day={day}
                     schedule={schedule}
                     onUpdate={updateSchedule}
+                    totalDays={totalDays}
+                    totalHours={totalHours}
+                    creatorName={creatorName}
                   />
                 );
               })}

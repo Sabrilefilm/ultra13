@@ -9,41 +9,44 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
   const [profileId, setProfileId] = useState<string | null>(null);
+  const [creatorName, setCreatorName] = useState("");
+  const [totalDays, setTotalDays] = useState(0);
+  const [totalHours, setTotalHours] = useState(0);
 
   const fetchProfileId = async (username: string) => {
     try {
-      // Pour le fondateur Sabri, on utilise directement son ID
-      if (username === "Sabri") {
-        const { data: userAccounts, error: userError } = await supabase
-          .from("user_accounts")
-          .select("id")
-          .eq("username", "Sabri")
-          .single();
+      const { data: userAccounts, error: userError } = await supabase
+        .from("user_accounts")
+        .select("id, username")
+        .eq("username", username)
+        .single();
 
-        if (userError) throw userError;
-        if (userAccounts) {
-          setProfileId(userAccounts.id);
-          return userAccounts.id;
-        }
-      } else {
-        // Pour les autres utilisateurs
-        const { data: userAccounts, error: userError } = await supabase
-          .from("user_accounts")
-          .select("id")
-          .eq("username", username)
-          .single();
-
-        if (userError) throw userError;
-        if (userAccounts) {
-          setProfileId(userAccounts.id);
-          return userAccounts.id;
-        }
+      if (userError) throw userError;
+      if (userAccounts) {
+        setProfileId(userAccounts.id);
+        setCreatorName(userAccounts.username);
+        return userAccounts.id;
       }
     } catch (error) {
       console.error("Erreur lors de la récupération du profil:", error);
       toast.error("Erreur lors de la récupération du profil");
     }
     return null;
+  };
+
+  const calculateStats = (schedules: Schedule[]) => {
+    const activeDays = schedules.filter(s => s.is_active).length;
+    setTotalDays(activeDays);
+
+    let totalHours = 0;
+    schedules.forEach(schedule => {
+      if (schedule.is_active) {
+        const start = new Date(`2000-01-01 ${schedule.start_time}`);
+        const end = new Date(`2000-01-01 ${schedule.end_time}`);
+        totalHours += (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+      }
+    });
+    setTotalHours(totalHours);
   };
 
   const fetchSchedules = async (id: string) => {
@@ -69,6 +72,7 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
       });
 
       setSchedules(initialSchedules);
+      calculateStats(initialSchedules);
     } catch (error) {
       console.error("Erreur lors du chargement des horaires:", error);
       toast.error("Erreur lors du chargement des horaires");
@@ -113,6 +117,7 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
         }
       }
 
+      calculateStats(schedules);
       toast.success("Horaires mis à jour avec succès");
       return true;
     } catch (error) {
@@ -129,13 +134,15 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
     field: "start_time" | "end_time" | "is_active",
     value: string | boolean
   ) => {
-    setSchedules((prev) =>
-      prev.map((schedule) =>
+    setSchedules((prev) => {
+      const newSchedules = prev.map((schedule) =>
         schedule.day_of_week === dayId
           ? { ...schedule, [field]: value }
           : schedule
-      )
-    );
+      );
+      calculateStats(newSchedules);
+      return newSchedules;
+    });
   };
 
   useEffect(() => {
@@ -156,5 +163,8 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
     loading,
     updateSchedule,
     handleSave,
+    totalDays,
+    totalHours,
+    creatorName,
   };
 };
