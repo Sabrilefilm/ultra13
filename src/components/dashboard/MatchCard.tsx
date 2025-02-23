@@ -35,8 +35,8 @@ export const MatchCard = ({
   return (
     <div 
       className={`flex flex-col h-full aspect-square max-w-md rounded-2xl shadow-lg transition-all duration-300 overflow-hidden ${
-        match.winner_id ? 'bg-gradient-to-br from-white to-gray-50' : 'bg-white'
-      } ${isMatchOff ? 'opacity-75 bg-gray-100' : ''}`}
+        match.winner_id ? 'bg-gradient-to-br from-black to-gray-900' : 'bg-black'
+      } ${isMatchOff ? 'opacity-75' : ''}`}
     >
       {match.match_image && (
         <div className="w-full h-1/2 relative">
@@ -46,7 +46,7 @@ export const MatchCard = ({
             className="w-full h-full object-cover"
           />
           {isMatchOff && (
-            <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-red-100 text-red-600 text-sm font-medium border border-red-200">
+            <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-red-900/80 text-red-100 text-sm font-medium border border-red-700">
               Match Off
             </div>
           )}
@@ -55,30 +55,30 @@ export const MatchCard = ({
       
       <div className="flex flex-col flex-grow p-4 space-y-4">
         {showRequirements && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-3 shadow-sm">
-            <p className="text-base font-semibold text-red-600 text-center mb-2">
+          <div className="bg-red-900/30 border border-red-800 rounded-xl p-3 shadow-sm">
+            <p className="text-base font-semibold text-red-100 text-center mb-2">
               OBJECTIFS DU MATCH
             </p>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-red-100">
-                <Calendar className="w-4 h-4 text-red-500" />
-                <span className="text-red-600 font-medium">7 Jours</span>
+              <div className="flex items-center gap-2 bg-red-950/50 p-2 rounded-lg border border-red-800">
+                <Calendar className="w-4 h-4 text-red-400" />
+                <span className="text-red-100 font-medium">7 Jours</span>
               </div>
-              <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-red-100">
-                <Timer className="w-4 h-4 text-red-500" />
-                <span className="text-red-600 font-medium">15h Live</span>
+              <div className="flex items-center gap-2 bg-red-950/50 p-2 rounded-lg border border-red-800">
+                <Timer className="w-4 h-4 text-red-400" />
+                <span className="text-red-100 font-medium">15h Live</span>
               </div>
-              <div className="col-span-2 flex items-center justify-center gap-2 bg-white p-2 rounded-lg border border-red-100">
-                <span className="text-red-500 font-semibold text-base">💎</span>
-                <span className="text-red-600 font-medium">100 Diamants</span>
+              <div className="col-span-2 flex items-center justify-center gap-2 bg-red-950/50 p-2 rounded-lg border border-red-800">
+                <span className="text-red-400 font-semibold text-base">💎</span>
+                <span className="text-red-100 font-medium">100 Diamants</span>
               </div>
             </div>
           </div>
         )}
 
         <div className="flex-grow">
-          <p className="font-semibold text-lg text-gray-900">{match.creator_id} vs {match.opponent_id}</p>
-          <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+          <p className="font-semibold text-lg text-white">{match.creator_id} vs {match.opponent_id}</p>
+          <div className="flex items-center gap-2 text-sm text-gray-300 mt-1">
             <Calendar className="w-4 h-4" />
             {formatDate(match.match_date)}
             <Clock className="w-4 h-4 ml-2" />
@@ -88,10 +88,10 @@ export const MatchCard = ({
 
         <div className="flex flex-wrap items-center gap-2 mt-auto">
           {match.winner_id ? (
-            <div className="flex-grow bg-white shadow-sm border rounded-lg p-2 flex items-center justify-between">
+            <div className="flex-grow bg-gray-900 shadow-sm border border-gray-800 rounded-lg p-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-yellow-500" />
-                <span className="text-sm font-medium">
+                <span className="text-sm font-medium text-white">
                   Gagnant : {match.winner_id}
                 </span>
               </div>
@@ -99,7 +99,7 @@ export const MatchCard = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-6 w-6 p-0 text-gray-500 hover:text-black hover:bg-gray-100 rounded-full"
+                  className="h-6 w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-800 rounded-full"
                   onClick={() => onClearWinner(match.id)}
                 >
                   <X className="h-4 w-4" />
@@ -112,7 +112,7 @@ export const MatchCard = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 bg-white text-black border-gray-200 hover:bg-gray-50"
+                  className="flex-1 bg-gray-900 text-white border-gray-700 hover:bg-gray-800"
                   onClick={() => onSetWinner(match.id, match.creator_id)}
                 >
                   {match.creator_id} gagne
@@ -120,7 +120,7 @@ export const MatchCard = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 bg-white text-black border-gray-200 hover:bg-gray-50"
+                  className="flex-1 bg-gray-900 text-white border-gray-700 hover:bg-gray-800"
                   onClick={() => onSetWinner(match.id, match.opponent_id)}
                 >
                   {match.opponent_id} gagne
@@ -133,7 +133,7 @@ export const MatchCard = ({
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-white text-black border-gray-200 hover:bg-gray-50"
+                className="bg-gray-900 text-white border-gray-700 hover:bg-gray-800"
                 onClick={() => onDownload(
                   match.match_image,
                   `match_${match.creator_id}_vs_${match.opponent_id}`
@@ -146,7 +146,7 @@ export const MatchCard = ({
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-white text-red-500 border-red-200 hover:bg-red-50"
+                className="bg-gray-900 text-red-400 border-red-900/50 hover:bg-red-950/50"
                 onClick={() => onDelete(match.id)}
               >
                 <Trash2 className="w-4 h-4" />
