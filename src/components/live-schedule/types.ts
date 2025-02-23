@@ -7,8 +7,8 @@ export interface LiveScheduleModalProps {
 
 export interface Schedule {
   id: string;
-  hours?: number;
-  days?: number;
+  hours: number;
+  days: number;
   is_active: boolean;
   creator_name?: string;
 }

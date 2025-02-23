@@ -8,7 +8,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { DAYS_OF_WEEK } from "./constants";
 import { LiveScheduleModalProps } from "./types";
 import { useLiveSchedule } from "./use-live-schedule";
 import { ScheduleDay } from "./schedule-day";
@@ -26,8 +25,6 @@ export const LiveScheduleModal = ({
     loading, 
     updateSchedule, 
     handleSave,
-    totalDays,
-    totalHours,
     creatorName,
   } = useLiveSchedule(isOpen, selectedCreator);
 
@@ -44,7 +41,7 @@ export const LiveScheduleModal = ({
         <DialogHeader>
           <DialogTitle>Configuration des Horaires de Live</DialogTitle>
           <DialogDescription>
-            Configurez vos horaires de live pour chaque jour de la semaine
+            Configurez vos horaires de live
           </DialogDescription>
         </DialogHeader>
 
@@ -62,22 +59,14 @@ export const LiveScheduleModal = ({
             </div>
           ) : (
             <div className="space-y-4">
-              {DAYS_OF_WEEK.map((day) => {
-                const schedule = schedules.find((s) => s.day_of_week === day.id);
-                if (!schedule) return null;
-
-                return (
-                  <ScheduleDay
-                    key={day.id}
-                    day={day}
-                    schedule={schedule}
-                    onUpdate={updateSchedule}
-                    totalDays={totalDays}
-                    totalHours={totalHours}
-                    creatorName={creatorName}
-                  />
-                );
-              })}
+              {schedules.map((schedule) => (
+                <ScheduleDay
+                  key={schedule.id}
+                  schedule={schedule}
+                  onUpdate={updateSchedule}
+                  creatorName={creatorName}
+                />
+              ))}
             </div>
           )}
         </div>

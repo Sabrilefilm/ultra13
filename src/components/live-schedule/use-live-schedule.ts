@@ -1,6 +1,6 @@
+
 import { useState, useEffect } from "react";
 import { Schedule } from "./types";
-import { DAYS_OF_WEEK } from "./constants";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
@@ -9,20 +9,16 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
   const [loading, setLoading] = useState(true);
   const [profileId, setProfileId] = useState<string | null>(null);
   const [creatorName, setCreatorName] = useState("");
-  const [totalDays, setTotalDays] = useState(0);
-  const [totalHours, setTotalHours] = useState(0);
 
   const fetchProfileId = async (username: string) => {
     try {
-      console.log("Fetching profile for username:", username); // Debug log
+      console.log("Fetching profile for username:", username);
 
       const { data: userAccounts, error: userError } = await supabase
         .from("user_accounts")
         .select("id, username")
         .eq("username", username)
-        .maybeSingle(); // Utilisation de maybeSingle au lieu de single
-
-      console.log("Query result:", userAccounts, userError); // Debug log
+        .maybeSingle();
 
       if (userError) {
         console.error("Database error:", userError);
@@ -35,7 +31,7 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
         return null;
       }
 
-      console.log("User account found:", userAccounts); // Debug log
+      console.log("User account found:", userAccounts);
       setProfileId(userAccounts.id);
       setCreatorName(userAccounts.username);
       return userAccounts.id;
@@ -47,24 +43,9 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
     }
   };
 
-  const calculateStats = (schedules: Schedule[]) => {
-    const activeDays = schedules.filter(s => s.is_active).length;
-    setTotalDays(activeDays);
-
-    let totalHours = 0;
-    schedules.forEach(schedule => {
-      if (schedule.is_active) {
-        const start = new Date(`2000-01-01 ${schedule.start_time}`);
-        const end = new Date(`2000-01-01 ${schedule.end_time}`);
-        totalHours += (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-      }
-    });
-    setTotalHours(totalHours);
-  };
-
   const fetchSchedules = async (id: string) => {
     try {
-      console.log("Fetching schedules for id:", id); // Debug log
+      console.log("Fetching schedules for id:", id);
 
       const { data, error } = await supabase
         .from("live_schedules")
@@ -73,23 +54,18 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
 
       if (error) throw error;
 
-      console.log("Schedules found:", data); // Debug log
+      console.log("Schedules found:", data);
 
-      const initialSchedules = DAYS_OF_WEEK.map((day) => {
-        const existingSchedule = data?.find((s) => s.day_of_week === day.id);
-        return (
-          existingSchedule || {
-            id: `new-${day.id}`,
-            day_of_week: day.id,
-            start_time: "09:00",
-            end_time: "18:00",
-            is_active: false,
-          }
-        );
-      });
+      // Initialiser avec un seul horaire par créateur
+      const schedule: Schedule = {
+        id: data?.[0]?.id || 'new-schedule',
+        hours: data?.[0]?.hours || 0,
+        days: data?.[0]?.days || 0,
+        is_active: true,
+        creator_name: creatorName
+      };
 
-      setSchedules(initialSchedules);
-      calculateStats(initialSchedules);
+      setSchedules([schedule]);
     } catch (error) {
       console.error("Erreur lors du chargement des horaires:", error);
       toast.error("Erreur lors du chargement des horaires");
@@ -103,39 +79,28 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
 
     try {
       setLoading(true);
+      const schedule = schedules[0]; // On ne garde qu'un seul horaire
 
-      for (const schedule of schedules) {
-        if (schedule.is_active) {
-          if (schedule.id.startsWith("new-")) {
-            const { error } = await supabase.from("live_schedules").insert({
-              creator_id: profileId,
-              day_of_week: schedule.day_of_week,
-              start_time: schedule.start_time,
-              end_time: schedule.end_time,
-              is_active: true,
-            });
-            if (error) throw error;
-          } else {
-            const { error } = await supabase
-              .from("live_schedules")
-              .update({
-                start_time: schedule.start_time,
-                end_time: schedule.end_time,
-              })
-              .eq("id", schedule.id);
-            if (error) throw error;
-          }
-        } else if (!schedule.id.startsWith("new-")) {
-          const { error } = await supabase
-            .from("live_schedules")
-            .delete()
-            .eq("id", schedule.id);
-          if (error) throw error;
-        }
+      if (schedule.id.startsWith('new-')) {
+        const { error } = await supabase.from("live_schedules").insert({
+          creator_id: profileId,
+          hours: schedule.hours,
+          days: schedule.days,
+          is_active: true,
+        });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("live_schedules")
+          .update({
+            hours: schedule.hours,
+            days: schedule.days,
+          })
+          .eq("id", schedule.id);
+        if (error) throw error;
       }
 
-      calculateStats(schedules);
-      toast.success("Horaires mis à jour avec succ��s");
+      toast.success("Horaires mis à jour avec succès");
       return true;
     } catch (error) {
       console.error("Erreur lors de la sauvegarde des horaires:", error);
@@ -147,24 +112,26 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
   };
 
   const updateSchedule = (
-    dayId: string,
-    field: "start_time" | "end_time" | "is_active",
+    scheduleId: string,
+    field: "hours" | "days" | "is_active",
     value: string | boolean
   ) => {
     setSchedules((prev) => {
       const newSchedules = prev.map((schedule) =>
-        schedule.day_of_week === dayId
-          ? { ...schedule, [field]: value }
+        schedule.id === scheduleId
+          ? { 
+              ...schedule, 
+              [field]: field === "is_active" ? value : Number(value)
+            }
           : schedule
       );
-      calculateStats(newSchedules);
       return newSchedules;
     });
   };
 
   useEffect(() => {
     if (isOpen && creatorId) {
-      console.log("Modal opened for creator:", creatorId); // Debug log
+      console.log("Modal opened for creator:", creatorId);
       setLoading(true);
       const initializeData = async () => {
         const id = await fetchProfileId(creatorId);
@@ -183,8 +150,6 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
     loading,
     updateSchedule,
     handleSave,
-    totalDays,
-    totalHours,
     creatorName,
   };
 };

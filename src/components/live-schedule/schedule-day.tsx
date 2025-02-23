@@ -7,15 +7,12 @@ import { Schedule } from "./types";
 import { User } from "lucide-react";
 
 interface ScheduleDayProps {
-  day: { id: string; label: string };
   schedule: Schedule;
   onUpdate: (
-    dayId: string,
-    field: "start_time" | "end_time" | "is_active",
+    scheduleId: string,
+    field: "hours" | "days" | "is_active",
     value: string | boolean
   ) => void;
-  totalDays: number;
-  totalHours: number;
   creatorName: string;
 }
 
@@ -47,7 +44,7 @@ export const ScheduleDay = ({
             min="0"
             max="24"
             step="0.5"
-            value={schedule.hours || "0"}
+            value={schedule.hours}
             onChange={(e) => onUpdate(schedule.id, "hours", e.target.value)}
             className="w-full"
           />
@@ -60,7 +57,7 @@ export const ScheduleDay = ({
             type="number"
             min="0"
             max="7"
-            value={schedule.days || "0"}
+            value={schedule.days}
             onChange={(e) => onUpdate(schedule.id, "days", e.target.value)}
             className="w-full"
           />
@@ -69,10 +66,10 @@ export const ScheduleDay = ({
 
       <div className="flex justify-end gap-2 mt-4">
         <Button variant="outline" size="sm">
-          {schedule.hours || "0"}H
+          {schedule.hours}H
         </Button>
         <Button variant="outline" size="sm">
-          {schedule.days || "0"}J
+          {schedule.days}J
         </Button>
       </div>
     </div>
