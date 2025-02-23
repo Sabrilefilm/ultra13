@@ -18,6 +18,7 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
         .from("user_accounts")
         .select("id, username")
         .eq("username", username)
+        .eq("role", "creator")
         .single();
 
       if (userError) {
@@ -50,17 +51,20 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
       const { data, error } = await supabase
         .from("live_schedules")
         .select("*")
-        .eq("creator_id", id);
+        .eq("creator_id", id)
+        .single();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') { // PGRST116 est le code pour "aucun résultat"
+        throw error;
+      }
 
-      console.log("Schedules found:", data);
+      console.log("Schedule found:", data);
 
       // Initialiser avec un seul horaire par créateur
       const schedule: Schedule = {
-        id: data?.[0]?.id || 'new-schedule',
-        hours: data?.[0]?.hours || 0,
-        days: data?.[0]?.days || 0,
+        id: data?.id || 'new-schedule',
+        hours: data?.hours || 0,
+        days: data?.days || 0,
         is_active: true,
         creator_name: creatorName
       };
@@ -81,13 +85,18 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
       setLoading(true);
       const schedule = schedules[0]; // On ne garde qu'un seul horaire
 
+      const data = {
+        creator_id: profileId,
+        hours: schedule.hours,
+        days: schedule.days,
+        is_active: true,
+      };
+
       if (schedule.id.startsWith('new-')) {
-        const { error } = await supabase.from("live_schedules").insert({
-          creator_id: profileId,
-          hours: schedule.hours,
-          days: schedule.days,
-          is_active: true,
-        });
+        const { error } = await supabase
+          .from("live_schedules")
+          .insert(data);
+        
         if (error) throw error;
       } else {
         const { error } = await supabase
@@ -97,6 +106,7 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
             days: schedule.days,
           })
           .eq("id", schedule.id);
+          
         if (error) throw error;
       }
 

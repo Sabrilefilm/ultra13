@@ -113,7 +113,7 @@ export type Database = {
             foreignKeyName: "live_schedules_creator_id_fkey"
             columns: ["creator_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
         ]
