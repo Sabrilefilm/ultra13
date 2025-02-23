@@ -11,16 +11,10 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
   const { data: matches, isLoading } = useQuery({
     queryKey: ['upcoming-matches', creatorId],
     queryFn: async () => {
-      let query = supabase
+      const { data, error } = await supabase
         .from('upcoming_matches')
         .select('*')
         .order('match_date', { ascending: true });
-
-      if (role !== 'founder') {
-        query = query.eq('creator_id', creatorId);
-      }
-      
-      const { data, error } = await query;
       
       if (error) throw error;
       return data;
@@ -71,7 +65,7 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
         startVelocity: 30, 
         spread: 360, 
         ticks: 60, 
-        zIndex: -1, // Met l'animation en arrière-plan
+        zIndex: -1,
         gravity: 0.5,
         drift: 0
       };
