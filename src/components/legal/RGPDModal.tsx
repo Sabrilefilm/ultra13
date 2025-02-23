@@ -41,7 +41,7 @@ export function RGPDModal() {
               <p>Nous collectons les données suivantes :</p>
               <ul className="list-disc pl-6 mt-2">
                 <li>Informations de profil (nom d'utilisateur, email)</li>
-                <li>Données de connexion</li>
+                <li>Données de connexion (conservées pendant 2 ans)</li>
                 <li>Informations sur les récompenses et activités</li>
               </ul>
             </section>
@@ -105,7 +105,7 @@ export function RGPDModal() {
               <h3 className="font-semibold mb-2">8. Contact</h3>
               <p>
                 Pour toute question concernant cette politique ou pour exercer vos droits, 
-                vous pouvez nous contacter à l'adresse : privacy@example.com
+                vous pouvez nous contacter à l'adresse : contact@phoceenagency.fr
               </p>
             </section>
           </div>
