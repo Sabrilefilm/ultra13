@@ -34,10 +34,10 @@ export const FounderDashboard = ({
         >
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-primary" />
-            <span className="font-semibold">Gestion des Comptes</span>
+            <span className="font-semibold">Gestion des Utilisateurs</span>
           </div>
           <p className="text-sm text-muted-foreground text-left">
-            Créer et gérer les comptes (Créateurs, Managers)
+            Voir et gérer tous les utilisateurs de la plateforme
           </p>
         </Button>
 
