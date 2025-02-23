@@ -5,6 +5,7 @@ import { LiveScheduleModal } from "@/components/live-schedule";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SponsorshipForm } from "@/components/SponsorshipForm";
 import { SponsorshipList } from "@/components/SponsorshipList";
+import { ScheduleMatchDialog } from "@/components/matches/ScheduleMatchDialog";
 
 interface ModalManagerProps {
   isCreateAccountModalOpen: boolean;
@@ -85,6 +86,11 @@ export const ModalManager = ({
         isOpen={isLiveScheduleModalOpen}
         onClose={() => setIsLiveScheduleModalOpen(false)}
         creatorId={selectedCreatorId}
+      />
+
+      <ScheduleMatchDialog
+        isOpen={isCreateAccountModalOpen}
+        onClose={() => setIsCreateAccountModalOpen(false)}
       />
     </>
   );
