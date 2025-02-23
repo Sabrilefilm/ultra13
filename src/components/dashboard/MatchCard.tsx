@@ -38,6 +38,73 @@ export const MatchCard = ({
         match.winner_id ? 'bg-gradient-to-br from-black to-gray-900' : 'bg-black'
       } ${isMatchOff ? 'opacity-75' : ''}`}
     >
+      <div className="flex items-center justify-between p-2 bg-gray-900/50">
+        {match.winner_id ? (
+          <div className="flex items-center gap-1 flex-grow">
+            <Trophy className="w-4 h-4 text-yellow-500" />
+            <span className="text-xs font-medium text-white truncate">
+              Gagnant : {match.winner_id}
+            </span>
+            {canManageMatch && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-5 w-5 p-0 ml-1 text-gray-400 hover:text-white hover:bg-gray-800 rounded-full"
+                onClick={() => onClearWinner(match.id)}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
+        ) : (
+          canManageMatch && (
+            <div className="flex gap-1 flex-grow">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-6 text-xs flex-1 bg-gray-900 text-white border-gray-700 hover:bg-gray-800"
+                onClick={() => onSetWinner(match.id, match.creator_id)}
+              >
+                {match.creator_id} gagne
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-6 text-xs flex-1 bg-gray-900 text-white border-gray-700 hover:bg-gray-800"
+                onClick={() => onSetWinner(match.id, match.opponent_id)}
+              >
+                {match.opponent_id} gagne
+              </Button>
+            </div>
+          )
+        )}
+        <div className="flex gap-1 ml-1">
+          {match.match_image && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-6 bg-gray-900 text-white border-gray-700 hover:bg-gray-800"
+              onClick={() => onDownload(
+                match.match_image,
+                `match_${match.creator_id}_vs_${match.opponent_id}`
+              )}
+            >
+              <Download className="w-3 h-3" />
+            </Button>
+          )}
+          {canDeleteMatch && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-6 bg-gray-900 text-red-400 border-red-900/50 hover:bg-red-950/50"
+              onClick={() => onDelete(match.id)}
+            >
+              <Trash2 className="w-3 h-3" />
+            </Button>
+          )}
+        </div>
+      </div>
+
       {match.match_image && (
         <div className="w-full h-[120px] relative">
           <img
@@ -83,75 +150,6 @@ export const MatchCard = ({
             {formatDate(match.match_date)}
             <Clock className="w-3 h-3 ml-1" />
             {matchTime}
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-1 mt-auto">
-          {match.winner_id ? (
-            <div className="flex-grow bg-gray-900 shadow-sm border border-gray-800 rounded-md p-1.5 flex items-center justify-between">
-              <div className="flex items-center gap-1">
-                <Trophy className="w-4 h-4 text-yellow-500" />
-                <span className="text-xs font-medium text-white truncate">
-                  Gagnant : {match.winner_id}
-                </span>
-              </div>
-              {canManageMatch && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-5 w-5 p-0 text-gray-400 hover:text-white hover:bg-gray-800 rounded-full"
-                  onClick={() => onClearWinner(match.id)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              )}
-            </div>
-          ) : (
-            canManageMatch && (
-              <div className="flex gap-1 flex-grow">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs flex-1 bg-gray-900 text-white border-gray-700 hover:bg-gray-800"
-                  onClick={() => onSetWinner(match.id, match.creator_id)}
-                >
-                  {match.creator_id} gagne
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs flex-1 bg-gray-900 text-white border-gray-700 hover:bg-gray-800"
-                  onClick={() => onSetWinner(match.id, match.opponent_id)}
-                >
-                  {match.opponent_id} gagne
-                </Button>
-              </div>
-            )
-          )}
-          <div className="flex gap-1">
-            {match.match_image && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 bg-gray-900 text-white border-gray-700 hover:bg-gray-800"
-                onClick={() => onDownload(
-                  match.match_image,
-                  `match_${match.creator_id}_vs_${match.opponent_id}`
-                )}
-              >
-                <Download className="w-3 h-3" />
-              </Button>
-            )}
-            {canDeleteMatch && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 bg-gray-900 text-red-400 border-red-900/50 hover:bg-red-950/50"
-                onClick={() => onDelete(match.id)}
-              >
-                <Trash2 className="w-3 h-3" />
-              </Button>
-            )}
           </div>
         </div>
       </div>
