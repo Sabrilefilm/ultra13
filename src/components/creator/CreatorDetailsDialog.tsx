@@ -1,11 +1,5 @@
 
 import React, { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -39,52 +33,90 @@ export function CreatorDetailsDialog({ isOpen, onClose }: CreatorDetailsProps) {
     snapchat: "",
   });
 
+  // Ajoutons des logs pour déboguer
+  console.log("État initial du formulaire:", formData);
+
   const { data: profile, refetch } = useQuery({
     queryKey: ["creator-profile"],
     queryFn: async () => {
-      const { data: user } = await supabase.auth.getSession();
-      if (!user.session) throw new Error("Non authentifié");
+      console.log("Récupération du profil...");
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) {
+        console.log("Pas de session trouvée");
+        throw new Error("Non authentifié");
+      }
 
+      console.log("ID utilisateur:", session.session.user.id);
       const { data, error } = await supabase
         .from("creator_profiles")
         .select("*")
-        .eq("user_id", user.session.user.id)
-        .single();
+        .eq("user_id", session.session.user.id)
+        .maybeSingle();
 
-      if (error && error.code !== "PGRST116") throw error;
-      if (data) setFormData(data);
+      if (error) {
+        console.error("Erreur lors de la récupération du profil:", error);
+        throw error;
+      }
+
+      console.log("Profil récupéré:", data);
       return data;
     },
+    retry: false,
   });
 
   useEffect(() => {
     if (profile) {
+      console.log("Mise à jour du formulaire avec le profil:", profile);
       setFormData(profile);
     }
   }, [profile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Soumission du formulaire avec les données:", formData);
+
     try {
       const { data: session } = await supabase.auth.getSession();
-      if (!session.session) throw new Error("Non authentifié");
+      if (!session.session) {
+        console.log("Pas de session lors de la soumission");
+        throw new Error("Non authentifié");
+      }
 
-      const { error } = await supabase.from("creator_profiles").upsert({
+      // Créons d'abord le profil s'il n'existe pas
+      const { data: existingProfile, error: checkError } = await supabase
+        .from("creator_profiles")
+        .select("id")
+        .eq("user_id", session.session.user.id)
+        .maybeSingle();
+
+      console.log("Profil existant:", existingProfile);
+
+      const dataToUpsert = {
         user_id: session.session.user.id,
         ...formData,
         updated_at: new Date().toISOString(),
-      });
+      };
 
-      if (error) throw error;
+      console.log("Données à mettre à jour:", dataToUpsert);
+
+      const { error } = await supabase
+        .from("creator_profiles")
+        .upsert(dataToUpsert);
+
+      if (error) {
+        console.error("Erreur lors de la mise à jour:", error);
+        throw error;
+      }
 
       toast({
         title: "Succès",
         description: "Vos informations ont été mises à jour",
       });
-      
-      refetch();
+
+      await refetch();
       onClose();
     } catch (error) {
+      console.error("Erreur complète:", error);
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour vos informations",
@@ -101,7 +133,7 @@ export function CreatorDetailsDialog({ isOpen, onClose }: CreatorDetailsProps) {
             <Label htmlFor="first_name">Prénom</Label>
             <Input
               id="first_name"
-              value={formData.first_name}
+              value={formData.first_name || ""}
               onChange={e => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
               className="bg-background"
             />
@@ -110,7 +142,7 @@ export function CreatorDetailsDialog({ isOpen, onClose }: CreatorDetailsProps) {
             <Label htmlFor="last_name">Nom</Label>
             <Input
               id="last_name"
-              value={formData.last_name}
+              value={formData.last_name || ""}
               onChange={e => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
               className="bg-background"
             />
@@ -121,7 +153,7 @@ export function CreatorDetailsDialog({ isOpen, onClose }: CreatorDetailsProps) {
           <Label htmlFor="address">Adresse</Label>
           <Input
             id="address"
-            value={formData.address}
+            value={formData.address || ""}
             onChange={e => setFormData(prev => ({ ...prev, address: e.target.value }))}
             className="bg-background"
           />
@@ -131,7 +163,7 @@ export function CreatorDetailsDialog({ isOpen, onClose }: CreatorDetailsProps) {
           <Label htmlFor="id_card_number">Numéro de carte d'identité</Label>
           <Input
             id="id_card_number"
-            value={formData.id_card_number}
+            value={formData.id_card_number || ""}
             onChange={e => setFormData(prev => ({ ...prev, id_card_number: e.target.value }))}
             className="bg-background"
           />
@@ -142,7 +174,7 @@ export function CreatorDetailsDialog({ isOpen, onClose }: CreatorDetailsProps) {
           <Input
             id="email"
             type="email"
-            value={formData.email}
+            value={formData.email || ""}
             onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
             className="bg-background"
           />
@@ -152,7 +184,7 @@ export function CreatorDetailsDialog({ isOpen, onClose }: CreatorDetailsProps) {
           <Label htmlFor="paypal_address">Adresse PayPal</Label>
           <Input
             id="paypal_address"
-            value={formData.paypal_address}
+            value={formData.paypal_address || ""}
             onChange={e => setFormData(prev => ({ ...prev, paypal_address: e.target.value }))}
             className="bg-background"
           />
@@ -162,7 +194,7 @@ export function CreatorDetailsDialog({ isOpen, onClose }: CreatorDetailsProps) {
           <Label htmlFor="snapchat">Snapchat</Label>
           <Input
             id="snapchat"
-            value={formData.snapchat}
+            value={formData.snapchat || ""}
             onChange={e => setFormData(prev => ({ ...prev, snapchat: e.target.value }))}
             className="bg-background"
           />
