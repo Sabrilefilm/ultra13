@@ -27,8 +27,11 @@ export const MatchCard = ({
   const isMatchOff = match.status === 'off';
   const showRequirements = ['agent', 'manager', 'creator'].includes(role);
 
-  console.log("Current role in MatchCard:", role);
-  console.log("Should show requirements:", showRequirements);
+  // Format de l'heure
+  const matchTime = new Date(match.match_date).toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 
   return (
     <div 
@@ -75,84 +78,85 @@ export const MatchCard = ({
             Match Off
           </div>
         )}
-        {match.source && (
-          <div className="inline-flex items-center justify-start px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium">
-            Source: {match.source}
-          </div>
-        )}
+        <div className="inline-flex items-center justify-start px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium">
+          TikTok
+        </div>
       </div>
-      <div className="flex justify-between items-center relative">
-        <div className="flex items-center gap-4">
+      <div className="mt-auto">
+        <div className="flex justify-between items-end">
           <div>
             <p className="font-medium text-black">{match.creator_id} vs {match.opponent_id}</p>
-            <p className="text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Calendar className="w-4 h-4" />
               {formatDate(match.match_date)}
-            </p>
+              <Clock className="w-4 h-4 ml-2" />
+              {matchTime}
+            </div>
           </div>
-          {match.winner_id && (
-            <div className="animate-fade-in bg-white shadow-lg border text-black px-4 py-2 rounded-full inline-flex items-center gap-2 font-bold">
-              <Trophy className="w-5 h-5 text-yellow-500" />
-              <span className="text-sm text-black">
-                Gagnant : {match.winner_id}
-              </span>
-              {canManageMatch && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="ml-2 h-6 w-6 p-0 text-gray-600 hover:text-black"
-                  onClick={() => onClearWinner(match.id)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="text-sm font-medium text-black">{match.platform}</div>
-          {!match.winner_id && canManageMatch && (
-            <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            {match.winner_id ? (
+              <div className="animate-fade-in bg-white shadow-lg border text-black px-4 py-2 rounded-full inline-flex items-center gap-2 font-bold">
+                <Trophy className="w-5 h-5 text-yellow-500" />
+                <span className="text-sm text-black">
+                  Gagnant : {match.winner_id}
+                </span>
+                {canManageMatch && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-2 h-6 w-6 p-0 text-gray-600 hover:text-black"
+                    onClick={() => onClearWinner(match.id)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ) : (
+              canManageMatch && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-black border-gray-300 hover:bg-gray-100 hover:text-black"
+                    onClick={() => onSetWinner(match.id, match.creator_id)}
+                  >
+                    {match.creator_id} gagne
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-black border-gray-300 hover:bg-gray-100 hover:text-black"
+                    onClick={() => onSetWinner(match.id, match.opponent_id)}
+                  >
+                    {match.opponent_id} gagne
+                  </Button>
+                </div>
+              )
+            )}
+            {match.match_image && (
               <Button
                 variant="outline"
                 size="sm"
                 className="text-black border-gray-300 hover:bg-gray-100 hover:text-black"
-                onClick={() => onSetWinner(match.id, match.creator_id)}
+                onClick={() => onDownload(
+                  match.match_image,
+                  `match_${match.creator_id}_vs_${match.opponent_id}`
+                )}
               >
-                {match.creator_id} gagne
+                <Download className="w-4 h-4 mr-2" />
+                Télécharger
               </Button>
+            )}
+            {canDeleteMatch && (
               <Button
-                variant="outline"
+                variant="destructive"
                 size="sm"
-                className="text-black border-gray-300 hover:bg-gray-100 hover:text-black"
-                onClick={() => onSetWinner(match.id, match.opponent_id)}
+                onClick={() => onDelete(match.id)}
               >
-                {match.opponent_id} gagne
+                <Trash2 className="w-4 h-4" />
               </Button>
-            </div>
-          )}
-          {match.match_image && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-black border-gray-300 hover:bg-gray-100 hover:text-black"
-              onClick={() => onDownload(
-                match.match_image,
-                `match_${match.creator_id}_vs_${match.opponent_id}`
-              )}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Télécharger
-            </Button>
-          )}
-          {canDeleteMatch && (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => onDelete(match.id)}
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

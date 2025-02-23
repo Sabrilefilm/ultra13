@@ -17,7 +17,6 @@ export const ScheduleMatchDialog = ({ isOpen, onClose }: ScheduleMatchDialogProp
   const [creator2, setCreator2] = useState("");
   const [matchDate, setMatchDate] = useState("");
   const [matchTime, setMatchTime] = useState("");
-  const [source, setSource] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -61,7 +60,7 @@ export const ScheduleMatchDialog = ({ isOpen, onClose }: ScheduleMatchDialogProp
         match_date: matchDateTime.toISOString(),
         match_image: matchImage,
         status: 'scheduled',
-        source: source
+        source: 'TikTok'
       });
 
       if (error) throw error;
@@ -76,7 +75,6 @@ export const ScheduleMatchDialog = ({ isOpen, onClose }: ScheduleMatchDialogProp
       setCreator2("");
       setMatchDate("");
       setMatchTime("");
-      setSource("");
     } catch (error) {
       console.error("Erreur lors de la programmation du match:", error);
       toast({
@@ -93,7 +91,7 @@ export const ScheduleMatchDialog = ({ isOpen, onClose }: ScheduleMatchDialogProp
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Programmer un match</DialogTitle>
+          <DialogTitle>Programmer un match TikTok</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -114,15 +112,6 @@ export const ScheduleMatchDialog = ({ isOpen, onClose }: ScheduleMatchDialogProp
               onChange={(e) => setCreator2(e.target.value)}
               placeholder="ex: TEST_123"
               required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="source">Source du match</Label>
-            <Input
-              id="source"
-              value={source}
-              onChange={(e) => setSource(e.target.value)}
-              placeholder="ex: Instagram, TikTok, etc."
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
