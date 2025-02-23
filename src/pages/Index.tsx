@@ -79,8 +79,8 @@ const Index = () => {
             />
           )}
 
-          <RoleStats role={role || ''} />
-          <RewardsPanel role={role || ''} userId={username === "Sabri" ? "founder" : username} />
+          <RoleStats role={role || ''} userId={username} />
+          <RewardsPanel role={role || ''} userId={username} />
 
           <ModalManager
             isCreateAccountModalOpen={isCreateAccountModalOpen}
