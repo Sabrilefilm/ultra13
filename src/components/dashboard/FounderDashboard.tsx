@@ -27,7 +27,7 @@ export const FounderDashboard = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Button
           variant="outline"
-          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5"
+          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
           onClick={onCreateAccount}
         >
           <div className="flex items-center gap-2">
@@ -41,7 +41,7 @@ export const FounderDashboard = ({
 
         <Button
           variant="outline"
-          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5"
+          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
           onClick={onConfigureRewards}
         >
           <div className="flex items-center gap-2">
@@ -55,7 +55,7 @@ export const FounderDashboard = ({
 
         <Button
           variant="outline"
-          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5"
+          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
           onClick={() => window.location.href = '/accounts'}
         >
           <div className="flex items-center gap-2">
@@ -69,7 +69,7 @@ export const FounderDashboard = ({
 
         <Button
           variant="outline"
-          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5"
+          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
           onClick={() => onOpenLiveSchedule(username)}
         >
           <div className="flex items-center gap-2">
@@ -84,3 +84,4 @@ export const FounderDashboard = ({
     </div>
   );
 };
+
