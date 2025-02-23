@@ -3,12 +3,78 @@ import { Award, Clock, Diamond, Gift, Settings, Users } from "lucide-react";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { StatsCard } from "@/components/StatsCard";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
+  const { toast } = useToast();
+
+  const handleLogin = () => {
+    if (password === "Marseille@13011") {
+      setIsAuthenticated(true);
+      toast({
+        title: "Connexion réussie",
+        description: "Bienvenue dans le panneau d'administration",
+      });
+    } else {
+      toast({
+        title: "Erreur",
+        description: "Mot de passe incorrect",
+        variant: "destructive",
+      });
+      setPassword("");
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4 flex items-center justify-center">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold">Espace Fondateurs</h2>
+            <p className="text-sm text-muted-foreground mt-2">
+              Veuillez vous authentifier pour accéder au panneau d'administration
+            </p>
+          </div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="Mot de passe"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleLogin()}
+                className="w-full"
+              />
+            </div>
+            <Button
+              className="w-full"
+              onClick={handleLogin}
+            >
+              Accéder au panneau d'administration
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
-        <ProfileHeader username="Fondateur" handle="@Admin" />
+        <div className="flex justify-between items-center">
+          <ProfileHeader username="Fondateur" handle="@Admin" />
+          <Button 
+            variant="outline" 
+            onClick={() => setIsAuthenticated(false)}
+            className="ml-4"
+          >
+            Déconnexion
+          </Button>
+        </div>
         
         <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
           <div className="flex items-center justify-between mb-6">
