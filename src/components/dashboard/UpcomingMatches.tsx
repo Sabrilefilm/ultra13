@@ -6,6 +6,7 @@ import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Download, Trash2, Trophy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import confetti from 'canvas-confetti';
 
 export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: string }) => {
   const { toast } = useToast();
@@ -19,7 +20,6 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
         .select('*')
         .order('match_date', { ascending: true });
 
-      // Si ce n'est pas le fondateur, filtrer par creator_id
       if (role !== 'founder') {
         query = query.eq('creator_id', creatorId);
       }
@@ -88,6 +88,13 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
 
       if (error) throw error;
 
+      // Lancer les confettis
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+
       toast({
         title: "Gagnant défini",
         description: "Le gagnant du match a été enregistré avec succès",
@@ -139,9 +146,9 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
                       {formatDate(match.match_date)}
                     </p>
                     {match.winner_id && (
-                      <div className="mt-2 bg-yellow-500 text-white px-3 py-1 rounded-full inline-flex items-center gap-2">
-                        <Trophy className="w-4 h-4" />
-                        <span className="text-sm font-medium">
+                      <div className="mt-2 animate-fade-in bg-yellow-500/90 backdrop-blur-sm shadow-lg text-yellow-950 px-4 py-2 rounded-full inline-flex items-center gap-2 font-bold">
+                        <Trophy className="w-5 h-5" />
+                        <span className="text-sm">
                           Gagnant : {match.winner_id}
                         </span>
                       </div>
@@ -180,7 +187,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
                         Télécharger
                       </Button>
                     )}
-                    {role === 'founder' && ( // Seul le fondateur peut supprimer
+                    {role === 'founder' && (
                       <Button
                         variant="destructive"
                         size="sm"
