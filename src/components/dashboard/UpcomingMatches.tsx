@@ -59,8 +59,8 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
         description: "Le match a été supprimé avec succès",
       });
 
-      // Rafraîchir la liste des matchs
-      queryClient.invalidateQueries(['upcoming-matches']);
+      // Rafraîchir la liste des matchs avec le bon format pour React Query v5
+      queryClient.invalidateQueries({ queryKey: ['upcoming-matches', creatorId] });
     } catch (error) {
       console.error("Erreur lors de la suppression:", error);
       toast({
