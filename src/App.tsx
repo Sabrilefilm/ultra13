@@ -21,7 +21,7 @@ const ThemeToggle = () => {
     <Button
       variant="outline"
       size="icon"
-      className="fixed top-4 right-4 rounded-full w-12 h-12 bg-background/50 backdrop-blur-sm border border-border/50 z-50 animate-colors"
+      className="fixed bottom-4 right-4 rounded-full w-12 h-12 bg-background/50 backdrop-blur-sm border border-border/50 z-50"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
     >
       <Sun className="h-6 w-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -31,12 +31,22 @@ const ThemeToggle = () => {
   );
 };
 
+const Logo = () => (
+  <div className="fixed bottom-4 right-20 opacity-50 z-50">
+    <div className="flex items-center gap-2">
+      <span className="font-bold text-lg">
+        <span className="text-[#403E43]">Phocéen</span>
+        <span className="text-[#0EA5E9]">Agency</span>
+      </span>
+    </div>
+  </div>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="dark" storageKey="ultra-theme">
       <TooltipProvider>
         <div className="min-h-screen bg-background text-foreground">
-          <ThemeToggle />
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -46,6 +56,8 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
+          <Logo />
+          <ThemeToggle />
         </div>
       </TooltipProvider>
     </ThemeProvider>
