@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 type Role = 'creator' | 'manager' | 'founder';
 
@@ -30,6 +31,73 @@ const Index = () => {
         variant: "destructive",
       });
       setPassword("");
+    }
+  };
+
+  const handleCreateAccount = async (role: 'creator' | 'manager', username: string, managerId?: string) => {
+    try {
+      const { data: user, error: authError } = await supabase.auth.signUp({
+        email: `${username}@example.com`,
+        password: "password123", // Vous devriez générer un mot de passe aléatoire sécurisé
+        options: {
+          data: {
+            role: role
+          }
+        }
+      });
+
+      if (authError) throw authError;
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: user.user?.id,
+            username,
+            role,
+            manager_id: managerId
+          }
+        ]);
+
+      if (profileError) throw profileError;
+
+      toast({
+        title: "Compte créé",
+        description: `Le compte ${role} a été créé avec succès`,
+      });
+    } catch (error) {
+      console.error('Error creating account:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer le compte",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateSettings = async (diamondValue: number, minimumPayout: number) => {
+    try {
+      const { error } = await supabase
+        .from('platform_settings')
+        .update({
+          diamond_value: diamondValue,
+          minimum_payout: minimumPayout
+        })
+        .eq('id', 1);
+
+      if (error) throw error;
+
+      toast({
+        title: "Paramètres mis à jour",
+        description: "Les paramètres ont été mis à jour avec succès",
+      });
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour les paramètres",
+        variant: "destructive",
+      });
     }
   };
 
@@ -107,6 +175,13 @@ const Index = () => {
                 <Button
                   variant="outline"
                   className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5"
+                  onClick={() => {
+                    // Ouvrir modal de création de compte
+                    toast({
+                      title: "Création de compte",
+                      description: "Cette fonctionnalité sera bientôt disponible",
+                    });
+                  }}
                 >
                   <div className="flex items-center gap-2">
                     <Users className="w-5 h-5 text-primary" />
@@ -120,6 +195,13 @@ const Index = () => {
                 <Button
                   variant="outline"
                   className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5"
+                  onClick={() => {
+                    // Ouvrir modal de configuration des récompenses
+                    toast({
+                      title: "Configuration des récompenses",
+                      description: "Cette fonctionnalité sera bientôt disponible",
+                    });
+                  }}
                 >
                   <div className="flex items-center gap-2">
                     <Diamond className="w-5 h-5 text-primary" />
