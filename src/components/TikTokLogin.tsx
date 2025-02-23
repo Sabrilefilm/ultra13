@@ -1,13 +1,8 @@
 
 import { Button } from "@/components/ui/button";
-import { createClient } from '@supabase/supabase-js';
-import { Share2 } from "lucide-react"; // On utilise Share2 à la place de TikTok
+import { Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+import { supabase } from "@/lib/supabase";
 
 export const TikTokLogin = () => {
   const { toast } = useToast();
@@ -15,7 +10,7 @@ export const TikTokLogin = () => {
   const handleTikTokLogin = async () => {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'twitter', // On utilise twitter comme provider temporairement
+        provider: 'twitter',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`
         }
