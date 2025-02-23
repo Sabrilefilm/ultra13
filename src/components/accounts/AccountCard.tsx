@@ -2,7 +2,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, Eye, EyeOff, Diamond, Calendar, Clock, Info } from "lucide-react";
+import { Trash2, Eye, EyeOff, Diamond, Calendar, Clock } from "lucide-react";
 import { Account } from "@/types/accounts";
 
 interface AccountCardProps {
@@ -28,7 +28,23 @@ export const AccountCard = ({
               {account.role === 'creator' ? 'Créateur' : account.role}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
+            {account.role === 'creator' && (
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Diamond className="h-4 w-4" />
+                  <span>{account.profile?.total_diamonds || 0} diamants</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span>{account.profile?.days_streamed || 0} Jours</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <span>{account.profile?.total_live_hours || 0}h de live</span>
+                </div>
+              </div>
+            )}
             <Button
               variant="ghost"
               size="sm"
@@ -54,33 +70,6 @@ export const AccountCard = ({
             </Button>
           </div>
         </div>
-        
-        {account.role === 'creator' && (
-          <div className="border-t pt-4">
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Diamond className="h-4 w-4" />
-                <span>{account.profile?.total_diamonds || 0} diamants</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>{account.profile?.days_streamed || 0} Jours</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                <span>{account.profile?.total_live_hours || 0}h de live</span>
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-4 w-full text-sm bg-secondary/30 hover:bg-secondary/50 backdrop-blur-sm border-secondary/50"
-            >
-              <Info className="h-4 w-4 mr-2" />
-              Plus d'informations
-            </Button>
-          </div>
-        )}
       </div>
     </Card>
   );
