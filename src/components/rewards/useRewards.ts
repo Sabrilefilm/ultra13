@@ -14,9 +14,9 @@ export function useRewards(role: string, userId: string) {
   return useQuery({
     queryKey: ["rewards", userId, role],
     queryFn: async () => {
-      // Pour le fondateur, récupérer toutes les récompenses
-      // Pour les créateurs, filtrer par leur ID
-      let query = supabase
+      // Pour les fondateurs et managers, récupérer toutes les récompenses
+      // Pour les créateurs, filtrer par leur username
+      const query = supabase
         .from("creator_rewards")
         .select(`
           *,
@@ -25,10 +25,6 @@ export function useRewards(role: string, userId: string) {
           )
         `)
         .order("created_at", { ascending: false });
-
-      if (role === "creator") {
-        query = query.eq("creator_id", userId);
-      }
 
       const { data, error } = await query;
       
@@ -42,5 +38,7 @@ export function useRewards(role: string, userId: string) {
         creator_username: reward.creator?.username || reward.creator_id
       }));
     },
+    // Rafraîchir les données toutes les 30 secondes
+    refetchInterval: 30000,
   });
 }
