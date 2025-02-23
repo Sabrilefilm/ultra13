@@ -480,24 +480,29 @@ const Index = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4 flex items-center justify-center">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center space-y-4">
-            <div className="flex items-center justify-center gap-2">
-              <Rocket className="w-8 h-8 text-primary animate-pulse" />
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+      <div className="min-h-screen bg-[#1A1F2C] text-white p-4 flex flex-col items-center justify-center">
+        <div className="w-full max-w-[450px] mx-auto space-y-8">
+          <div className="text-center space-y-6">
+            <div className="flex items-center justify-center gap-3">
+              <Rocket className="w-10 h-10 text-primary animate-pulse" />
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                 ULTRA
               </h1>
             </div>
-            <h2 className="text-2xl font-bold">Votre Espace de Connexion</h2>
-            <p className="text-sm text-muted-foreground">
-              Connectez-vous pour accéder à vos données statistiques et votre tableau de bord
-            </p>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-semibold text-white/90">Votre Espace de Connexion</h2>
+              <p className="text-sm text-white/60">
+                Connectez-vous pour accéder à vos données statistiques
+              </p>
+            </div>
           </div>
-          <div className="space-y-4">
+
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 space-y-6 shadow-xl border border-white/10">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Identifiant</Label>
+                <Label htmlFor="username" className="text-white/90">
+                  Identifiant
+                </Label>
                 <Input
                   id="username"
                   type="text"
@@ -505,11 +510,13 @@ const Index = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleLogin()}
-                  className="w-full"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Mot de passe</Label>
+                <Label htmlFor="password" className="text-white/90">
+                  Mot de passe
+                </Label>
                 <Input
                   id="password"
                   type="password"
@@ -517,30 +524,38 @@ const Index = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleLogin()}
-                  className="w-full"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
                 />
               </div>
               <Button
                 variant="link"
-                className="text-sm text-muted-foreground hover:text-primary p-0"
+                className="text-sm text-white/60 hover:text-primary p-0"
                 onClick={() => setIsForgotPasswordModalOpen(true)}
               >
                 Mot de passe oublié ?
               </Button>
             </div>
-            <Button
-              className="w-full"
-              onClick={handleLogin}
-            >
-              Se connecter
-            </Button>
-          </div>
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">
-              Une plateforme pour gérer vos performances
-            </p>
+
+            <div className="space-y-4">
+              <Button
+                className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-6"
+                onClick={handleLogin}
+              >
+                Se connecter
+              </Button>
+              <p className="text-sm text-center text-white/40">
+                Une plateforme sécurisée pour gérer vos performances
+              </p>
+            </div>
           </div>
         </div>
+
+        <div className="fixed bottom-4 flex gap-4 text-sm text-white/40">
+          <button className="hover:text-white/60">Aide</button>
+          <button className="hover:text-white/60">Confidentialité</button>
+          <button className="hover:text-white/60">Conditions</button>
+        </div>
+
         <ForgotPasswordModal
           isOpen={isForgotPasswordModalOpen}
           onClose={() => setIsForgotPasswordModalOpen(false)}
