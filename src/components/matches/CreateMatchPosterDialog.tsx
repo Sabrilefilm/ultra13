@@ -15,11 +15,15 @@ interface CreateMatchPosterDialogProps {
 }
 
 type MatchType = 'OFF' | 'ANNIVERSAIRE';
+type BackgroundTheme = 'GAMING' | 'SPORT' | 'ABSTRACT' | 'NEON';
 
 export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDialogProps) => {
   const [player1Name, setPlayer1Name] = useState("");
   const [player2Name, setPlayer2Name] = useState("");
+  const [player1ImageUrl, setPlayer1ImageUrl] = useState("");
+  const [player2ImageUrl, setPlayer2ImageUrl] = useState("");
   const [matchType, setMatchType] = useState<MatchType>("OFF");
+  const [backgroundTheme, setBackgroundTheme] = useState<BackgroundTheme>("GAMING");
   const [matchDate, setMatchDate] = useState("");
   const [matchTime, setMatchTime] = useState("");
   const [width] = useState("1080");
@@ -29,7 +33,7 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
     try {
       const { data: { generatedText }, error } = await supabase.functions.invoke('generate-match-poster', {
         body: {
-          prompt: `Create a professional e-sports tournament poster featuring two players facing off. The poster should show "${player1Name}" on the left vs "${player2Name}" on the right. Include the text "${matchType} MATCH" prominently at the top. Display the date "${matchDate}" and time "${matchTime}" in the middle. Add "Phocéen Agency" at the bottom. Use a dynamic, modern gaming style with high contrast and engaging visual effects. Make it look professional and impressive.`
+          prompt: `Create a professional e-sports tournament poster with a ${backgroundTheme.toLowerCase()} theme background. The poster should show "${player1Name}" (using the profile image from ${player1ImageUrl}) on the left vs "${player2Name}" (using the profile image from ${player2ImageUrl}) on the right. Include the text "${matchType} MATCH" prominently at the top. Display the date "${matchDate}" and time "${matchTime}" in the middle. Add "Phocéen Agency" at the bottom. Use a dynamic, modern style with high contrast and engaging visual effects. Make it look professional and impressive.`
         }
       });
 
@@ -84,22 +88,54 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="player1Name">Nom du joueur 1</Label>
+            <Label htmlFor="backgroundTheme">Thème de l'arrière-plan</Label>
+            <Select 
+              value={backgroundTheme} 
+              onValueChange={(value: BackgroundTheme) => setBackgroundTheme(value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner le thème" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="GAMING">Gaming</SelectItem>
+                <SelectItem value="SPORT">Sport</SelectItem>
+                <SelectItem value="ABSTRACT">Abstrait</SelectItem>
+                <SelectItem value="NEON">Néon</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="player1Name">Joueur 1</Label>
             <Input
               id="player1Name"
-              placeholder="ex: SABRI_AMD"
+              placeholder="Nom du joueur 1 (ex: SABRI_AMD)"
               value={player1Name}
               onChange={(e) => setPlayer1Name(e.target.value)}
+            />
+            <Input
+              id="player1ImageUrl"
+              placeholder="URL de la photo de profil du joueur 1"
+              value={player1ImageUrl}
+              onChange={(e) => setPlayer1ImageUrl(e.target.value)}
+              className="mt-2"
             />
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="player2Name">Nom du joueur 2</Label>
+            <Label htmlFor="player2Name">Joueur 2</Label>
             <Input
               id="player2Name"
-              placeholder="ex: TEST_123"
+              placeholder="Nom du joueur 2 (ex: TEST_123)"
               value={player2Name}
               onChange={(e) => setPlayer2Name(e.target.value)}
+            />
+            <Input
+              id="player2ImageUrl"
+              placeholder="URL de la photo de profil du joueur 2"
+              value={player2ImageUrl}
+              onChange={(e) => setPlayer2ImageUrl(e.target.value)}
+              className="mt-2"
             />
           </div>
 
