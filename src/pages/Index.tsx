@@ -490,7 +490,7 @@ const Index = () => {
                   ULTRA
                 </h1>
               </div>
-              <p className="agency-text text-lg bg-gradient-to-br from-white via-[#38bdf8] to-[#0ea5e9] bg-clip-text text-transparent mt-1">
+              <p className="agency-text text-lg bg-gradient-to-br from-white via-[#38bdf8] to-[#0ea5e9] bg-clip-text text-transparent mt-3 mb-2">
                 by Agency Phocéen
               </p>
             </div>
