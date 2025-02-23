@@ -90,33 +90,17 @@ const Index = () => {
     }
   };
 
-  const handleCreateAccount = async (role: 'creator' | 'manager', username: string, password: string) => {
-    try {
-      const { error } = await supabase
-        .from('user_accounts')
-        .insert([{ username, password, role }]);
-
-      if (error) throw error;
-
-      toast({
-        title: "Compte créé",
-        description: `Le compte ${role} a été créé avec succès`,
-        duration: 60000,
-      });
-    } catch (error) {
-      console.error('Error creating account:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de créer le compte",
-        variant: "destructive",
-        duration: 60000,
-      });
-      throw error;
-    }
+  const playNotificationSound = () => {
+    const audio = new Audio('/notification.mp3');
+    audio.volume = 0.5; // Set volume to 50%
+    audio.play().catch(error => {
+      console.error('Error playing notification sound:', error);
+    });
   };
 
   const handleLogin = async (username: string, password: string) => {
     if (!username) {
+      playNotificationSound();
       toast({
         title: "Erreur",
         description: "Veuillez saisir un identifiant",
@@ -131,6 +115,7 @@ const Index = () => {
         setRole('founder');
         setUsername(username);
         setIsAuthenticated(true);
+        playNotificationSound();
         toast({
           title: "Connexion réussie",
           description: "Bienvenue dans l'espace Fondateur",
@@ -151,6 +136,7 @@ const Index = () => {
           setRole(data.role as Role);
           setUsername(username);
           setIsAuthenticated(true);
+          playNotificationSound();
           toast({
             title: "Connexion réussie",
             description: `Bienvenue dans votre espace ${data.role}`,
@@ -161,12 +147,40 @@ const Index = () => {
         }
       }
     } catch (error) {
+      playNotificationSound();
       toast({
         title: "Erreur",
         description: "Identifiant ou mot de passe incorrect",
         variant: "destructive",
         duration: 60000,
       });
+    }
+  };
+
+  const handleCreateAccount = async (role: 'creator' | 'manager', username: string, password: string) => {
+    try {
+      const { error } = await supabase
+        .from('user_accounts')
+        .insert([{ username, password, role }]);
+
+      if (error) throw error;
+
+      playNotificationSound();
+      toast({
+        title: "Compte créé",
+        description: `Le compte ${role} a été créé avec succès`,
+        duration: 60000,
+      });
+    } catch (error) {
+      console.error('Error creating account:', error);
+      playNotificationSound();
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer le compte",
+        variant: "destructive",
+        duration: 60000,
+      });
+      throw error;
     }
   };
 
@@ -187,6 +201,7 @@ const Index = () => {
         minimumPayout,
       });
 
+      playNotificationSound();
       toast({
         title: "Paramètres mis à jour",
         description: "Les paramètres ont été mis à jour avec succès",
@@ -194,6 +209,7 @@ const Index = () => {
       });
     } catch (error) {
       console.error('Error updating settings:', error);
+      playNotificationSound();
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour les paramètres",
