@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Plus, FileText, Handshake } from "lucide-react";
+import { Plus, FileText, Handshake, TikTok } from "lucide-react";
 
 interface CreatorDashboardProps {
   onOpenSponsorshipForm: () => void;
@@ -98,6 +98,7 @@ export function CreatorDashboard({
                 rel="noopener noreferrer"
                 className="border-purple-600 text-purple-400 hover:bg-purple-600 hover:text-white transition-colors"
               >
+                <TikTok className="h-6 w-6" />
                 <span>Backstage</span>
               </a>
             </Button>
