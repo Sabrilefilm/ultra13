@@ -42,6 +42,71 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_settings: {
+        Row: {
+          created_at: string
+          diamond_value: number
+          id: string
+          minimum_payout: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          diamond_value?: number
+          id?: string
+          minimum_payout?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          diamond_value?: number
+          id?: string
+          minimum_payout?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          manager_id: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          total_diamonds: number | null
+          total_viewing_time: number | null
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          manager_id?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          total_diamonds?: number | null
+          total_viewing_time?: number | null
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          manager_id?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          total_diamonds?: number | null
+          total_viewing_time?: number | null
+          updated_at?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -50,7 +115,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "creator" | "manager" | "founder"
     }
     CompositeTypes: {
       [_ in never]: never
