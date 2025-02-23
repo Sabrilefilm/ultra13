@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Download, Trash2, Trophy } from "lucide-react";
+import { Download, Trash2, Trophy, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import confetti from 'canvas-confetti';
 
@@ -88,7 +88,6 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
 
       if (error) throw error;
 
-      // Lancer les confettis
       confetti({
         particleCount: 100,
         spread: 70,
@@ -111,6 +110,34 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
     }
   };
 
+  const clearWinner = async (matchId: string) => {
+    try {
+      const { error } = await supabase
+        .from('upcoming_matches')
+        .update({
+          winner_id: null,
+          status: 'scheduled'
+        })
+        .eq('id', matchId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Gagnant effacé",
+        description: "Le gagnant du match a été effacé avec succès",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['upcoming-matches', creatorId] });
+    } catch (error) {
+      console.error("Erreur lors de l'effacement du gagnant:", error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'effacement du gagnant",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) return <div>Chargement des matchs...</div>;
 
   const canManageMatch = role === 'founder' || role === 'manager';
@@ -127,7 +154,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
               <div 
                 key={match.id} 
                 className={`flex flex-col space-y-4 p-4 border rounded-lg transition-all duration-300 ${
-                  match.winner_id ? 'bg-gradient-to-r from-yellow-100 to-yellow-50 dark:from-yellow-900/20 dark:to-yellow-800/20' : ''
+                  match.winner_id ? 'bg-gradient-to-r from-white to-gray-50 dark:from-gray-900/20 dark:to-gray-800/20' : ''
                 }`}
               >
                 {match.match_image && (
@@ -140,17 +167,29 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
                   </div>
                 )}
                 <div className="flex justify-between items-center relative">
-                  <div>
-                    <p className="font-medium">{match.creator_id} vs {match.opponent_id}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDate(match.match_date)}
-                    </p>
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <p className="font-medium">{match.creator_id} vs {match.opponent_id}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatDate(match.match_date)}
+                      </p>
+                    </div>
                     {match.winner_id && (
-                      <div className="mt-2 animate-fade-in bg-yellow-500/90 backdrop-blur-sm shadow-lg text-yellow-950 px-4 py-2 rounded-full inline-flex items-center gap-2 font-bold">
-                        <Trophy className="w-5 h-5" />
+                      <div className="animate-fade-in bg-white dark:bg-gray-800 shadow-lg border text-black dark:text-white px-4 py-2 rounded-full inline-flex items-center gap-2 font-bold">
+                        <Trophy className="w-5 h-5 text-yellow-500" />
                         <span className="text-sm">
                           Gagnant : {match.winner_id}
                         </span>
+                        {canManageMatch && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="ml-2 h-6 w-6 p-0"
+                            onClick={() => clearWinner(match.id)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     )}
                   </div>
