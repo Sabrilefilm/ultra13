@@ -2,7 +2,11 @@
 import { Button } from "@/components/ui/button";
 import { WhatsappLogo } from "phosphor-react";
 
-export const Footer = () => {
+interface FooterProps {
+  role?: string;
+}
+
+export const Footer = ({ role }: FooterProps) => {
   return (
     <footer className="w-full bg-[#1A1F2C] border-t border-gray-800 mt-auto py-4">
       <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -22,19 +26,21 @@ export const Footer = () => {
             phoceenagency.fr
           </a>
 
-          <Button 
-            variant="outline" 
-            asChild
-            className="border-purple-600 text-purple-400 hover:bg-purple-600 hover:text-white transition-colors"
-          >
-            <a 
-              href="https://live-backstage.tiktok.com/" 
-              target="_blank" 
-              rel="noopener noreferrer"
+          {role === 'agent' && (
+            <Button 
+              variant="outline" 
+              asChild
+              className="border-purple-600 text-purple-400 hover:bg-purple-600 hover:text-white transition-colors"
             >
-              Backstage
-            </a>
-          </Button>
+              <a 
+                href="https://live-backstage.tiktok.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                Backstage
+              </a>
+            </Button>
+          )}
           
           <Button 
             variant="outline" 

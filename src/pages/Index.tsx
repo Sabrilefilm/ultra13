@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ProfileHeader } from "@/components/ProfileHeader";
@@ -114,7 +113,7 @@ const Index = () => {
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer role={role || ''} />
     </div>
   );
 }
