@@ -1,5 +1,5 @@
 
-import { Settings, Users, Diamond } from "lucide-react";
+import { Settings, Users, Diamond, Gamepad } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -8,6 +8,7 @@ interface FounderDashboardProps {
   onConfigureRewards: () => void;
   onOpenLiveSchedule: (creatorId: string) => void;
   onOpenSponsorships: () => void;
+  onScheduleMatch: () => void;
   username: string;
 }
 
@@ -16,6 +17,7 @@ export const FounderDashboard = ({
   onConfigureRewards,
   onOpenLiveSchedule,
   onOpenSponsorships,
+  onScheduleMatch,
   username
 }: FounderDashboardProps) => {
   const navigate = useNavigate();
@@ -41,6 +43,20 @@ export const FounderDashboard = ({
           </div>
           <p className="text-sm text-muted-foreground text-left">
             Créer et gérer les comptes (Créateurs, Managers)
+          </p>
+        </Button>
+
+        <Button
+          variant="outline"
+          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
+          onClick={onScheduleMatch}
+        >
+          <div className="flex items-center gap-2">
+            <Gamepad className="w-5 h-5 text-primary" />
+            <span className="font-semibold">Programmer un Match</span>
+          </div>
+          <p className="text-sm text-muted-foreground text-left">
+            Créer un nouveau match entre créateurs
           </p>
         </Button>
 

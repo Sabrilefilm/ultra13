@@ -24,6 +24,8 @@ interface ModalManagerProps {
   handleUpdateSettings: (diamondValue: number, minimumPayout: number) => Promise<void>;
   username: string;
   role: string;
+  isScheduleMatchModalOpen: boolean;
+  setIsScheduleMatchModalOpen: (value: boolean) => void;
 }
 
 export const ModalManager = ({
@@ -43,6 +45,8 @@ export const ModalManager = ({
   handleUpdateSettings,
   username,
   role,
+  isScheduleMatchModalOpen,
+  setIsScheduleMatchModalOpen,
 }: ModalManagerProps) => {
   return (
     <>
@@ -89,8 +93,8 @@ export const ModalManager = ({
       />
 
       <ScheduleMatchDialog
-        isOpen={isCreateAccountModalOpen}
-        onClose={() => setIsCreateAccountModalOpen(false)}
+        isOpen={isScheduleMatchModalOpen}
+        onClose={() => setIsScheduleMatchModalOpen(false)}
       />
     </>
   );

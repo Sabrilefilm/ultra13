@@ -23,6 +23,7 @@ const Index = () => {
   const [isRewardSettingsModalOpen, setIsRewardSettingsModalOpen] = useState(false);
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
   const [isLiveScheduleModalOpen, setIsLiveScheduleModalOpen] = useState(false);
+  const [isScheduleMatchModalOpen, setIsScheduleMatchModalOpen] = useState(false);
   const [selectedCreatorId, setSelectedCreatorId] = useState<string>("");
   const [isSponsorshipModalOpen, setIsSponsorshipModalOpen] = useState(false);
   const [showSponsorshipList, setShowSponsorshipList] = useState(false);
@@ -69,6 +70,7 @@ const Index = () => {
                 setSelectedCreatorId(creatorId);
                 setIsLiveScheduleModalOpen(true);
               }}
+              onScheduleMatch={() => setIsScheduleMatchModalOpen(true)}
               onOpenSponsorships={() => setShowSponsorshipList(true)}
               username={username}
             />
@@ -103,6 +105,8 @@ const Index = () => {
             handleUpdateSettings={handleUpdateSettings}
             username={username}
             role={role || ''}
+            isScheduleMatchModalOpen={isScheduleMatchModalOpen}
+            setIsScheduleMatchModalOpen={setIsScheduleMatchModalOpen}
           />
         </div>
       </div>
