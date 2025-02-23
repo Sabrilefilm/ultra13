@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { useIndexAuth } from "@/hooks/use-index-auth";
@@ -69,16 +68,13 @@ function Index() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 py-32">
-        <div className="container px-4 md:px-6">
+      <div className="min-h-screen">
+        <div className="container px-4 md:px-6 py-32">
           <div className="flex flex-col items-center space-y-8">
             <div className="text-center space-y-2">
               <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                Bienvenue sur Index
+                ULTRA
               </h1>
-              <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed">
-                Connectez-vous pour accéder à votre espace
-              </p>
             </div>
             <div className="w-full max-w-sm space-y-4">
               <LoginForm 
