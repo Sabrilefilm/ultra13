@@ -75,3 +75,25 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes color-cycle {
+  0% {
+    border-color: rgb(139, 92, 246); /* violet */
+  }
+  33% {
+    border-color: rgb(59, 130, 246); /* blue */
+  }
+  66% {
+    border-color: rgb(239, 68, 68); /* red */
+  }
+  100% {
+    border-color: rgb(139, 92, 246); /* violet */
+  }
+}
+
+@layer utilities {
+  .animate-colors {
+    animation: color-cycle 6s linear infinite;
+    border-width: 2px;
+  }
+}

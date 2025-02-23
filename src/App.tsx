@@ -21,11 +21,11 @@ const ThemeToggle = () => {
     <Button
       variant="outline"
       size="icon"
-      className="fixed top-4 right-4 rounded-full w-10 h-10 bg-background/50 backdrop-blur-sm border border-border/50 z-50"
+      className="fixed top-4 right-4 rounded-full w-12 h-12 bg-background/50 backdrop-blur-sm border border-border/50 z-50 animate-colors"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
     >
-      <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      <Sun className="h-6 w-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+      <Moon className="absolute h-6 w-6 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
       <span className="sr-only">Changer le thème</span>
     </Button>
   );
