@@ -34,8 +34,20 @@ export const MatchCard = ({
       } ${isMatchOff ? 'opacity-75 bg-gray-100' : ''}`}
     >
       {showRequirements && (
-        <div className="animate-pulse text-red-500 font-semibold text-sm bg-red-50 p-2 rounded-md border border-red-200">
-          Objectifs : 7 Jours / 15 Heures de Live et 100 Diamants
+        <div className="animate-bounce bg-red-100 border-2 border-red-500 rounded-lg p-4 mb-4 shadow-lg">
+          <p className="text-lg font-bold text-red-600 text-center tracking-wide">
+            OBJECTIFS DU MATCH
+          </p>
+          <div className="flex flex-col items-center mt-2 space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-red-500 font-semibold text-base">⏰</span>
+              <span className="text-red-600 font-medium">7 Jours / 15 Heures de Live</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-red-500 font-semibold text-base">💎</span>
+              <span className="text-red-600 font-medium">100 Diamants</span>
+            </div>
+          </div>
         </div>
       )}
       {match.match_image && (
