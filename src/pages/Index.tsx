@@ -66,7 +66,7 @@ const Index = () => {
       return;
     }
 
-    if (password === "Marseille@13011") {
+    if (username === "Sabri" && password === "Marseille@13011") {
       setRole('founder');
       setIsAuthenticated(true);
       toast({
@@ -97,7 +97,7 @@ const Index = () => {
     } else {
       toast({
         title: "Erreur",
-        description: "Mot de passe incorrect",
+        description: "Identifiant ou mot de passe incorrect",
         variant: "destructive",
       });
       setPassword("");
