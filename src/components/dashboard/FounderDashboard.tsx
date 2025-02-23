@@ -47,20 +47,6 @@ export const FounderDashboard = ({
         <Button
           variant="outline"
           className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
-          onClick={onConfigureRewards}
-        >
-          <div className="flex items-center gap-2">
-            <Diamond className="w-5 h-5 text-primary" />
-            <span className="font-semibold">Configuration Récompenses</span>
-          </div>
-          <p className="text-sm text-muted-foreground text-left">
-            Gérer les taux de conversion et les diamants
-          </p>
-        </Button>
-
-        <Button
-          variant="outline"
-          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
           onClick={onOpenSponsorships}
         >
           <div className="flex items-center gap-2">
