@@ -1,8 +1,7 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+import { HfInference } from 'https://esm.sh/@huggingface/inference@2.3.2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,30 +15,28 @@ serve(async (req) => {
 
   try {
     const { prompt } = await req.json();
+    console.log("Prompt reçu:", prompt);
 
-    const response = await fetch('https://api.openai.com/v1/images/generations', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: "dall-e-3",
-        prompt: prompt,
-        n: 1,
-        size: "1024x1024",
-        quality: "standard",
-        style: "vivid"
-      }),
+    const hf = new HfInference(Deno.env.get('HUGGING_FACE_ACCESS_TOKEN'));
+
+    console.log("Génération de l'image en cours...");
+    const image = await hf.textToImage({
+      inputs: prompt,
+      model: 'black-forest-labs/FLUX.1-schnell',
+      parameters: {
+        height: 1024,
+        width: 1024,
+        guidance_scale: 7.5,
+        num_inference_steps: 50,
+      }
     });
 
-    const data = await response.json();
-    
-    if (!data.data?.[0]?.url) {
-      throw new Error('Pas d\'URL d\'image dans la réponse');
-    }
+    // Convertir le blob en base64
+    const arrayBuffer = await image.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    const imageUrl = `data:image/jpeg;base64,${base64}`;
 
-    const imageUrl = data.data[0].url;
+    console.log("Image générée avec succès");
 
     return new Response(JSON.stringify({ imageUrl }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
