@@ -87,6 +87,20 @@ export function CreatorDashboard({
               <Handshake className="h-6 w-6" />
               <span>Parrainages en cours</span>
             </Button>
+            <Button
+              variant="outline"
+              className="h-24 flex-col items-center justify-center space-y-2"
+              asChild
+            >
+              <a 
+                href="https://live-backstage.tiktok.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="border-purple-600 text-purple-400 hover:bg-purple-600 hover:text-white transition-colors"
+              >
+                <span>Backstage</span>
+              </a>
+            </Button>
           </>
         );
       default:
