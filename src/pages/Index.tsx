@@ -13,6 +13,7 @@ type Role = 'client' | 'creator' | 'manager' | 'founder';
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<Role | null>(null);
   const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
@@ -54,6 +55,15 @@ const Index = () => {
   };
 
   const handleLogin = () => {
+    if (!username) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez saisir un identifiant",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (password === "Marseille@13011") {
       setRole('founder');
       setIsAuthenticated(true);
@@ -472,15 +482,31 @@ const Index = () => {
             </p>
           </div>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Input
-                type="password"
-                placeholder="Mot de passe"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleLogin()}
-                className="w-full"
-              />
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">Identifiant</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="Votre identifiant"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleLogin()}
+                  className="w-full"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Mot de passe</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Votre mot de passe"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleLogin()}
+                  className="w-full"
+                />
+              </div>
             </div>
             <Button
               className="w-full"
