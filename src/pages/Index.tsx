@@ -68,7 +68,7 @@ function Index() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-[#1A1F2C]">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center space-y-8">
             <div className="w-full max-w-sm space-y-4">
@@ -76,22 +76,6 @@ function Index() {
                 onLogin={handleLogin}
                 onForgotPassword={handleForgotPassword}
               />
-              <div className="flex justify-between">
-                <Button
-                  variant="link"
-                  onClick={() => setIsForgotPasswordOpen(true)}
-                  className="text-sm"
-                >
-                  Mot de passe oublié?
-                </Button>
-                <Button
-                  variant="link"
-                  onClick={() => setIsCreateAccountOpen(true)}
-                  className="text-sm"
-                >
-                  Créer un compte
-                </Button>
-              </div>
             </div>
           </div>
         </div>
