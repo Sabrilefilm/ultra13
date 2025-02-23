@@ -482,10 +482,13 @@ const Index = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4 flex items-center justify-center">
         <div className="w-full max-w-md space-y-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold">Espace de Connexion</h2>
-            <p className="text-sm text-muted-foreground mt-2">
-              Veuillez vous authentifier pour accéder à votre espace
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              ULTRA
+            </h1>
+            <h2 className="text-2xl font-bold">Votre Espace de Connexion</h2>
+            <p className="text-sm text-muted-foreground">
+              Connectez-vous pour accéder à vos données statistiques et votre tableau de bord
             </p>
           </div>
           <div className="space-y-4">
@@ -528,6 +531,11 @@ const Index = () => {
             >
               Se connecter
             </Button>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">
+              Une plateforme pour gérer vos performances
+            </p>
           </div>
         </div>
         <ForgotPasswordModal
