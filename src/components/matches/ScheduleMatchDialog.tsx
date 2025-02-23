@@ -16,6 +16,7 @@ export const ScheduleMatchDialog = ({ isOpen, onClose }: ScheduleMatchDialogProp
   const [creator1, setCreator1] = useState("");
   const [creator2, setCreator2] = useState("");
   const [matchDate, setMatchDate] = useState("");
+  const [matchTime, setMatchTime] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -49,15 +50,19 @@ export const ScheduleMatchDialog = ({ isOpen, onClose }: ScheduleMatchDialogProp
     setIsSubmitting(true);
 
     try {
+      // Combiner la date et l'heure
+      const matchDateTime = new Date(`${matchDate}T${matchTime}`);
+      
       // Générer l'image du match
-      const matchImage = await generateMatchImage(creator1, creator2, matchDate);
+      const matchImage = await generateMatchImage(creator1, creator2, matchDateTime.toISOString());
 
       // Créer le match dans la base de données
       const { error } = await supabase.from("upcoming_matches").insert({
         creator_id: creator1,
         opponent_id: creator2,
-        match_date: new Date(matchDate).toISOString(),
+        match_date: matchDateTime.toISOString(),
         match_image: matchImage,
+        status: 'scheduled'
       });
 
       if (error) throw error;
@@ -71,6 +76,7 @@ export const ScheduleMatchDialog = ({ isOpen, onClose }: ScheduleMatchDialogProp
       setCreator1("");
       setCreator2("");
       setMatchDate("");
+      setMatchTime("");
     } catch (error) {
       console.error("Erreur lors de la programmation du match:", error);
       toast({
@@ -110,15 +116,27 @@ export const ScheduleMatchDialog = ({ isOpen, onClose }: ScheduleMatchDialogProp
               required
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="matchDate">Date et heure du match</Label>
-            <Input
-              id="matchDate"
-              type="datetime-local"
-              value={matchDate}
-              onChange={(e) => setMatchDate(e.target.value)}
-              required
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="matchDate">Date du match</Label>
+              <Input
+                id="matchDate"
+                type="date"
+                value={matchDate}
+                onChange={(e) => setMatchDate(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="matchTime">Heure du match</Label>
+              <Input
+                id="matchTime"
+                type="time"
+                value={matchTime}
+                onChange={(e) => setMatchTime(e.target.value)}
+                required
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>

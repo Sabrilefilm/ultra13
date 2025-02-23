@@ -285,6 +285,7 @@ export type Database = {
           platform: string
           status: string
           updated_at: string
+          winner_id: string | null
         }
         Insert: {
           created_at?: string
@@ -296,6 +297,7 @@ export type Database = {
           platform?: string
           status?: string
           updated_at?: string
+          winner_id?: string | null
         }
         Update: {
           created_at?: string
@@ -307,6 +309,7 @@ export type Database = {
           platform?: string
           status?: string
           updated_at?: string
+          winner_id?: string | null
         }
         Relationships: []
       }

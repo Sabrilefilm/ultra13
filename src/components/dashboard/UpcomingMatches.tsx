@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Download, Trash2 } from "lucide-react";
+import { Download, Trash2, Trophy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: string }) => {
@@ -59,7 +59,6 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
         description: "Le match a été supprimé avec succès",
       });
 
-      // Rafraîchir la liste des matchs avec le bon format pour React Query v5
       queryClient.invalidateQueries({ queryKey: ['upcoming-matches', creatorId] });
     } catch (error) {
       console.error("Erreur lors de la suppression:", error);
@@ -71,9 +70,37 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
     }
   };
 
+  const setWinner = async (matchId: string, winnerId: string) => {
+    try {
+      const { error } = await supabase
+        .from('upcoming_matches')
+        .update({
+          winner_id: winnerId,
+          status: 'completed'
+        })
+        .eq('id', matchId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Gagnant défini",
+        description: "Le gagnant du match a été enregistré avec succès",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['upcoming-matches', creatorId] });
+    } catch (error) {
+      console.error("Erreur lors de la définition du gagnant:", error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la définition du gagnant",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) return <div>Chargement des matchs...</div>;
 
-  const canDeleteMatch = role === 'founder' || role === 'manager';
+  const canManageMatch = role === 'founder' || role === 'manager';
 
   return (
     <Card>
@@ -84,7 +111,12 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
         {matches && matches.length > 0 ? (
           <div className="space-y-4">
             {matches.map((match) => (
-              <div key={match.id} className="flex flex-col space-y-4 p-4 border rounded-lg">
+              <div 
+                key={match.id} 
+                className={`flex flex-col space-y-4 p-4 border rounded-lg transition-all duration-300 ${
+                  match.winner_id ? 'bg-gradient-to-r from-yellow-100 to-yellow-50 dark:from-yellow-900/20 dark:to-yellow-800/20' : ''
+                }`}
+              >
                 {match.match_image && (
                   <div className="w-full aspect-video relative rounded-lg overflow-hidden">
                     <img
@@ -92,15 +124,41 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
                       alt={`${match.creator_id} vs ${match.opponent_id}`}
                       className="w-full h-full object-cover"
                     />
+                    {match.winner_id && (
+                      <div className="absolute top-2 right-2 bg-yellow-500 text-white px-3 py-1 rounded-full flex items-center gap-2 animate-bounce">
+                        <Trophy className="w-4 h-4" />
+                        <span className="text-sm font-medium">Gagnant</span>
+                      </div>
+                    )}
                   </div>
                 )}
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="font-medium">{match.creator_id} vs {match.opponent_id}</p>
-                    <p className="text-sm text-muted-foreground">{formatDate(match.match_date)}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatDate(match.match_date)}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="text-sm font-medium">{match.platform}</div>
+                    {!match.winner_id && canManageMatch && (
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setWinner(match.id, match.creator_id)}
+                        >
+                          {match.creator_id} gagne
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setWinner(match.id, match.opponent_id)}
+                        >
+                          {match.opponent_id} gagne
+                        </Button>
+                      </div>
+                    )}
                     {match.match_image && (
                       <Button
                         variant="outline"
@@ -114,7 +172,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
                         Télécharger
                       </Button>
                     )}
-                    {canDeleteMatch && (
+                    {canManageMatch && !match.winner_id && (
                       <Button
                         variant="destructive"
                         size="sm"
