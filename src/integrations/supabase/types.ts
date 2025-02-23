@@ -280,6 +280,7 @@ export type Database = {
           creator_id: string
           id: string
           match_date: string
+          match_image: string | null
           opponent_id: string
           platform: string
           status: string
@@ -290,6 +291,7 @@ export type Database = {
           creator_id: string
           id?: string
           match_date: string
+          match_image?: string | null
           opponent_id: string
           platform?: string
           status?: string
@@ -300,6 +302,7 @@ export type Database = {
           creator_id?: string
           id?: string
           match_date?: string
+          match_image?: string | null
           opponent_id?: string
           platform?: string
           status?: string
