@@ -16,47 +16,79 @@ interface LiveSchedule {
 }
 
 export const RoleStats = ({ role, userId }: RoleStatsProps) => {
-  const { data: liveSchedule } = useQuery({
+  // Requête pour récupérer les horaires de live
+  const { data: liveSchedule, isError } = useQuery({
     queryKey: ["live-schedule", userId],
     queryFn: async () => {
       if (role !== "creator" || !userId) return null;
-      
-      // D'abord, récupérer l'ID du créateur depuis user_accounts
-      const { data: userAccount, error: userError } = await supabase
-        .from("user_accounts")
-        .select("id")
-        .eq("username", userId)
-        .eq("role", "creator")
-        .single();
 
-      if (userError) {
-        console.error("Error fetching user account:", userError);
-        toast.error("Erreur lors de la récupération des données");
+      try {
+        // Première requête pour récupérer l'ID depuis user_accounts
+        const { data: userAccount, error: userError } = await supabase
+          .from("user_accounts")
+          .select("id")
+          .eq("username", userId)
+          .eq("role", "creator")
+          .maybeSingle();
+
+        if (userError) {
+          console.error("Error fetching user account:", userError);
+          throw new Error("Erreur lors de la récupération du compte utilisateur");
+        }
+
+        if (!userAccount) {
+          console.log("No user account found for:", userId);
+          return null;
+        }
+
+        console.log("User account found:", userAccount);
+
+        // Deuxième requête pour récupérer les horaires avec l'ID correct
+        const { data: schedule, error: scheduleError } = await supabase
+          .from("live_schedules")
+          .select("hours, days")
+          .eq("creator_id", userAccount.id)
+          .maybeSingle();
+
+        if (scheduleError) {
+          console.error("Error fetching live schedule:", scheduleError);
+          throw new Error("Erreur lors de la récupération des horaires");
+        }
+
+        console.log("Schedule found:", schedule);
+
+        if (!schedule) {
+          // Si aucun horaire n'existe, on crée une nouvelle entrée
+          const { data: newSchedule, error: createError } = await supabase
+            .from("live_schedules")
+            .insert([
+              { creator_id: userAccount.id, hours: 0, days: 0 }
+            ])
+            .select()
+            .single();
+
+          if (createError) {
+            console.error("Error creating live schedule:", createError);
+            throw new Error("Erreur lors de la création des horaires");
+          }
+
+          console.log("New schedule created:", newSchedule);
+          return newSchedule;
+        }
+
+        return schedule;
+      } catch (error) {
+        console.error("Error in live schedule query:", error);
+        toast.error(error instanceof Error ? error.message : "Une erreur est survenue");
         return null;
       }
-
-      if (!userAccount) {
-        console.log("No user account found");
-        return null;
-      }
-
-      // Ensuite, récupérer les données de live_schedules avec l'ID du créateur
-      const { data, error } = await supabase
-        .from("live_schedules")
-        .select("hours, days")
-        .eq("creator_id", userAccount.id)
-        .single();
-
-      if (error) {
-        console.error("Error fetching live schedule:", error);
-        toast.error("Erreur lors de la récupération des horaires");
-        return null;
-      }
-
-      return data as LiveSchedule;
     },
     enabled: role === "creator" && !!userId
   });
+
+  if (isError) {
+    toast.error("Erreur lors de la récupération des statistiques");
+  }
 
   if (role === 'client') {
     return (
