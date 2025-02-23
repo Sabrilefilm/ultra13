@@ -73,13 +73,22 @@ export const LoginForm = ({ onLogin, onForgotPassword }: LoginFormProps) => {
                 className="bg-black border-white/10 text-white placeholder:text-white/40"
               />
             </div>
-            <Button
-              variant="link"
-              className="text-sm text-white/60 hover:text-primary p-0"
-              onClick={onForgotPassword}
-            >
-              Mot de passe oublié ?
-            </Button>
+            <div className="flex justify-between items-center">
+              <Button
+                variant="link"
+                className="text-sm text-white/60 hover:text-primary p-0"
+                onClick={onForgotPassword}
+              >
+                Mot de passe oublié ?
+              </Button>
+              <Button
+                variant="link"
+                className="text-sm text-white/60 hover:text-primary p-0"
+                onClick={() => window.location.href = 'mailto:Contact@Phoceenagency.fr'}
+              >
+                Contacter le support
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-4">
