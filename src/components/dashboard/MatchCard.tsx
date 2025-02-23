@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import { Download, Trash2, Trophy, X, Timer, Clock, Calendar } from "lucide-react";
@@ -37,9 +36,9 @@ export const MatchCard = ({
     if (match.winner_id) return 'border-2 border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.3)]';
     
     const hour = new Date(match.match_date).getHours();
-    if (hour >= 20 || hour < 6) return 'border-2 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.3)]';
-    if (hour >= 12 && hour < 20) return 'border-2 border-sky-500/50 shadow-[0_0_15px_rgba(14,165,233,0.3)]';
-    return 'border-2 border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.3)]';
+    if (hour >= 22 || hour === 0) return 'border-2 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.3)]';
+    if (hour >= 12 && hour < 19) return 'border-2 border-sky-500/50 shadow-[0_0_15px_rgba(14,165,233,0.3)]';
+    return 'border-2 border-purple-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]';
   };
 
   const getHoverStyle = () => {
@@ -47,9 +46,9 @@ export const MatchCard = ({
     if (match.winner_id) return 'hover:shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:border-green-400/60';
     
     const hour = new Date(match.match_date).getHours();
-    if (hour >= 20 || hour < 6) return 'hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:border-blue-400/60';
-    if (hour >= 12 && hour < 20) return 'hover:shadow-[0_0_20px_rgba(14,165,233,0.4)] hover:border-sky-400/60';
-    return 'hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] hover:border-indigo-400/60';
+    if (hour >= 22 || hour === 0) return 'hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:border-blue-400/60';
+    if (hour >= 12 && hour < 19) return 'hover:shadow-[0_0_20px_rgba(14,165,233,0.4)] hover:border-sky-400/60';
+    return 'hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] hover:border-purple-400/60';
   };
 
   return (
