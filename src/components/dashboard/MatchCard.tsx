@@ -25,6 +25,7 @@ export const MatchCard = ({
   onDownload
 }: MatchCardProps) => {
   const isMatchOff = match.status === 'off';
+  const showRequirements = ['agent', 'manager', 'creator'].includes(role);
 
   return (
     <div 
@@ -32,6 +33,11 @@ export const MatchCard = ({
         match.winner_id ? 'bg-gradient-to-r from-gray-50 to-white' : ''
       } ${isMatchOff ? 'opacity-75 bg-gray-100' : ''}`}
     >
+      {showRequirements && (
+        <div className="animate-pulse text-red-500 font-semibold text-sm bg-red-50 p-2 rounded-md border border-red-200">
+          Objectifs : 7 Jours / 15 Heures de Live et 100 Diamants
+        </div>
+      )}
       {match.match_image && (
         <div className="w-full aspect-video relative rounded-lg overflow-hidden">
           <img
