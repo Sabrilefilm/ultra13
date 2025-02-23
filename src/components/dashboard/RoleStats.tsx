@@ -17,13 +17,12 @@ interface LiveSchedule {
 
 export const RoleStats = ({ role, userId }: RoleStatsProps) => {
   // Requête pour récupérer les horaires de live
-  const { data: liveSchedule, isError } = useQuery({
+  const { data: liveSchedule, isError: isLiveScheduleError } = useQuery({
     queryKey: ["live-schedule", userId],
     queryFn: async () => {
       if (role !== "creator" || !userId) return null;
 
       try {
-        // Première requête pour récupérer l'ID depuis user_accounts
         const { data: userAccount, error: userError } = await supabase
           .from("user_accounts")
           .select("id")
@@ -43,7 +42,6 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
 
         console.log("User account found:", userAccount);
 
-        // Deuxième requête pour récupérer les horaires avec l'ID correct
         const { data: schedule, error: scheduleError } = await supabase
           .from("live_schedules")
           .select("hours, days")
@@ -58,7 +56,6 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
         console.log("Schedule found:", schedule);
 
         if (!schedule) {
-          // Si aucun horaire n'existe, on crée une nouvelle entrée
           const { data: newSchedule, error: createError } = await supabase
             .from("live_schedules")
             .insert([
@@ -86,7 +83,38 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
     enabled: role === "creator" && !!userId
   });
 
-  if (isError) {
+  // Nouvelle requête pour récupérer les diamants reçus
+  const { data: rewardsData, isError: isRewardsError } = useQuery({
+    queryKey: ["creator-rewards", userId],
+    queryFn: async () => {
+      if (role !== "creator" || !userId) return null;
+
+      try {
+        const { data: rewards, error } = await supabase
+          .from("creator_rewards")
+          .select("diamonds_count")
+          .eq("creator_id", userId);
+
+        if (error) {
+          console.error("Error fetching rewards:", error);
+          throw new Error("Erreur lors de la récupération des récompenses");
+        }
+
+        console.log("Rewards found:", rewards);
+        
+        // Calculer le total des diamants reçus
+        const totalDiamonds = rewards?.reduce((sum, reward) => sum + reward.diamonds_count, 0) || 0;
+        return totalDiamonds;
+      } catch (error) {
+        console.error("Error in rewards query:", error);
+        toast.error(error instanceof Error ? error.message : "Une erreur est survenue");
+        return 0;
+      }
+    },
+    enabled: role === "creator" && !!userId
+  });
+
+  if (isLiveScheduleError || isRewardsError) {
     toast.error("Erreur lors de la récupération des statistiques");
   }
 
@@ -127,7 +155,7 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
         />
         <StatsCard
           title="Diamants Reçus"
-          value="0"
+          value={`${rewardsData || 0}`}
           icon={<Diamond className="w-6 h-6 text-primary" />}
         />
       </div>
