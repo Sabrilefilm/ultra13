@@ -22,11 +22,13 @@ export const MatchCard = ({
   onDelete,
   onDownload
 }: MatchCardProps) => {
+  const isMatchOff = match.status === 'off';
+
   return (
     <div 
       className={`flex flex-col space-y-4 p-4 border rounded-lg transition-all duration-300 ${
         match.winner_id ? 'bg-gradient-to-r from-gray-50 to-white' : ''
-      }`}
+      } ${isMatchOff ? 'opacity-75 bg-gray-100' : ''}`}
     >
       {match.match_image && (
         <div className="w-full aspect-video relative rounded-lg overflow-hidden">
@@ -37,6 +39,18 @@ export const MatchCard = ({
           />
         </div>
       )}
+      <div className="flex flex-col space-y-2">
+        {isMatchOff && (
+          <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-red-100 text-red-600 text-sm font-medium">
+            Match Off
+          </div>
+        )}
+        {match.source && (
+          <div className="inline-flex items-center justify-start px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium">
+            Source: {match.source}
+          </div>
+        )}
+      </div>
       <div className="flex justify-between items-center relative">
         <div className="flex items-center gap-4">
           <div>
