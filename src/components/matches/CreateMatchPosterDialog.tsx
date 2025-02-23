@@ -101,10 +101,10 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
               value={matchType} 
               onValueChange={(value: MatchType) => setMatchType(value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Sélectionner le type de match" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-popover border shadow-lg">
                 <SelectItem value="OFF">Match OFF</SelectItem>
                 <SelectItem value="ANNIVERSAIRE">Match Anniversaire</SelectItem>
               </SelectContent>
@@ -117,10 +117,10 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
               value={backgroundTheme} 
               onValueChange={(value: BackgroundTheme) => setBackgroundTheme(value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Sélectionner le thème" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-popover border shadow-lg">
                 <SelectItem value="GAMING">Gaming</SelectItem>
                 <SelectItem value="SPORT">Sport</SelectItem>
                 <SelectItem value="NEON">Néon</SelectItem>
