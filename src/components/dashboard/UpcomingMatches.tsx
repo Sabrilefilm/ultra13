@@ -88,11 +88,34 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
 
       if (error) throw error;
 
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
+      // Animation continue de confettis
+      const duration = 15 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+      function randomInRange(min: number, max: number) {
+        return Math.random() * (max - min) + min;
+      }
+
+      const interval: NodeJS.Timer = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+
+        const particleCount = 50 * (timeLeft / duration);
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+        });
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+        });
+      }, 250);
 
       toast({
         title: "Gagnant défini",
@@ -143,7 +166,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
   const canManageMatch = role === 'founder' || role === 'manager';
 
   return (
-    <Card>
+    <Card className="bg-white text-black">
       <CardHeader>
         <CardTitle>Matchs à venir</CardTitle>
       </CardHeader>
@@ -154,7 +177,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
               <div 
                 key={match.id} 
                 className={`flex flex-col space-y-4 p-4 border rounded-lg transition-all duration-300 ${
-                  match.winner_id ? 'bg-gradient-to-r from-white to-gray-50 dark:from-gray-900/20 dark:to-gray-800/20' : ''
+                  match.winner_id ? 'bg-gradient-to-r from-gray-50 to-white' : ''
                 }`}
               >
                 {match.match_image && (
@@ -169,22 +192,22 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
                 <div className="flex justify-between items-center relative">
                   <div className="flex items-center gap-4">
                     <div>
-                      <p className="font-medium">{match.creator_id} vs {match.opponent_id}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-medium text-black">{match.creator_id} vs {match.opponent_id}</p>
+                      <p className="text-sm text-gray-600">
                         {formatDate(match.match_date)}
                       </p>
                     </div>
                     {match.winner_id && (
-                      <div className="animate-fade-in bg-white dark:bg-gray-800 shadow-lg border text-black dark:text-white px-4 py-2 rounded-full inline-flex items-center gap-2 font-bold">
+                      <div className="animate-fade-in bg-white shadow-lg border text-black px-4 py-2 rounded-full inline-flex items-center gap-2 font-bold">
                         <Trophy className="w-5 h-5 text-yellow-500" />
-                        <span className="text-sm">
+                        <span className="text-sm text-black">
                           Gagnant : {match.winner_id}
                         </span>
                         {canManageMatch && (
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="ml-2 h-6 w-6 p-0"
+                            className="ml-2 h-6 w-6 p-0 text-gray-600 hover:text-black"
                             onClick={() => clearWinner(match.id)}
                           >
                             <X className="h-4 w-4" />
@@ -194,12 +217,13 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
                     )}
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="text-sm font-medium">{match.platform}</div>
+                    <div className="text-sm font-medium text-black">{match.platform}</div>
                     {!match.winner_id && canManageMatch && (
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"
+                          className="text-black border-gray-300 hover:bg-gray-100 hover:text-black"
                           onClick={() => setWinner(match.id, match.creator_id)}
                         >
                           {match.creator_id} gagne
@@ -207,6 +231,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
                         <Button
                           variant="outline"
                           size="sm"
+                          className="text-black border-gray-300 hover:bg-gray-100 hover:text-black"
                           onClick={() => setWinner(match.id, match.opponent_id)}
                         >
                           {match.opponent_id} gagne
@@ -217,6 +242,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
                       <Button
                         variant="outline"
                         size="sm"
+                        className="text-black border-gray-300 hover:bg-gray-100 hover:text-black"
                         onClick={() => handleDownload(
                           match.match_image!,
                           `match_${match.creator_id}_vs_${match.opponent_id}`
@@ -241,7 +267,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground">Aucun match à venir</p>
+          <p className="text-gray-600">Aucun match à venir</p>
         )}
       </CardContent>
     </Card>
