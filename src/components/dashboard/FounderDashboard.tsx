@@ -34,10 +34,10 @@ export const FounderDashboard = ({
         >
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-primary" />
-            <span className="font-semibold">Gestion des Utilisateurs</span>
+            <span className="font-semibold">Nouveau Compte</span>
           </div>
           <p className="text-sm text-muted-foreground text-left">
-            Voir et gérer tous les utilisateurs de la plateforme
+            Créer et gérer les comptes (Créateurs, Managers)
           </p>
         </Button>
 
@@ -80,6 +80,19 @@ export const FounderDashboard = ({
           </div>
           <p className="text-sm text-muted-foreground text-left">
             Paramètres généraux et horaires des lives de la plateforme
+          </p>
+        </Button>
+
+        <Button
+          variant="outline"
+          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
+        >
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary" />
+            <span className="font-semibold">Gestion des Utilisateurs</span>
+          </div>
+          <p className="text-sm text-muted-foreground text-left">
+            Voir et gérer tous les utilisateurs (mots de passe, bannissement, suppression)
           </p>
         </Button>
       </div>
