@@ -12,7 +12,7 @@ import { RewardSettingsModal } from "@/components/RewardSettingsModal";
 import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
 import { RewardsPanel } from "@/components/RewardsPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LiveScheduleModal } from "@/components/LiveScheduleModal";
+import { LiveScheduleModal } from "@/components/live-schedule";
 
 type Role = 'client' | 'creator' | 'manager' | 'founder';
 
