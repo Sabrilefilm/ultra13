@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -102,6 +101,7 @@ const Index = () => {
       toast({
         title: "Compte créé",
         description: `Le compte ${role} a été créé avec succès`,
+        duration: 2000,
       });
     } catch (error) {
       console.error('Error creating account:', error);
@@ -109,6 +109,7 @@ const Index = () => {
         title: "Erreur",
         description: "Impossible de créer le compte",
         variant: "destructive",
+        duration: 2000,
       });
       throw error;
     }
@@ -120,6 +121,7 @@ const Index = () => {
         title: "Erreur",
         description: "Veuillez saisir un identifiant",
         variant: "destructive",
+        duration: 2000,
       });
       return;
     }
@@ -132,6 +134,7 @@ const Index = () => {
         toast({
           title: "Connexion réussie",
           description: "Bienvenue dans l'espace Fondateur",
+          duration: 2000,
         });
       } else {
         const { data, error } = await supabase
@@ -151,6 +154,7 @@ const Index = () => {
           toast({
             title: "Connexion réussie",
             description: `Bienvenue dans votre espace ${data.role}`,
+            duration: 2000,
           });
         } else {
           throw new Error("Identifiant ou mot de passe incorrect");
@@ -161,6 +165,7 @@ const Index = () => {
         title: "Erreur",
         description: "Identifiant ou mot de passe incorrect",
         variant: "destructive",
+        duration: 2000,
       });
     }
   };
@@ -185,6 +190,7 @@ const Index = () => {
       toast({
         title: "Paramètres mis à jour",
         description: "Les paramètres ont été mis à jour avec succès",
+        duration: 2000,
       });
     } catch (error) {
       console.error('Error updating settings:', error);
@@ -192,6 +198,7 @@ const Index = () => {
         title: "Erreur",
         description: "Impossible de mettre à jour les paramètres",
         variant: "destructive",
+        duration: 2000,
       });
       throw error;
     }
