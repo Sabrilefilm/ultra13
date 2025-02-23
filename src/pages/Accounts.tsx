@@ -3,8 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Save } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 
 interface UserAccount {
   id: string;
@@ -14,9 +19,62 @@ interface UserAccount {
   created_at: string;
 }
 
+interface PasswordDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  account: UserAccount;
+  onSave: (newPassword: string) => Promise<void>;
+}
+
+const PasswordDialog = ({ isOpen, onClose, account, onSave }: PasswordDialogProps) => {
+  const [newPassword, setNewPassword] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await onSave(newPassword);
+    setNewPassword("");
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Modifier le mot de passe pour {account.username}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+            <Input
+              id="newPassword"
+              type="text"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Entrez le nouveau mot de passe"
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Annuler
+            </Button>
+            <Button type="submit">
+              <Save className="w-4 h-4 mr-2" />
+              Enregistrer
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export default function Accounts() {
   const navigate = useNavigate();
-  const { data: accounts, isLoading, error } = useQuery({
+  const { toast } = useToast();
+  const [selectedAccount, setSelectedAccount] = useState<UserAccount | null>(null);
+  const [passwordVisibility, setPasswordVisibility] = useState<Record<string, boolean>>({});
+
+  const { data: accounts, isLoading, error, refetch } = useQuery({
     queryKey: ['accounts'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -27,6 +85,36 @@ export default function Accounts() {
       return data as UserAccount[];
     }
   });
+
+  const togglePasswordVisibility = (accountId: string) => {
+    setPasswordVisibility(prev => ({
+      ...prev,
+      [accountId]: !prev[accountId]
+    }));
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    if (!selectedAccount) return;
+
+    const { error } = await supabase
+      .from('user_accounts')
+      .update({ password: newPassword })
+      .eq('id', selectedAccount.id);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le mot de passe"
+      });
+    } else {
+      toast({
+        title: "Succès",
+        description: "Mot de passe mis à jour avec succès"
+      });
+      refetch();
+    }
+  };
 
   if (isLoading) return <div className="p-8">Chargement...</div>;
   if (error) return <div className="p-8 text-red-500">Une erreur est survenue</div>;
@@ -59,7 +147,31 @@ export default function Accounts() {
             {accounts?.map((account) => (
               <TableRow key={account.id}>
                 <TableCell>{account.username}</TableCell>
-                <TableCell>{account.password}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono">
+                      {passwordVisibility[account.id] ? account.password : '••••••••'}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => togglePasswordVisibility(account.id)}
+                    >
+                      {passwordVisibility[account.id] ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedAccount(account)}
+                    >
+                      Modifier
+                    </Button>
+                  </div>
+                </TableCell>
                 <TableCell>{account.role}</TableCell>
                 <TableCell>{new Date(account.created_at).toLocaleDateString()}</TableCell>
               </TableRow>
@@ -67,6 +179,15 @@ export default function Accounts() {
           </TableBody>
         </Table>
       </div>
+
+      {selectedAccount && (
+        <PasswordDialog
+          isOpen={!!selectedAccount}
+          onClose={() => setSelectedAccount(null)}
+          account={selectedAccount}
+          onSave={updatePassword}
+        />
+      )}
     </div>
   );
 }
