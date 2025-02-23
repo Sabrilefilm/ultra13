@@ -10,7 +10,7 @@ export const TikTokLogin = () => {
   const handleTikTokLogin = async () => {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'twitter',
+        provider: 'tiktok',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`
         }
