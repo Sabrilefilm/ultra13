@@ -15,13 +15,9 @@ interface Account {
   role: string;
   profile?: {
     total_diamonds: number;
-    total_viewing_time: number;
+    days_streamed: number;
+    total_live_hours: number;
   };
-  schedules?: {
-    day_of_week: string;
-    start_time: string;
-    end_time: string;
-  }[];
 }
 
 const Accounts = () => {
@@ -42,8 +38,7 @@ const Accounts = () => {
         .from("user_accounts")
         .select(`
           *,
-          profile:profiles(total_diamonds, total_viewing_time),
-          schedules:live_schedules(day_of_week, start_time, end_time)
+          profile:profiles(total_diamonds, days_streamed, total_live_hours)
         `)
         .order("role", { ascending: true });
 
@@ -90,12 +85,6 @@ const Accounts = () => {
       ...prev,
       [id]: !prev[id]
     }));
-  };
-
-  const formatTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return `${hours}h${remainingMinutes > 0 ? ` ${remainingMinutes}min` : ''}`;
   };
 
   return (
@@ -184,11 +173,11 @@ const Accounts = () => {
                           </div>
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4" />
-                            <span>Jours</span>
+                            <span>{account.profile?.days_streamed || 0} Jours</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Clock className="h-4 w-4" />
-                            <span>Heure de live</span>
+                            <span>{account.profile?.total_live_hours || 0}h de live</span>
                           </div>
                         </div>
                       </div>

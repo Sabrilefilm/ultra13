@@ -148,30 +148,36 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          days_streamed: number | null
           id: string
           manager_id: string | null
           role: Database["public"]["Enums"]["user_role"]
           total_diamonds: number | null
+          total_live_hours: number | null
           total_viewing_time: number | null
           updated_at: string
           username: string
         }
         Insert: {
           created_at?: string
+          days_streamed?: number | null
           id: string
           manager_id?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           total_diamonds?: number | null
+          total_live_hours?: number | null
           total_viewing_time?: number | null
           updated_at?: string
           username: string
         }
         Update: {
           created_at?: string
+          days_streamed?: number | null
           id?: string
           manager_id?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           total_diamonds?: number | null
+          total_live_hours?: number | null
           total_viewing_time?: number | null
           updated_at?: string
           username?: string
