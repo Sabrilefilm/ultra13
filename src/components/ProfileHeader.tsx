@@ -1,7 +1,6 @@
 
 import { User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { TikTokLogin } from "./TikTokLogin";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -84,8 +83,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           Bienvenue, {userProfile.username}
         </h1>
         <p className="text-secondary">{userProfile.handle}</p>
-        {!userProfile.avatarUrl && <TikTokLogin />}
       </div>
     </div>
   );
-};
+}
