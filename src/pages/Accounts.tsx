@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users, Trash2, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Users, Trash2, Eye, EyeOff, Search } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -14,8 +14,7 @@ const Accounts = () => {
   const [accounts, setAccounts] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [showPasswords, setShowPasswords] = React.useState<{[key: string]: boolean}>({});
-  const [newUsername, setNewUsername] = React.useState("");
-  const [newPassword, setNewPassword] = React.useState("");
+  const [searchQuery, setSearchQuery] = React.useState("");
 
   React.useEffect(() => {
     fetchAccounts();
@@ -73,10 +72,29 @@ const Accounts = () => {
     }));
   };
 
+  const filteredAccounts = accounts.filter(account => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      account.username.toLowerCase().includes(searchLower) ||
+      account.role.toLowerCase().includes(searchLower)
+    );
+  });
+
+  const translateRole = (role: string) => {
+    switch (role) {
+      case 'creator':
+        return 'Créateur';
+      case 'manager':
+        return 'Manager';
+      default:
+        return role;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="max-w-3xl mx-auto space-y-6">
+        <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             size="icon"
@@ -89,7 +107,16 @@ const Accounts = () => {
             <Users className="h-6 w-6" />
             Espace Identifiants
           </h1>
-          <div className="w-10" />
+        </div>
+
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher un utilisateur..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
         </div>
 
         {loading ? (
@@ -97,34 +124,39 @@ const Accounts = () => {
             <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
           </div>
         ) : (
-          <div className="grid gap-6">
-            {accounts.map((account) => (
-              <Card key={account.id} className="p-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold capitalize">{account.role}</h3>
-                    <p className="text-muted-foreground">{account.username}</p>
-                  </div>
+          <div className="grid gap-4">
+            {filteredAccounts.map((account) => (
+              <Card key={account.id} className="p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
+                    <div>
+                      <h3 className="font-medium">{account.username}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {translateRole(account.role)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
                     <Button
                       variant="ghost"
-                      className="relative group px-3 py-1 h-8"
+                      size="sm"
+                      className="text-sm"
                       onClick={() => togglePasswordVisibility(account.id)}
                     >
-                      <span className="text-sm font-medium">
+                      <span className="mr-2">
                         {showPasswords[account.id] ? account.password : '••••••'}
                       </span>
                       {showPasswords[account.id] ? (
-                        <EyeOff className="h-4 w-4 ml-2 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <EyeOff className="h-4 w-4" />
                       ) : (
-                        <Eye className="h-4 w-4 ml-2 absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <Eye className="h-4 w-4" />
                       )}
                     </Button>
                     <Button
-                      variant="destructive"
+                      variant="ghost"
                       size="icon"
                       onClick={() => handleDeleteAccount(account.id, account.username)}
-                      className="h-8 w-8"
+                      className="h-8 w-8 hover:bg-destructive hover:text-destructive-foreground"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
