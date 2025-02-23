@@ -11,6 +11,14 @@ import { LiveScheduleModal } from "@/components/live-schedule";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { FounderDashboard } from "@/components/dashboard/FounderDashboard";
 import { RoleStats } from "@/components/dashboard/RoleStats";
+import { SponsorshipForm } from "@/components/SponsorshipForm";
+import { SponsorshipList } from "@/components/SponsorshipList";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type Role = 'client' | 'creator' | 'manager' | 'founder';
 
@@ -36,6 +44,8 @@ const Index = () => {
     diamondValue: number;
     minimumPayout: number;
   } | null>(null);
+  const [isSponsorshipModalOpen, setIsSponsorshipModalOpen] = useState(false);
+  const [showSponsorshipList, setShowSponsorshipList] = useState(false);
 
   const { toast } = useToast();
 
@@ -261,13 +271,61 @@ const Index = () => {
                 setSelectedCreatorId(creatorId);
                 setIsLiveScheduleModalOpen(true);
               }}
+              onOpenSponsorships={() => setShowSponsorshipList(true)}
               username={username}
             />
           )}
 
-          <RoleStats role={role || ''} />
+          {role === 'creator' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Button
+                variant="outline"
+                onClick={() => setIsSponsorshipModalOpen(true)}
+                className="p-6 h-auto flex-col items-start gap-4"
+              >
+                <span className="font-semibold">Demander un parrainage</span>
+                <p className="text-sm text-muted-foreground text-left">
+                  Remplir le formulaire de parrainage
+                </p>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowSponsorshipList(true)}
+                className="p-6 h-auto flex-col items-start gap-4"
+              >
+                <span className="font-semibold">Mes parrainages</span>
+                <p className="text-sm text-muted-foreground text-left">
+                  Voir l'état de mes demandes de parrainage
+                </p>
+              </Button>
+            </div>
+          )}
 
+          <RoleStats role={role || ''} />
           <RewardsPanel role={role || ''} userId={username === "Sabri" ? "founder" : username} />
+
+          <Dialog open={isSponsorshipModalOpen} onOpenChange={setIsSponsorshipModalOpen}>
+            <DialogContent className="sm:max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Demande de parrainage</DialogTitle>
+              </DialogHeader>
+              <SponsorshipForm
+                creatorId={username}
+                onSubmit={() => setIsSponsorshipModalOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={showSponsorshipList} onOpenChange={setShowSponsorshipList}>
+            <DialogContent className="sm:max-w-4xl">
+              <DialogHeader>
+                <DialogTitle>
+                  {role === 'founder' ? "Gestion des parrainages" : "Mes parrainages"}
+                </DialogTitle>
+              </DialogHeader>
+              <SponsorshipList isFounder={role === 'founder'} />
+            </DialogContent>
+          </Dialog>
 
           <CreateAccountModal
             isOpen={isCreateAccountModalOpen}
