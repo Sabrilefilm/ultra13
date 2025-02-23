@@ -14,8 +14,6 @@ export function useRewards(role: string, userId: string) {
   return useQuery({
     queryKey: ["rewards", userId, role],
     queryFn: async () => {
-      // Pour les fondateurs et managers, récupérer toutes les récompenses
-      // Pour les créateurs, filtrer par leur username
       const query = supabase
         .from("creator_rewards")
         .select(`
@@ -33,12 +31,15 @@ export function useRewards(role: string, userId: string) {
         throw error;
       }
 
+      // Les politiques RLS s'occupent déjà de filtrer les données selon le rôle :
+      // - Fondateurs : toutes les récompenses + modification
+      // - Managers : toutes les récompenses en lecture seule
+      // - Créateurs : uniquement leurs récompenses
       return (data || []).map(reward => ({
         ...reward,
         creator_username: reward.creator?.username || reward.creator_id
       }));
     },
-    // Rafraîchir les données toutes les 30 secondes
-    refetchInterval: 30000,
+    refetchInterval: 30000, // Rafraîchissement toutes les 30 secondes
   });
 }

@@ -16,7 +16,8 @@ export function RewardsPanel({ role, userId }: RewardsPanelProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { data: rewards, isLoading, refetch } = useRewards(role, userId);
 
-  const canAddRewards = role === 'founder' || role === 'manager';
+  // Seuls les fondateurs peuvent ajouter des récompenses
+  const canAddRewards = role === 'founder';
 
   if (isLoading) {
     return (
