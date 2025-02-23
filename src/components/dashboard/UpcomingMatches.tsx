@@ -124,20 +124,22 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
                       alt={`${match.creator_id} vs ${match.opponent_id}`}
                       className="w-full h-full object-cover"
                     />
-                    {match.winner_id && (
-                      <div className="absolute top-2 right-2 bg-yellow-500 text-white px-3 py-1 rounded-full flex items-center gap-2 animate-bounce">
-                        <Trophy className="w-4 h-4" />
-                        <span className="text-sm font-medium">Gagnant</span>
-                      </div>
-                    )}
                   </div>
                 )}
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center relative">
                   <div>
                     <p className="font-medium">{match.creator_id} vs {match.opponent_id}</p>
                     <p className="text-sm text-muted-foreground">
                       {formatDate(match.match_date)}
                     </p>
+                    {match.winner_id && (
+                      <div className="mt-2 bg-yellow-500 text-white px-3 py-1 rounded-full inline-flex items-center gap-2">
+                        <Trophy className="w-4 h-4" />
+                        <span className="text-sm font-medium">
+                          Gagnant : {match.winner_id}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="text-sm font-medium">{match.platform}</div>
@@ -172,7 +174,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
                         Télécharger
                       </Button>
                     )}
-                    {canManageMatch && !match.winner_id && (
+                    {role === 'founder' && ( // Seul le fondateur peut supprimer
                       <Button
                         variant="destructive"
                         size="sm"
