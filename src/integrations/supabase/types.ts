@@ -199,6 +199,42 @@ export type Database = {
           },
         ]
       }
+      sponsorships: {
+        Row: {
+          agent_name: string
+          created_at: string
+          creator_id: string
+          creator_tiktok: string
+          id: string
+          invitation_code: string
+          sponsor_tiktok: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          agent_name: string
+          created_at?: string
+          creator_id: string
+          creator_tiktok: string
+          id?: string
+          invitation_code: string
+          sponsor_tiktok: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agent_name?: string
+          created_at?: string
+          creator_id?: string
+          creator_tiktok?: string
+          id?: string
+          invitation_code?: string
+          sponsor_tiktok?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_accounts: {
         Row: {
           created_at: string
