@@ -58,8 +58,8 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
 
       if (error) throw error;
 
-      // Animation de confettis pendant 2 minutes
-      const duration = 2 * 60 * 1000;
+      // Animation de confettis pendant 1 minute
+      const duration = 1 * 60 * 1000;
       const animationEnd = Date.now() + duration;
       const defaults = { 
         startVelocity: 30, 
