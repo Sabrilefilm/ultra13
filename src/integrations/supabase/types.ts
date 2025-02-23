@@ -42,6 +42,56 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_profiles: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          first_name: string | null
+          id: string
+          id_card_number: string | null
+          last_name: string | null
+          paypal_address: string | null
+          snapchat: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          id_card_number?: string | null
+          last_name?: string | null
+          paypal_address?: string | null
+          snapchat?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          id_card_number?: string | null
+          last_name?: string | null
+          paypal_address?: string | null
+          snapchat?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_rewards: {
         Row: {
           amount_earned: number

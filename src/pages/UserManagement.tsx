@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Info } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -15,11 +15,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { Account } from "@/types/accounts";
+import { CreatorDetailsDialog } from "@/components/creator/CreatorDetailsDialog";
 
 const UserManagement = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showPasswords, setShowPasswords] = React.useState<{[key: string]: boolean}>({});
+  const [selectedUser, setSelectedUser] = React.useState<string | null>(null);
+  const [creatorDetails, setCreatorDetails] = React.useState(null);
 
   const { data: users, isLoading, refetch } = useQuery({
     queryKey: ["users"],
@@ -63,6 +66,28 @@ const UserManagement = () => {
       ...prev,
       [id]: !prev[id]
     }));
+  };
+
+  const handleViewDetails = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("creator_profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+
+      if (error && error.code !== "PGRST116") throw error;
+      
+      setCreatorDetails(data);
+      setSelectedUser(userId);
+    } catch (error) {
+      console.error("Error fetching creator details:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les détails du créateur",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -115,13 +140,24 @@ const UserManagement = () => {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeleteUser(user.id, user.username)}
-                      >
-                        Supprimer
-                      </Button>
+                      <div className="flex justify-end gap-2">
+                        {user.role === "creator" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewDetails(user.id)}
+                          >
+                            <Info className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteUser(user.id, user.username)}
+                        >
+                          Supprimer
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -129,6 +165,12 @@ const UserManagement = () => {
             </Table>
           </div>
         )}
+
+        <CreatorDetailsDialog
+          isOpen={!!selectedUser}
+          onClose={() => setSelectedUser(null)}
+          creatorDetails={creatorDetails}
+        />
       </div>
     </div>
   );
