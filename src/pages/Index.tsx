@@ -1,4 +1,3 @@
-
 import { Award, Clock, Diamond, Gift, Settings, Users } from "lucide-react";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { StatsCard } from "@/components/StatsCard";
@@ -10,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { CreateAccountModal } from "@/components/CreateAccountModal";
 import { RewardSettingsModal } from "@/components/RewardSettingsModal";
 
-type Role = 'creator' | 'manager' | 'founder';
+type Role = 'client' | 'creator' | 'manager' | 'founder';
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -76,6 +75,13 @@ const Index = () => {
         title: "Connexion réussie",
         description: "Bienvenue dans l'espace Créateur",
       });
+    } else if (password === "client") {
+      setRole('client');
+      setIsAuthenticated(true);
+      toast({
+        title: "Connexion réussie",
+        description: "Bienvenue dans votre espace",
+      });
     } else {
       toast({
         title: "Erreur",
@@ -90,7 +96,7 @@ const Index = () => {
     try {
       const { data: user, error: authError } = await supabase.auth.signUp({
         email: `${username}@example.com`,
-        password: "password123", // Vous devriez générer un mot de passe aléatoire sécurisé
+        password: "password123",
         options: {
           data: {
             role: role
@@ -161,6 +167,81 @@ const Index = () => {
 
   const renderContentForRole = () => {
     switch (role) {
+      case 'client':
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <StatsCard
+                title="Vos Créateurs Suivis"
+                value="0"
+                icon={<Users className="w-6 h-6 text-primary" />}
+              />
+              <StatsCard
+                title="Diamants Envoyés"
+                value="0"
+                icon={<Diamond className="w-6 h-6 text-primary" />}
+              />
+              <StatsCard
+                title="Temps de Visionnage"
+                value="0h"
+                icon={<Clock className="w-6 h-6 text-primary" />}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-primary" />
+                  Créateurs Populaires
+                </h2>
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Découvrez de nouveaux créateurs
+                  </p>
+                  <div className="space-y-2">
+                    <Button variant="outline" className="w-full flex justify-between items-center">
+                      <span>Explorer les créateurs</span>
+                      <Users className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <Gift className="w-5 h-5 text-primary" />
+                  Vos Récompenses
+                </h2>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center p-3 bg-accent/5 rounded">
+                    <span>Points de fidélité</span>
+                    <span>0 pts</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-accent/5 rounded">
+                    <span>Niveau</span>
+                    <span>Débutant</span>
+                  </div>
+                  <Button variant="outline" className="w-full">
+                    Voir tous les avantages
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
+              <h2 className="text-xl font-bold mb-4">Vos Lives Favoris</h2>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Vous n'avez pas encore de lives favoris
+                </p>
+                <Button variant="outline" className="w-full">
+                  Découvrir des lives
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+
       case 'creator':
         return (
           <div className="space-y-6">
