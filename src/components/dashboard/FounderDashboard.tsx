@@ -1,7 +1,6 @@
 
+import { Settings, Users, Diamond } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { User, LogOut, Settings } from "lucide-react";
 
 interface FounderDashboardProps {
   onCreateAccount: () => void;
@@ -11,55 +10,79 @@ interface FounderDashboardProps {
   username: string;
 }
 
-export function FounderDashboard({
+export const FounderDashboard = ({
   onCreateAccount,
   onConfigureRewards,
   onOpenLiveSchedule,
   onOpenSponsorships,
-  username,
-}: FounderDashboardProps) {
+  username
+}: FounderDashboardProps) => {
   return (
-    <Card className="p-6">
-      <div className="flex flex-col space-y-4">
-        <div className="flex items-center justify-end gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onConfigureRewards}
-            className="text-xs px-2 py-1 h-8"
-          >
-            <Settings className="h-4 w-4 mr-1" />
-            Configuration des récompenses
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Button
-            variant="default"
-            onClick={onCreateAccount}
-            className="h-24 text-lg"
-          >
-            <User className="h-6 w-6 mr-2" />
-            Gestion des utilisateurs
-          </Button>
-          
-          <Button
-            variant="default"
-            onClick={() => onOpenLiveSchedule(username)}
-            className="h-24 text-lg"
-          >
-            Gérer les horaires
-          </Button>
-
-          <Button
-            variant="default"
-            onClick={onOpenSponsorships}
-            className="h-24 text-lg"
-          >
-            Gérer les sponsorings
-          </Button>
-        </div>
+    <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <Settings className="w-6 h-6 text-primary" />
+          Configuration Globale
+        </h2>
       </div>
-    </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Button
+          variant="outline"
+          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
+          onClick={onCreateAccount}
+        >
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary" />
+            <span className="font-semibold">Gestion des Comptes</span>
+          </div>
+          <p className="text-sm text-muted-foreground text-left">
+            Créer et gérer les comptes (Créateurs, Managers)
+          </p>
+        </Button>
+
+        <Button
+          variant="outline"
+          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
+          onClick={onConfigureRewards}
+        >
+          <div className="flex items-center gap-2">
+            <Diamond className="w-5 h-5 text-primary" />
+            <span className="font-semibold">Configuration Récompenses</span>
+          </div>
+          <p className="text-sm text-muted-foreground text-left">
+            Gérer les taux de conversion et les diamants
+          </p>
+        </Button>
+
+        <Button
+          variant="outline"
+          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
+          onClick={onOpenSponsorships}
+        >
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary" />
+            <span className="font-semibold">Parrainages</span>
+          </div>
+          <p className="text-sm text-muted-foreground text-left">
+            Gérer les demandes de parrainage
+          </p>
+        </Button>
+
+        <Button
+          variant="outline"
+          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
+          onClick={() => onOpenLiveSchedule(username)}
+        >
+          <div className="flex items-center gap-2">
+            <Settings className="w-5 h-5 text-primary" />
+            <span className="font-semibold">Configuration Générale</span>
+          </div>
+          <p className="text-sm text-muted-foreground text-left">
+            Paramètres généraux et horaires des lives de la plateforme
+          </p>
+        </Button>
+      </div>
+    </div>
   );
-}
+};
