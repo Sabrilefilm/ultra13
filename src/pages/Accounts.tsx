@@ -31,15 +31,17 @@ const Accounts = () => {
         `)
         .order("role", { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching accounts:", error);
+        toast({
+          title: "Erreur de chargement",
+          description: "Impossible de charger les comptes. Veuillez réessayer.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setAccounts(data || []);
-    } catch (error) {
-      console.error("Error fetching accounts:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les comptes",
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
@@ -52,7 +54,15 @@ const Accounts = () => {
         .delete()
         .eq("id", id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error deleting account:", error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de supprimer le compte. Veuillez réessayer.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       setAccounts(accounts.filter(account => account.id !== id));
       toast({
@@ -60,10 +70,10 @@ const Accounts = () => {
         description: `Le compte ${username} a été supprimé avec succès`,
       });
     } catch (error) {
-      console.error("Error deleting account:", error);
+      console.error("Error in delete operation:", error);
       toast({
-        title: "Erreur",
-        description: "Impossible de supprimer le compte",
+        title: "Erreur inattendue",
+        description: "Une erreur est survenue lors de la suppression du compte",
         variant: "destructive",
       });
     }
@@ -111,15 +121,21 @@ const Accounts = () => {
           </div>
         ) : (
           <div className="grid gap-4 animate-fadeIn">
-            {filteredAccounts.map((account) => (
-              <AccountCard
-                key={account.id}
-                account={account}
-                showPassword={showPasswords[account.id]}
-                onTogglePassword={() => togglePasswordVisibility(account.id)}
-                onDelete={() => handleDeleteAccount(account.id, account.username)}
-              />
-            ))}
+            {filteredAccounts.length > 0 ? (
+              filteredAccounts.map((account) => (
+                <AccountCard
+                  key={account.id}
+                  account={account}
+                  showPassword={showPasswords[account.id]}
+                  onTogglePassword={() => togglePasswordVisibility(account.id)}
+                  onDelete={() => handleDeleteAccount(account.id, account.username)}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                {searchQuery ? "Aucun compte ne correspond à votre recherche" : "Aucun compte trouvé"}
+              </div>
+            )}
           </div>
         )}
       </div>
