@@ -174,7 +174,7 @@ export const MatchCard = ({
                 </div>
               )
             )}
-            <div className="flex gap-1.5 mx-auto">
+            <div className="flex gap-1.5">
               {match.match_image && (
                 <Button
                   variant="outline"
