@@ -19,15 +19,45 @@ export const ScheduleMatchDialog = ({ isOpen, onClose }: ScheduleMatchDialogProp
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  const generateMatchImage = async (creator1: string, creator2: string, matchDate: string) => {
+    try {
+      const response = await fetch("/functions/v1/generate-match-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          creator1,
+          creator2,
+          matchDate,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Erreur lors de la génération de l'image");
+      
+      const data = await response.json();
+      return data.image;
+    } catch (error) {
+      console.error("Erreur lors de la génération de l'image:", error);
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
+      // Générer l'image du match
+      const matchImage = await generateMatchImage(creator1, creator2, matchDate);
+
+      // Créer le match dans la base de données
       const { error } = await supabase.from("upcoming_matches").insert({
         creator_id: creator1,
         opponent_id: creator2,
         match_date: new Date(matchDate).toISOString(),
+        match_image: matchImage,
       });
 
       if (error) throw error;
