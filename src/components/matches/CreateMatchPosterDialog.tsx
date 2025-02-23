@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -30,14 +31,19 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
 
   const generateAIImage = async (prompt: string) => {
     try {
-      const { data: { generatedText }, error } = await supabase.functions.invoke('generate-match-poster', {
+      const { data, error } = await supabase.functions.invoke('generate-match-poster', {
         body: {
           prompt: `Create a professional e-sports tournament poster with a ${backgroundTheme.toLowerCase()} theme background. The poster should show "${player1Name}" (using the profile image from ${player1ImageUrl}) on the left vs "${player2Name}" (using the profile image from ${player2ImageUrl}) on the right. Include the text "${matchType} MATCH" prominently at the top. Display the date "${matchDate}" and time "${matchTime}" in the middle. Add "Phocéen Agency" at the bottom. Use a dynamic, modern style with high contrast and engaging visual effects. Make it look professional and impressive. Theme details: ${getThemeDetails(backgroundTheme)}`
         }
       });
 
       if (error) throw error;
-      return generatedText;
+      
+      if (!data?.imageUrl) {
+        throw new Error('URL de l\'image non reçue');
+      }
+
+      return data.imageUrl;
     } catch (error) {
       console.error("Erreur lors de la génération de l'image:", error);
       throw error;
@@ -79,10 +85,12 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
 
     try {
       const imageUrl = await generateAIImage(`Match ${matchType}`);
+      console.log("URL de l'image générée:", imageUrl); // Pour le débogage
       await downloadImage(imageUrl, `match-${matchType.toLowerCase()}-${matchDate.replace(/\//g, '-')}`);
       toast.success("Affiche téléchargée avec succès!");
       onClose();
     } catch (error) {
+      console.error("Erreur complète:", error);
       toast.error("Erreur lors de la génération de l'affiche");
     }
   };
