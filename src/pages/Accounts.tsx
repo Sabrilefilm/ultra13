@@ -1,8 +1,7 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users, Trash2, Eye, EyeOff, Search, Diamond, Clock } from "lucide-react";
+import { ArrowLeft, Users, Trash2, Eye, EyeOff, Search, Diamond, Clock, Calendar } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -15,6 +14,7 @@ interface Account {
   role: string;
   profile?: {
     total_diamonds: number;
+    total_viewing_time: number;
   };
   schedules?: {
     day_of_week: string;
@@ -41,7 +41,7 @@ const Accounts = () => {
         .from("user_accounts")
         .select(`
           *,
-          profile:profiles(total_diamonds),
+          profile:profiles(total_diamonds, total_viewing_time),
           schedules:live_schedules(day_of_week, start_time, end_time)
         `)
         .order("role", { ascending: true });
@@ -91,40 +91,10 @@ const Accounts = () => {
     }));
   };
 
-  const filteredAccounts = accounts.filter(account => {
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      account.username.toLowerCase().includes(searchLower) ||
-      account.role.toLowerCase().includes(searchLower)
-    );
-  });
-
-  const translateRole = (role: string) => {
-    switch (role) {
-      case 'creator':
-        return 'Créateur';
-      case 'manager':
-        return 'Manager';
-      default:
-        return role;
-    }
-  };
-
-  const translateDay = (day: string) => {
-    const days: { [key: string]: string } = {
-      'monday': 'Lundi',
-      'tuesday': 'Mardi',
-      'wednesday': 'Mercredi',
-      'thursday': 'Jeudi',
-      'friday': 'Vendredi',
-      'saturday': 'Samedi',
-      'sunday': 'Dimanche'
-    };
-    return days[day.toLowerCase()] || day;
-  };
-
-  const formatTime = (time: string) => {
-    return time.slice(0, 5); // Format HH:mm
+  const formatTime = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours}h${remainingMinutes > 0 ? ` ${remainingMinutes}min` : ''}`;
   };
 
   return (
@@ -161,69 +131,65 @@ const Accounts = () => {
           </div>
         ) : (
           <div className="grid gap-4">
-            {filteredAccounts.map((account) => (
-              <Card key={account.id} className="p-4 hover:shadow-md transition-shadow">
-                <div className="flex flex-col space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">{account.username}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {translateRole(account.role)}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-sm"
-                        onClick={() => togglePasswordVisibility(account.id)}
-                      >
-                        <span className="mr-2">
-                          {showPasswords[account.id] ? account.password : '••••••'}
-                        </span>
-                        {showPasswords[account.id] ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteAccount(account.id, account.username)}
-                        className="h-8 w-8 hover:bg-destructive hover:text-destructive-foreground"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  {account.role === 'creator' && (
-                    <div className="border-t pt-4 space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Diamond className="h-4 w-4" />
-                        <span>Total des diamants : {account.profile?.total_diamonds || 0}</span>
+            {accounts
+              .filter(account => {
+                const searchLower = searchQuery.toLowerCase();
+                return account.username.toLowerCase().includes(searchLower) ||
+                       account.role.toLowerCase().includes(searchLower);
+              })
+              .map((account) => (
+                <Card key={account.id} className="p-4 hover:shadow-md transition-shadow">
+                  <div className="flex flex-col space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium">{account.username}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {account.role === 'creator' ? 'Créateur' : account.role}
+                        </p>
                       </div>
-                      
-                      {account.schedules && account.schedules.length > 0 && (
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium flex items-center gap-2">
-                            <Clock className="h-4 w-4" />
-                            Horaires :
-                          </p>
-                          <div className="grid grid-cols-2 gap-2">
-                            {account.schedules.map((schedule, index) => (
-                              <div key={index} className="text-sm text-muted-foreground">
-                                {translateDay(schedule.day_of_week)} : {formatTime(schedule.start_time)} - {formatTime(schedule.end_time)}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-sm"
+                          onClick={() => togglePasswordVisibility(account.id)}
+                        >
+                          <span className="mr-2">
+                            {showPasswords[account.id] ? account.password : '••••••'}
+                          </span>
+                          {showPasswords[account.id] ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteAccount(account.id, account.username)}
+                          className="h-8 w-8 hover:bg-destructive hover:text-destructive-foreground"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  )}
-                </div>
-              </Card>
+                    
+                    {account.role === 'creator' && (
+                      <div className="border-t pt-4 grid gap-4">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Diamond className="h-4 w-4" />
+                          <span>Total des diamants : {account.profile?.total_diamonds || 0}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Clock className="h-4 w-4" />
+                          <span>
+                            Temps total de streaming : {formatTime(account.profile?.total_viewing_time || 0)}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </Card>
             ))}
           </div>
         )}
