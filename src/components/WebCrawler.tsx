@@ -1,15 +1,12 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, Download } from "lucide-react";
+import { Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import * as XLSX from 'xlsx';
 
 export const WebCrawler = () => {
-  const [url, setUrl] = useState("");
-  const [loading, setLoading] = useState(false);
   const [crawledPages, setCrawledPages] = useState<any[]>([]);
   const { toast } = useToast();
 
@@ -36,78 +33,6 @@ export const WebCrawler = () => {
     }
 
     setCrawledPages(data || []);
-  };
-
-  const crawlPage = async () => {
-    if (!url) {
-      toast({
-        title: "URL requise",
-        description: "Veuillez entrer une URL à analyser",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Vérifier si l'utilisateur est connecté
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast({
-        title: "Non connecté",
-        description: "Vous devez être connecté pour analyser une page",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch(url);
-      const html = await response.text();
-      
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      
-      const title = doc.querySelector('title')?.textContent || '';
-      const content = doc.body.textContent || '';
-      const metadata = {
-        description: doc.querySelector('meta[name="description"]')?.getAttribute('content') || '',
-        keywords: doc.querySelector('meta[name="keywords"]')?.getAttribute('content') || '',
-      };
-
-      const { data, error } = await supabase
-        .from('crawled_pages')
-        .insert([
-          {
-            url,
-            title,
-            content,
-            metadata,
-            user_id: user.id
-          }
-        ])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      toast({
-        title: "Page analysée avec succès",
-        description: `Informations extraites de : ${url}`,
-      });
-
-      // Recharger les données après l'ajout
-      loadCrawledPages();
-
-    } catch (error) {
-      console.error('Erreur lors du crawling:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible d'analyser cette page",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
   };
 
   const exportToExcel = () => {
@@ -147,33 +72,6 @@ export const WebCrawler = () => {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4 p-4 bg-card rounded-lg border shadow-sm">
-        <h2 className="text-xl font-bold">Analyser une page web</h2>
-        <div className="flex gap-2">
-          <Input
-            type="url"
-            placeholder="Entrez l'URL de la page à analyser"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            className="flex-1"
-          />
-          <Button
-            onClick={crawlPage}
-            disabled={loading}
-            className="min-w-[120px]"
-          >
-            {loading ? (
-              "Analyse..."
-            ) : (
-              <>
-                <Search className="w-4 h-4 mr-2" />
-                Analyser
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-
       {crawledPages.length > 0 && (
         <div className="space-y-4 p-4 bg-card rounded-lg border shadow-sm">
           <div className="flex justify-between items-center">
