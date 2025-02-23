@@ -16,7 +16,7 @@ export const SearchBar = ({ value, onChange }: SearchBarProps) => {
         placeholder="Rechercher un utilisateur..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="pl-10"
+        className="pl-10 bg-card/50 border-border/50 backdrop-blur-sm"
       />
     </div>
   );

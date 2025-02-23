@@ -90,12 +90,12 @@ const Accounts = () => {
             variant="ghost"
             size="icon"
             onClick={() => navigate("/")}
-            className="h-10 w-10"
+            className="h-10 w-10 hover:bg-accent hover:text-accent-foreground"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Users className="h-6 w-6" />
+            <Users className="h-6 w-6 text-primary" />
             Espace Identifiants
           </h1>
         </div>
@@ -110,7 +110,7 @@ const Accounts = () => {
             <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
           </div>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-4 animate-fadeIn">
             {filteredAccounts.map((account) => (
               <AccountCard
                 key={account.id}

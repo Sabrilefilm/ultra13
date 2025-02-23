@@ -23,11 +23,11 @@ export const AccountCard = ({
     (account.profile?.total_live_hours || 0) === 0;
 
   return (
-    <Card className={`p-4 hover:shadow-md transition-shadow ${isInactive ? 'border-[#ea384c] bg-[#ea384c]/5' : ''}`}>
+    <Card className={`p-4 hover:shadow-md transition-shadow ${isInactive ? 'border-error bg-error/5' : ''}`}>
       <div className="flex flex-col space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className={`font-medium ${isInactive ? 'text-[#ea384c]' : ''}`}>
+            <h3 className={`font-medium ${isInactive ? 'text-error' : ''}`}>
               {account.username}
             </h3>
             <p className={`text-sm ${isInactive ? 'text-white' : 'text-muted-foreground'}`}>
@@ -38,29 +38,29 @@ export const AccountCard = ({
             {account.role === 'creator' && (
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <Diamond className={`h-4 w-4 ${isInactive ? 'text-[#ea384c]' : ''}`} />
-                  <span className={isInactive ? 'text-[#ea384c]' : ''}>
+                  <Diamond className={`h-4 w-4 ${isInactive ? 'text-error' : 'text-primary'}`} />
+                  <span className={isInactive ? 'text-error' : ''}>
                     {account.profile?.total_diamonds || 0} diamants
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Calendar className={`h-4 w-4 ${isInactive ? 'text-[#ea384c]' : ''}`} />
-                  <span className={isInactive ? 'text-[#ea384c]' : ''}>
+                  <Calendar className={`h-4 w-4 ${isInactive ? 'text-error' : 'text-primary'}`} />
+                  <span className={isInactive ? 'text-error' : ''}>
                     {account.profile?.days_streamed || 0} Jours
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock className={`h-4 w-4 ${isInactive ? 'text-[#ea384c]' : ''}`} />
-                  <span className={isInactive ? 'text-[#ea384c]' : ''}>
+                  <Clock className={`h-4 w-4 ${isInactive ? 'text-error' : 'text-primary'}`} />
+                  <span className={isInactive ? 'text-error' : ''}>
                     {account.profile?.total_live_hours || 0}h de live
                   </span>
                 </div>
               </div>
             )}
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
-              className={`text-sm bg-black text-white hover:bg-black hover:text-white`}
+              className="text-sm hover:bg-accent hover:text-accent-foreground"
               onClick={onTogglePassword}
             >
               <span className="mr-2">
@@ -73,10 +73,10 @@ export const AccountCard = ({
               )}
             </Button>
             <Button
-              variant="ghost"
+              variant="destructive"
               size="icon"
               onClick={onDelete}
-              className={`h-8 w-8 text-white bg-black hover:bg-black hover:text-white`}
+              className="h-8 w-8"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
