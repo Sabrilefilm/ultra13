@@ -6,14 +6,18 @@ import { supabase } from "@/lib/supabase";
 
 export const TikTokLogin = () => {
   const { toast } = useToast();
+  const TIKTOK_CLIENT_ID = 'Aw455byinoq8zkkw';
 
   const handleTikTokLogin = async () => {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'tiktok' as any, // On type cast temporairement pour éviter l'erreur TS
+        provider: 'tiktok' as any,
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
-          scopes: 'user.info.basic,video.list' // Ajout des scopes TikTok nécessaires
+          scopes: 'user.info.basic,video.list',
+          queryParams: {
+            client_key: TIKTOK_CLIENT_ID
+          }
         }
       });
 
