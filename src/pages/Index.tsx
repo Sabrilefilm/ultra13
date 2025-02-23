@@ -483,14 +483,14 @@ const Index = () => {
       <div className="min-h-screen bg-[#1A1F2C] text-white p-4 flex flex-col items-center justify-center">
         <div className="w-full max-w-[450px] mx-auto space-y-8">
           <div className="text-center space-y-6">
-            <div className="flex flex-col items-center justify-center space-y-3">
-              <div className="flex items-center justify-center gap-3">
-                <Rocket className="w-16 h-16 text-primary animate-pulse" />
-                <h1 className="text-7xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-red-500 bg-clip-text text-transparent">
+            <div className="flex flex-col items-center justify-center space-y-2">
+              <div className="flex items-center gap-2">
+                <Rocket className="w-14 h-14 text-primary animate-pulse" />
+                <h1 className="text-6xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-red-500 bg-clip-text text-transparent">
                   ULTRA
                 </h1>
               </div>
-              <p className="agency-text text-lg bg-gradient-to-br from-white via-[#38bdf8] to-[#0ea5e9] bg-clip-text text-transparent">
+              <p className="agency-text text-base bg-gradient-to-br from-white via-[#38bdf8] to-[#0ea5e9] bg-clip-text text-transparent">
                 by Agency Phocéen
               </p>
             </div>
