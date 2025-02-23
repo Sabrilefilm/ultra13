@@ -72,10 +72,11 @@ const Index = () => {
             />
           )}
 
-          {role === 'creator' && (
+          {['creator', 'manager', 'agent'].includes(role || '') && (
             <CreatorDashboard
               onOpenSponsorshipForm={() => setIsSponsorshipModalOpen(true)}
               onOpenSponsorshipList={() => setShowSponsorshipList(true)}
+              role={role}
             />
           )}
 
@@ -104,6 +105,6 @@ const Index = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Index;
