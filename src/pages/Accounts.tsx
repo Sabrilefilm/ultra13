@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -175,16 +176,20 @@ const Accounts = () => {
                     </div>
                     
                     {account.role === 'creator' && (
-                      <div className="border-t pt-4 grid gap-4">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Diamond className="h-4 w-4" />
-                          <span>Total des diamants : {account.profile?.total_diamonds || 0}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Clock className="h-4 w-4" />
-                          <span>
-                            Temps total de streaming : {formatTime(account.profile?.total_viewing_time || 0)}
-                          </span>
+                      <div className="border-t pt-4">
+                        <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <Diamond className="h-4 w-4" />
+                            <span>{account.profile?.total_diamonds || 0} diamants</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            <span>Jours</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            <span>Heure de live</span>
+                          </div>
                         </div>
                       </div>
                     )}
