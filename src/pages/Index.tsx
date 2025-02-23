@@ -57,9 +57,10 @@ const Index = () => {
               handle={`@${roleDisplay}`}
             />
             <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">
-                Vous devez faire 7 jours et 15 heures de live
-              </span>
+              <div className="text-sm text-muted-foreground text-right">
+                <p className="lowercase">vous devez obligatoirement faire</p>
+                <p className="lowercase">7 jours et 15 heures de live</p>
+              </div>
               <Button
                 variant="outline"
                 onClick={handleLogout}
