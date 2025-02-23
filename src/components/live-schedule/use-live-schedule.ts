@@ -12,16 +12,32 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
 
   const fetchProfileId = async (username: string) => {
     try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("username", username)
-        .single();
+      // Pour le fondateur Sabri, on utilise directement son ID
+      if (username === "Sabri") {
+        const { data: userAccounts, error: userError } = await supabase
+          .from("user_accounts")
+          .select("id")
+          .eq("username", "Sabri")
+          .single();
 
-      if (error) throw error;
-      if (data) {
-        setProfileId(data.id);
-        return data.id;
+        if (userError) throw userError;
+        if (userAccounts) {
+          setProfileId(userAccounts.id);
+          return userAccounts.id;
+        }
+      } else {
+        // Pour les autres utilisateurs
+        const { data: userAccounts, error: userError } = await supabase
+          .from("user_accounts")
+          .select("id")
+          .eq("username", username)
+          .single();
+
+        if (userError) throw userError;
+        if (userAccounts) {
+          setProfileId(userAccounts.id);
+          return userAccounts.id;
+        }
       }
     } catch (error) {
       console.error("Erreur lors de la récupération du profil:", error);
