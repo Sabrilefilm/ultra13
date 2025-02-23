@@ -12,6 +12,7 @@ import { RewardSettingsModal } from "@/components/RewardSettingsModal";
 import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
 import { RewardsPanel } from "@/components/RewardsPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LiveScheduleModal } from "@/components/LiveScheduleModal";
 
 type Role = 'client' | 'creator' | 'manager' | 'founder';
 
@@ -27,6 +28,9 @@ const Index = () => {
     diamondValue: number;
     minimumPayout: number;
   } | null>(null);
+  const [isLiveScheduleModalOpen, setIsLiveScheduleModalOpen] = useState(false);
+  const [selectedCreatorId, setSelectedCreatorId] = useState<string>("");
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -168,6 +172,11 @@ const Index = () => {
       });
       throw error;
     }
+  };
+
+  const handleOpenLiveSchedule = (creatorId: string) => {
+    setSelectedCreatorId(creatorId);
+    setIsLiveScheduleModalOpen(true);
   };
 
   const renderContentForRole = () => {
@@ -315,6 +324,13 @@ const Index = () => {
                 </div>
               </div>
             </div>
+
+            <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
+              <h2 className="text-2xl font-bold mb-4">Mes Horaires de Live</h2>
+              <Button onClick={() => handleOpenLiveSchedule(userId)}>
+                Voir mes horaires
+              </Button>
+            </div>
           </div>
         );
 
@@ -444,7 +460,7 @@ const Index = () => {
                 <Button
                   variant="outline"
                   className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5"
-                  onClick={() => {}} // À implémenter
+                  onClick={() => handleOpenLiveSchedule(userId)}
                 >
                   <div className="flex items-center gap-2">
                     <Settings className="w-5 h-5 text-primary" />
