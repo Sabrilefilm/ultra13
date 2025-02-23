@@ -10,6 +10,8 @@ import { supabase } from "@/lib/supabase";
 import { CreateAccountModal } from "@/components/CreateAccountModal";
 import { RewardSettingsModal } from "@/components/RewardSettingsModal";
 import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
+import { RewardsPanel } from "@/components/RewardsPanel";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Role = 'client' | 'creator' | 'manager' | 'founder';
 
@@ -191,6 +193,8 @@ const Index = () => {
               />
             </div>
 
+            <RewardsPanel role="client" userId="user-id-placeholder" />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
@@ -266,6 +270,8 @@ const Index = () => {
               />
             </div>
 
+            <RewardsPanel role="creator" userId="user-id-placeholder" />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
@@ -332,6 +338,8 @@ const Index = () => {
                 icon={<Award className="w-6 h-6 text-primary" />}
               />
             </div>
+
+            <RewardsPanel role="manager" userId="manager-id-placeholder" />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">

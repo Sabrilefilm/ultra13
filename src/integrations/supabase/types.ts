@@ -42,6 +42,44 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_rewards: {
+        Row: {
+          amount_earned: number
+          created_at: string
+          creator_id: string
+          diamonds_count: number
+          id: string
+          payment_status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_earned?: number
+          created_at?: string
+          creator_id: string
+          diamonds_count?: number
+          id?: string
+          payment_status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_earned?: number
+          created_at?: string
+          creator_id?: string
+          diamonds_count?: number
+          id?: string
+          payment_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_rewards_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_settings: {
         Row: {
           created_at: string
