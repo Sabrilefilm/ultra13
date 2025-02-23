@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { CreateAccountModal } from "@/components/CreateAccountModal";
 import { RewardSettingsModal } from "@/components/RewardSettingsModal";
+import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
 
 type Role = 'client' | 'creator' | 'manager' | 'founder';
 
@@ -20,6 +21,7 @@ const Index = () => {
   const [role, setRole] = useState<Role | null>(null);
   const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
   const [isRewardSettingsModalOpen, setIsRewardSettingsModalOpen] = useState(false);
+  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
   const [platformSettings, setPlatformSettings] = useState<{
     diamondValue: number;
     minimumPayout: number;
@@ -511,6 +513,13 @@ const Index = () => {
                   className="w-full"
                 />
               </div>
+              <Button
+                variant="link"
+                className="text-sm text-muted-foreground hover:text-primary p-0"
+                onClick={() => setIsForgotPasswordModalOpen(true)}
+              >
+                Mot de passe oublié ?
+              </Button>
             </div>
             <Button
               className="w-full"
@@ -520,6 +529,10 @@ const Index = () => {
             </Button>
           </div>
         </div>
+        <ForgotPasswordModal
+          isOpen={isForgotPasswordModalOpen}
+          onClose={() => setIsForgotPasswordModalOpen(false)}
+        />
       </div>
     );
   }
