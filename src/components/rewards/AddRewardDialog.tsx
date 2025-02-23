@@ -38,27 +38,11 @@ export function AddRewardDialog({ isOpen, onOpenChange, onSuccess }: AddRewardDi
     }
 
     try {
-      const { data: userAccount, error: userError } = await supabase
-        .from("user_accounts")
-        .select("id")
-        .eq("username", recipientId)
-        .eq("role", "creator")
-        .single();
-
-      if (userError || !userAccount) {
-        toast({
-          title: "Erreur",
-          description: "Créateur non trouvé ou non autorisé",
-          variant: "destructive",
-        });
-        return;
-      }
-
       const { error: insertError } = await supabase
         .from("creator_rewards")
         .insert([
           {
-            creator_id: userAccount.id,
+            creator_id: recipientId,
             diamonds_count: parseInt(diamonds),
           }
         ]);

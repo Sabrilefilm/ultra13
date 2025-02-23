@@ -16,27 +16,11 @@ export function useRewards(role: string, userId: string) {
     queryFn: async () => {
       let query = supabase
         .from("creator_rewards")
-        .select(`
-          *,
-          user_accounts!creator_id(username)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (role === "creator") {
-        const { data: userAccount, error: userError } = await supabase
-          .from("user_accounts")
-          .select("id")
-          .eq("username", userId)
-          .single();
-
-        if (userError) {
-          console.error("Error fetching user account:", userError);
-          return [];
-        }
-
-        if (userAccount) {
-          query = query.eq("creator_id", userAccount.id);
-        }
+        query = query.eq("creator_id", userId);
       }
 
       const { data, error } = await query;
@@ -48,7 +32,7 @@ export function useRewards(role: string, userId: string) {
 
       return (data || []).map(reward => ({
         ...reward,
-        creator_username: reward.user_accounts?.username
+        creator_username: reward.creator_id
       }));
     },
   });

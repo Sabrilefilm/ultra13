@@ -70,15 +70,7 @@ export type Database = {
           payment_status?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "creator_rewards_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       live_schedules: {
         Row: {
