@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Accounts from "./pages/Accounts";
 import NotFound from "./pages/NotFound";
 import UserManagement from "./pages/UserManagement";
+import RewardsManagement from "./pages/RewardsManagement";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/accounts" element={<Accounts />} />
               <Route path="/user-management" element={<UserManagement />} />
+              <Route path="/rewards-management" element={<RewardsManagement />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

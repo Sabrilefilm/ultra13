@@ -85,6 +85,20 @@ export const FounderDashboard = ({
             Voir et gérer tous les utilisateurs (mots de passe, bannissement, suppression)
           </p>
         </Button>
+
+        <Button
+          variant="outline"
+          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
+          onClick={() => navigate("/rewards-management")}
+        >
+          <div className="flex items-center gap-2">
+            <Diamond className="w-5 h-5 text-primary" />
+            <span className="font-semibold">Gestion des Récompenses</span>
+          </div>
+          <p className="text-sm text-muted-foreground text-left">
+            Gérer les diamants et les récompenses des créateurs
+          </p>
+        </Button>
       </div>
     </div>
   );
