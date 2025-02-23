@@ -21,6 +21,20 @@ export const Footer = () => {
           >
             phoceenagency.fr
           </a>
+
+          <Button 
+            variant="outline" 
+            asChild
+            className="border-purple-600 text-purple-400 hover:bg-purple-600 hover:text-white transition-colors"
+          >
+            <a 
+              href="https://live-backstage.tiktok.com/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              Backstage
+            </a>
+          </Button>
           
           <Button 
             variant="outline" 
