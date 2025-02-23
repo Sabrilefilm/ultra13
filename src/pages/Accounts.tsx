@@ -2,6 +2,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface UserAccount {
   id: string;
@@ -12,6 +15,7 @@ interface UserAccount {
 }
 
 export default function Accounts() {
+  const navigate = useNavigate();
   const { data: accounts, isLoading, error } = useQuery({
     queryKey: ['accounts'],
     queryFn: async () => {
@@ -29,7 +33,18 @@ export default function Accounts() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">Liste des comptes utilisateurs</h1>
+      <div className="flex items-center gap-4 mb-6">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Retour
+        </Button>
+        <h1 className="text-2xl font-bold">Liste des comptes utilisateurs</h1>
+      </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
