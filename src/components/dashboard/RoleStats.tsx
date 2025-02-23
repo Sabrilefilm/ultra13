@@ -3,6 +3,7 @@ import { Users, Diamond, Clock, Gift, Calendar } from "lucide-react";
 import { StatsCard } from "@/components/StatsCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 interface RoleStatsProps {
   role: string;
@@ -20,14 +21,35 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
     queryFn: async () => {
       if (role !== "creator" || !userId) return null;
       
+      // D'abord, récupérer l'ID du créateur depuis user_accounts
+      const { data: userAccount, error: userError } = await supabase
+        .from("user_accounts")
+        .select("id")
+        .eq("username", userId)
+        .eq("role", "creator")
+        .single();
+
+      if (userError) {
+        console.error("Error fetching user account:", userError);
+        toast.error("Erreur lors de la récupération des données");
+        return null;
+      }
+
+      if (!userAccount) {
+        console.log("No user account found");
+        return null;
+      }
+
+      // Ensuite, récupérer les données de live_schedules avec l'ID du créateur
       const { data, error } = await supabase
         .from("live_schedules")
         .select("hours, days")
-        .eq("creator_id", userId)
+        .eq("creator_id", userAccount.id)
         .single();
 
       if (error) {
         console.error("Error fetching live schedule:", error);
+        toast.error("Erreur lors de la récupération des horaires");
         return null;
       }
 
