@@ -84,31 +84,28 @@ export type Database = {
         Row: {
           created_at: string
           creator_id: string
-          day_of_week: string
-          end_time: string
+          days: number | null
+          hours: number | null
           id: string
           is_active: boolean | null
-          start_time: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           creator_id: string
-          day_of_week: string
-          end_time: string
+          days?: number | null
+          hours?: number | null
           id?: string
           is_active?: boolean | null
-          start_time: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           creator_id?: string
-          day_of_week?: string
-          end_time?: string
+          days?: number | null
+          hours?: number | null
           id?: string
           is_active?: boolean | null
-          start_time?: string
           updated_at?: string
         }
         Relationships: [
