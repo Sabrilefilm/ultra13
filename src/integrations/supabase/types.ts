@@ -274,6 +274,39 @@ export type Database = {
         }
         Relationships: []
       }
+      upcoming_matches: {
+        Row: {
+          created_at: string
+          creator_id: string
+          id: string
+          match_date: string
+          opponent_id: string
+          platform: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          id?: string
+          match_date: string
+          opponent_id: string
+          platform?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          id?: string
+          match_date?: string
+          opponent_id?: string
+          platform?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_accounts: {
         Row: {
           created_at: string
