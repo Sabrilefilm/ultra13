@@ -1,3 +1,4 @@
+
 import { Award, Clock, Diamond, Gift, Settings, Users, Rocket } from "lucide-react";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { StatsCard } from "@/components/StatsCard";
@@ -483,9 +484,9 @@ const Index = () => {
       <div className="min-h-screen bg-[#1A1F2C] text-white p-4 flex flex-col items-center justify-center">
         <div className="w-full max-w-[450px] mx-auto space-y-8">
           <div className="text-center space-y-6">
-            <div className="flex items-center justify-center gap-3">
-              <Rocket className="w-10 h-10 text-primary animate-pulse" />
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <div className="flex items-center justify-center gap-3 mb-8">
+              <Rocket className="w-16 h-16 text-primary animate-pulse" />
+              <h1 className="text-7xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-red-500 bg-clip-text text-transparent animate-colors">
                 ULTRA
               </h1>
             </div>
