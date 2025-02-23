@@ -1,3 +1,4 @@
+
 import { Award, Clock, Diamond, Gift, Settings, Users, Rocket } from "lucide-react";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { StatsCard } from "@/components/StatsCard";
@@ -550,10 +551,15 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="fixed bottom-4 flex gap-4 text-sm text-white/40">
-          <button className="hover:text-white/60">Aide</button>
-          <button className="hover:text-white/60">Confidentialité</button>
-          <button className="hover:text-white/60">Conditions</button>
+        <div className="fixed bottom-16 flex flex-col items-center gap-4">
+          <p className="text-2xl font-bold text-white/80 bg-gradient-to-r from-blue-200 to-blue-100 bg-clip-text text-transparent">
+            Agency phoceen
+          </p>
+          <div className="flex gap-4 text-sm text-white/40">
+            <button className="hover:text-white/60">Aide</button>
+            <button className="hover:text-white/60">Confidentialité</button>
+            <button className="hover:text-white/60">Conditions</button>
+          </div>
         </div>
 
         <ForgotPasswordModal
