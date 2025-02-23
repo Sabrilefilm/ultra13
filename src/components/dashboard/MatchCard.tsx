@@ -27,6 +27,9 @@ export const MatchCard = ({
   const isMatchOff = match.status === 'off';
   const showRequirements = ['agent', 'manager', 'creator'].includes(role);
 
+  console.log("Current role in MatchCard:", role); // Debug log
+  console.log("Should show requirements:", showRequirements); // Debug log
+
   return (
     <div 
       className={`flex flex-col space-y-4 p-4 border rounded-lg transition-all duration-300 ${

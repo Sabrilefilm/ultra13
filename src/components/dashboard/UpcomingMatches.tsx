@@ -12,6 +12,8 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
   const canManageMatch = role === 'founder' || role === 'manager';
   const canDeleteMatch = role === 'founder';
 
+  console.log("Current role in UpcomingMatches:", role); // Debug log
+
   return (
     <Card className="bg-white text-black">
       <CardHeader>
