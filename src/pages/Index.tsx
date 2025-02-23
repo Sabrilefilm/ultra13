@@ -552,8 +552,8 @@ const Index = () => {
 
         <div className="fixed bottom-16 flex flex-col items-center gap-6">
           <div className="relative group cursor-default">
-            <div className="absolute -inset-1 bg-gradient-to-r from-violet-500 via-blue-500 to-red-500 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-            <p className="relative text-3xl font-black tracking-wider bg-gradient-to-br from-white to-white/60 bg-clip-text text-transparent px-4 py-2">
+            <div className="absolute -inset-1 bg-gradient-to-r from-[#0ea5e9] via-[#38bdf8] to-white rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+            <p className="agency-text relative text-4xl bg-gradient-to-br from-white via-[#38bdf8] to-[#0ea5e9] bg-clip-text text-transparent px-6 py-3">
               Agency phocéen
             </p>
           </div>

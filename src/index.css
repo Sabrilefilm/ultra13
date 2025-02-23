@@ -1,4 +1,6 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -76,24 +78,32 @@
   }
 }
 
-@keyframes color-cycle {
+@keyframes glow {
   0% {
-    border-color: rgb(139, 92, 246); /* violet */
+    box-shadow: 0 0 5px #fff,
+                0 0 10px #fff,
+                0 0 15px #0ea5e9,
+                0 0 20px #0ea5e9,
+                0 0 25px #0ea5e9;
   }
-  33% {
-    border-color: rgb(59, 130, 246); /* blue */
-  }
-  66% {
-    border-color: rgb(239, 68, 68); /* red */
+  50% {
+    box-shadow: 0 0 10px #fff,
+                0 0 20px #fff,
+                0 0 30px #38bdf8,
+                0 0 40px #38bdf8,
+                0 0 50px #38bdf8;
   }
   100% {
-    border-color: rgb(139, 92, 246); /* violet */
+    box-shadow: 0 0 5px #fff,
+                0 0 10px #fff,
+                0 0 15px #0ea5e9,
+                0 0 20px #0ea5e9,
+                0 0 25px #0ea5e9;
   }
 }
 
-@layer utilities {
-  .animate-colors {
-    animation: color-cycle 6s linear infinite;
-    border-width: 2px;
-  }
+.agency-text {
+  font-family: 'Righteous', cursive;
+  animation: glow 3s ease-in-out infinite;
 }
+
