@@ -60,7 +60,7 @@ export const AccountCard = ({
             <Button
               variant="ghost"
               size="sm"
-              className={`text-sm ${isInactive ? 'text-white hover:text-white/90' : ''}`}
+              className={`text-sm bg-black text-white hover:bg-black/90`}
               onClick={onTogglePassword}
             >
               <span className="mr-2">
@@ -76,7 +76,7 @@ export const AccountCard = ({
               variant="ghost"
               size="icon"
               onClick={onDelete}
-              className={`h-8 w-8 ${isInactive ? 'text-white hover:text-white/90' : 'hover:bg-destructive hover:text-destructive-foreground'}`}
+              className={`h-8 w-8 text-white bg-black hover:bg-black/90`}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
