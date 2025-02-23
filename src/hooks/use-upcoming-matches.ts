@@ -65,22 +65,21 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
       if (error) throw error;
 
       // Animation de confettis pendant 2 minutes
-      const duration = 2 * 60 * 1000; // 2 minutes en millisecondes
+      const duration = 2 * 60 * 1000;
       const animationEnd = Date.now() + duration;
       const defaults = { 
         startVelocity: 30, 
         spread: 360, 
         ticks: 60, 
-        zIndex: 0,
-        gravity: 0.5, // Réduit la gravité pour que les confettis tombent plus lentement
-        drift: 0 // Empêche les confettis de dériver sur les côtés
+        zIndex: -1, // Met l'animation en arrière-plan
+        gravity: 0.5,
+        drift: 0
       };
 
       function randomInRange(min: number, max: number) {
         return Math.random() * (max - min) + min;
       }
 
-      // Animation continue
       const interval = setInterval(function() {
         const timeLeft = animationEnd - Date.now();
 
@@ -88,10 +87,8 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
           return clearInterval(interval);
         }
 
-        // Augmente la fréquence et la quantité de confettis
         const particleCount = 100;
 
-        // Lance des confettis depuis plusieurs points
         confetti({
           ...defaults,
           particleCount,
@@ -107,7 +104,7 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
           particleCount,
           origin: { x: randomInRange(0.7, 0.9), y: 0 }
         });
-      }, 100); // Réduit l'intervalle pour une animation plus fluide
+      }, 100);
 
       toast({
         title: "🎉 Gagnant défini !",
