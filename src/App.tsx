@@ -21,12 +21,12 @@ const ThemeToggle = () => {
     <Button
       variant="outline"
       size="icon"
-      className="fixed top-4 right-4 rounded-full w-10 h-10 bg-background/50 backdrop-blur-sm border border-border/50"
+      className="fixed top-4 right-4 rounded-full w-10 h-10 bg-background/50 backdrop-blur-sm border border-border/50 z-50"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
     >
       <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
       <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-      <span className="sr-only">Toggle theme</span>
+      <span className="sr-only">Changer le thème</span>
     </Button>
   );
 };
@@ -35,16 +35,18 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="dark" storageKey="ultra-theme">
       <TooltipProvider>
-        <ThemeToggle />
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/accounts" element={<Accounts />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <div className="min-h-screen bg-background text-foreground">
+          <ThemeToggle />
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/accounts" element={<Accounts />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </div>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
