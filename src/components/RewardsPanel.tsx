@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { CreatorSelect } from "@/components/live-schedule/creator-select";
 
 interface Reward {
   id: string;
@@ -115,12 +116,10 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="recipientId">Identifiant du créateur</Label>
-                  <Input
-                    id="recipientId"
+                  <Label>Sélectionner un créateur</Label>
+                  <CreatorSelect
                     value={recipientId}
-                    onChange={(e) => setRecipientId(e.target.value)}
-                    placeholder="@username"
+                    onSelect={setRecipientId}
                   />
                 </div>
                 <div className="space-y-2">
