@@ -2,7 +2,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, Eye, EyeOff, Diamond, Calendar, Clock } from "lucide-react";
+import { Trash2, Eye, EyeOff, Diamond, Calendar, Clock, Info } from "lucide-react";
 import { Account } from "@/types/accounts";
 
 interface AccountCardProps {
@@ -71,6 +71,14 @@ export const AccountCard = ({
                 <span>{account.profile?.total_live_hours || 0}h de live</span>
               </div>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4 w-full text-sm bg-secondary/30 hover:bg-secondary/50 backdrop-blur-sm border-secondary/50"
+            >
+              <Info className="h-4 w-4 mr-2" />
+              Plus d'informations
+            </Button>
           </div>
         )}
       </div>
