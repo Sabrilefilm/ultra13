@@ -18,12 +18,18 @@ export const AccountCard = ({
   onTogglePassword, 
   onDelete 
 }: AccountCardProps) => {
+  const isInactive = account.role === 'creator' && 
+    (account.profile?.days_streamed || 0) < 3 && 
+    (account.profile?.total_live_hours || 0) === 0;
+
   return (
-    <Card className="p-4 hover:shadow-md transition-shadow">
+    <Card className={`p-4 hover:shadow-md transition-shadow ${isInactive ? 'border-[#ea384c] bg-[#ea384c]/5' : ''}`}>
       <div className="flex flex-col space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-medium">{account.username}</h3>
+            <h3 className={`font-medium ${isInactive ? 'text-[#ea384c]' : ''}`}>
+              {account.username}
+            </h3>
             <p className="text-sm text-muted-foreground">
               {account.role === 'creator' ? 'Créateur' : account.role}
             </p>
@@ -32,16 +38,22 @@ export const AccountCard = ({
             {account.role === 'creator' && (
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <Diamond className="h-4 w-4" />
-                  <span>{account.profile?.total_diamonds || 0} diamants</span>
+                  <Diamond className={`h-4 w-4 ${isInactive ? 'text-[#ea384c]' : ''}`} />
+                  <span className={isInactive ? 'text-[#ea384c]' : ''}>
+                    {account.profile?.total_diamonds || 0} diamants
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>{account.profile?.days_streamed || 0} Jours</span>
+                  <Calendar className={`h-4 w-4 ${isInactive ? 'text-[#ea384c]' : ''}`} />
+                  <span className={isInactive ? 'text-[#ea384c]' : ''}>
+                    {account.profile?.days_streamed || 0} Jours
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <span>{account.profile?.total_live_hours || 0}h de live</span>
+                  <Clock className={`h-4 w-4 ${isInactive ? 'text-[#ea384c]' : ''}`} />
+                  <span className={isInactive ? 'text-[#ea384c]' : ''}>
+                    {account.profile?.total_live_hours || 0}h de live
+                  </span>
                 </div>
               </div>
             )}
