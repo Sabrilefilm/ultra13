@@ -14,6 +14,8 @@ import { useIndexAuth } from "@/hooks/use-index-auth";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { useAccountManagement } from "@/hooks/use-account-management";
 import { UpcomingMatches } from "@/components/dashboard/UpcomingMatches";
+import { CreateMatchPosterDialog } from "@/components/matches/CreateMatchPosterDialog";
+import { ImageIcon } from "lucide-react";
 
 const Index = () => {
   const { isAuthenticated, username, role, handleLogout, handleLogin } = useIndexAuth();
@@ -28,6 +30,7 @@ const Index = () => {
   const [selectedCreatorId, setSelectedCreatorId] = useState<string>("");
   const [isSponsorshipModalOpen, setIsSponsorshipModalOpen] = useState(false);
   const [showSponsorshipList, setShowSponsorshipList] = useState(false);
+  const [isCreatePosterModalOpen, setIsCreatePosterModalOpen] = useState(false);
 
   if (!isAuthenticated) {
     return (
@@ -61,6 +64,14 @@ const Index = () => {
                 <p className="lowercase">vous devez obligatoirement faire</p>
                 <p className="lowercase">7J 15H de lives</p>
               </div>
+              <Button
+                variant="outline"
+                onClick={() => setIsCreatePosterModalOpen(true)}
+                className="gap-2"
+              >
+                <ImageIcon className="w-4 h-4" />
+                Créer une affiche
+              </Button>
               <Button
                 variant="outline"
                 onClick={handleLogout}
@@ -116,6 +127,11 @@ const Index = () => {
               role={role || ''}
               isScheduleMatchModalOpen={isScheduleMatchModalOpen}
               setIsScheduleMatchModalOpen={setIsScheduleMatchModalOpen}
+            />
+
+            <CreateMatchPosterDialog
+              isOpen={isCreatePosterModalOpen}
+              onClose={() => setIsCreatePosterModalOpen(false)}
             />
           </div>
         </div>
