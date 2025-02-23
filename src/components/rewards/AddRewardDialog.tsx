@@ -11,12 +11,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, ArrowLeft } from "lucide-react";
+import { Plus } from "lucide-react";
 import { CreatorSelect } from "@/components/live-schedule/creator-select";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 
 interface AddRewardDialogProps {
   isOpen: boolean;
@@ -29,7 +28,6 @@ export function AddRewardDialog({ isOpen, onOpenChange, onSuccess }: AddRewardDi
   const [recipientId, setRecipientId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   const handleAddReward = async () => {
     if (!recipientId || !diamonds || parseInt(diamonds) <= 0) {
@@ -69,63 +67,48 @@ export function AddRewardDialog({ isOpen, onOpenChange, onSuccess }: AddRewardDi
     }
   };
 
-  const handleReturn = () => {
-    navigate('/');
-  };
-
   return (
-    <>
-      <Button 
-        variant="ghost" 
-        onClick={handleReturn}
-        className="mb-4"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Retour à l'accueil
-      </Button>
-
-      <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogTrigger asChild>
-          <Button variant="outline" className="gap-2">
-            <Plus className="w-4 h-4" />
-            Ajouter des diamants
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Ajouter des diamants</DialogTitle>
-            <DialogDescription>
-              Ajoutez des diamants pour un créateur
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Sélectionner un créateur</Label>
-              <CreatorSelect
-                value={recipientId}
-                onSelect={setRecipientId}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="diamonds">Nombre de diamants</Label>
-              <Input
-                id="diamonds"
-                type="number"
-                min="1"
-                value={diamonds}
-                onChange={(e) => setDiamonds(e.target.value)}
-              />
-            </div>
-            <Button 
-              onClick={handleAddReward} 
-              className="w-full"
-              disabled={isLoading || !recipientId || !diamonds || parseInt(diamonds) <= 0}
-            >
-              {isLoading ? "Ajout en cours..." : "Ajouter les diamants"}
-            </Button>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="gap-2">
+          <Plus className="w-4 h-4" />
+          Ajouter des diamants
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Ajouter des diamants</DialogTitle>
+          <DialogDescription>
+            Ajoutez des diamants pour un créateur
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label>Sélectionner un créateur</Label>
+            <CreatorSelect
+              value={recipientId}
+              onSelect={setRecipientId}
+            />
           </div>
-        </DialogContent>
-      </Dialog>
-    </>
+          <div className="space-y-2">
+            <Label htmlFor="diamonds">Nombre de diamants</Label>
+            <Input
+              id="diamonds"
+              type="number"
+              min="1"
+              value={diamonds}
+              onChange={(e) => setDiamonds(e.target.value)}
+            />
+          </div>
+          <Button 
+            onClick={handleAddReward} 
+            className="w-full"
+            disabled={isLoading || !recipientId || !diamonds || parseInt(diamonds) <= 0}
+          >
+            {isLoading ? "Ajout en cours..." : "Ajouter les diamants"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
