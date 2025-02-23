@@ -41,7 +41,7 @@ export const useIndexAuth = () => {
         title: "Erreur",
         description: "Veuillez saisir un identifiant",
         variant: "destructive",
-        duration: 60000,
+        duration: 10000, // 10 secondes
       });
       return;
     }
@@ -51,11 +51,14 @@ export const useIndexAuth = () => {
         setRole('founder');
         setUsername(username);
         setIsAuthenticated(true);
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('userRole', 'founder');
+        localStorage.setItem('username', username);
         playNotificationSound();
         toast({
           title: "Connexion réussie",
           description: "Bienvenue dans l'espace Fondateur",
-          duration: 60000,
+          duration: 10000, // 10 secondes
         });
       } else {
         const { data, error } = await supabase
@@ -72,11 +75,14 @@ export const useIndexAuth = () => {
           setRole(data.role as Role);
           setUsername(username);
           setIsAuthenticated(true);
+          localStorage.setItem('isAuthenticated', 'true');
+          localStorage.setItem('userRole', data.role);
+          localStorage.setItem('username', username);
           playNotificationSound();
           toast({
             title: "Connexion réussie",
             description: `Bienvenue dans votre espace ${data.role}`,
-            duration: 60000,
+            duration: 10000, // 10 secondes
           });
         } else {
           throw new Error("Identifiant ou mot de passe incorrect");
@@ -88,7 +94,7 @@ export const useIndexAuth = () => {
         title: "Erreur",
         description: "Identifiant ou mot de passe incorrect",
         variant: "destructive",
-        duration: 60000,
+        duration: 10000, // 10 secondes
       });
     }
   };
