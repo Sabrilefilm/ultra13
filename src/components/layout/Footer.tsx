@@ -7,11 +7,9 @@ export const Footer = () => {
     <footer className="w-full bg-[#1A1F2C] border-t border-gray-800 mt-auto py-4">
       <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <img 
-            src="/phoceenagency-logo.svg" 
-            alt="Phocéen Agency"
-            className="h-8 w-auto"
-          />
+          <span className="agency-text text-2xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-white">
+            Phocéen Agency
+          </span>
         </div>
         
         <div className="flex items-center gap-4">
