@@ -44,13 +44,15 @@ const Index = () => {
     );
   }
 
+  const roleDisplay = role === 'founder' ? 'Fondateur' : role;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
           <ProfileHeader
             username={username}
-            handle={`@${role}`}
+            handle={`@${roleDisplay}`}
           />
           <div className="flex items-center gap-2">
             <Button
@@ -122,6 +124,7 @@ const Index = () => {
                 isOpen={showPersonalInfo} 
                 onClose={() => setShowPersonalInfo(false)}
                 creatorDetails={null}
+                isFounder={role === 'founder'}
               />
             </DialogContent>
           </Dialog>
