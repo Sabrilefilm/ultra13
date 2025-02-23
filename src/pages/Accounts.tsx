@@ -1,9 +1,8 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Eye, EyeOff, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Save, Trash2, Diamond, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -11,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface UserAccount {
   id: string;
@@ -18,6 +18,14 @@ interface UserAccount {
   password: string;
   role: string;
   created_at: string;
+}
+
+interface UserStats {
+  id: string;
+  total_diamonds: number;
+  total_viewing_time: number;
+  role: string;
+  username: string;
 }
 
 interface PasswordDialogProps {
@@ -76,7 +84,7 @@ export default function Accounts() {
   const [accountToDelete, setAccountToDelete] = useState<UserAccount | null>(null);
   const [passwordVisibility, setPasswordVisibility] = useState<Record<string, boolean>>({});
 
-  const { data: accounts, isLoading, error, refetch } = useQuery({
+  const { data: accounts, isLoading: isLoadingAccounts, error: accountsError, refetch } = useQuery({
     queryKey: ['accounts'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -85,6 +93,18 @@ export default function Accounts() {
       
       if (error) throw error;
       return data as UserAccount[];
+    }
+  });
+
+  const { data: stats, isLoading: isLoadingStats } = useQuery({
+    queryKey: ['profiles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, total_diamonds, total_viewing_time, role, username');
+      
+      if (error) throw error;
+      return data as UserStats[];
     }
   });
 
@@ -142,8 +162,19 @@ export default function Accounts() {
     setAccountToDelete(null);
   };
 
-  if (isLoading) return <div className="p-8">Chargement...</div>;
-  if (error) return <div className="p-8 text-red-500">Une erreur est survenue</div>;
+  const formatTime = (minutes: number) => {
+    const days = Math.floor(minutes / (24 * 60));
+    const hours = Math.floor((minutes % (24 * 60)) / 60);
+    const remainingMinutes = minutes % 60;
+
+    return `${days}j ${hours}h ${remainingMinutes}m`;
+  };
+
+  if (isLoadingAccounts || isLoadingStats) return <div className="p-8">Chargement...</div>;
+  if (accountsError) return <div className="p-8 text-red-500">Une erreur est survenue</div>;
+
+  const creators = stats?.filter(user => user.role === 'creator') || [];
+  const managers = stats?.filter(user => user.role === 'manager') || [];
 
   return (
     <div className="p-8">
@@ -157,9 +188,84 @@ export default function Accounts() {
           <ArrowLeft className="w-4 h-4" />
           Retour
         </Button>
-        <h1 className="text-2xl font-bold">Liste des comptes utilisateurs</h1>
+        <h1 className="text-2xl font-bold">Espace Administrateur</h1>
       </div>
-      <div className="rounded-md border">
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Diamond className="w-5 h-5 text-primary" />
+              Statistiques Créateurs
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nom</TableHead>
+                  <TableHead>Diamants</TableHead>
+                  <TableHead>Temps Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {creators.map((creator) => (
+                  <TableRow key={creator.id}>
+                    <TableCell>{creator.username}</TableCell>
+                    <TableCell>{creator.total_diamonds || 0}</TableCell>
+                    <TableCell>{formatTime(creator.total_viewing_time || 0)}</TableCell>
+                  </TableRow>
+                ))}
+                {creators.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center text-muted-foreground">
+                      Aucun créateur trouvé
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-primary" />
+              Statistiques Managers
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nom</TableHead>
+                  <TableHead>Créateurs Gérés</TableHead>
+                  <TableHead>Performance</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {managers.map((manager) => (
+                  <TableRow key={manager.id}>
+                    <TableCell>{manager.username}</TableCell>
+                    <TableCell>0</TableCell>
+                    <TableCell>-</TableCell>
+                  </TableRow>
+                ))}
+                {managers.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center text-muted-foreground">
+                      Aucun manager trouvé
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="rounded-md border mb-6">
         <Table>
           <TableHeader>
             <TableRow>
