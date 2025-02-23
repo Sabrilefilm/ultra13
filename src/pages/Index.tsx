@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ProfileHeader } from "@/components/ProfileHeader";
@@ -55,12 +56,17 @@ const Index = () => {
               username={username}
               handle={`@${roleDisplay}`}
             />
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-            >
-              Déconnexion
-            </Button>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground">
+                Vous devez faire 7 jours et 15 heures de live
+              </span>
+              <Button
+                variant="outline"
+                onClick={handleLogout}
+              >
+                Déconnexion
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-6">
