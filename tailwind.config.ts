@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -73,56 +74,6 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "neon-pulse": {
-          "0%, 100%": { 
-            borderColor: "rgba(99, 102, 241, 0.7)",
-            boxShadow: "0 0 20px rgba(99, 102, 241, 0.5)"
-          },
-          "50%": { 
-            borderColor: "rgba(139, 92, 246, 0.7)",
-            boxShadow: "0 0 30px rgba(139, 92, 246, 0.5)"
-          }
-        },
-        "neon-night": {
-          "0%, 100%": { 
-            borderColor: "rgba(59, 130, 246, 0.7)",
-            boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)"
-          },
-          "50%": { 
-            borderColor: "rgba(147, 51, 234, 0.7)",
-            boxShadow: "0 0 30px rgba(147, 51, 234, 0.5)"
-          }
-        },
-        "neon-night-2": {
-          "0%, 100%": { 
-            borderColor: "rgba(147, 51, 234, 0.7)",
-            boxShadow: "0 0 20px rgba(147, 51, 234, 0.5)"
-          },
-          "50%": { 
-            borderColor: "rgba(59, 130, 246, 0.7)",
-            boxShadow: "0 0 30px rgba(59, 130, 246, 0.5)"
-          }
-        },
-        "neon-day": {
-          "0%, 100%": { 
-            borderColor: "rgba(14, 165, 233, 0.7)",
-            boxShadow: "0 0 20px rgba(14, 165, 233, 0.5)"
-          },
-          "50%": { 
-            borderColor: "rgba(234, 179, 8, 0.7)",
-            boxShadow: "0 0 30px rgba(234, 179, 8, 0.5)"
-          }
-        },
-        "neon-day-2": {
-          "0%, 100%": { 
-            borderColor: "rgba(234, 179, 8, 0.7)",
-            boxShadow: "0 0 20px rgba(234, 179, 8, 0.5)"
-          },
-          "50%": { 
-            borderColor: "rgba(14, 165, 233, 0.7)",
-            boxShadow: "0 0 30px rgba(14, 165, 233, 0.5)"
-          }
-        },
         fadeIn: {
           "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
@@ -143,11 +94,6 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "neon-pulse": "neon-pulse 4s ease-in-out infinite",
-        "neon-night": "neon-night 4s ease-in-out infinite",
-        "neon-night-2": "neon-night-2 4s ease-in-out infinite",
-        "neon-day": "neon-day 4s ease-in-out infinite",
-        "neon-day-2": "neon-day-2 4s ease-in-out infinite",
         fadeIn: "fadeIn 0.5s ease-out forwards",
         slideIn: "slideIn 0.3s ease-out forwards",
         pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
@@ -160,7 +106,7 @@ export default {
       },
       boxShadow: {
         glass: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-        glow: "0 0 15px rgba(139,92,246,0.5)",
+        glow: "0 0 15px rgba(139, 92, 246, 0.5)",
         highlight: "inset 0 1px 0 0 rgba(255, 255, 255, 0.05)",
       },
     },

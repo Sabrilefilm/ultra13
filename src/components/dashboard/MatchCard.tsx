@@ -1,7 +1,7 @@
 
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
-import { Timer, Clock, Calendar } from "lucide-react";
-import { MatchCardButtons } from "./MatchCardButtons";
+import { Download, Trash2, Trophy, X, Timer, Clock, Calendar } from "lucide-react";
 
 interface MatchCardProps {
   match: any;
@@ -27,120 +27,134 @@ export const MatchCard = ({
   const isMatchOff = match.status === 'off';
   const showRequirements = ['agent', 'manager', 'creator'].includes(role);
 
+  // Format de l'heure
   const matchTime = new Date(match.match_date).toLocaleTimeString('fr-FR', {
     hour: '2-digit',
     minute: '2-digit'
   });
 
-  const getNeonStyle = () => {
-    if (isMatchOff) return 'border-[3px] border-red-500/70 shadow-[0_0_20px_rgba(239,68,68,0.5)]';
-    if (match.winner_id) return 'border-[3px] border-green-500/70 shadow-[0_0_20px_rgba(34,197,94,0.5)]';
-    
-    const hour = new Date(match.match_date).getHours();
-    if (hour >= 22 || hour === 0) {
-      return `
-        border-[3px] 
-        animate-[neon-pulse_4s_ease-in-out_infinite]
-        before:absolute before:inset-0 before:border-[3px] before:rounded-xl
-        before:animate-[neon-night_4s_ease-in-out_infinite]
-        after:absolute after:inset-0 after:border-[3px] after:rounded-xl
-        after:animate-[neon-night-2_4s_ease-in-out_infinite]
-      `;
-    }
-    if (hour >= 12 && hour < 19) {
-      return `
-        border-[3px]
-        animate-[neon-pulse_4s_ease-in-out_infinite]
-        before:absolute before:inset-0 before:border-[3px] before:rounded-xl
-        before:animate-[neon-day_4s_ease-in-out_infinite]
-        after:absolute after:inset-0 after:border-[3px] after:rounded-xl
-        after:animate-[neon-day-2_4s_ease-in-out_infinite]
-      `;
-    }
-    return 'border-[3px] border-purple-500/70 shadow-[0_0_20px_rgba(139,92,246,0.5)]';
-  };
-
-  const getHoverStyle = () => {
-    if (isMatchOff) return 'hover:shadow-[0_0_30px_rgba(239,68,68,0.6)] hover:border-red-400/80';
-    if (match.winner_id) return 'hover:shadow-[0_0_30px_rgba(34,197,94,0.6)] hover:border-green-400/80';
-    
-    const hour = new Date(match.match_date).getHours();
-    if (hour >= 22 || hour === 0) return 'hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] hover:border-blue-400/80';
-    if (hour >= 12 && hour < 19) return 'hover:shadow-[0_0_30px_rgba(14,165,233,0.6)] hover:border-sky-400/80';
-    return 'hover:shadow-[0_0_30px_rgba(139,92,246,0.6)] hover:border-purple-400/80';
-  };
-
   return (
     <div 
-      className={`group relative flex flex-col h-[280px] w-full max-w-[240px] rounded-xl transition-all duration-300 overflow-hidden backdrop-blur-sm bg-gradient-to-br from-gray-900/95 to-gray-950/95 ${getNeonStyle()} ${
-        isMatchOff ? 'opacity-75 grayscale' : ''
-      } ${getHoverStyle()} hover:scale-[1.02]`}
+      className={`flex flex-col space-y-4 p-4 border rounded-lg transition-all duration-300 ${
+        match.winner_id ? 'bg-gradient-to-r from-gray-50 to-white' : ''
+      } ${isMatchOff ? 'opacity-75 bg-gray-100' : ''}`}
     >
+      {showRequirements && (
+        <div className="animate-bounce bg-red-100 border-2 border-red-500 rounded-lg p-4 mb-4 shadow-lg">
+          <p className="text-lg font-bold text-red-600 text-center tracking-wide">
+            OBJECTIFS DU MATCH
+          </p>
+          <div className="flex flex-col items-center mt-2 space-y-3">
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-5 h-5 text-red-500" />
+                <span className="text-red-600 font-medium">7 Jours</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Timer className="w-5 h-5 text-red-500" />
+                <span className="text-red-600 font-medium">15 Heures de Live</span>
+                <Clock className="w-4 h-4 text-red-400 animate-pulse" />
+              </div>
+            </div>
+            <div className="flex items-center gap-2 bg-red-200 px-4 py-2 rounded-full">
+              <span className="text-red-500 font-semibold text-base">💎</span>
+              <span className="text-red-600 font-medium">100 Diamants</span>
+            </div>
+          </div>
+        </div>
+      )}
       {match.match_image && (
-        <div className="w-full h-[120px] relative overflow-hidden">
+        <div className="w-full aspect-video relative rounded-lg overflow-hidden">
           <img
             src={match.match_image}
             alt={`${match.creator_id} vs ${match.opponent_id}`}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+            className="w-full h-full object-cover"
           />
-          {isMatchOff && (
-            <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-red-500/90 text-white text-xs font-medium border border-red-400 shadow-lg backdrop-blur-sm">
-              Match Off
-            </div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-50" />
         </div>
       )}
-      
-      <div className="flex flex-col flex-grow p-3 space-y-2">
-        {showRequirements && (
-          <div className="bg-gradient-to-r from-red-900/40 to-red-800/30 backdrop-blur-sm border border-red-800/50 rounded-lg p-2 shadow-inner">
-            <p className="text-sm font-semibold text-red-100 text-center mb-1 tracking-wide">
-              OBJECTIFS DU MATCH
-            </p>
-            <div className="grid grid-cols-2 gap-1 text-xs">
-              <div className="flex items-center gap-1.5 bg-red-950/50 p-1.5 rounded-md border border-red-800/50 backdrop-blur-sm">
-                <Calendar className="w-3 h-3 text-red-400" />
-                <span className="text-red-100 font-medium">7 Jours</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-red-950/50 p-1.5 rounded-md border border-red-800/50 backdrop-blur-sm">
-                <Timer className="w-3 h-3 text-red-400" />
-                <span className="text-red-100 font-medium">15h Live</span>
-              </div>
-              <div className="col-span-2 flex items-center justify-center gap-1.5 bg-red-950/50 p-1.5 rounded-md border border-red-800/50 backdrop-blur-sm">
-                <span className="text-red-400 font-bold text-base">💎</span>
-                <span className="text-red-100 font-medium">100 Diamants</span>
-              </div>
-            </div>
+      <div className="flex flex-col space-y-2">
+        {isMatchOff && (
+          <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-red-100 text-red-600 text-sm font-medium">
+            Match Off
           </div>
         )}
-
-        <div className="flex flex-col flex-grow justify-between min-h-0">
+      </div>
+      <div className="mt-auto">
+        <div className="flex justify-between items-end">
           <div>
-            <p className="font-bold text-base text-white truncate tracking-wide">
-              {match.creator_id} vs {match.opponent_id}
-            </p>
-            <div className="flex items-center gap-1.5 text-xs text-gray-300/90 mt-1">
-              <div className="flex items-center gap-1 bg-gray-800/50 px-2 py-1 rounded-full">
-                <Calendar className="w-3 h-3 text-purple-400" />
-                <span>{formatDate(match.match_date)}</span>
-              </div>
-              <div className="flex items-center gap-1 bg-gray-800/50 px-2 py-1 rounded-full">
-                <Clock className="w-3 h-3 text-purple-400" />
-                <span>{matchTime}</span>
-              </div>
+            <p className="font-medium text-black">{match.creator_id} vs {match.opponent_id}</p>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Calendar className="w-4 h-4" />
+              {formatDate(match.match_date)}
+              <Clock className="w-4 h-4 ml-2" />
+              {matchTime}
             </div>
           </div>
-
-          <MatchCardButtons
-            match={match}
-            canManageMatch={canManageMatch}
-            canDeleteMatch={canDeleteMatch}
-            onSetWinner={onSetWinner}
-            onClearWinner={onClearWinner}
-            onDelete={onDelete}
-            onDownload={onDownload}
-          />
+          <div className="flex items-center gap-2">
+            {match.winner_id ? (
+              <div className="animate-fade-in bg-white shadow-lg border text-black px-4 py-2 rounded-full inline-flex items-center gap-2 font-bold">
+                <Trophy className="w-5 h-5 text-yellow-500" />
+                <span className="text-sm text-black">
+                  Gagnant : {match.winner_id}
+                </span>
+                {canManageMatch && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-2 h-6 w-6 p-0 text-gray-600 hover:text-black hover:bg-gray-100"
+                    onClick={() => onClearWinner(match.id)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ) : (
+              canManageMatch && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-white text-black border-gray-200 hover:bg-gray-100 hover:text-black"
+                    onClick={() => onSetWinner(match.id, match.creator_id)}
+                  >
+                    {match.creator_id} gagne
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-white text-black border-gray-200 hover:bg-gray-100 hover:text-black"
+                    onClick={() => onSetWinner(match.id, match.opponent_id)}
+                  >
+                    {match.opponent_id} gagne
+                  </Button>
+                </div>
+              )
+            )}
+            {match.match_image && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-white text-black border-gray-200 hover:bg-gray-100 hover:text-black"
+                onClick={() => onDownload(
+                  match.match_image,
+                  `match_${match.creator_id}_vs_${match.opponent_id}`
+                )}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Télécharger
+              </Button>
+            )}
+            {canDeleteMatch && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-white text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
+                onClick={() => onDelete(match.id)}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
