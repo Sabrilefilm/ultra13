@@ -1,24 +1,16 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { ProfileHeader } from "@/components/ProfileHeader";
-import { CreateAccountModal } from "@/components/CreateAccountModal";
-import { RewardSettingsModal } from "@/components/RewardSettingsModal";
 import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
 import { RewardsPanel } from "@/components/RewardsPanel";
-import { LiveScheduleModal } from "@/components/live-schedule";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { FounderDashboard } from "@/components/dashboard/FounderDashboard";
 import { RoleStats } from "@/components/dashboard/RoleStats";
-import { SponsorshipForm } from "@/components/SponsorshipForm";
-import { SponsorshipList } from "@/components/SponsorshipList";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { CreatorDashboard } from "@/components/creator/CreatorDashboard";
+import { ModalManager } from "@/components/layout/ModalManager";
 
 type Role = 'client' | 'creator' | 'manager' | 'founder';
 
@@ -71,9 +63,6 @@ const Index = () => {
     setIsAuthenticated(false);
     setRole(null);
     setUsername("");
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('username');
   };
 
   const fetchPlatformSettings = async () => {
@@ -182,7 +171,6 @@ const Index = () => {
         duration: 60000,
       });
     } catch (error) {
-      console.error('Error creating account:', error);
       playNotificationSound();
       toast({
         title: "Erreur",
@@ -218,7 +206,6 @@ const Index = () => {
         duration: 60000,
       });
     } catch (error) {
-      console.error('Error updating settings:', error);
       playNotificationSound();
       toast({
         title: "Erreur",
@@ -277,73 +264,32 @@ const Index = () => {
           )}
 
           {role === 'creator' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Button
-                variant="outline"
-                onClick={() => setIsSponsorshipModalOpen(true)}
-                className="p-6 h-auto flex-col items-start gap-4"
-              >
-                <span className="font-semibold">Demander un parrainage</span>
-                <p className="text-sm text-muted-foreground text-left">
-                  Remplir le formulaire de parrainage
-                </p>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowSponsorshipList(true)}
-                className="p-6 h-auto flex-col items-start gap-4"
-              >
-                <span className="font-semibold">Mes parrainages</span>
-                <p className="text-sm text-muted-foreground text-left">
-                  Voir l'état de mes demandes de parrainage
-                </p>
-              </Button>
-            </div>
+            <CreatorDashboard
+              onOpenSponsorshipForm={() => setIsSponsorshipModalOpen(true)}
+              onOpenSponsorshipList={() => setShowSponsorshipList(true)}
+            />
           )}
 
           <RoleStats role={role || ''} />
           <RewardsPanel role={role || ''} userId={username === "Sabri" ? "founder" : username} />
 
-          <Dialog open={isSponsorshipModalOpen} onOpenChange={setIsSponsorshipModalOpen}>
-            <DialogContent className="sm:max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Demande de parrainage</DialogTitle>
-              </DialogHeader>
-              <SponsorshipForm
-                creatorId={username}
-                onSubmit={() => setIsSponsorshipModalOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
-
-          <Dialog open={showSponsorshipList} onOpenChange={setShowSponsorshipList}>
-            <DialogContent className="sm:max-w-4xl">
-              <DialogHeader>
-                <DialogTitle>
-                  {role === 'founder' ? "Gestion des parrainages" : "Mes parrainages"}
-                </DialogTitle>
-              </DialogHeader>
-              <SponsorshipList isFounder={role === 'founder'} />
-            </DialogContent>
-          </Dialog>
-
-          <CreateAccountModal
-            isOpen={isCreateAccountModalOpen}
-            onClose={() => setIsCreateAccountModalOpen(false)}
-            onSubmit={handleCreateAccount}
-          />
-
-          <RewardSettingsModal
-            isOpen={isRewardSettingsModalOpen}
-            onClose={() => setIsRewardSettingsModalOpen(false)}
-            onSubmit={handleUpdateSettings}
-            currentSettings={platformSettings ?? undefined}
-          />
-
-          <LiveScheduleModal
-            isOpen={isLiveScheduleModalOpen}
-            onClose={() => setIsLiveScheduleModalOpen(false)}
-            creatorId={selectedCreatorId}
+          <ModalManager
+            isCreateAccountModalOpen={isCreateAccountModalOpen}
+            setIsCreateAccountModalOpen={setIsCreateAccountModalOpen}
+            isRewardSettingsModalOpen={isRewardSettingsModalOpen}
+            setIsRewardSettingsModalOpen={setIsRewardSettingsModalOpen}
+            isLiveScheduleModalOpen={isLiveScheduleModalOpen}
+            setIsLiveScheduleModalOpen={setIsLiveScheduleModalOpen}
+            isSponsorshipModalOpen={isSponsorshipModalOpen}
+            setIsSponsorshipModalOpen={setIsSponsorshipModalOpen}
+            showSponsorshipList={showSponsorshipList}
+            setShowSponsorshipList={setShowSponsorshipList}
+            selectedCreatorId={selectedCreatorId}
+            platformSettings={platformSettings}
+            handleCreateAccount={handleCreateAccount}
+            handleUpdateSettings={handleUpdateSettings}
+            username={username}
+            role={role || ''}
           />
         </div>
       </div>
