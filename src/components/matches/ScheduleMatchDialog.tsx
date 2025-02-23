@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface ScheduleMatchDialogProps {
   isOpen: boolean;
@@ -22,11 +22,10 @@ export const ScheduleMatchDialog = ({ isOpen, onClose }: ScheduleMatchDialogProp
 
   const generateMatchImage = async (creator1: string, creator2: string, matchDate: string) => {
     try {
-      const response = await fetch("/functions/v1/generate-match-image", {
+      const response = await fetch("/api/generate-match-image", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({
           creator1,
@@ -35,13 +34,15 @@ export const ScheduleMatchDialog = ({ isOpen, onClose }: ScheduleMatchDialogProp
         }),
       });
 
-      if (!response.ok) throw new Error("Erreur lors de la génération de l'image");
+      if (!response.ok) {
+        throw new Error("Erreur lors de la génération de l'image");
+      }
       
       const data = await response.json();
       return data.image;
     } catch (error) {
       console.error("Erreur lors de la génération de l'image:", error);
-      throw error;
+      return null; // Retourner null en cas d'erreur pour continuer sans image
     }
   };
 
