@@ -1,4 +1,3 @@
-
 import { Award, Clock, Diamond, Gift, Settings, Users, Rocket } from "lucide-react";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { StatsCard } from "@/components/StatsCard";
@@ -486,7 +485,7 @@ const Index = () => {
           <div className="text-center space-y-6">
             <div className="flex items-center justify-center gap-3 mb-8">
               <Rocket className="w-16 h-16 text-primary animate-pulse" />
-              <h1 className="text-7xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-red-500 bg-clip-text text-transparent animate-colors">
+              <h1 className="text-7xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-red-500 bg-clip-text text-transparent">
                 ULTRA
               </h1>
             </div>
