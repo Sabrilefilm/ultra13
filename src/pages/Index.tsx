@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ProfileHeader } from "@/components/ProfileHeader";
@@ -66,14 +65,6 @@ const Index = () => {
               </div>
               <Button
                 variant="outline"
-                onClick={() => setIsCreatePosterModalOpen(true)}
-                className="gap-2"
-              >
-                <ImageIcon className="w-4 h-4" />
-                Créer une affiche
-              </Button>
-              <Button
-                variant="outline"
                 onClick={handleLogout}
               >
                 Déconnexion
@@ -92,6 +83,7 @@ const Index = () => {
                 }}
                 onScheduleMatch={() => setIsScheduleMatchModalOpen(true)}
                 onOpenSponsorships={() => setShowSponsorshipList(true)}
+                onCreatePoster={() => setIsCreatePosterModalOpen(true)}
                 username={username}
               />
             )}
@@ -100,6 +92,7 @@ const Index = () => {
               <CreatorDashboard
                 onOpenSponsorshipForm={() => setIsSponsorshipModalOpen(true)}
                 onOpenSponsorshipList={() => setShowSponsorshipList(true)}
+                onCreatePoster={() => setIsCreatePosterModalOpen(true)}
                 role={role}
               />
             )}

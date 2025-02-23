@@ -1,5 +1,5 @@
 
-import { Settings, Users, Diamond, Gamepad } from "lucide-react";
+import { Settings, Users, Diamond, Gamepad, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -9,6 +9,7 @@ interface FounderDashboardProps {
   onOpenLiveSchedule: (creatorId: string) => void;
   onOpenSponsorships: () => void;
   onScheduleMatch: () => void;
+  onCreatePoster: () => void;
   username: string;
 }
 
@@ -18,6 +19,7 @@ export const FounderDashboard = ({
   onOpenLiveSchedule,
   onOpenSponsorships,
   onScheduleMatch,
+  onCreatePoster,
   username
 }: FounderDashboardProps) => {
   const navigate = useNavigate();
@@ -63,6 +65,20 @@ export const FounderDashboard = ({
         <Button
           variant="outline"
           className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
+          onClick={onCreatePoster}
+        >
+          <div className="flex items-center gap-2">
+            <ImageIcon className="w-5 h-5 text-primary" />
+            <span className="font-semibold">Créer une affiche</span>
+          </div>
+          <p className="text-sm text-muted-foreground text-left">
+            Générer une affiche pour un match
+          </p>
+        </Button>
+
+        <Button
+          variant="outline"
+          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
           onClick={onOpenSponsorships}
         >
           <div className="flex items-center gap-2">
@@ -85,20 +101,6 @@ export const FounderDashboard = ({
           </div>
           <p className="text-sm text-muted-foreground text-left">
             Paramètres généraux et horaires des lives de la plateforme
-          </p>
-        </Button>
-
-        <Button
-          variant="outline"
-          className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
-          onClick={() => navigate("/user-management")}
-        >
-          <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-primary" />
-            <span className="font-semibold">Gestion des Utilisateurs</span>
-          </div>
-          <p className="text-sm text-muted-foreground text-left">
-            Voir et gérer tous les utilisateurs (mots de passe, bannissement, suppression)
           </p>
         </Button>
 
