@@ -26,6 +26,15 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
 
+  // Liste des types MIME autorisés
+  const ALLOWED_MIME_TYPES = [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/gif',
+    'image/webp'
+  ];
+
   useEffect(() => {
     fetchProfile();
   }, []);
@@ -67,11 +76,11 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       const file = event.target.files?.[0];
       if (!file) return;
 
-      // Vérification du type de fichier
-      if (!file.type.startsWith('image/')) {
+      // Vérification du type de fichier avec la liste des types MIME autorisés
+      if (!ALLOWED_MIME_TYPES.includes(file.type)) {
         toast({
-          title: "Erreur",
-          description: "Veuillez sélectionner une image",
+          title: "Type de fichier non autorisé",
+          description: "Veuillez sélectionner une image (PNG, JPEG, GIF, ou WebP)",
           variant: "destructive",
         });
         return;
@@ -166,7 +175,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         <input
           id="avatar-upload"
           type="file"
-          accept="image/*"
+          accept="image/png,image/jpeg,image/gif,image/webp"
           className="hidden"
           onChange={handleAvatarUpload}
           disabled={isUploading}
@@ -181,3 +190,4 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     </div>
   );
 };
+
