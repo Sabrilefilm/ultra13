@@ -1,12 +1,16 @@
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: string }) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const { data: matches, isLoading } = useQuery({
     queryKey: ['upcoming-matches', creatorId],
     queryFn: async () => {
@@ -23,21 +27,17 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
 
   const handleDownload = async (imageUrl: string, fileName: string) => {
     try {
-      // Convertir l'image base64 en blob
       const response = await fetch(imageUrl);
       const blob = await response.blob();
       
-      // Créer un lien de téléchargement
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `${fileName}.png`;
       
-      // Déclencher le téléchargement
       document.body.appendChild(link);
       link.click();
       
-      // Nettoyer
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
@@ -45,7 +45,35 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
     }
   };
 
+  const handleDelete = async (matchId: string) => {
+    try {
+      const { error } = await supabase
+        .from('upcoming_matches')
+        .delete()
+        .eq('id', matchId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Match supprimé",
+        description: "Le match a été supprimé avec succès",
+      });
+
+      // Rafraîchir la liste des matchs
+      queryClient.invalidateQueries(['upcoming-matches']);
+    } catch (error) {
+      console.error("Erreur lors de la suppression:", error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la suppression du match",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) return <div>Chargement des matchs...</div>;
+
+  const canDeleteMatch = role === 'founder' || role === 'manager';
 
   return (
     <Card>
@@ -84,6 +112,15 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
                       >
                         <Download className="w-4 h-4 mr-2" />
                         Télécharger
+                      </Button>
+                    )}
+                    {canDeleteMatch && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(match.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     )}
                   </div>
