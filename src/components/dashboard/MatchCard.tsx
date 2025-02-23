@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
-import { Download, Trash2, Trophy, X } from "lucide-react";
+import { Download, Trash2, Trophy, X, Timer, Clock, Calendar } from "lucide-react";
 
 interface MatchCardProps {
   match: any;
@@ -27,8 +27,8 @@ export const MatchCard = ({
   const isMatchOff = match.status === 'off';
   const showRequirements = ['agent', 'manager', 'creator'].includes(role);
 
-  console.log("Current role in MatchCard:", role); // Debug log
-  console.log("Should show requirements:", showRequirements); // Debug log
+  console.log("Current role in MatchCard:", role);
+  console.log("Should show requirements:", showRequirements);
 
   return (
     <div 
@@ -41,12 +41,19 @@ export const MatchCard = ({
           <p className="text-lg font-bold text-red-600 text-center tracking-wide">
             OBJECTIFS DU MATCH
           </p>
-          <div className="flex flex-col items-center mt-2 space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-red-500 font-semibold text-base">⏰</span>
-              <span className="text-red-600 font-medium">7 Jours / 15 Heures de Live</span>
+          <div className="flex flex-col items-center mt-2 space-y-3">
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-5 h-5 text-red-500" />
+                <span className="text-red-600 font-medium">7 Jours</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Timer className="w-5 h-5 text-red-500" />
+                <span className="text-red-600 font-medium">15 Heures de Live</span>
+                <Clock className="w-4 h-4 text-red-400 animate-pulse" />
+              </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 bg-red-200 px-4 py-2 rounded-full">
               <span className="text-red-500 font-semibold text-base">💎</span>
               <span className="text-red-600 font-medium">100 Diamants</span>
             </div>
