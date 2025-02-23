@@ -12,6 +12,8 @@ import { ModalManager } from "@/components/layout/ModalManager";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { useAccountManagement } from "@/hooks/use-account-management";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CreatorDetailsDialog } from "@/components/creator/CreatorDetailsDialog";
 
 const Index = () => {
   const { isAuthenticated, username, role, handleLogout, handleLogin } = useIndexAuth();
@@ -25,6 +27,7 @@ const Index = () => {
   const [selectedCreatorId, setSelectedCreatorId] = useState<string>("");
   const [isSponsorshipModalOpen, setIsSponsorshipModalOpen] = useState(false);
   const [showSponsorshipList, setShowSponsorshipList] = useState(false);
+  const [showPersonalInfo, setShowPersonalInfo] = useState(false);
 
   if (!isAuthenticated) {
     return (
@@ -49,13 +52,21 @@ const Index = () => {
             username={username}
             handle={`@${role}`}
           />
-          <Button
-            variant="outline"
-            onClick={handleLogout}
-            className="ml-4"
-          >
-            Déconnexion
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              onClick={() => setShowPersonalInfo(true)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Informations personnelles
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+            >
+              Déconnexion
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-6">
@@ -101,6 +112,19 @@ const Index = () => {
             username={username}
             role={role || ''}
           />
+
+          <Dialog open={showPersonalInfo} onOpenChange={setShowPersonalInfo}>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold">Informations Personnelles</DialogTitle>
+              </DialogHeader>
+              <CreatorDetailsDialog 
+                isOpen={showPersonalInfo} 
+                onClose={() => setShowPersonalInfo(false)}
+                creatorDetails={null}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </div>
