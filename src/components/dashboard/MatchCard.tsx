@@ -96,7 +96,7 @@ export const MatchCard = ({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1.5 mt-2">
+          <div className="flex flex-wrap justify-between items-center gap-2 mt-2">
             {match.winner_id ? (
               <div className="flex-grow bg-purple-900/30 shadow-lg border border-purple-500/30 rounded-md p-1.5 flex items-center justify-between backdrop-blur-sm">
                 <div className="flex items-center gap-1.5">
@@ -138,7 +138,7 @@ export const MatchCard = ({
                 </div>
               )
             )}
-            <div className="flex gap-1.5">
+            <div className="flex gap-1.5 mx-auto">
               {match.match_image && (
                 <Button
                   variant="outline"
@@ -156,7 +156,7 @@ export const MatchCard = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-7 bg-gray-800/50 text-red-400 border-red-900/50 hover:bg-red-900/30 hover:border-red-500/50 backdrop-blur-sm transition-colors"
+                  className="h-7 w-7 flex items-center justify-center bg-gray-800/50 text-red-400 border-red-900/50 hover:bg-red-900/30 hover:border-red-500/50 backdrop-blur-sm transition-colors"
                   onClick={() => onDelete(match.id)}
                 >
                   <Trash2 className="w-3 h-3" />
