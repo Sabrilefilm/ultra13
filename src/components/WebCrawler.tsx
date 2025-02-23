@@ -21,6 +21,17 @@ export const WebCrawler = () => {
       return;
     }
 
+    // Vérifier si l'utilisateur est connecté
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Non connecté",
+        description: "Vous devez être connecté pour analyser une page",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await fetch(url);
@@ -38,7 +49,7 @@ export const WebCrawler = () => {
         keywords: doc.querySelector('meta[name="keywords"]')?.getAttribute('content') || '',
       };
 
-      // Sauvegarde dans Supabase
+      // Sauvegarde dans Supabase avec l'ID de l'utilisateur
       const { data, error } = await supabase
         .from('crawled_pages')
         .insert([
@@ -47,6 +58,7 @@ export const WebCrawler = () => {
             title,
             content,
             metadata,
+            user_id: user.id
           }
         ])
         .select()
