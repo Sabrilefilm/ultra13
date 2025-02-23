@@ -14,11 +14,17 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
   const { data: matches, isLoading } = useQuery({
     queryKey: ['upcoming-matches', creatorId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('upcoming_matches')
         .select('*')
-        .eq(role === 'founder' ? 'status' : 'creator_id', role === 'founder' ? 'scheduled' : creatorId)
         .order('match_date', { ascending: true });
+
+      // Si ce n'est pas le fondateur, filtrer par creator_id
+      if (role !== 'founder') {
+        query = query.eq('creator_id', creatorId);
+      }
+      
+      const { data, error } = await query;
       
       if (error) throw error;
       return data;
