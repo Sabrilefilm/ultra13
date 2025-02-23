@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Schedule } from "./types";
 import { DAYS_OF_WEEK } from "./constants";
@@ -15,23 +14,37 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
 
   const fetchProfileId = async (username: string) => {
     try {
+      console.log("Fetching profile for username:", username); // Debug log
+
       const { data: userAccounts, error: userError } = await supabase
         .from("user_accounts")
         .select("id, username")
         .eq("username", username)
-        .single();
+        .maybeSingle(); // Utilisation de maybeSingle au lieu de single
 
-      if (userError) throw userError;
-      if (userAccounts) {
-        setProfileId(userAccounts.id);
-        setCreatorName(userAccounts.username);
-        return userAccounts.id;
+      console.log("Query result:", userAccounts, userError); // Debug log
+
+      if (userError) {
+        console.error("Database error:", userError);
+        throw userError;
       }
+
+      if (!userAccounts) {
+        console.log("No user account found for username:", username);
+        toast.error(`Aucun profil trouvé pour ${username}`);
+        return null;
+      }
+
+      console.log("User account found:", userAccounts); // Debug log
+      setProfileId(userAccounts.id);
+      setCreatorName(userAccounts.username);
+      return userAccounts.id;
+
     } catch (error) {
       console.error("Erreur lors de la récupération du profil:", error);
       toast.error("Erreur lors de la récupération du profil");
+      return null;
     }
-    return null;
   };
 
   const calculateStats = (schedules: Schedule[]) => {
@@ -51,12 +64,16 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
 
   const fetchSchedules = async (id: string) => {
     try {
+      console.log("Fetching schedules for id:", id); // Debug log
+
       const { data, error } = await supabase
         .from("live_schedules")
         .select("*")
         .eq("creator_id", id);
 
       if (error) throw error;
+
+      console.log("Schedules found:", data); // Debug log
 
       const initialSchedules = DAYS_OF_WEEK.map((day) => {
         const existingSchedule = data?.find((s) => s.day_of_week === day.id);
@@ -118,7 +135,7 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
       }
 
       calculateStats(schedules);
-      toast.success("Horaires mis à jour avec succès");
+      toast.success("Horaires mis à jour avec succ��s");
       return true;
     } catch (error) {
       console.error("Erreur lors de la sauvegarde des horaires:", error);
@@ -147,11 +164,14 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
 
   useEffect(() => {
     if (isOpen && creatorId) {
+      console.log("Modal opened for creator:", creatorId); // Debug log
       setLoading(true);
       const initializeData = async () => {
         const id = await fetchProfileId(creatorId);
         if (id) {
           await fetchSchedules(id);
+        } else {
+          setLoading(false);
         }
       };
       initializeData();
