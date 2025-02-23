@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,12 +12,15 @@ import { DAYS_OF_WEEK } from "./constants";
 import { LiveScheduleModalProps } from "./types";
 import { useLiveSchedule } from "./use-live-schedule";
 import { ScheduleDay } from "./schedule-day";
+import { CreatorSelect } from "./creator-select";
 
 export const LiveScheduleModal = ({
   isOpen,
   onClose,
-  creatorId,
+  creatorId: initialCreatorId,
 }: LiveScheduleModalProps) => {
+  const [selectedCreator, setSelectedCreator] = useState(initialCreatorId);
+  
   const { 
     schedules, 
     loading, 
@@ -26,7 +29,7 @@ export const LiveScheduleModal = ({
     totalDays,
     totalHours,
     creatorName,
-  } = useLiveSchedule(isOpen, creatorId);
+  } = useLiveSchedule(isOpen, selectedCreator);
 
   const onSave = async () => {
     const success = await handleSave();
@@ -44,6 +47,13 @@ export const LiveScheduleModal = ({
             Configurez vos horaires de live pour chaque jour de la semaine
           </DialogDescription>
         </DialogHeader>
+
+        <div className="mb-4">
+          <CreatorSelect 
+            value={selectedCreator} 
+            onSelect={setSelectedCreator} 
+          />
+        </div>
 
         <div className="space-y-6 py-4">
           {loading ? (
