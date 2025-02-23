@@ -2,23 +2,12 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users, Trash2, Eye, EyeOff, Search, Diamond, Clock, Calendar } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { ArrowLeft, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
-import { Input } from "@/components/ui/input";
-
-interface Account {
-  id: string;
-  username: string;
-  password: string;
-  role: string;
-  profile?: {
-    total_diamonds: number;
-    days_streamed: number;
-    total_live_hours: number;
-  };
-}
+import { SearchBar } from "@/components/accounts/SearchBar";
+import { AccountCard } from "@/components/accounts/AccountCard";
+import { Account } from "@/types/accounts";
 
 const Accounts = () => {
   const navigate = useNavigate();
@@ -87,6 +76,12 @@ const Accounts = () => {
     }));
   };
 
+  const filteredAccounts = accounts.filter(account => {
+    const searchLower = searchQuery.toLowerCase();
+    return account.username.toLowerCase().includes(searchLower) ||
+           account.role.toLowerCase().includes(searchLower);
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4">
       <div className="max-w-3xl mx-auto space-y-6">
@@ -105,15 +100,10 @@ const Accounts = () => {
           </h1>
         </div>
 
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher un utilisateur..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+        <SearchBar 
+          value={searchQuery}
+          onChange={setSearchQuery}
+        />
 
         {loading ? (
           <div className="flex justify-center py-8">
@@ -121,69 +111,14 @@ const Accounts = () => {
           </div>
         ) : (
           <div className="grid gap-4">
-            {accounts
-              .filter(account => {
-                const searchLower = searchQuery.toLowerCase();
-                return account.username.toLowerCase().includes(searchLower) ||
-                       account.role.toLowerCase().includes(searchLower);
-              })
-              .map((account) => (
-                <Card key={account.id} className="p-4 hover:shadow-md transition-shadow">
-                  <div className="flex flex-col space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-medium">{account.username}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {account.role === 'creator' ? 'Créateur' : account.role}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-sm"
-                          onClick={() => togglePasswordVisibility(account.id)}
-                        >
-                          <span className="mr-2">
-                            {showPasswords[account.id] ? account.password : '••••••'}
-                          </span>
-                          {showPasswords[account.id] ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteAccount(account.id, account.username)}
-                          className="h-8 w-8 hover:bg-destructive hover:text-destructive-foreground"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    {account.role === 'creator' && (
-                      <div className="border-t pt-4">
-                        <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-2">
-                            <Diamond className="h-4 w-4" />
-                            <span>{account.profile?.total_diamonds || 0} diamants</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            <span>{account.profile?.days_streamed || 0} Jours</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4" />
-                            <span>{account.profile?.total_live_hours || 0}h de live</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </Card>
+            {filteredAccounts.map((account) => (
+              <AccountCard
+                key={account.id}
+                account={account}
+                showPassword={showPasswords[account.id]}
+                onTogglePassword={() => togglePasswordVisibility(account.id)}
+                onDelete={() => handleDeleteAccount(account.id, account.username)}
+              />
             ))}
           </div>
         )}
