@@ -97,7 +97,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
         return Math.random() * (max - min) + min;
       }
 
-      const interval: NodeJS.Timer = setInterval(function() {
+      const interval = setInterval(function() {
         const timeLeft = animationEnd - Date.now();
 
         if (timeLeft <= 0) {
