@@ -1,4 +1,3 @@
-
 import { Award, Clock, Diamond, Gift, Settings, Users, Rocket } from "lucide-react";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { StatsCard } from "@/components/StatsCard";
@@ -551,14 +550,17 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="fixed bottom-16 flex flex-col items-center gap-4">
-          <p className="text-2xl font-bold text-white/80 bg-gradient-to-r from-blue-200 to-blue-100 bg-clip-text text-transparent">
-            Agency phoceen
-          </p>
-          <div className="flex gap-4 text-sm text-white/40">
-            <button className="hover:text-white/60">Aide</button>
-            <button className="hover:text-white/60">Confidentialité</button>
-            <button className="hover:text-white/60">Conditions</button>
+        <div className="fixed bottom-16 flex flex-col items-center gap-6">
+          <div className="relative group cursor-default">
+            <div className="absolute -inset-1 bg-gradient-to-r from-violet-500 via-blue-500 to-red-500 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+            <p className="relative text-3xl font-black tracking-wider bg-gradient-to-br from-white to-white/60 bg-clip-text text-transparent px-4 py-2">
+              Agency phocéen
+            </p>
+          </div>
+          <div className="flex gap-6 text-sm text-white/40">
+            <button className="hover:text-white/60 transition-colors">Aide</button>
+            <button className="hover:text-white/60 transition-colors">Confidentialité</button>
+            <button className="hover:text-white/60 transition-colors">Conditions</button>
           </div>
         </div>
 
