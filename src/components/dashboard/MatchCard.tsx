@@ -34,11 +34,11 @@ export const MatchCard = ({
 
   return (
     <div 
-      className={`group flex flex-col h-[280px] w-full max-w-[240px] rounded-xl shadow-lg transition-all duration-300 overflow-hidden backdrop-blur-sm ${
+      className={`group flex flex-col h-[280px] w-full max-w-[240px] rounded-xl transition-all duration-300 overflow-hidden backdrop-blur-sm ${
         match.winner_id 
-          ? 'bg-gradient-to-br from-purple-900/90 to-gray-900/95 border border-purple-500/20' 
-          : 'bg-gradient-to-br from-gray-900/95 to-black border border-gray-800/20'
-      } ${isMatchOff ? 'opacity-75 grayscale' : ''} hover:shadow-xl hover:scale-[1.02] hover:border-purple-500/40`}
+          ? 'bg-gradient-to-br from-gray-900/95 to-gray-950 border-2 border-purple-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]' 
+          : 'bg-gradient-to-br from-gray-900/95 to-gray-950 border-2 border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.2)]'
+      } ${isMatchOff ? 'opacity-75 grayscale' : ''} hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] hover:scale-[1.02] hover:border-purple-400/60`}
     >
       {match.match_image && (
         <div className="w-full h-[120px] relative overflow-hidden">
