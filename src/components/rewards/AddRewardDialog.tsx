@@ -37,17 +37,6 @@ export function AddRewardDialog({ isOpen, onOpenChange, onSuccess }: AddRewardDi
 
     setIsLoading(true);
     try {
-      // On utilise l'ID de l'utilisateur récupéré depuis user_accounts
-      const { data: userData, error: userError } = await supabase
-        .from('user_accounts')
-        .select('id')
-        .eq('username', recipientId)
-        .single();
-
-      if (userError || !userData) {
-        throw new Error("Impossible de trouver le créateur");
-      }
-
       const { error: insertError } = await supabase
         .from("creator_rewards")
         .insert([
@@ -66,7 +55,7 @@ export function AddRewardDialog({ isOpen, onOpenChange, onSuccess }: AddRewardDi
       setDiamonds("");
       setRecipientId("");
       
-      // Invalider plusieurs requêtes pour forcer la mise à jour
+      // Invalider les requêtes pour forcer la mise à jour
       await queryClient.invalidateQueries({ queryKey: ["rewards"] });
       await queryClient.invalidateQueries({ queryKey: ["creator-stats"] });
       
