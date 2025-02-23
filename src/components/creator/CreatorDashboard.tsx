@@ -1,37 +1,45 @@
 
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { Plus, FileText, Handshake } from "lucide-react";
 
 interface CreatorDashboardProps {
   onOpenSponsorshipForm: () => void;
   onOpenSponsorshipList: () => void;
 }
 
-export const CreatorDashboard = ({ 
+export function CreatorDashboard({
   onOpenSponsorshipForm,
   onOpenSponsorshipList
-}: CreatorDashboardProps) => {
+}: CreatorDashboardProps) {
+  const navigate = useNavigate();
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid gap-4 md:grid-cols-3">
       <Button
         variant="outline"
-        onClick={onOpenSponsorshipForm}
-        className="p-6 h-auto flex-col items-start gap-4"
+        onClick={() => navigate("/personal-information")}
+        className="h-24 flex-col items-center justify-center space-y-2"
       >
-        <span className="font-semibold">Demander un parrainage</span>
-        <p className="text-sm text-muted-foreground text-left">
-          Remplir le formulaire de parrainage
-        </p>
+        <FileText className="h-6 w-6" />
+        <span>Informations personnelles</span>
       </Button>
       <Button
         variant="outline"
-        onClick={onOpenSponsorshipList}
-        className="p-6 h-auto flex-col items-start gap-4"
+        className="h-24 flex-col items-center justify-center space-y-2"
+        onClick={onOpenSponsorshipForm}
       >
-        <span className="font-semibold">Mes parrainages</span>
-        <p className="text-sm text-muted-foreground text-left">
-          Voir l'état de mes demandes de parrainage
-        </p>
+        <Plus className="h-6 w-6" />
+        <span>Demander un parrainage</span>
+      </Button>
+      <Button
+        variant="outline"
+        className="h-24 flex-col items-center justify-center space-y-2"
+        onClick={onOpenSponsorshipList}
+      >
+        <Handshake className="h-6 w-6" />
+        <span>Mes parrainages</span>
       </Button>
     </div>
   );
-};
+}
