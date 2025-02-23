@@ -72,7 +72,7 @@ export const MatchCard = ({
 
   return (
     <div 
-      className={`group relative flex flex-col h-[280px] w-full max-w-[240px] rounded-xl transition-all duration-300 overflow-hidden backdrop-blur-sm bg-gradient-to-br from-gray-900/95 to-gray-950 ${getNeonStyle()} ${
+      className={`group relative flex flex-col h-[280px] w-full max-w-[240px] rounded-xl transition-all duration-300 overflow-hidden backdrop-blur-sm bg-gradient-to-br from-gray-900/95 to-gray-950/95 ${getNeonStyle()} ${
         isMatchOff ? 'opacity-75 grayscale' : ''
       } ${getHoverStyle()} hover:scale-[1.02]`}
     >
