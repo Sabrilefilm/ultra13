@@ -2,8 +2,21 @@
 import { useQuery } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Diamond, DollarSign } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Diamond, DollarSign, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/lib/supabase";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 interface Reward {
   id: string;
@@ -14,7 +27,12 @@ interface Reward {
 }
 
 export function RewardsPanel({ role, userId }: { role: string; userId: string }) {
-  const { data: rewards, isLoading } = useQuery({
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [diamonds, setDiamonds] = useState("");
+  const [amount, setAmount] = useState("");
+  const { toast } = useToast();
+
+  const { data: rewards, isLoading, refetch } = useQuery({
     queryKey: ["rewards", userId],
     queryFn: async () => {
       let query = supabase
@@ -44,6 +62,40 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
     },
   });
 
+  const handleAddReward = async () => {
+    try {
+      const { error } = await supabase
+        .from("creator_rewards")
+        .insert([
+          {
+            creator_id: userId,
+            diamonds_count: parseInt(diamonds),
+            amount_earned: parseFloat(amount),
+            payment_status: "pending"
+          }
+        ]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Récompense ajoutée",
+        description: "La récompense a été ajoutée avec succès",
+      });
+
+      setIsDialogOpen(false);
+      setDiamonds("");
+      setAmount("");
+      refetch();
+    } catch (error) {
+      console.error('Error adding reward:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'ajouter la récompense",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -56,11 +108,53 @@ export function RewardsPanel({ role, userId }: { role: string; userId: string })
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <Diamond className="w-5 h-5" />
           Récompenses
         </CardTitle>
+        {role === 'founder' && (
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Plus className="w-4 h-4" />
+                Ajouter une récompense
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Ajouter une récompense</DialogTitle>
+                <DialogDescription>
+                  Ajoutez une nouvelle récompense pour ce créateur
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="diamonds">Nombre de diamants</Label>
+                  <Input
+                    id="diamonds"
+                    type="number"
+                    value={diamonds}
+                    onChange={(e) => setDiamonds(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Montant (€)</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    step="0.01"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                  />
+                </div>
+                <Button onClick={handleAddReward} className="w-full">
+                  Ajouter la récompense
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </CardHeader>
       <CardContent>
         {rewards && rewards.length > 0 ? (
