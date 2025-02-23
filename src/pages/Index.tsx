@@ -483,11 +483,16 @@ const Index = () => {
       <div className="min-h-screen bg-[#1A1F2C] text-white p-4 flex flex-col items-center justify-center">
         <div className="w-full max-w-[450px] mx-auto space-y-8">
           <div className="text-center space-y-6">
-            <div className="flex items-center justify-center gap-3 mb-8">
-              <Rocket className="w-16 h-16 text-primary animate-pulse" />
-              <h1 className="text-7xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-red-500 bg-clip-text text-transparent">
-                ULTRA
-              </h1>
+            <div className="flex flex-col items-center justify-center gap-1">
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <Rocket className="w-16 h-16 text-primary animate-pulse" />
+                <h1 className="text-7xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-red-500 bg-clip-text text-transparent">
+                  ULTRA
+                </h1>
+              </div>
+              <p className="agency-text text-lg bg-gradient-to-br from-white via-[#38bdf8] to-[#0ea5e9] bg-clip-text text-transparent">
+                by Agency Phocéen
+              </p>
             </div>
             <div className="space-y-2">
               <h2 className="text-2xl font-semibold text-white/90">Votre Espace de Connexion</h2>
@@ -550,18 +555,10 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="fixed bottom-16 flex flex-col items-center gap-6">
-          <div className="relative group cursor-default">
-            <div className="absolute -inset-1 bg-gradient-to-r from-[#0ea5e9] via-[#38bdf8] to-white rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-            <p className="agency-text relative text-2xl bg-gradient-to-br from-white via-[#38bdf8] to-[#0ea5e9] bg-clip-text text-transparent px-4 py-2">
-              Agency phocéen
-            </p>
-          </div>
-          <div className="flex gap-6 text-sm text-white/40">
-            <button className="hover:text-white/60 transition-colors">Aide</button>
-            <button className="hover:text-white/60 transition-colors">Confidentialité</button>
-            <button className="hover:text-white/60 transition-colors">Conditions</button>
-          </div>
+        <div className="fixed bottom-16 flex gap-6 text-sm text-white/40">
+          <button className="hover:text-white/60 transition-colors">Aide</button>
+          <button className="hover:text-white/60 transition-colors">Confidentialité</button>
+          <button className="hover:text-white/60 transition-colors">Conditions</button>
         </div>
 
         <ForgotPasswordModal
