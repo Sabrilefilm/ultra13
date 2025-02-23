@@ -3,10 +3,12 @@ import { Award, Clock, Diamond, Gift, Settings, Users } from "lucide-react";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { StatsCard } from "@/components/StatsCard";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { CreateAccountModal } from "@/components/CreateAccountModal";
+import { RewardSettingsModal } from "@/components/RewardSettingsModal";
 
 type Role = 'creator' | 'manager' | 'founder';
 
@@ -14,7 +16,43 @@ const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<Role | null>(null);
+  const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
+  const [isRewardSettingsModalOpen, setIsRewardSettingsModalOpen] = useState(false);
+  const [platformSettings, setPlatformSettings] = useState<{
+    diamondValue: number;
+    minimumPayout: number;
+  } | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (role === 'founder') {
+      fetchPlatformSettings();
+    }
+  }, [role]);
+
+  const fetchPlatformSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('platform_settings')
+        .select('diamond_value, minimum_payout')
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setPlatformSettings({
+          diamondValue: data.diamond_value,
+          minimumPayout: data.minimum_payout,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les paramètres",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleLogin = () => {
     if (password === "Marseille@13011") {
@@ -34,7 +72,7 @@ const Index = () => {
     }
   };
 
-  const handleCreateAccount = async (role: 'creator' | 'manager', username: string, managerId?: string) => {
+  const handleCreateAccount = async (role: 'creator' | 'manager', username: string) => {
     try {
       const { data: user, error: authError } = await supabase.auth.signUp({
         email: `${username}@example.com`,
@@ -55,7 +93,6 @@ const Index = () => {
             id: user.user?.id,
             username,
             role,
-            manager_id: managerId
           }
         ]);
 
@@ -72,6 +109,7 @@ const Index = () => {
         description: "Impossible de créer le compte",
         variant: "destructive",
       });
+      throw error;
     }
   };
 
@@ -87,6 +125,11 @@ const Index = () => {
 
       if (error) throw error;
 
+      setPlatformSettings({
+        diamondValue,
+        minimumPayout,
+      });
+
       toast({
         title: "Paramètres mis à jour",
         description: "Les paramètres ont été mis à jour avec succès",
@@ -98,6 +141,7 @@ const Index = () => {
         description: "Impossible de mettre à jour les paramètres",
         variant: "destructive",
       });
+      throw error;
     }
   };
 
@@ -175,13 +219,7 @@ const Index = () => {
                 <Button
                   variant="outline"
                   className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5"
-                  onClick={() => {
-                    // Ouvrir modal de création de compte
-                    toast({
-                      title: "Création de compte",
-                      description: "Cette fonctionnalité sera bientôt disponible",
-                    });
-                  }}
+                  onClick={() => setIsCreateAccountModalOpen(true)}
                 >
                   <div className="flex items-center gap-2">
                     <Users className="w-5 h-5 text-primary" />
@@ -195,13 +233,7 @@ const Index = () => {
                 <Button
                   variant="outline"
                   className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5"
-                  onClick={() => {
-                    // Ouvrir modal de configuration des récompenses
-                    toast({
-                      title: "Configuration des récompenses",
-                      description: "Cette fonctionnalité sera bientôt disponible",
-                    });
-                  }}
+                  onClick={() => setIsRewardSettingsModalOpen(true)}
                 >
                   <div className="flex items-center gap-2">
                     <Diamond className="w-5 h-5 text-primary" />
@@ -291,29 +323,4 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex justify-between items-center">
-          <ProfileHeader 
-            username={role === 'founder' ? 'Fondateur' : role === 'manager' ? 'Manager' : 'Créateur'} 
-            handle={`@${role}`} 
-          />
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              setIsAuthenticated(false);
-              setRole(null);
-            }}
-            className="ml-4"
-          >
-            Déconnexion
-          </Button>
-        </div>
-        
-        {renderContentForRole()}
-      </div>
-    </div>
-  );
-};
-
-export default Index;
+    <div className="min
