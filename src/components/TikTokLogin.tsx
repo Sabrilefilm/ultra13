@@ -7,10 +7,10 @@ import { supabase } from "@/lib/supabase";
 export const TikTokLogin = () => {
   const { toast } = useToast();
 
-  const handleGoogleLogin = async () => {
+  const handleTikTokLogin = async () => {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: 'tiktok',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`
         }
@@ -19,7 +19,7 @@ export const TikTokLogin = () => {
       if (error) {
         toast({
           title: "Erreur de connexion",
-          description: "Impossible de se connecter avec Google",
+          description: "Impossible de se connecter à TikTok",
           variant: "destructive"
         });
       }
@@ -34,11 +34,11 @@ export const TikTokLogin = () => {
 
   return (
     <Button 
-      onClick={handleGoogleLogin}
+      onClick={handleTikTokLogin}
       className="flex items-center gap-2"
     >
       <Share2 className="w-5 h-5" />
-      Se connecter avec Google
+      Se connecter avec TikTok
     </Button>
   );
 };
