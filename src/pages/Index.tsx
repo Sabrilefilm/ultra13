@@ -443,6 +443,8 @@ const Index = () => {
               </div>
             </div>
 
+            <RewardsPanel role="founder" userId={username === "Sabri" ? "founder" : ""} />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
                 <div className="flex items-center justify-between mb-4">
