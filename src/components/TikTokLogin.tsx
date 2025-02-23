@@ -13,7 +13,7 @@ export const TikTokLogin = () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'tiktok' as any,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: 'http://localhost:3000/auth/callback',
           scopes: 'user.info.basic,video.list',
           queryParams: {
             client_key: TIKTOK_CLIENT_ID
