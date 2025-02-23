@@ -64,14 +64,23 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
 
       if (error) throw error;
 
-      const duration = 15 * 1000;
+      // Animation de confettis pendant 2 minutes
+      const duration = 2 * 60 * 1000; // 2 minutes en millisecondes
       const animationEnd = Date.now() + duration;
-      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+      const defaults = { 
+        startVelocity: 30, 
+        spread: 360, 
+        ticks: 60, 
+        zIndex: 0,
+        gravity: 0.5, // Réduit la gravité pour que les confettis tombent plus lentement
+        drift: 0 // Empêche les confettis de dériver sur les côtés
+      };
 
       function randomInRange(min: number, max: number) {
         return Math.random() * (max - min) + min;
       }
 
+      // Animation continue
       const interval = setInterval(function() {
         const timeLeft = animationEnd - Date.now();
 
@@ -79,21 +88,29 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
           return clearInterval(interval);
         }
 
-        const particleCount = 50 * (timeLeft / duration);
+        // Augmente la fréquence et la quantité de confettis
+        const particleCount = 100;
+
+        // Lance des confettis depuis plusieurs points
         confetti({
           ...defaults,
           particleCount,
-          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+          origin: { x: randomInRange(0.1, 0.3), y: 0 }
         });
         confetti({
           ...defaults,
           particleCount,
-          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+          origin: { x: randomInRange(0.4, 0.6), y: 0 }
         });
-      }, 250);
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.7, 0.9), y: 0 }
+        });
+      }, 100); // Réduit l'intervalle pour une animation plus fluide
 
       toast({
-        title: "Gagnant défini",
+        title: "🎉 Gagnant défini !",
         description: "Le gagnant du match a été enregistré avec succès",
       });
 
