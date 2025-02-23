@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 
@@ -7,18 +7,42 @@ type Role = 'client' | 'creator' | 'manager' | 'founder';
 
 export const useIndexAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const savedAuth = localStorage.getItem('isAuthenticated');
-    const savedRole = localStorage.getItem('userRole');
+    const savedAuth = sessionStorage.getItem('isAuthenticated');
+    const savedRole = sessionStorage.getItem('userRole');
     return savedAuth === 'true' && savedRole ? true : false;
   });
 
-  const [username, setUsername] = useState(() => localStorage.getItem('username') || "");
+  const [username, setUsername] = useState(() => sessionStorage.getItem('username') || "");
   const [role, setRole] = useState<Role | null>(() => {
-    const savedRole = localStorage.getItem('userRole');
+    const savedRole = sessionStorage.getItem('userRole');
     return savedRole as Role | null;
   });
 
   const { toast } = useToast();
+
+  // Gestionnaire pour la fermeture de la page
+  useEffect(() => {
+    const handleUnload = () => {
+      sessionStorage.clear();
+    };
+
+    window.addEventListener('beforeunload', handleUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+    };
+  }, []);
+
+  // Sauvegarde des données d'authentification
+  useEffect(() => {
+    if (isAuthenticated && role && username) {
+      sessionStorage.setItem('isAuthenticated', 'true');
+      sessionStorage.setItem('userRole', role);
+      sessionStorage.setItem('username', username);
+    } else {
+      sessionStorage.clear();
+    }
+  }, [isAuthenticated, role, username]);
 
   const playNotificationSound = () => {
     const audio = new Audio('/notification.mp3');
@@ -32,6 +56,7 @@ export const useIndexAuth = () => {
     setIsAuthenticated(false);
     setRole(null);
     setUsername("");
+    sessionStorage.clear();
   };
 
   const handleLogin = async (username: string, password: string) => {
