@@ -49,7 +49,10 @@ export const SponsorshipList = ({ isFounder }: SponsorshipListProps) => {
         .update({ status })
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erreur de mise à jour:", error);
+        throw error;
+      }
 
       toast({
         title: "Statut mis à jour",
