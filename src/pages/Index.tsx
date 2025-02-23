@@ -69,13 +69,8 @@ function Index() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen">
-        <div className="container px-4 md:px-6 py-32">
+        <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center space-y-8">
-            <div className="text-center space-y-2">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                ULTRA
-              </h1>
-            </div>
             <div className="w-full max-w-sm space-y-4">
               <LoginForm 
                 onLogin={handleLogin}
