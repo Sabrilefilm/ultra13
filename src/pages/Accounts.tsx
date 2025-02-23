@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users } from "lucide-react";
+import { ArrowLeft, Users, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -38,6 +38,30 @@ const Accounts = () => {
     }
   };
 
+  const handleDeleteAccount = async (id: string, username: string) => {
+    try {
+      const { error } = await supabase
+        .from("user_accounts")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setAccounts(accounts.filter(account => account.id !== id));
+      toast({
+        title: "Compte supprimé",
+        description: `Le compte ${username} a été supprimé avec succès`,
+      });
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le compte",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -54,7 +78,7 @@ const Accounts = () => {
             <Users className="h-6 w-6" />
             Espace Identifiants
           </h1>
-          <div className="w-10" /> {/* Spacer pour centrer le titre */}
+          <div className="w-10" />
         </div>
 
         {loading ? (
@@ -70,9 +94,19 @@ const Accounts = () => {
                     <h3 className="text-lg font-semibold capitalize">{account.role}</h3>
                     <p className="text-muted-foreground">{account.username}</p>
                   </div>
-                  <p className="text-sm px-3 py-1 rounded-full bg-primary/10 text-primary">
-                    {account.password}
-                  </p>
+                  <div className="flex items-center gap-4">
+                    <p className="text-sm px-3 py-1 rounded-full bg-primary/10 text-primary">
+                      {account.password}
+                    </p>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => handleDeleteAccount(account.id, account.username)}
+                      className="h-8 w-8"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </Card>
             ))}
