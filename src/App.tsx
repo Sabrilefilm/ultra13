@@ -11,6 +11,7 @@ import { useTheme } from "@/components/theme-provider";
 import Index from "./pages/Index";
 import Accounts from "./pages/Accounts";
 import NotFound from "./pages/NotFound";
+import UserManagement from "./pages/UserManagement";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/accounts" element={<Accounts />} />
+              <Route path="/user-management" element={<UserManagement />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

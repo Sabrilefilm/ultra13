@@ -1,6 +1,7 @@
 
 import { Settings, Users, Diamond } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface FounderDashboardProps {
   onCreateAccount: () => void;
@@ -17,6 +18,8 @@ export const FounderDashboard = ({
   onOpenSponsorships,
   username
 }: FounderDashboardProps) => {
+  const navigate = useNavigate();
+
   return (
     <div className="p-6 rounded-lg bg-card backdrop-blur-sm border border-border/50 shadow-lg">
       <div className="flex items-center justify-between mb-6">
@@ -86,6 +89,7 @@ export const FounderDashboard = ({
         <Button
           variant="outline"
           className="p-6 h-auto flex-col items-start gap-4 hover:bg-accent/5 text-primary-foreground hover:text-primary-foreground"
+          onClick={() => navigate("/user-management")}
         >
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-primary" />
