@@ -15,6 +15,7 @@ import { Plus } from "lucide-react";
 import { CreatorSelect } from "@/components/live-schedule/creator-select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 interface AddRewardDialogProps {
   isOpen: boolean;
@@ -25,15 +26,10 @@ interface AddRewardDialogProps {
 export function AddRewardDialog({ isOpen, onOpenChange, onSuccess }: AddRewardDialogProps) {
   const [diamonds, setDiamonds] = useState("");
   const [recipientId, setRecipientId] = useState("");
-  const { toast } = useToast();
 
   const handleAddReward = async () => {
     if (!recipientId || !diamonds || parseInt(diamonds) <= 0) {
-      toast({
-        title: "Erreur de validation",
-        description: "Veuillez sélectionner un créateur et entrer un nombre valide de diamants",
-        variant: "destructive",
-      });
+      toast("Veuillez sélectionner un créateur et entrer un nombre valide de diamants");
       return;
     }
 
@@ -51,22 +47,14 @@ export function AddRewardDialog({ isOpen, onOpenChange, onSuccess }: AddRewardDi
         throw insertError;
       }
 
-      toast({
-        title: "Succès",
-        description: "La récompense a été ajoutée avec succès",
-      });
-
+      toast("La récompense a été ajoutée avec succès");
       onOpenChange(false);
       setDiamonds("");
       setRecipientId("");
       onSuccess();
     } catch (error) {
       console.error('Error adding reward:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible d'ajouter la récompense. Veuillez réessayer.",
-        variant: "destructive",
-      });
+      toast("Impossible d'ajouter la récompense. Veuillez réessayer.");
     }
   };
 
