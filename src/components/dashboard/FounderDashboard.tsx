@@ -123,11 +123,27 @@ export const FounderDashboard = ({
         <Button
           variant="default"
           size="lg"
-          className="w-full max-w-md"
+          className="w-full max-w-md relative overflow-hidden group
+            bg-gradient-to-r from-[#0EA5E9] to-[#1E40AF] 
+            hover:from-[#1E40AF] hover:to-[#0EA5E9]
+            transition-all duration-300 ease-in-out
+            shadow-[0_0_15px_rgba(14,165,233,0.5)]
+            hover:shadow-[0_0_25px_rgba(14,165,233,0.8)]
+            border border-[#FEC6A1] hover:border-[#F97316]
+            before:content-['']
+            before:absolute before:inset-0
+            before:bg-gradient-to-r before:from-transparent
+            before:via-[rgba(254,198,161,0.2)] before:to-transparent
+            before:translate-x-[-200%]
+            before:transition-transform before:duration-[1.5s]
+            before:animate-shimmer
+            group-hover:before:translate-x-[200%]"
           onClick={() => navigate("/user-management")}
         >
-          <Users className="w-5 h-5 mr-2" />
-          Gestion des Utilisateurs
+          <Users className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-300" />
+          <span className="relative z-10 text-white font-semibold tracking-wide">
+            Gestion des Utilisateurs
+          </span>
         </Button>
       </div>
     </div>
