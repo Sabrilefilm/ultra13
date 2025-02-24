@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Bell, Smartphone, Monitor, Send } from "lucide-react";
+import { ArrowLeft, Bell, Smartphone, Monitor, Send, User, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -21,6 +21,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { useQuery } from "@tanstack/react-query";
 
 const NotificationManagement = () => {
   const navigate = useNavigate();
@@ -28,7 +29,21 @@ const NotificationManagement = () => {
   const [title, setTitle] = React.useState("");
   const [message, setMessage] = React.useState("");
   const [target, setTarget] = React.useState<"all" | "mobile" | "desktop">("all");
-  const [userGroup, setUserGroup] = React.useState<"all" | "creators" | "managers" | "agents">("all");
+  const [userGroup, setUserGroup] = React.useState<"all" | "creators" | "managers" | "agents" | "specific">("all");
+  const [selectedUserId, setSelectedUserId] = React.useState<string>("");
+
+  const { data: users, isLoading: loadingUsers } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_accounts")
+        .select("id, username, role")
+        .order("role", { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const handleSendNotification = async () => {
     if (!title.trim() || !message.trim()) {
@@ -50,6 +65,7 @@ const NotificationManagement = () => {
         message,
         target,
         user_group: userGroup,
+        user_id: userGroup === "specific" ? selectedUserId : null,
         sent_at: new Date().toISOString(),
       });
 
@@ -65,6 +81,7 @@ const NotificationManagement = () => {
       setMessage("");
       setTarget("all");
       setUserGroup("all");
+      setSelectedUserId("");
     } catch (error) {
       console.error("Error sending notification:", error);
       toast({
@@ -152,24 +169,64 @@ const NotificationManagement = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="userGroup">Groupe d'utilisateurs</Label>
-                <Select value={userGroup} onValueChange={(value: "all" | "creators" | "managers" | "agents") => setUserGroup(value)}>
+                <Label htmlFor="userGroup">Destinataire</Label>
+                <Select value={userGroup} onValueChange={(value: "all" | "creators" | "managers" | "agents" | "specific") => {
+                  setUserGroup(value);
+                  if (value !== "specific") {
+                    setSelectedUserId("");
+                  }
+                }}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Tous les utilisateurs</SelectItem>
+                    <SelectItem value="all">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        Tous les utilisateurs
+                      </div>
+                    </SelectItem>
                     <SelectItem value="creators">Créateurs uniquement</SelectItem>
                     <SelectItem value="managers">Managers uniquement</SelectItem>
                     <SelectItem value="agents">Agents uniquement</SelectItem>
+                    <SelectItem value="specific">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        Utilisateur spécifique
+                      </div>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
+              {userGroup === "specific" && (
+                <div className="space-y-2">
+                  <Label htmlFor="userId">Sélectionner l'utilisateur</Label>
+                  <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choisir un utilisateur" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {loadingUsers ? (
+                        <SelectItem value="loading" disabled>
+                          Chargement des utilisateurs...
+                        </SelectItem>
+                      ) : (
+                        users?.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.username} ({user.role})
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               <Button 
                 className="w-full" 
                 onClick={handleSendNotification}
-                disabled={!title.trim() || !message.trim()}
+                disabled={!title.trim() || !message.trim() || (userGroup === "specific" && !selectedUserId)}
               >
                 <Send className="h-4 w-4 mr-2" />
                 Envoyer la notification
