@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { downloadImage } from "@/utils/download";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/lib/supabase";
+import { Loader2 } from "lucide-react";
 
 interface CreateMatchPosterDialogProps {
   isOpen: boolean;
@@ -26,20 +27,25 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
   const [backgroundTheme, setBackgroundTheme] = useState<BackgroundTheme>("GAMING");
   const [matchDate, setMatchDate] = useState("");
   const [matchTime, setMatchTime] = useState("");
-  const [width] = useState("1080");
-  const [height] = useState("1920");
+  const [isLoading, setIsLoading] = useState(false);
 
   const generateAIImage = async (prompt: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('generate-match-poster', {
         body: {
-          prompt: `Create a professional e-sports tournament poster with a ${backgroundTheme.toLowerCase()} theme background. The poster should show "${player1Name}" (using the profile image from ${player1ImageUrl}) on the left vs "${player2Name}" (using the profile image from ${player2ImageUrl}) on the right. Include the text "${matchType} MATCH" prominently at the top. Display the date "${matchDate}" and time "${matchTime}" in the middle. Add "Phocéen Agency" at the bottom. Use a dynamic, modern style with high contrast and engaging visual effects. Make it look professional and impressive. Theme details: ${getThemeDetails(backgroundTheme)}`
+          prompt: `Create an esports tournament poster with ${backgroundTheme.toLowerCase()} theme. Show a VS battle between "${player1Name}" on the left and "${player2Name}" on the right. Include "Match ${matchType}" at the top. Display date: "${matchDate}" and time: "${matchTime}". Add "Phocéen Agency" at the bottom. Style: intense, dramatic, professional gaming event`
         }
       });
 
-      if (error) throw error;
+      console.log("Réponse de l'API:", data); // Pour le débogage
+
+      if (error) {
+        console.error("Erreur Supabase:", error);
+        throw error;
+      }
       
       if (!data?.imageUrl) {
+        console.error("Pas d'URL d'image dans la réponse:", data);
         throw new Error('URL de l\'image non reçue');
       }
 
@@ -50,53 +56,30 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
     }
   };
 
-  const getThemeDetails = (theme: BackgroundTheme) => {
-    switch (theme) {
-      case 'GAMING':
-        return 'Include gaming elements like controllers, RGB lights, and esports-style graphics';
-      case 'SPORT':
-        return 'Use dynamic sports elements, motion effects, and athletic imagery';
-      case 'NEON':
-        return 'Create a cyberpunk atmosphere with bright neon lights and glowing effects';
-      case 'DISNEY':
-        return 'Incorporate magical Disney-inspired elements, castles, and whimsical designs';
-      case 'ANIMALS':
-        return 'Use majestic animals, nature elements, and wildlife themes';
-      case 'SUPERHERO':
-        return 'Include comic book style elements, superhero imagery, and dramatic effects';
-      case 'ANIME':
-        return 'Use anime and manga inspired art style with bold colors and dynamic effects';
-      case 'SPACE':
-        return 'Create a cosmic theme with stars, planets, and space phenomena';
-      case 'FANTASY':
-        return 'Include magical elements, mythical creatures, and fantasy world imagery';
-      default:
-        return '';
-    }
-  };
-
   const handleGenerate = async () => {
     if (!player1Name || !player2Name || !matchDate || !matchTime) {
       toast.error("Veuillez remplir tous les champs obligatoires");
       return;
     }
 
-    toast.info("Génération de l'affiche en cours...");
+    setIsLoading(true);
+    toast.info("Génération de l'affiche en cours... Cela peut prendre quelques secondes.");
 
     try {
       const imageUrl = await generateAIImage(`Match ${matchType}`);
-      console.log("URL de l'image générée:", imageUrl); // Pour le débogage
       await downloadImage(imageUrl, `match-${matchType.toLowerCase()}-${matchDate.replace(/\//g, '-')}`);
       toast.success("Affiche téléchargée avec succès!");
       onClose();
     } catch (error) {
       console.error("Erreur complète:", error);
-      toast.error("Erreur lors de la génération de l'affiche");
+      toast.error("Erreur lors de la génération de l'affiche. Veuillez réessayer.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}} modal>
+    <Dialog open={isOpen} onOpenChange={onClose} modal>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Créer une affiche de match</DialogTitle>
@@ -150,13 +133,6 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
               value={player1Name}
               onChange={(e) => setPlayer1Name(e.target.value)}
             />
-            <Input
-              id="player1ImageUrl"
-              placeholder="URL de la photo de profil du joueur 1"
-              value={player1ImageUrl}
-              onChange={(e) => setPlayer1ImageUrl(e.target.value)}
-              className="mt-2"
-            />
           </div>
 
           <div className="grid gap-2">
@@ -166,13 +142,6 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
               placeholder="Nom du joueur 2 (ex: TEST_123)"
               value={player2Name}
               onChange={(e) => setPlayer2Name(e.target.value)}
-            />
-            <Input
-              id="player2ImageUrl"
-              placeholder="URL de la photo de profil du joueur 2"
-              value={player2ImageUrl}
-              onChange={(e) => setPlayer2ImageUrl(e.target.value)}
-              className="mt-2"
             />
           </div>
 
@@ -202,8 +171,15 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
           <Button variant="outline" onClick={onClose}>
             Annuler
           </Button>
-          <Button onClick={handleGenerate}>
-            Générer et Télécharger
+          <Button onClick={handleGenerate} disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Génération en cours...
+              </>
+            ) : (
+              'Générer et Télécharger'
+            )}
           </Button>
         </div>
       </DialogContent>
