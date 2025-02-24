@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { downloadImage } from "@/utils/download";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/lib/supabase";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface CreateMatchPosterDialogProps {
@@ -22,19 +22,19 @@ type BackgroundTheme = 'GAMING' | 'SPORT' | 'NEON' | 'DISNEY' | 'ANIMALS' | 'SUP
 export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDialogProps) => {
   const [player1Name, setPlayer1Name] = useState("");
   const [player2Name, setPlayer2Name] = useState("");
-  const [player1ImageUrl, setPlayer1ImageUrl] = useState("");
-  const [player2ImageUrl, setPlayer2ImageUrl] = useState("");
   const [matchType, setMatchType] = useState<MatchType>("OFF");
   const [backgroundTheme, setBackgroundTheme] = useState<BackgroundTheme>("GAMING");
   const [matchDate, setMatchDate] = useState("");
   const [matchTime, setMatchTime] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
 
-  const generateAIImage = async (prompt: string) => {
+  const generateAIImage = async (prompt: string, isPreview: boolean = false) => {
     try {
       const { data, error } = await supabase.functions.invoke('generate-match-poster', {
         body: {
-          prompt: `Create an esports tournament poster with ${backgroundTheme.toLowerCase()} theme. Show a VS battle between "${player1Name}" (use this profile picture: ${player1ImageUrl}) on the left and "${player2Name}" (use this profile picture: ${player2ImageUrl}) on the right. Include "Match ${matchType}" at the top. Display date: "${matchDate}" and time: "${matchTime}". Add "Phocéen Agency" at the bottom. Style: intense, dramatic, professional gaming event`
+          prompt: `Create an esports tournament poster with ${backgroundTheme.toLowerCase()} theme. Show a VS battle between "${player1Name}" on the left and "${player2Name}" on the right. Include "Match ${matchType}" at the top. Display date: "${matchDate}" and time: "${matchTime}". Add "Phocéen Agency" at the bottom. Style: intense, dramatic, professional gaming event`
         }
       });
 
@@ -53,9 +53,30 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
     }
   };
 
+  const handlePreview = async () => {
+    if (!player1Name || !player2Name || !matchDate || !matchTime) {
+      toast.error("Veuillez remplir tous les champs obligatoires");
+      return;
+    }
+
+    setIsPreviewLoading(true);
+    toast.info("Génération de la prévisualisation...");
+
+    try {
+      const imageUrl = await generateAIImage(`Match ${matchType}`, true);
+      setPreviewUrl(imageUrl);
+      toast.success("Prévisualisation générée!");
+    } catch (error) {
+      console.error("Erreur preview:", error);
+      toast.error("Erreur lors de la génération de la prévisualisation");
+    } finally {
+      setIsPreviewLoading(false);
+    }
+  };
+
   const handleGenerate = async () => {
-    if (!player1Name || !player2Name || !matchDate || !matchTime || !player1ImageUrl || !player2ImageUrl) {
-      toast.error("Veuillez remplir tous les champs et ajouter les URLs des photos de profil");
+    if (!player1Name || !player2Name || !matchDate || !matchTime) {
+      toast.error("Veuillez remplir tous les champs obligatoires");
       return;
     }
 
@@ -77,137 +98,144 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose} modal>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>Créer une affiche de match</DialogTitle>
         </DialogHeader>
         
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="matchType">Type de match</Label>
-            <Select 
-              value={matchType} 
-              onValueChange={(value: MatchType) => setMatchType(value)}
-            >
-              <SelectTrigger className="bg-background">
-                <SelectValue placeholder="Sélectionner le type de match" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border shadow-lg">
-                <SelectItem value="OFF">Match OFF</SelectItem>
-                <SelectItem value="ANNIVERSAIRE">Match Anniversaire</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="backgroundTheme">Thème de l'arrière-plan</Label>
-            <Select 
-              value={backgroundTheme} 
-              onValueChange={(value: BackgroundTheme) => setBackgroundTheme(value)}
-            >
-              <SelectTrigger className="bg-background">
-                <SelectValue placeholder="Sélectionner le thème" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border shadow-lg">
-                <SelectItem value="GAMING">Gaming</SelectItem>
-                <SelectItem value="SPORT">Sport</SelectItem>
-                <SelectItem value="NEON">Néon</SelectItem>
-                <SelectItem value="DISNEY">Disney</SelectItem>
-                <SelectItem value="ANIMALS">Animaux</SelectItem>
-                <SelectItem value="SUPERHERO">Super-héros</SelectItem>
-                <SelectItem value="ANIME">Anime</SelectItem>
-                <SelectItem value="SPACE">Espace</SelectItem>
-                <SelectItem value="FANTASY">Fantasy</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
+        <div className="grid grid-cols-2 gap-8">
+          {/* Formulaire à gauche */}
           <div className="grid gap-4">
-            <div className="space-y-2">
-              <Label>Joueur 1</Label>
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <Input
-                    placeholder="Nom du joueur 1 (ex: SABRI_AMD)"
-                    value={player1Name}
-                    onChange={(e) => setPlayer1Name(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2 w-full">
-                  <Input
-                    placeholder="URL de la photo de profil"
-                    value={player1ImageUrl}
-                    onChange={(e) => setPlayer1ImageUrl(e.target.value)}
-                  />
-                </div>
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={player1ImageUrl} />
-                  <AvatarFallback>{player1Name?.slice(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
+            <div className="grid gap-2">
+              <Label htmlFor="matchType">Type de match</Label>
+              <Select 
+                value={matchType} 
+                onValueChange={(value: MatchType) => setMatchType(value)}
+              >
+                <SelectTrigger className="bg-background">
+                  <SelectValue placeholder="Sélectionner le type de match" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border shadow-lg">
+                  <SelectItem value="OFF">Match OFF</SelectItem>
+                  <SelectItem value="ANNIVERSAIRE">Match Anniversaire</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="backgroundTheme">Thème de l'arrière-plan</Label>
+              <Select 
+                value={backgroundTheme} 
+                onValueChange={(value: BackgroundTheme) => setBackgroundTheme(value)}
+              >
+                <SelectTrigger className="bg-background">
+                  <SelectValue placeholder="Sélectionner le thème" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border shadow-lg">
+                  <SelectItem value="GAMING">Gaming</SelectItem>
+                  <SelectItem value="SPORT">Sport</SelectItem>
+                  <SelectItem value="NEON">Néon</SelectItem>
+                  <SelectItem value="DISNEY">Disney</SelectItem>
+                  <SelectItem value="ANIMALS">Animaux</SelectItem>
+                  <SelectItem value="SUPERHERO">Super-héros</SelectItem>
+                  <SelectItem value="ANIME">Anime</SelectItem>
+                  <SelectItem value="SPACE">Espace</SelectItem>
+                  <SelectItem value="FANTASY">Fantasy</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="player1Name">Joueur 1</Label>
+              <Input
+                id="player1Name"
+                placeholder="Nom du joueur 1 (ex: SABRI_AMD)"
+                value={player1Name}
+                onChange={(e) => setPlayer1Name(e.target.value)}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="player2Name">Joueur 2</Label>
+              <Input
+                id="player2Name"
+                placeholder="Nom du joueur 2 (ex: TEST_123)"
+                value={player2Name}
+                onChange={(e) => setPlayer2Name(e.target.value)}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="matchDate">Date du match</Label>
+                <Input
+                  id="matchDate"
+                  type="date"
+                  value={matchDate}
+                  onChange={(e) => setMatchDate(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="matchTime">Heure du match</Label>
+                <Input
+                  id="matchTime"
+                  type="time"
+                  value={matchTime}
+                  onChange={(e) => setMatchTime(e.target.value)}
+                />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Joueur 2</Label>
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <Input
-                    placeholder="Nom du joueur 2 (ex: TEST_123)"
-                    value={player2Name}
-                    onChange={(e) => setPlayer2Name(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2 w-full">
-                  <Input
-                    placeholder="URL de la photo de profil"
-                    value={player2ImageUrl}
-                    onChange={(e) => setPlayer2ImageUrl(e.target.value)}
-                  />
-                </div>
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={player2ImageUrl} />
-                  <AvatarFallback>{player2Name?.slice(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
+            <div className="flex justify-between gap-4 mt-4">
+              <Button variant="outline" onClick={onClose}>
+                Annuler
+              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={handlePreview}
+                  disabled={isPreviewLoading}
+                >
+                  {isPreviewLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Prévisualisation...
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="mr-2 h-4 w-4" />
+                      Prévisualiser
+                    </>
+                  )}
+                </Button>
+                <Button onClick={handleGenerate} disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Génération...
+                    </>
+                  ) : (
+                    'Générer et Télécharger'
+                  )}
+                </Button>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="matchDate">Date du match</Label>
-              <Input
-                id="matchDate"
-                type="date"
-                value={matchDate}
-                onChange={(e) => setMatchDate(e.target.value)}
+          {/* Prévisualisation à droite */}
+          <div className="relative min-h-[400px] border rounded-lg overflow-hidden bg-gray-50">
+            {previewUrl ? (
+              <img 
+                src={previewUrl} 
+                alt="Prévisualisation de l'affiche" 
+                className="w-full h-full object-cover"
               />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="matchTime">Heure du match</Label>
-              <Input
-                id="matchTime"
-                type="time"
-                value={matchTime}
-                onChange={(e) => setMatchTime(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-4">
-          <Button variant="outline" onClick={onClose}>
-            Annuler
-          </Button>
-          <Button onClick={handleGenerate} disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Génération en cours...
-              </>
             ) : (
-              'Générer et Télécharger'
+              <div className="flex items-center justify-center h-full text-gray-400">
+                <p>Cliquez sur "Prévisualiser" pour voir l'affiche</p>
+              </div>
             )}
-          </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
