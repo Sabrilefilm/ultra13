@@ -16,90 +16,49 @@ interface CreateMatchPosterDialogProps {
 }
 
 type MatchType = 'OFF' | 'ANNIVERSAIRE';
-type BackgroundTheme = 'GAMING' | 'SPORT' | 'NEON' | 'DISNEY' | 'ANIMALS' | 'SUPERHERO' | 'ANIME' | 'SPACE' | 'FANTASY';
 
 export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDialogProps) => {
   const [player1Name, setPlayer1Name] = useState("");
   const [player2Name, setPlayer2Name] = useState("");
+  const [player1ImageUrl, setPlayer1ImageUrl] = useState("");
+  const [player2ImageUrl, setPlayer2ImageUrl] = useState("");
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState("");
   const [matchType, setMatchType] = useState<MatchType>("OFF");
-  const [backgroundTheme, setBackgroundTheme] = useState<BackgroundTheme>("GAMING");
   const [matchDate, setMatchDate] = useState("");
   const [matchTime, setMatchTime] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string>("");
 
-  const generateAIImage = async (prompt: string) => {
-    try {
-      const formattedDate = matchDate ? new Date(matchDate).toLocaleDateString('fr-FR') : '';
-      const fullPrompt = `Create a professional esports tournament poster. Create a high-contrast, dramatic VS battle scene.
-        On the left side: Player "${player1Name}" represented as a professional gamer.
-        On the right side: Player "${player2Name}" represented as a professional gamer.
-        At the top: Large text "Match ${matchType}".
-        In the middle: Date "${formattedDate}" and time "${matchTime}".
-        At the bottom: Text "Phocéen Agency".
-        Theme: ${backgroundTheme.toLowerCase()}.
-        Style: Modern esports design, intense lighting, dramatic atmosphere, professional gaming event.
-        The image should be clean, professional, and suitable for a gaming tournament.`;
-
-      console.log("Sending prompt:", fullPrompt);
-
-      const { data, error } = await supabase.functions.invoke('generate-match-poster', {
-        body: { prompt: fullPrompt }
-      });
-
-      console.log("API Response:", data);
-
-      if (error) {
-        console.error("Supabase function error:", error);
-        throw error;
-      }
-      
-      if (!data?.imageUrl) {
-        throw new Error('No image URL received');
-      }
-
-      return data.imageUrl;
-    } catch (error) {
-      console.error("Image generation error:", error);
-      throw error;
-    }
-  };
-
   const handlePreview = async () => {
-    if (!player1Name || !player2Name || !matchDate || !matchTime) {
+    if (!player1Name || !player2Name || !matchDate || !matchTime || !backgroundImageUrl || !player1ImageUrl || !player2ImageUrl) {
       toast.error("Veuillez remplir tous les champs obligatoires");
       return;
     }
 
     setIsPreviewLoading(true);
-    toast.info("Génération de la prévisualisation...");
-
     try {
-      const imageUrl = await generateAIImage(`Match ${matchType}`);
-      setPreviewUrl(imageUrl);
-      toast.success("Prévisualisation générée avec succès!");
+      // Utilisez directement l'image de fond comme prévisualisation
+      setPreviewUrl(backgroundImageUrl);
+      toast.success("Prévisualisation mise à jour!");
     } catch (error) {
       console.error("Erreur preview:", error);
-      toast.error("Erreur lors de la génération de la prévisualisation");
+      toast.error("Erreur lors de la prévisualisation");
     } finally {
       setIsPreviewLoading(false);
     }
   };
 
   const handleGenerate = async () => {
-    if (!player1Name || !player2Name || !matchDate || !matchTime) {
+    if (!player1Name || !player2Name || !matchDate || !matchTime || !backgroundImageUrl || !player1ImageUrl || !player2ImageUrl) {
       toast.error("Veuillez remplir tous les champs obligatoires");
       return;
     }
 
     setIsLoading(true);
-    toast.info("Génération de l'affiche en cours... Cela peut prendre quelques secondes.");
-
     try {
-      const imageUrl = await generateAIImage(`Match ${matchType}`);
       const fileName = `match-${matchType.toLowerCase()}-${matchDate.replace(/\//g, '-')}`;
-      await downloadImage(imageUrl, fileName);
+      await downloadImage(backgroundImageUrl, fileName);
       toast.success("Affiche téléchargée avec succès!");
       onClose();
     } catch (error) {
@@ -137,35 +96,32 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="backgroundTheme">Thème de l'arrière-plan</Label>
-              <Select 
-                value={backgroundTheme} 
-                onValueChange={(value: BackgroundTheme) => setBackgroundTheme(value)}
-              >
-                <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="Sélectionner le thème" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border shadow-lg">
-                  <SelectItem value="GAMING">Gaming</SelectItem>
-                  <SelectItem value="SPORT">Sport</SelectItem>
-                  <SelectItem value="NEON">Néon</SelectItem>
-                  <SelectItem value="DISNEY">Disney</SelectItem>
-                  <SelectItem value="ANIMALS">Animaux</SelectItem>
-                  <SelectItem value="SUPERHERO">Super-héros</SelectItem>
-                  <SelectItem value="ANIME">Anime</SelectItem>
-                  <SelectItem value="SPACE">Espace</SelectItem>
-                  <SelectItem value="FANTASY">Fantasy</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="backgroundImageUrl">URL de l'image d'arrière-plan</Label>
+              <Input
+                id="backgroundImageUrl"
+                placeholder="https://exemple.com/image-background.jpg"
+                value={backgroundImageUrl}
+                onChange={(e) => setBackgroundImageUrl(e.target.value)}
+              />
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="player1Name">Joueur 1</Label>
               <Input
                 id="player1Name"
-                placeholder="Nom du joueur 1 (ex: SABRI_AMD)"
+                placeholder="Nom du joueur 1"
                 value={player1Name}
                 onChange={(e) => setPlayer1Name(e.target.value)}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="player1ImageUrl">Image du joueur 1</Label>
+              <Input
+                id="player1ImageUrl"
+                placeholder="https://exemple.com/joueur1.jpg"
+                value={player1ImageUrl}
+                onChange={(e) => setPlayer1ImageUrl(e.target.value)}
               />
             </div>
 
@@ -173,9 +129,19 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
               <Label htmlFor="player2Name">Joueur 2</Label>
               <Input
                 id="player2Name"
-                placeholder="Nom du joueur 2 (ex: TEST_123)"
+                placeholder="Nom du joueur 2"
                 value={player2Name}
                 onChange={(e) => setPlayer2Name(e.target.value)}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="player2ImageUrl">Image du joueur 2</Label>
+              <Input
+                id="player2ImageUrl"
+                placeholder="https://exemple.com/joueur2.jpg"
+                value={player2ImageUrl}
+                onChange={(e) => setPlayer2ImageUrl(e.target.value)}
               />
             </div>
 
