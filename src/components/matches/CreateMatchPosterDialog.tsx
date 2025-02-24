@@ -1,13 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { downloadImage } from "@/utils/download";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/lib/supabase";
 import { Loader2, Eye } from "lucide-react";
 
 interface CreateMatchPosterDialogProps {
@@ -30,6 +28,71 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string>("");
 
+  const generatePoster = async () => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    // Définir la taille du canvas
+    canvas.width = 1200;
+    canvas.height = 675;
+
+    try {
+      // Charger l'image de fond
+      const bgImage = await loadImage(backgroundImageUrl);
+      ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+
+      // Ajouter un overlay semi-transparent
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Charger et dessiner l'image du joueur 1
+      const player1Img = await loadImage(player1ImageUrl);
+      ctx.drawImage(player1Img, 50, 150, 300, 400);
+
+      // Charger et dessiner l'image du joueur 2
+      const player2Img = await loadImage(player2ImageUrl);
+      ctx.drawImage(player2Img, canvas.width - 350, 150, 300, 400);
+
+      // Ajouter le texte
+      ctx.fillStyle = 'white';
+      ctx.textAlign = 'center';
+      
+      // Type de match
+      ctx.font = 'bold 48px Arial';
+      ctx.fillText(`MATCH ${matchType}`, canvas.width / 2, 80);
+
+      // Noms des joueurs
+      ctx.font = 'bold 36px Arial';
+      ctx.fillText(player1Name, 200, 120);
+      ctx.fillText(player2Name, canvas.width - 200, 120);
+
+      // VS
+      ctx.font = 'bold 72px Arial';
+      ctx.fillText('VS', canvas.width / 2, canvas.height / 2);
+
+      // Date et heure
+      ctx.font = '32px Arial';
+      const date = new Date(matchDate).toLocaleDateString('fr-FR');
+      ctx.fillText(`${date} - ${matchTime}`, canvas.width / 2, canvas.height - 100);
+
+      return canvas.toDataURL('image/png');
+    } catch (error) {
+      console.error('Erreur lors de la génération:', error);
+      return null;
+    }
+  };
+
+  const loadImage = (url: string): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous"; // Important pour les images externes
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
+  };
+
   const handlePreview = async () => {
     if (!player1Name || !player2Name || !matchDate || !matchTime || !backgroundImageUrl || !player1ImageUrl || !player2ImageUrl) {
       toast.error("Veuillez remplir tous les champs obligatoires");
@@ -38,9 +101,13 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
 
     setIsPreviewLoading(true);
     try {
-      // Utilisez directement l'image de fond comme prévisualisation
-      setPreviewUrl(backgroundImageUrl);
-      toast.success("Prévisualisation mise à jour!");
+      const posterUrl = await generatePoster();
+      if (posterUrl) {
+        setPreviewUrl(posterUrl);
+        toast.success("Prévisualisation mise à jour!");
+      } else {
+        throw new Error("Impossible de générer l'affiche");
+      }
     } catch (error) {
       console.error("Erreur preview:", error);
       toast.error("Erreur lors de la prévisualisation");
@@ -57,8 +124,19 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
 
     setIsLoading(true);
     try {
-      const fileName = `match-${matchType.toLowerCase()}-${matchDate.replace(/\//g, '-')}`;
-      await downloadImage(backgroundImageUrl, fileName);
+      const posterUrl = await generatePoster();
+      if (!posterUrl) {
+        throw new Error("Impossible de générer l'affiche");
+      }
+
+      // Créer un lien de téléchargement
+      const link = document.createElement('a');
+      link.download = `match-${matchType.toLowerCase()}-${matchDate.replace(/\//g, '-')}.png`;
+      link.href = posterUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
       toast.success("Affiche téléchargée avec succès!");
       onClose();
     } catch (error) {
