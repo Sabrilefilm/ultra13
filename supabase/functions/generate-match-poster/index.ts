@@ -1,6 +1,5 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { HfInference } from 'https://esm.sh/@huggingface/inference@2.3.2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,60 +7,53 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    console.log("Starting image generation...");
-    const { prompt } = await req.json();
-    
-    console.log("Prompt received:", prompt);
-    
-    const hf = new HfInference(Deno.env.get('HUGGING_FACE_ACCESS_TOKEN'));
+    const { prompt } = await req.json()
+    console.log("Received prompt:", prompt)
 
-    console.log("Calling Hugging Face API...");
-    const blob = await hf.textToImage({
-      inputs: prompt,
-      model: "stabilityai/stable-diffusion-2",
-      parameters: {
-        negative_prompt: "blurry, bad quality, distorted",
-      }
+    const response = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`
+      },
+      body: JSON.stringify({
+        model: "dall-e-3",
+        prompt: prompt,
+        n: 1,
+        size: "1024x1024",
+        quality: "standard",
+        style: "vivid"
+      })
     });
 
-    // Convert blob to base64
-    const arrayBuffer = await blob.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-    const imageUrl = `data:image/png;base64,${base64}`;
+    const data = await response.json()
+    console.log("OpenAI response:", data)
 
-    console.log("Image generated successfully");
+    if (data.error) {
+      throw new Error(data.error.message)
+    }
 
     return new Response(
       JSON.stringify({ 
-        imageUrl: imageUrl 
+        imageUrl: data.data[0].url 
       }),
       { 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        } 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
-    );
+    )
   } catch (error) {
-    console.error("Error in generate-match-poster:", error);
+    console.error("Error:", error)
     return new Response(
-      JSON.stringify({ 
-        error: 'Error generating image',
-        details: error.message 
-      }),
+      JSON.stringify({ error: error.message }),
       { 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        },
-        status: 500 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
       }
-    );
+    )
   }
-});
+})

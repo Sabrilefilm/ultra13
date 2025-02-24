@@ -32,13 +32,15 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
   const generateAIImage = async (prompt: string) => {
     try {
       const formattedDate = matchDate ? new Date(matchDate).toLocaleDateString('fr-FR') : '';
-      const fullPrompt = `Create a high quality esports tournament poster with ${backgroundTheme.toLowerCase()} theme. 
-        Show a VS battle setup. On the left side, prominently display player "${player1Name}" and on the right side 
-        show player "${player2Name}". At the top, add the text "Match ${matchType}". 
-        Below that, display the date "${formattedDate}" and time "${matchTime}". 
-        At the bottom, add the text "Phocéen Agency".
-        Make it look professional, dramatic, and intense like an esports event.
-        Use a clean, modern design with bold typography.`;
+      const fullPrompt = `Create a professional esports tournament poster. Create a high-contrast, dramatic VS battle scene.
+        On the left side: Player "${player1Name}" represented as a professional gamer.
+        On the right side: Player "${player2Name}" represented as a professional gamer.
+        At the top: Large text "Match ${matchType}".
+        In the middle: Date "${formattedDate}" and time "${matchTime}".
+        At the bottom: Text "Phocéen Agency".
+        Theme: ${backgroundTheme.toLowerCase()}.
+        Style: Modern esports design, intense lighting, dramatic atmosphere, professional gaming event.
+        The image should be clean, professional, and suitable for a gaming tournament.`;
 
       console.log("Sending prompt:", fullPrompt);
 
