@@ -47,7 +47,7 @@ const UserManagement = () => {
   const [showRoleConfirmDialog, setShowRoleConfirmDialog] = React.useState(false);
   const [pendingRoleChange, setPendingRoleChange] = React.useState<{userId: string; newRole: string; username: string} | null>(null);
 
-  const { data: users, isLoading } = useQuery({
+  const { data: users, isLoading, refetch } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -192,22 +192,6 @@ const UserManagement = () => {
     );
   }, [users, searchQuery]);
 
-  const groupedUsers = React.useMemo(() => {
-    const groups = {
-      manager: [] as typeof filteredUsers,
-      creator: [] as typeof filteredUsers,
-      agent: [] as typeof filteredUsers,
-    };
-
-    filteredUsers.forEach(user => {
-      if (user.role in groups) {
-        groups[user.role as keyof typeof groups].push(user);
-      }
-    });
-
-    return groups;
-  }, [filteredUsers]);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -232,85 +216,118 @@ const UserManagement = () => {
             <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Managers */}
-            <div className="bg-card rounded-lg border border-border/50 shadow-lg overflow-hidden">
-              <div className="p-4 border-b border-border/50">
-                <h2 className="text-lg font-semibold">Managers</h2>
-              </div>
-              <div className="divide-y divide-border/50">
-                {groupedUsers.manager.map((user) => (
-                  <UserRow 
-                    key={user.id} 
-                    user={user} 
-                    onRoleChange={handleRoleChange}
-                    onDelete={handleDeleteUser}
-                    showPassword={showPasswords[user.id]}
-                    onTogglePassword={() => togglePasswordVisibility(user.id)}
-                    onViewDetails={handleViewDetails}
-                    onEdit={handleUsernameEdit}
-                    isEditing={editingUser?.id === user.id}
-                    editedUsername={editedUsername}
-                    onEditChange={setEditedUsername}
-                    onSave={handleUsernameSave}
-                    onCancel={() => setEditingUser(null)}
-                  />
+          <div className="rounded-lg border bg-card shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[300px]">Utilisateur</TableHead>
+                  <TableHead>Rôle</TableHead>
+                  <TableHead>Statistiques</TableHead>
+                  <TableHead>Mot de passe</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>
+                      {editingUser?.id === user.id ? (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={editedUsername}
+                            onChange={(e) => onEditChange(e.target.value)}
+                            className="max-w-[200px]"
+                          />
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={handleUsernameSave}
+                            disabled={!editedUsername.trim() || editedUsername === user.username}
+                          >
+                            <Check className="h-4 w-4 text-green-500" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => setEditingUser(null)}
+                          >
+                            <X className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{user.username}</span>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => handleUsernameEdit(user)}
+                          >
+                            <UserCog className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={user.role}
+                        onValueChange={(value) => handleRoleChange(user.id, value, user.username)}
+                      >
+                        <SelectTrigger className="w-[120px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="creator">Créateur</SelectItem>
+                          <SelectItem value="manager">Manager</SelectItem>
+                          <SelectItem value="agent">Agent</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      {user.role === "creator" && user.live_schedules && user.live_schedules[0] && (
+                        <div className="text-sm text-muted-foreground">
+                          <p>Heures de live : {user.live_schedules[0].hours}h</p>
+                          <p>Jours streamés : {user.live_schedules[0].days}j</p>
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm">
+                          {showPasswords[user.id] ? user.password : "••••••••"}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => togglePasswordVisibility(user.id)}
+                        >
+                          {showPasswords[user.id] ? "Masquer" : "Afficher"}
+                        </Button>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {user.role === "creator" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewDetails(user.id)}
+                          >
+                            <Info className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteUser(user.id, user.username)}
+                        >
+                          Supprimer
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </div>
-            </div>
-
-            {/* Creators */}
-            <div className="bg-card rounded-lg border border-border/50 shadow-lg overflow-hidden">
-              <div className="p-4 border-b border-border/50">
-                <h2 className="text-lg font-semibold">Créateurs</h2>
-              </div>
-              <div className="divide-y divide-border/50">
-                {groupedUsers.creator.map((user) => (
-                  <UserRow 
-                    key={user.id} 
-                    user={user}
-                    onRoleChange={handleRoleChange}
-                    onDelete={handleDeleteUser}
-                    showPassword={showPasswords[user.id]}
-                    onTogglePassword={() => togglePasswordVisibility(user.id)}
-                    onViewDetails={handleViewDetails}
-                    onEdit={handleUsernameEdit}
-                    isEditing={editingUser?.id === user.id}
-                    editedUsername={editedUsername}
-                    onEditChange={setEditedUsername}
-                    onSave={handleUsernameSave}
-                    onCancel={() => setEditingUser(null)}
-                    showStats
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Agents */}
-            <div className="bg-card rounded-lg border border-border/50 shadow-lg overflow-hidden">
-              <div className="p-4 border-b border-border/50">
-                <h2 className="text-lg font-semibold">Agents</h2>
-              </div>
-              <div className="divide-y divide-border/50">
-                {groupedUsers.agent.map((user) => (
-                  <UserRow 
-                    key={user.id} 
-                    user={user}
-                    onRoleChange={handleRoleChange}
-                    onDelete={handleDeleteUser}
-                    showPassword={showPasswords[user.id]}
-                    onTogglePassword={() => togglePasswordVisibility(user.id)}
-                    onViewDetails={handleViewDetails}
-                    onEdit={handleUsernameEdit}
-                    isEditing={editingUser?.id === user.id}
-                    editedUsername={editedUsername}
-                    onEditChange={setEditedUsername}
-                    onSave={handleUsernameSave}
-                    onCancel={() => setEditingUser(null)}
-                  />
-                ))}
-              </div>
-            </div>
+              </TableBody>
+            </Table>
           </div>
         )}
 
@@ -345,133 +362,6 @@ const UserManagement = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
-    </div>
-  );
-};
-
-interface UserRowProps {
-  user: Account & { live_schedules?: { hours: number; days: number }[] };
-  onRoleChange: (userId: string, newRole: string, username: string) => void;
-  onDelete: (id: string, username: string) => void;
-  showPassword: boolean;
-  onTogglePassword: () => void;
-  onViewDetails: (userId: string) => void;
-  onEdit: (user: Account) => void;
-  isEditing: boolean;
-  editedUsername: string;
-  onEditChange: (value: string) => void;
-  onSave: () => void;
-  onCancel: () => void;
-  showStats?: boolean;
-}
-
-const UserRow = ({
-  user,
-  onRoleChange,
-  onDelete,
-  showPassword,
-  onTogglePassword,
-  onViewDetails,
-  onEdit,
-  isEditing,
-  editedUsername,
-  onEditChange,
-  onSave,
-  onCancel,
-  showStats,
-}: UserRowProps) => {
-  return (
-    <div className="p-4 space-y-3">
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1 flex-1">
-          {isEditing ? (
-            <div className="flex items-center gap-2">
-              <Input
-                value={editedUsername}
-                onChange={(e) => onEditChange(e.target.value)}
-                className="max-w-[200px]"
-              />
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={onSave}
-                disabled={!editedUsername.trim() || editedUsername === user.username}
-              >
-                <Check className="h-4 w-4 text-green-500" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={onCancel}
-              >
-                <X className="h-4 w-4 text-red-500" />
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{user.username}</span>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => onEdit(user)}
-              >
-                <UserCog className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-          {showStats && user.live_schedules && user.live_schedules[0] && (
-            <div className="text-sm text-muted-foreground">
-              <p>Heures de live : {user.live_schedules[0].hours}h</p>
-              <p>Jours streamés : {user.live_schedules[0].days}j</p>
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <Select
-            value={user.role}
-            onValueChange={(value) => onRoleChange(user.id, value, user.username)}
-          >
-            <SelectTrigger className="w-[120px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="creator">Créateur</SelectItem>
-              <SelectItem value="manager">Manager</SelectItem>
-              <SelectItem value="agent">Agent</SelectItem>
-            </SelectContent>
-          </Select>
-          {user.role === "creator" && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onViewDetails(user.id)}
-            >
-              <Info className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      </div>
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-sm">
-            {showPassword ? user.password : "••••••••"}
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onTogglePassword}
-          >
-            {showPassword ? "Masquer" : "Afficher"}
-          </Button>
-        </div>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => onDelete(user.id, user.username)}
-        >
-          Supprimer
-        </Button>
       </div>
     </div>
   );
