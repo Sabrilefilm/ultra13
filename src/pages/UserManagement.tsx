@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Info } from "lucide-react";
+import { ArrowLeft, Info, UserCog } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -17,6 +17,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Account } from "@/types/accounts";
 import { CreatorDetailsDialog } from "@/components/creator/CreatorDetailsDialog";
 import { useIndexAuth } from "@/hooks/use-index-auth";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const UserManagement = () => {
   const navigate = useNavigate();
@@ -58,6 +65,31 @@ const UserManagement = () => {
       toast({
         title: "Erreur",
         description: "Impossible de supprimer le compte",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRoleChange = async (userId: string, newRole: string, username: string) => {
+    try {
+      const { error } = await supabase
+        .from("user_accounts")
+        .update({ role: newRole })
+        .eq("id", userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Rôle modifié",
+        description: `Le rôle de ${username} a été changé en ${newRole}`,
+        duration: 3000,
+      });
+      
+      refetch();
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier le rôle",
         variant: "destructive",
       });
     }
@@ -126,7 +158,21 @@ const UserManagement = () => {
                 {users?.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.username}</TableCell>
-                    <TableCell>{user.role}</TableCell>
+                    <TableCell>
+                      <Select
+                        defaultValue={user.role}
+                        onValueChange={(value) => handleRoleChange(user.id, value, user.username)}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="creator">Créateur</SelectItem>
+                          <SelectItem value="manager">Manager</SelectItem>
+                          <SelectItem value="agent">Agent</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <span className="font-mono">
