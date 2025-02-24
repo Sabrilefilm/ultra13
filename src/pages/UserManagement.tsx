@@ -27,6 +27,7 @@ const UserManagement = () => {
     showRoleConfirmDialog,
     setShowRoleConfirmDialog,
     pendingRoleChange,
+    setPendingRoleChange,
     showPasswords,
     handleDeleteUser,
     handleRoleChangeConfirm,

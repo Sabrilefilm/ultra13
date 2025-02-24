@@ -1,9 +1,14 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { Account } from "@/types/accounts";
 import { useQuery } from "@tanstack/react-query";
+
+interface PendingRoleChange {
+  userId: string;
+  newRole: string;
+  username: string;
+}
 
 export const useUserManagement = () => {
   const { toast } = useToast();
@@ -14,11 +19,7 @@ export const useUserManagement = () => {
   const [editedUsername, setEditedUsername] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showRoleConfirmDialog, setShowRoleConfirmDialog] = useState(false);
-  const [pendingRoleChange, setPendingRoleChange] = useState<{
-    userId: string;
-    newRole: string;
-    username: string;
-  } | null>(null);
+  const [pendingRoleChange, setPendingRoleChange] = useState<PendingRoleChange | null>(null);
 
   const { data: users, isLoading, refetch } = useQuery({
     queryKey: ["users"],
@@ -39,55 +40,77 @@ export const useUserManagement = () => {
     },
   });
 
-  const handleDeleteUser = async (id: string, username: string) => {
+  const filteredUsers = users
+    ?.filter(user => {
+      if (!searchQuery) return true;
+      const search = searchQuery.toLowerCase();
+      return (
+        user.username.toLowerCase().includes(search) ||
+        user.email.toLowerCase().includes(search)
+      );
+    }) || [];
+
+  const handleDeleteUser = async (userId: string) => {
     try {
       const { error } = await supabase
         .from("user_accounts")
         .delete()
-        .eq("id", id);
+        .eq("id", userId);
 
-      if (error) throw error;
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Erreur!",
+          description: "Impossible de supprimer l'utilisateur.",
+        });
+        return;
+      }
 
       toast({
-        title: "Compte supprimé",
-        description: `Le compte ${username} a été supprimé avec succès`,
+        title: "Succès!",
+        description: "Utilisateur supprimé avec succès.",
       });
-      
       refetch();
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: "Impossible de supprimer le compte",
         variant: "destructive",
+        title: "Erreur!",
+        description: "Une erreur s'est produite lors de la suppression de l'utilisateur.",
       });
     }
   };
 
   const handleRoleChangeConfirm = async () => {
     if (!pendingRoleChange) return;
-    
+
     try {
+      const { userId, newRole } = pendingRoleChange;
       const { error } = await supabase
         .from("user_accounts")
-        .update({ role: pendingRoleChange.newRole })
-        .eq("id", pendingRoleChange.userId);
+        .update({ role: newRole })
+        .eq("id", userId);
 
-      if (error) throw error;
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Erreur!",
+          description: "Impossible de modifier le rôle de l'utilisateur.",
+        });
+        return;
+      }
 
       toast({
-        title: "Rôle modifié",
-        description: `Le rôle de ${pendingRoleChange.username} a été changé en ${pendingRoleChange.newRole}`,
-        duration: 3000,
+        title: "Succès!",
+        description: "Rôle de l'utilisateur modifié avec succès.",
       });
-      
       setShowRoleConfirmDialog(false);
       setPendingRoleChange(null);
       refetch();
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: "Impossible de modifier le rôle",
         variant: "destructive",
+        title: "Erreur!",
+        description: "Une erreur s'est produite lors de la modification du rôle de l'utilisateur.",
       });
     }
   };
@@ -102,74 +125,81 @@ export const useUserManagement = () => {
     setEditedUsername(user.username);
   };
 
-  const handleUsernameSave = async () => {
-    if (!editingUser || !editedUsername.trim()) return;
+  const handleUsernameSave = async (userId: string) => {
+    if (!editingUser) return;
 
     try {
       const { error } = await supabase
         .from("user_accounts")
-        .update({ username: editedUsername.trim() })
-        .eq("id", editingUser.id);
+        .update({ username: editedUsername })
+        .eq("id", userId);
 
-      if (error) throw error;
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Erreur!",
+          description: "Impossible de modifier le nom d'utilisateur.",
+        });
+        return;
+      }
 
       toast({
-        title: "Nom d'utilisateur modifié",
-        description: `Le nom d'utilisateur a été changé en ${editedUsername.trim()}`,
+        title: "Succès!",
+        description: "Nom d'utilisateur modifié avec succès.",
       });
-      
       setEditingUser(null);
+      setEditedUsername("");
       refetch();
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: "Impossible de modifier le nom d'utilisateur",
         variant: "destructive",
+        title: "Erreur!",
+        description: "Une erreur s'est produite lors de la modification du nom d'utilisateur.",
       });
     }
   };
 
   const handleViewDetails = async (userId: string) => {
+    setSelectedUser(userId);
     try {
       const { data, error } = await supabase
-        .from("creator_profiles")
-        .select("*")
-        .eq("user_id", userId)
+        .from("user_accounts")
+        .select(`*, live_schedules (*)`)
+        .eq("id", userId)
         .single();
 
-      if (error && error.code !== "PGRST116") throw error;
-      
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Erreur!",
+          description: "Impossible de récupérer les détails de l'utilisateur.",
+        });
+        return;
+      }
+
       setCreatorDetails(data);
-      setSelectedUser(userId);
     } catch (error) {
-      console.error("Error fetching creator details:", error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les détails du créateur",
         variant: "destructive",
+        title: "Erreur!",
+        description: "Une erreur s'est produite lors de la récupération des détails de l'utilisateur.",
       });
     }
   };
 
-  const togglePasswordVisibility = (id: string) => {
-    setShowPasswords(prev => ({
-      ...prev,
-      [id]: !prev[id]
+  const togglePasswordVisibility = (userId: string) => {
+    setShowPasswords(prevState => ({
+      ...prevState,
+      [userId]: !prevState[userId],
     }));
   };
 
-  const filteredUsers = users?.filter(user => 
-    user.username.toLowerCase().includes(searchQuery.toLowerCase())
-  ) ?? [];
-
-  const groupedUsers = {
-    manager: filteredUsers.filter(user => user.role === "manager"),
-    creator: filteredUsers.filter(user => user.role === "creator"),
-    agent: filteredUsers.filter(user => user.role === "agent"),
-  };
-
   return {
-    users: groupedUsers,
+    users: {
+      manager: filteredUsers.filter(user => user.role === "manager"),
+      creator: filteredUsers.filter(user => user.role === "creator"),
+      agent: filteredUsers.filter(user => user.role === "agent"),
+    },
     isLoading,
     selectedUser,
     setSelectedUser,
@@ -182,6 +212,7 @@ export const useUserManagement = () => {
     showRoleConfirmDialog,
     setShowRoleConfirmDialog,
     pendingRoleChange,
+    setPendingRoleChange,
     showPasswords,
     handleDeleteUser,
     handleRoleChangeConfirm,

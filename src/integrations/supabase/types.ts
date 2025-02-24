@@ -168,6 +168,36 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          sent_at: string
+          target: string
+          title: string
+          user_group: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          sent_at?: string
+          target: string
+          title: string
+          user_group: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          sent_at?: string
+          target?: string
+          title?: string
+          user_group?: string
+        }
+        Relationships: []
+      }
       platform_settings: {
         Row: {
           created_at: string
