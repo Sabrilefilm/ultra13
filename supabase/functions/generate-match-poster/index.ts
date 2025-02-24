@@ -21,13 +21,12 @@ serve(async (req) => {
 
     console.log("Génération de l'image en cours...");
     const image = await hf.textToImage({
-      inputs: prompt,
-      model: 'black-forest-labs/FLUX.1-schnell',
+      inputs: `professional esports tournament poster, gaming event, ${prompt}, modern design, high quality, 4k, detailed, sharp focus, professional photography, epic lighting, dramatic composition`,
+      model: 'runwayml/stable-diffusion-v1-5',
       parameters: {
-        height: 1024,
-        width: 1024,
-        guidance_scale: 7.5,
-        num_inference_steps: 50,
+        negative_prompt: "blurry, low quality, distorted, bad anatomy, text, watermark",
+        num_inference_steps: 30,
+        guidance_scale: 7.5
       }
     });
 
