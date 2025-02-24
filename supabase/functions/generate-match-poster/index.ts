@@ -1,50 +1,67 @@
 
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { HfInference } from 'https://esm.sh/@huggingface/inference@2.3.2';
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { HfInference } from 'https://esm.sh/@huggingface/inference@2.3.2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+}
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log("Starting image generation...");
     const { prompt } = await req.json();
-    console.log("Prompt reçu:", prompt);
-
+    
+    console.log("Prompt received:", prompt);
+    
     const hf = new HfInference(Deno.env.get('HUGGING_FACE_ACCESS_TOKEN'));
 
-    console.log("Génération de l'image en cours...");
-    const image = await hf.textToImage({
-      inputs: `professional esports tournament poster, gaming event, ${prompt}, modern design, high quality, 4k, detailed, sharp focus, professional photography, epic lighting, dramatic composition`,
-      model: 'runwayml/stable-diffusion-v1-5',
+    console.log("Calling Hugging Face API...");
+    const blob = await hf.textToImage({
+      inputs: prompt,
+      model: "stabilityai/stable-diffusion-2",
       parameters: {
-        negative_prompt: "blurry, low quality, distorted, bad anatomy, text, watermark",
-        num_inference_steps: 30,
-        guidance_scale: 7.5
+        negative_prompt: "blurry, bad quality, distorted",
       }
     });
 
-    // Convertir le blob en base64
-    const arrayBuffer = await image.arrayBuffer();
+    // Convert blob to base64
+    const arrayBuffer = await blob.arrayBuffer();
     const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-    const imageUrl = `data:image/jpeg;base64,${base64}`;
+    const imageUrl = `data:image/png;base64,${base64}`;
 
-    console.log("Image générée avec succès");
+    console.log("Image generated successfully");
 
-    return new Response(JSON.stringify({ imageUrl }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ 
+        imageUrl: imageUrl 
+      }),
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
+      }
+    );
   } catch (error) {
-    console.error('Erreur dans la fonction generate-match-poster:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error("Error in generate-match-poster:", error);
+    return new Response(
+      JSON.stringify({ 
+        error: 'Error generating image',
+        details: error.message 
+      }),
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        },
+        status: 500 
+      }
+    );
   }
 });

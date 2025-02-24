@@ -9,7 +9,6 @@ import { downloadImage } from "@/utils/download";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/lib/supabase";
 import { Loader2, Eye } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface CreateMatchPosterDialogProps {
   isOpen: boolean;
@@ -30,25 +29,37 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string>("");
 
-  const generateAIImage = async (prompt: string, isPreview: boolean = false) => {
+  const generateAIImage = async (prompt: string) => {
     try {
+      const formattedDate = matchDate ? new Date(matchDate).toLocaleDateString('fr-FR') : '';
+      const fullPrompt = `Create a high quality esports tournament poster with ${backgroundTheme.toLowerCase()} theme. 
+        Show a VS battle setup. On the left side, prominently display player "${player1Name}" and on the right side 
+        show player "${player2Name}". At the top, add the text "Match ${matchType}". 
+        Below that, display the date "${formattedDate}" and time "${matchTime}". 
+        At the bottom, add the text "Phocéen Agency".
+        Make it look professional, dramatic, and intense like an esports event.
+        Use a clean, modern design with bold typography.`;
+
+      console.log("Sending prompt:", fullPrompt);
+
       const { data, error } = await supabase.functions.invoke('generate-match-poster', {
-        body: {
-          prompt: `Create an esports tournament poster with ${backgroundTheme.toLowerCase()} theme. Show a VS battle between "${player1Name}" on the left and "${player2Name}" on the right. Include "Match ${matchType}" at the top. Display date: "${matchDate}" and time: "${matchTime}". Add "Phocéen Agency" at the bottom. Style: intense, dramatic, professional gaming event`
-        }
+        body: { prompt: fullPrompt }
       });
 
-      console.log("Réponse de l'API:", data);
+      console.log("API Response:", data);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase function error:", error);
+        throw error;
+      }
       
       if (!data?.imageUrl) {
-        throw new Error('URL de l\'image non reçue');
+        throw new Error('No image URL received');
       }
 
       return data.imageUrl;
     } catch (error) {
-      console.error("Erreur lors de la génération de l'image:", error);
+      console.error("Image generation error:", error);
       throw error;
     }
   };
@@ -63,9 +74,9 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
     toast.info("Génération de la prévisualisation...");
 
     try {
-      const imageUrl = await generateAIImage(`Match ${matchType}`, true);
+      const imageUrl = await generateAIImage(`Match ${matchType}`);
       setPreviewUrl(imageUrl);
-      toast.success("Prévisualisation générée!");
+      toast.success("Prévisualisation générée avec succès!");
     } catch (error) {
       console.error("Erreur preview:", error);
       toast.error("Erreur lors de la génération de la prévisualisation");
@@ -85,12 +96,13 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
 
     try {
       const imageUrl = await generateAIImage(`Match ${matchType}`);
-      await downloadImage(imageUrl, `match-${matchType.toLowerCase()}-${matchDate.replace(/\//g, '-')}`);
+      const fileName = `match-${matchType.toLowerCase()}-${matchDate.replace(/\//g, '-')}`;
+      await downloadImage(imageUrl, fileName);
       toast.success("Affiche téléchargée avec succès!");
       onClose();
     } catch (error) {
       console.error("Erreur complète:", error);
-      toast.error("Erreur lors de la génération de l'affiche. Veuillez réessayer.");
+      toast.error("Erreur lors de la génération de l'affiche");
     } finally {
       setIsLoading(false);
     }
