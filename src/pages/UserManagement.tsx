@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -192,6 +193,141 @@ const UserManagement = () => {
     );
   }, [users, searchQuery]);
 
+  const groupedUsers = React.useMemo(() => {
+    const groups = {
+      manager: [] as typeof filteredUsers,
+      creator: [] as typeof filteredUsers,
+      agent: [] as typeof filteredUsers,
+    };
+
+    filteredUsers.forEach(user => {
+      if (user.role in groups) {
+        groups[user.role as keyof typeof groups].push(user);
+      }
+    });
+
+    return groups;
+  }, [filteredUsers]);
+
+  const UserTable = ({ users, title }: { users: typeof filteredUsers; title: string }) => (
+    <div className="mb-8">
+      <h2 className="text-lg font-semibold mb-4">{title}</h2>
+      <div className="rounded-lg border bg-card shadow-sm">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[300px]">Utilisateur</TableHead>
+              <TableHead>Rôle</TableHead>
+              <TableHead>Statistiques</TableHead>
+              <TableHead>Mot de passe</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell>
+                  {editingUser?.id === user.id ? (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={editedUsername}
+                        onChange={(e) => setEditedUsername(e.target.value)}
+                        className="max-w-[200px]"
+                      />
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={handleUsernameSave}
+                        disabled={!editedUsername.trim() || editedUsername === user.username}
+                      >
+                        <Check className="h-4 w-4 text-green-500" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => setEditingUser(null)}
+                      >
+                        <X className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{user.username}</span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => handleUsernameEdit(user)}
+                      >
+                        <UserCog className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <Select
+                    value={user.role}
+                    onValueChange={(value) => handleRoleChange(user.id, value, user.username)}
+                  >
+                    <SelectTrigger className="w-[120px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="creator">Créateur</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="agent">Agent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </TableCell>
+                <TableCell>
+                  {user.role === "creator" && user.live_schedules && user.live_schedules[0] && (
+                    <div className="text-sm text-muted-foreground">
+                      <p>Heures de live : {user.live_schedules[0].hours}h</p>
+                      <p>Jours streamés : {user.live_schedules[0].days}j</p>
+                    </div>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-sm">
+                      {showPasswords[user.id] ? user.password : "••••••••"}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => togglePasswordVisibility(user.id)}
+                    >
+                      {showPasswords[user.id] ? "Masquer" : "Afficher"}
+                    </Button>
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    {user.role === "creator" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewDetails(user.id)}
+                      >
+                        <Info className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeleteUser(user.id, user.username)}
+                    >
+                      Supprimer
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -216,118 +352,16 @@ const UserManagement = () => {
             <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
           </div>
         ) : (
-          <div className="rounded-lg border bg-card shadow-sm">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[300px]">Utilisateur</TableHead>
-                  <TableHead>Rôle</TableHead>
-                  <TableHead>Statistiques</TableHead>
-                  <TableHead>Mot de passe</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      {editingUser?.id === user.id ? (
-                        <div className="flex items-center gap-2">
-                          <Input
-                            value={editedUsername}
-                            onChange={(e) => onEditChange(e.target.value)}
-                            className="max-w-[200px]"
-                          />
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={handleUsernameSave}
-                            disabled={!editedUsername.trim() || editedUsername === user.username}
-                          >
-                            <Check className="h-4 w-4 text-green-500" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => setEditingUser(null)}
-                          >
-                            <X className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{user.username}</span>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => handleUsernameEdit(user)}
-                          >
-                            <UserCog className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Select
-                        value={user.role}
-                        onValueChange={(value) => handleRoleChange(user.id, value, user.username)}
-                      >
-                        <SelectTrigger className="w-[120px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="creator">Créateur</SelectItem>
-                          <SelectItem value="manager">Manager</SelectItem>
-                          <SelectItem value="agent">Agent</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell>
-                      {user.role === "creator" && user.live_schedules && user.live_schedules[0] && (
-                        <div className="text-sm text-muted-foreground">
-                          <p>Heures de live : {user.live_schedules[0].hours}h</p>
-                          <p>Jours streamés : {user.live_schedules[0].days}j</p>
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-sm">
-                          {showPasswords[user.id] ? user.password : "••••••••"}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => togglePasswordVisibility(user.id)}
-                        >
-                          {showPasswords[user.id] ? "Masquer" : "Afficher"}
-                        </Button>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {user.role === "creator" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleViewDetails(user.id)}
-                          >
-                            <Info className="h-4 w-4" />
-                          </Button>
-                        )}
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDeleteUser(user.id, user.username)}
-                        >
-                          Supprimer
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <div className="space-y-8">
+            {groupedUsers.manager.length > 0 && (
+              <UserTable users={groupedUsers.manager} title="Managers" />
+            )}
+            {groupedUsers.creator.length > 0 && (
+              <UserTable users={groupedUsers.creator} title="Créateurs" />
+            )}
+            {groupedUsers.agent.length > 0 && (
+              <UserTable users={groupedUsers.agent} title="Agents" />
+            )}
           </div>
         )}
 
