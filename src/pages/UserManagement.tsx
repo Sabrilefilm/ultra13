@@ -71,7 +71,7 @@ const UserManagement = () => {
                 onViewDetails={handleViewDetails}
                 onRoleChange={handleRoleChange}
                 onUsernameEdit={handleUsernameEdit}
-                onUsernameSave={handleUsernameSave}
+                onUsernameSave={() => handleUsernameSave(editingUser?.id || '')}
                 editingUser={editingUser}
                 editedUsername={editedUsername}
                 setEditedUsername={setEditedUsername}
@@ -87,7 +87,7 @@ const UserManagement = () => {
                 onViewDetails={handleViewDetails}
                 onRoleChange={handleRoleChange}
                 onUsernameEdit={handleUsernameEdit}
-                onUsernameSave={handleUsernameSave}
+                onUsernameSave={() => handleUsernameSave(editingUser?.id || '')}
                 editingUser={editingUser}
                 editedUsername={editedUsername}
                 setEditedUsername={setEditedUsername}
@@ -103,7 +103,7 @@ const UserManagement = () => {
                 onViewDetails={handleViewDetails}
                 onRoleChange={handleRoleChange}
                 onUsernameEdit={handleUsernameEdit}
-                onUsernameSave={handleUsernameSave}
+                onUsernameSave={() => handleUsernameSave(editingUser?.id || '')}
                 editingUser={editingUser}
                 editedUsername={editedUsername}
                 setEditedUsername={setEditedUsername}
