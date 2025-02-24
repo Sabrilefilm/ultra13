@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { downloadImage } from "@/utils/download";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/lib/supabase";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface CreateMatchPosterDialogProps {
@@ -22,52 +22,19 @@ type BackgroundTheme = 'GAMING' | 'SPORT' | 'NEON' | 'DISNEY' | 'ANIMALS' | 'SUP
 export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDialogProps) => {
   const [player1Name, setPlayer1Name] = useState("");
   const [player2Name, setPlayer2Name] = useState("");
-  const [player1Image, setPlayer1Image] = useState<File | null>(null);
-  const [player2Image, setPlayer2Image] = useState<File | null>(null);
-  const [player1ImagePreview, setPlayer1ImagePreview] = useState<string>("");
-  const [player2ImagePreview, setPlayer2ImagePreview] = useState<string>("");
+  const [player1ImageUrl, setPlayer1ImageUrl] = useState("");
+  const [player2ImageUrl, setPlayer2ImageUrl] = useState("");
   const [matchType, setMatchType] = useState<MatchType>("OFF");
   const [backgroundTheme, setBackgroundTheme] = useState<BackgroundTheme>("GAMING");
   const [matchDate, setMatchDate] = useState("");
   const [matchTime, setMatchTime] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleImageUpload = async (file: File, playerNumber: 1 | 2) => {
-    if (!file) return;
-
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      const filePath = `profile-images/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('matches')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('matches')
-        .getPublicUrl(filePath);
-
-      if (playerNumber === 1) {
-        setPlayer1ImagePreview(publicUrl);
-      } else {
-        setPlayer2ImagePreview(publicUrl);
-      }
-
-      toast.success(`Photo de profil du joueur ${playerNumber} uploadée !`);
-    } catch (error) {
-      console.error("Erreur upload:", error);
-      toast.error(`Erreur lors de l'upload de la photo du joueur ${playerNumber}`);
-    }
-  };
-
   const generateAIImage = async (prompt: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('generate-match-poster', {
         body: {
-          prompt: `Create an esports tournament poster with ${backgroundTheme.toLowerCase()} theme. Show a VS battle between "${player1Name}" (use this profile picture: ${player1ImagePreview}) on the left and "${player2Name}" (use this profile picture: ${player2ImagePreview}) on the right. Include "Match ${matchType}" at the top. Display date: "${matchDate}" and time: "${matchTime}". Add "Phocéen Agency" at the bottom. Style: intense, dramatic, professional gaming event`
+          prompt: `Create an esports tournament poster with ${backgroundTheme.toLowerCase()} theme. Show a VS battle between "${player1Name}" (use this profile picture: ${player1ImageUrl}) on the left and "${player2Name}" (use this profile picture: ${player2ImageUrl}) on the right. Include "Match ${matchType}" at the top. Display date: "${matchDate}" and time: "${matchTime}". Add "Phocéen Agency" at the bottom. Style: intense, dramatic, professional gaming event`
         }
       });
 
@@ -87,8 +54,8 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
   };
 
   const handleGenerate = async () => {
-    if (!player1Name || !player2Name || !matchDate || !matchTime || !player1ImagePreview || !player2ImagePreview) {
-      toast.error("Veuillez remplir tous les champs et uploader les photos de profil");
+    if (!player1Name || !player2Name || !matchDate || !matchTime || !player1ImageUrl || !player2ImageUrl) {
+      toast.error("Veuillez remplir tous les champs et ajouter les URLs des photos de profil");
       return;
     }
 
@@ -166,33 +133,17 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
                     onChange={(e) => setPlayer1Name(e.target.value)}
                   />
                 </div>
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={player1ImagePreview} />
-                    <AvatarFallback>{player1Name?.slice(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="relative">
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      id="player1-image"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          setPlayer1Image(file);
-                          handleImageUpload(file, 1);
-                        }
-                      }}
-                    />
-                    <Label
-                      htmlFor="player1-image"
-                      className="flex items-center justify-center p-2 border rounded-md cursor-pointer hover:bg-gray-50"
-                    >
-                      <Upload className="h-4 w-4" />
-                    </Label>
-                  </div>
+                <div className="space-y-2 w-full">
+                  <Input
+                    placeholder="URL de la photo de profil"
+                    value={player1ImageUrl}
+                    onChange={(e) => setPlayer1ImageUrl(e.target.value)}
+                  />
                 </div>
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={player1ImageUrl} />
+                  <AvatarFallback>{player1Name?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
               </div>
             </div>
 
@@ -206,33 +157,17 @@ export const CreateMatchPosterDialog = ({ isOpen, onClose }: CreateMatchPosterDi
                     onChange={(e) => setPlayer2Name(e.target.value)}
                   />
                 </div>
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={player2ImagePreview} />
-                    <AvatarFallback>{player2Name?.slice(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="relative">
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      id="player2-image"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          setPlayer2Image(file);
-                          handleImageUpload(file, 2);
-                        }
-                      }}
-                    />
-                    <Label
-                      htmlFor="player2-image"
-                      className="flex items-center justify-center p-2 border rounded-md cursor-pointer hover:bg-gray-50"
-                    >
-                      <Upload className="h-4 w-4" />
-                    </Label>
-                  </div>
+                <div className="space-y-2 w-full">
+                  <Input
+                    placeholder="URL de la photo de profil"
+                    value={player2ImageUrl}
+                    onChange={(e) => setPlayer2ImageUrl(e.target.value)}
+                  />
                 </div>
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={player2ImageUrl} />
+                  <AvatarFallback>{player2Name?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
               </div>
             </div>
           </div>
