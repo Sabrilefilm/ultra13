@@ -1,21 +1,49 @@
 
-import { createRoot } from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import App from './App.tsx';
-import './index.css';
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import App from './App.tsx'
+import Index from './pages/Index.tsx';
+import NotFound from './pages/NotFound.tsx';
+import Accounts from './pages/Accounts.tsx';
+import RewardsManagement from './pages/RewardsManagement.tsx';
+import PersonalInformation from './pages/PersonalInformation.tsx';
+import NotificationManagement from './pages/NotificationManagement.tsx';
+import UserManagement from './pages/UserManagement.tsx';
+import "./index.css";
+import { Toaster } from './components/ui/toaster';
 
-// Créer une instance de QueryClient
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      retry: 1,
-    },
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Index />,
+    errorElement: <NotFound />
   },
-});
+  {
+    path: '/accounts',
+    element: <Accounts />
+  },
+  {
+    path: '/rewards',
+    element: <RewardsManagement />
+  },
+  {
+    path: '/notifications',
+    element: <NotificationManagement />
+  },
+  {
+    path: '/personal-info',
+    element: <PersonalInformation />
+  },
+  {
+    path: '/user-management',
+    element: <UserManagement />
+  }
+]);
 
-createRoot(document.getElementById("root")!).render(
-  <QueryClientProvider client={queryClient}>
-    <App />
-  </QueryClientProvider>
-);
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <RouterProvider router={router} />
+    <Toaster />
+  </React.StrictMode>,
+)

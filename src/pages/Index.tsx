@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ProfileHeader } from "@/components/ProfileHeader";
@@ -58,8 +59,8 @@ const Index = () => {
       <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 flex flex-col">
         <div className="flex-1 p-4">
           <div className="max-w-7xl mx-auto">
-            <h1 className="text-2xl font-bold mb-4">Complétez votre profil</h1>
-            <p className="mb-4">Pour accéder à votre compte, veuillez d'abord compléter vos informations personnelles.</p>
+            <h1 className="text-2xl font-bold mb-4 text-white">Complétez votre profil</h1>
+            <p className="mb-4 text-white">Pour accéder à votre compte, veuillez d'abord compléter vos informations personnelles.</p>
             <Button onClick={() => window.location.href = '/personal-info'}>
               Compléter mon profil
             </Button>
@@ -101,7 +102,7 @@ const Index = () => {
               handle={`@${roleDisplay}`}
             />
             <div className="flex items-center gap-4">
-              <div className="text-sm text-muted-foreground text-right">
+              <div className="text-sm text-white text-right">
                 <p className="lowercase">vous devez obligatoirement faire</p>
                 <p className="lowercase">7J 15H de lives</p>
               </div>

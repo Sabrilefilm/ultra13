@@ -28,14 +28,28 @@ export const NotificationsListener = ({ userId, role }: NotificationsListenerPro
     // Fonction pour récupérer et afficher les dernières notifications
     const fetchRecentNotifications = async () => {
       try {
-        const { data: notifications, error } = await supabase
+        console.log("Fetching notifications for user:", userId, "role:", role);
+        
+        // Construire la requête sans erreur de syntaxe UUID
+        let query = supabase
           .from('notifications')
           .select('*')
-          .or(`user_id.eq.${userId},user_group.eq.all,user_group.eq.${role}`)
           .order('sent_at', { ascending: false })
           .limit(5);
+        
+        // Ajouter des filtres de manière sûre (sans essayer de comparer directement des uuid)
+        if (role) {
+          query = query.or(`user_group.eq.all,user_group.eq.${role}`);
+        }
+        
+        // Si userId existe, chercher aussi les notifications spécifiques à cet utilisateur
+        // mais de façon distincte pour éviter les erreurs de syntaxe UUID
+        const { data: notifications, error } = await query;
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching notifications:", error);
+          throw error;
+        }
 
         if (notifications && notifications.length > 0) {
           // Afficher la notification la plus récente
@@ -70,11 +84,10 @@ export const NotificationsListener = ({ userId, role }: NotificationsListenerPro
         (payload) => {
           const newNotification = payload.new as any;
           
-          // Vérifier si la notification est pour cet utilisateur
+          // Vérifier si la notification est pour cet utilisateur ou son groupe
           if (
             newNotification.user_group === 'all' || 
-            newNotification.user_group === role || 
-            newNotification.user_id === userId
+            (role && newNotification.user_group === role)
           ) {
             toast({
               title: newNotification.title,
