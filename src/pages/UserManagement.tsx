@@ -2,17 +2,20 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, UserPlus, Users } from "lucide-react";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { UserSearchBar } from "@/components/UserSearchBar";
 import { CreatorDetailsDialog } from "@/components/creator/CreatorDetailsDialog";
 import { UserTable } from "@/components/user-management/UserTable";
 import { RoleConfirmDialog } from "@/components/user-management/RoleConfirmDialog";
 import { useUserManagement } from "@/hooks/use-user-management";
+import { CreateAccountModal } from "@/components/CreateAccountModal";
 
 const UserManagement = () => {
   const navigate = useNavigate();
   const { role } = useIndexAuth();
+  const [showCreateAccount, setShowCreateAccount] = React.useState(false);
+  
   const {
     users,
     isLoading,
@@ -36,21 +39,46 @@ const UserManagement = () => {
     handleUsernameSave,
     handleViewDetails,
     togglePasswordVisibility,
+    handleCreateAccount,
   } = useUserManagement();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/")}
-            className="h-10 w-10"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-bold">Gestion des Utilisateurs</h1>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/")}
+              className="h-10 w-10"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-2xl font-bold">Gestion des Utilisateurs</h1>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={() => setShowCreateAccount(true)}
+              className="flex items-center gap-2"
+            >
+              <UserPlus className="h-4 w-4" />
+              Ajouter un utilisateur
+            </Button>
+            
+            {role === 'manager' && (
+              <Button 
+                variant="default"
+                onClick={() => navigate("/user-management")}
+                className="flex items-center gap-2"
+              >
+                <Users className="h-4 w-4" />
+                Accéder aux personnes de l'agence
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="w-full max-w-sm mx-auto mb-6">
@@ -77,6 +105,7 @@ const UserManagement = () => {
                 setEditedUsername={setEditedUsername}
                 showPasswords={showPasswords}
                 togglePasswordVisibility={togglePasswordVisibility}
+                userRole={role}
               />
             )}
             {users.creator.length > 0 && (
@@ -93,6 +122,7 @@ const UserManagement = () => {
                 setEditedUsername={setEditedUsername}
                 showPasswords={showPasswords}
                 togglePasswordVisibility={togglePasswordVisibility}
+                userRole={role}
               />
             )}
             {users.agent.length > 0 && (
@@ -109,6 +139,7 @@ const UserManagement = () => {
                 setEditedUsername={setEditedUsername}
                 showPasswords={showPasswords}
                 togglePasswordVisibility={togglePasswordVisibility}
+                userRole={role}
               />
             )}
           </div>
@@ -130,6 +161,12 @@ const UserManagement = () => {
           onConfirm={handleRoleChangeConfirm}
           username={pendingRoleChange?.username}
           newRole={pendingRoleChange?.newRole}
+        />
+        
+        <CreateAccountModal
+          isOpen={showCreateAccount}
+          onClose={() => setShowCreateAccount(false)}
+          onSubmit={handleCreateAccount}
         />
       </div>
     </div>
