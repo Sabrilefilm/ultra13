@@ -177,6 +177,7 @@ export type Database = {
           target: string
           title: string
           user_group: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -186,6 +187,7 @@ export type Database = {
           target: string
           title: string
           user_group: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -195,8 +197,17 @@ export type Database = {
           target?: string
           title?: string
           user_group?: string
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       platform_settings: {
         Row: {
