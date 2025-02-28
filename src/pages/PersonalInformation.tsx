@@ -1,343 +1,183 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, User, Mail, MapPin, CreditCard, ReceiptText } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { Card } from "@/components/ui/card";
 
-const PersonalInformation = () => {
+export default function PersonalInformation() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [formComplete, setFormComplete] = useState(false);
-
-  // Récupérer l'utilisateur actuel
-  const username = localStorage.getItem('username') || "";
-  const role = localStorage.getItem('userRole') || "";
-
-  // État du formulaire
-  const [formState, setFormState] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
+  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
     address: "",
-    idCardNumber: "",
-    paypalAddress: "",
+    id_card_number: "",
+    email: "",
+    paypal_address: "",
     snapchat: "",
   });
 
-  // Vérifier si l'utilisateur est authentifié
-  useEffect(() => {
-    if (!localStorage.getItem('isAuthenticated')) {
-      navigate('/');
-    }
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ["creator-profile"],
+    queryFn: async () => {
+      const { data: user } = await supabase.auth.getSession();
+      if (!user.session) throw new Error("Non authentifié");
 
-    // Récupérer les informations de profil existantes
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        
-        // D'abord, obtenir l'ID de l'utilisateur
-        const { data: userData, error: userError } = await supabase
-          .from('user_accounts')
-          .select('id')
-          .eq('username', username)
-          .single();
-        
-        if (userError) {
-          throw userError;
-        }
-        
-        if (!userData) {
-          return;
-        }
-        
-        // Ensuite, récupérer le profil du créateur
-        const { data: profile, error: profileError } = await supabase
-          .from('creator_profiles')
-          .select('*')
-          .eq('user_id', userData.id)
-          .single();
-        
-        if (profileError && profileError.code !== 'PGRST116') { // PGRST116 = no rows returned
-          throw profileError;
-        }
-        
-        if (profile) {
-          setFormState({
-            firstName: profile.first_name || "",
-            lastName: profile.last_name || "",
-            email: profile.email || "",
-            address: profile.address || "",
-            idCardNumber: profile.id_card_number || "",
-            paypalAddress: profile.paypal_address || "",
-            snapchat: profile.snapchat || "",
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-        toast({
-          title: "Erreur",
-          description: "Impossible de récupérer vos informations personnelles",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchProfile();
-  }, [navigate, toast, username]);
+      const { data, error } = await supabase
+        .from("creator_profiles")
+        .select("*")
+        .eq("user_id", user.session.user.id)
+        .single();
 
-  // Vérifier si le formulaire est complet
-  useEffect(() => {
-    // Vérifier que tous les champs obligatoires sont remplis
-    const { firstName, lastName, email, address } = formState;
-    setFormComplete(!!firstName && !!lastName && !!email && !!address);
-  }, [formState]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormState(prev => ({
-      ...prev,
-      [id]: value
-    }));
-  };
+      if (error && error.code !== "PGRST116") throw error;
+      if (data) setFormData(data);
+      return data;
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formComplete) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     try {
-      setLoading(true);
-      
-      // D'abord, obtenir l'ID de l'utilisateur
-      const { data: userData, error: userError } = await supabase
-        .from('user_accounts')
-        .select('id')
-        .eq('username', username)
-        .single();
-      
-      if (userError) {
-        throw userError;
-      }
-      
-      // Préparer les données pour la mise à jour ou l'insertion
-      const profileData = {
-        user_id: userData.id,
-        first_name: formState.firstName,
-        last_name: formState.lastName,
-        email: formState.email,
-        address: formState.address,
-        id_card_number: formState.idCardNumber,
-        paypal_address: formState.paypalAddress,
-        snapchat: formState.snapchat,
-      };
-      
-      // Vérifier si le profil existe déjà
-      const { data: existingProfile, error: checkError } = await supabase
-        .from('creator_profiles')
-        .select('id')
-        .eq('user_id', userData.id)
-        .single();
-      
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError;
-      }
-      
-      let result;
-      
-      if (existingProfile) {
-        // Mettre à jour le profil existant
-        result = await supabase
-          .from('creator_profiles')
-          .update(profileData)
-          .eq('id', existingProfile.id);
-      } else {
-        // Créer un nouveau profil
-        result = await supabase
-          .from('creator_profiles')
-          .insert([profileData]);
-      }
-      
-      if (result.error) {
-        throw result.error;
-      }
-      
-      // Marquer le profil comme complété
-      localStorage.setItem('profileCompleted', 'true');
-      
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) throw new Error("Non authentifié");
+
+      const { error } = await supabase.from("creator_profiles").upsert({
+        user_id: session.session.user.id,
+        ...formData,
+        updated_at: new Date().toISOString(),
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Succès",
-        description: "Vos informations personnelles ont été mises à jour",
+        description: "Vos informations ont été mises à jour",
       });
-      
-      // Rediriger vers la page d'accueil
-      navigate('/');
-      
     } catch (error) {
-      console.error("Error saving profile:", error);
       toast({
         title: "Erreur",
-        description: "Impossible de sauvegarder vos informations personnelles",
+        description: "Impossible de mettre à jour vos informations",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-400/20 to-pink-400/20 flex items-center justify-center">
+        <div className="animate-pulse text-xl font-medium">Chargement...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4 animate-background-shift">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center gap-4 mb-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-400/20 to-pink-400/20 p-4 md:p-8">
+      <div className="max-w-2xl mx-auto space-y-8 animate-fade-in">
+        <div className="flex items-center gap-4 bg-white/10 p-4 rounded-lg backdrop-blur-md">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate("/")}
-            className="h-10 w-10"
+            className="hover:bg-white/20"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold">Informations Personnelles</h1>
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 text-transparent bg-clip-text">
+            Informations Personnelles
+          </h1>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5 text-primary" />
-              Vos informations
-            </CardTitle>
-            <CardDescription>
-              Ces informations sont nécessaires pour gérer votre compte
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="backdrop-blur-md bg-white/10 border-white/20 shadow-xl">
+          <form onSubmit={handleSubmit} className="p-6 space-y-8">
+            <div className="grid gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName" className="flex items-center gap-1">
-                    Prénom <span className="text-red-500">*</span>
-                  </Label>
+                  <Label htmlFor="first_name" className="text-white/80">Prénom</Label>
                   <Input
-                    id="firstName"
-                    placeholder="Entrez votre prénom"
-                    value={formState.firstName}
-                    onChange={handleChange}
-                    required
+                    id="first_name"
+                    value={formData.first_name}
+                    onChange={e => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
+                    className="bg-white/5 border-white/10 focus:border-purple-400/50 transition-all"
                   />
                 </div>
-
                 <div className="space-y-2">
-                  <Label htmlFor="lastName" className="flex items-center gap-1">
-                    Nom <span className="text-red-500">*</span>
-                  </Label>
+                  <Label htmlFor="last_name" className="text-white/80">Nom</Label>
                   <Input
-                    id="lastName"
-                    placeholder="Entrez votre nom"
-                    value={formState.lastName}
-                    onChange={handleChange}
-                    required
+                    id="last_name"
+                    value={formData.last_name}
+                    onChange={e => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
+                    className="bg-white/5 border-white/10 focus:border-purple-400/50 transition-all"
                   />
                 </div>
               </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="address" className="text-white/80">Adresse</Label>
+                <Input
+                  id="address"
+                  value={formData.address}
+                  onChange={e => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                  className="bg-white/5 border-white/10 focus:border-purple-400/50 transition-all"
+                />
+              </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="flex items-center gap-1">
-                  <Mail className="h-4 w-4" /> Email <span className="text-red-500">*</span>
-                </Label>
+                <Label htmlFor="id_card_number" className="text-white/80">Numéro de carte d'identité</Label>
+                <Input
+                  id="id_card_number"
+                  value={formData.id_card_number}
+                  onChange={e => setFormData(prev => ({ ...prev, id_card_number: e.target.value }))}
+                  className="bg-white/5 border-white/10 focus:border-purple-400/50 transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-white/80">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="votre@email.com"
-                  value={formState.email}
-                  onChange={handleChange}
-                  required
+                  value={formData.email}
+                  onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  className="bg-white/5 border-white/10 focus:border-purple-400/50 transition-all"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address" className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" /> Adresse <span className="text-red-500">*</span>
-                </Label>
+                <Label htmlFor="paypal_address" className="text-white/80">Adresse PayPal</Label>
                 <Input
-                  id="address"
-                  placeholder="Votre adresse complète"
-                  value={formState.address}
-                  onChange={handleChange}
-                  required
+                  id="paypal_address"
+                  value={formData.paypal_address}
+                  onChange={e => setFormData(prev => ({ ...prev, paypal_address: e.target.value }))}
+                  className="bg-white/5 border-white/10 focus:border-purple-400/50 transition-all"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="idCardNumber" className="flex items-center gap-1">
-                  <CreditCard className="h-4 w-4" /> Numéro de Carte d'Identité
-                </Label>
-                <Input
-                  id="idCardNumber"
-                  placeholder="Votre numéro de carte d'identité"
-                  value={formState.idCardNumber}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="paypalAddress" className="flex items-center gap-1">
-                  <ReceiptText className="h-4 w-4" /> Adresse PayPal
-                </Label>
-                <Input
-                  id="paypalAddress"
-                  placeholder="Votre adresse PayPal pour les paiements"
-                  value={formState.paypalAddress}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="snapchat" className="flex items-center gap-1">
-                  Snapchat
-                </Label>
+                <Label htmlFor="snapchat" className="text-white/80">Snapchat</Label>
                 <Input
                   id="snapchat"
-                  placeholder="Votre nom d'utilisateur Snapchat"
-                  value={formState.snapchat}
-                  onChange={handleChange}
+                  value={formData.snapchat}
+                  onChange={e => setFormData(prev => ({ ...prev, snapchat: e.target.value }))}
+                  className="bg-white/5 border-white/10 focus:border-purple-400/50 transition-all"
                 />
               </div>
+            </div>
 
-              <div className="pt-4">
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={loading || !formComplete}
-                >
-                  {loading ? "Enregistrement..." : "Enregistrer"}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
+            <Button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+            >
+              Enregistrer les modifications
+            </Button>
+          </form>
         </Card>
       </div>
     </div>
   );
-};
-
-export default PersonalInformation;
+}

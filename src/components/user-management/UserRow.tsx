@@ -2,7 +2,7 @@
 import React from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Info, UserCog, Check, X, Users } from "lucide-react";
+import { Info, UserCog, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -25,7 +25,6 @@ interface UserRowProps {
   onViewDetails: (userId: string) => void;
   showPasswords: {[key: string]: boolean};
   togglePasswordVisibility: (id: string) => void;
-  isManager?: boolean;
 }
 
 export const UserRow: React.FC<UserRowProps> = ({
@@ -40,7 +39,6 @@ export const UserRow: React.FC<UserRowProps> = ({
   onViewDetails,
   showPasswords,
   togglePasswordVisibility,
-  isManager = false,
 }) => {
   return (
     <TableRow>
@@ -96,13 +94,6 @@ export const UserRow: React.FC<UserRowProps> = ({
           </SelectContent>
         </Select>
       </TableCell>
-      {isManager && (
-        <TableCell>
-          <div className="text-sm">
-            {user.email ? user.email : "Pas d'affiliation"}
-          </div>
-        </TableCell>
-      )}
       <TableCell>
         {user.role === "creator" && user.live_schedules && user.live_schedules[0] && (
           <div className="text-sm text-muted-foreground">
@@ -133,8 +124,7 @@ export const UserRow: React.FC<UserRowProps> = ({
               size="sm"
               onClick={() => onViewDetails(user.id)}
             >
-              <Info className="h-4 w-4 mr-2" />
-              Détails
+              <Info className="h-4 w-4" />
             </Button>
           )}
           <Button

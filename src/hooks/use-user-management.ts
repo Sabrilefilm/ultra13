@@ -46,46 +46,11 @@ export const useUserManagement = () => {
       const search = searchQuery.toLowerCase();
       return (
         user.username.toLowerCase().includes(search) ||
-        (user.email && user.email.toLowerCase().includes(search))
+        user.email.toLowerCase().includes(search)
       );
     }) || [];
 
-  const handleCreateAccount = async (role: 'creator' | 'manager' | 'agent', username: string, password: string) => {
-    try {
-      const email = `${username.toLowerCase().replace(/\s+/g, '.')}_${Date.now()}@phoceen.agency`;
-      
-      const { data, error } = await supabase
-        .from("user_accounts")
-        .insert([
-          { username, password, role, email }
-        ])
-        .select();
-
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Erreur!",
-          description: "Impossible de créer le compte: " + error.message,
-        });
-        return;
-      }
-
-      toast({
-        title: "Succès!",
-        description: `Le compte ${username} a été créé avec succès.`,
-      });
-      
-      refetch();
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erreur!",
-        description: "Une erreur s'est produite lors de la création du compte.",
-      });
-    }
-  };
-
-  const handleDeleteUser = async (userId: string, username: string) => {
+  const handleDeleteUser = async (userId: string) => {
     try {
       const { error } = await supabase
         .from("user_accounts")
@@ -256,6 +221,5 @@ export const useUserManagement = () => {
     handleUsernameSave,
     handleViewDetails,
     togglePasswordVisibility,
-    handleCreateAccount,
   };
 };

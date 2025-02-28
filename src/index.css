@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -5,117 +6,99 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 221.2 83.2% 53.3%;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+ 
     --radius: 0.5rem;
   }
-
+ 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 224.3 76.3% 48%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
-
+ 
 @layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-@keyframes background-shift {
+@keyframes subtle-glow {
   0% {
-    background-position: 0% 50%;
+    opacity: 0.8;
   }
   50% {
-    background-position: 100% 50%;
+    opacity: 1;
   }
   100% {
-    background-position: 0% 50%;
+    opacity: 0.8;
   }
 }
 
-@layer utilities {
-  .animate-background-shift {
-    background: linear-gradient(135deg, #0d3863, #0a1f36, #1e3a58, #081828);
-    background-size: 400% 400%;
-    animation: background-shift 30s ease infinite;
-  }
+.agency-text {
+  font-family: 'Righteous', cursive;
+  animation: subtle-glow 3s ease-in-out infinite;
+  text-shadow: 0 0 10px rgba(14, 165, 233, 0.5),
+               0 0 20px rgba(14, 165, 233, 0.3),
+               0 0 30px rgba(14, 165, 233, 0.2);
 }
 
-/* Animation pour Phocéen Agency */
-@keyframes glow {
-  0% {
-    color: #ffffff;
-    text-shadow: 0 0 10px rgba(14, 165, 233, 0.5),
-                 0 0 20px rgba(14, 165, 233, 0.3);
-  }
-  50% {
-    color: #0EA5E9;
-    text-shadow: 0 0 20px rgba(14, 165, 233, 0.8),
-                 0 0 30px rgba(14, 165, 233, 0.6),
-                 0 0 40px rgba(14, 165, 233, 0.4);
-  }
-  100% {
-    color: #ffffff;
-    text-shadow: 0 0 10px rgba(14, 165, 233, 0.5),
-                 0 0 20px rgba(14, 165, 233, 0.3);
-  }
-}
-
-.phoceen-logo {
-  font-family: 'Righteous', sans-serif;
-  font-size: 2.5rem;
-  font-weight: bold;
-  background: linear-gradient(135deg, #0EA5E9, #ffffff);
-  -webkit-background-clip: text;
-  color: transparent;
-  animation: glow 3s ease-in-out infinite;
-}
-
-/* Ajout de la classe pour le texte blanc par défaut */
-.animate-background-shift {
-  color: #FFFFFF;
-}
-
-.animate-background-shift .text-muted-foreground {
-  color: #FFFFFF;
-  opacity: 0.7;
+.copyright-text {
+  font-size: 0.75rem;
+  opacity: 0.5;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }

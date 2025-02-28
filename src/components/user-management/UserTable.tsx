@@ -24,7 +24,6 @@ interface UserTableProps {
   setEditedUsername: (username: string) => void;
   showPasswords: {[key: string]: boolean};
   togglePasswordVisibility: (id: string) => void;
-  userRole?: string; // Added prop for current user role
 }
 
 export const UserTable: React.FC<UserTableProps> = ({
@@ -40,10 +39,7 @@ export const UserTable: React.FC<UserTableProps> = ({
   setEditedUsername,
   showPasswords,
   togglePasswordVisibility,
-  userRole,
 }) => {
-  const isManager = userRole === 'manager';
-
   return (
     <div className="mb-8">
       <h2 className="text-lg font-semibold mb-4">{title}</h2>
@@ -51,9 +47,8 @@ export const UserTable: React.FC<UserTableProps> = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[250px]">Utilisateur</TableHead>
+              <TableHead className="w-[300px]">Utilisateur</TableHead>
               <TableHead>Rôle</TableHead>
-              {isManager && <TableHead>Affiliation</TableHead>}
               <TableHead>Statistiques</TableHead>
               <TableHead>Mot de passe</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -74,7 +69,6 @@ export const UserTable: React.FC<UserTableProps> = ({
                 onViewDetails={onViewDetails}
                 showPasswords={showPasswords}
                 togglePasswordVisibility={togglePasswordVisibility}
-                isManager={isManager}
               />
             ))}
           </TableBody>
