@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ProfileHeader } from "@/components/ProfileHeader";
@@ -74,7 +73,7 @@ const Index = () => {
   const roleDisplay = role === 'founder' ? 'Fondateur' : role;
 
   return (
-    <div className="min-h-screen animate-background-shift bg-gradient-to-br from-background via-accent/5 to-primary/10 flex flex-col">
+    <div className="min-h-screen animate-background-shift flex flex-col">
       {/* Session timeout warning */}
       {showWarning && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={handleLogoutTimeout}>

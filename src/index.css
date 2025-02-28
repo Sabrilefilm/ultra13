@@ -74,8 +74,9 @@
 
 @layer utilities {
   .animate-background-shift {
-    background-size: 200% 200%;
-    animation: background-shift 15s ease infinite;
+    background: linear-gradient(135deg, #0d3863, #0a1f36, #1e3a58, #081828);
+    background-size: 400% 400%;
+    animation: background-shift 30s ease infinite;
   }
 }
 
