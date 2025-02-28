@@ -121,6 +121,48 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
     }
   };
 
+  const resetSchedule = async () => {
+    if (!profileId) return;
+
+    try {
+      setLoading(true);
+      const schedule = schedules[0];
+
+      if (!schedule.id.startsWith('new-')) {
+        const { error } = await supabase
+          .from("live_schedules")
+          .update({
+            hours: 0,
+            days: 0,
+          })
+          .eq("id", schedule.id);
+          
+        if (error) throw error;
+
+        // Mettre à jour l'état local
+        setSchedules([{
+          ...schedule,
+          hours: 0,
+          days: 0
+        }]);
+
+        toast.success("Horaires réinitialisés avec succès");
+      } else {
+        // Si c'est un nouvel horaire, on le met simplement à zéro localement
+        setSchedules([{
+          ...schedule,
+          hours: 0,
+          days: 0
+        }]);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la réinitialisation des horaires:", error);
+      toast.error("Erreur lors de la réinitialisation des horaires");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const updateSchedule = (
     scheduleId: string,
     field: "hours" | "days" | "is_active",
@@ -160,6 +202,7 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
     loading,
     updateSchedule,
     handleSave,
+    resetSchedule,
     creatorName,
   };
 };

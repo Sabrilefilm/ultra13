@@ -25,6 +25,7 @@ export const LiveScheduleModal = ({
     loading, 
     updateSchedule, 
     handleSave,
+    resetSchedule,
     creatorName,
   } = useLiveSchedule(isOpen, selectedCreator);
 
@@ -65,6 +66,7 @@ export const LiveScheduleModal = ({
                   schedule={schedule}
                   onUpdate={updateSchedule}
                   creatorName={creatorName}
+                  onReset={resetSchedule}
                 />
               ))}
             </div>

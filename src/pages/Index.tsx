@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ProfileHeader } from "@/components/ProfileHeader";
@@ -15,11 +16,14 @@ import { useAccountManagement } from "@/hooks/use-account-management";
 import { UpcomingMatches } from "@/components/dashboard/UpcomingMatches";
 import { CreateMatchPosterDialog } from "@/components/matches/CreateMatchPosterDialog";
 import { ImageIcon } from "lucide-react";
+import { NotificationsListener } from "@/components/NotificationListener";
+import { useSessionTimeout } from "@/hooks/use-session-timeout";
 
 const Index = () => {
   const { isAuthenticated, username, role, handleLogout, handleLogin } = useIndexAuth();
   const { platformSettings, handleUpdateSettings } = usePlatformSettings(role);
   const { handleCreateAccount } = useAccountManagement();
+  const { timeRemaining, resetTimeout, showWarning, handleStayLoggedIn, handleLogoutTimeout } = useSessionTimeout(isAuthenticated);
 
   const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
   const [isRewardSettingsModalOpen, setIsRewardSettingsModalOpen] = useState(false);
@@ -47,11 +51,50 @@ const Index = () => {
     );
   }
 
+  // Vérifier si les informations personnelles sont complètes avant de continuer
+  const shouldShowProfileCompletion = isAuthenticated && role === 'creator' && !localStorage.getItem('profileCompleted');
+  
+  if (shouldShowProfileCompletion) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 flex flex-col">
+        <div className="flex-1 p-4">
+          <div className="max-w-7xl mx-auto">
+            <h1 className="text-2xl font-bold mb-4">Complétez votre profil</h1>
+            <p className="mb-4">Pour accéder à votre compte, veuillez d'abord compléter vos informations personnelles.</p>
+            <Button onClick={() => window.location.href = '/personal-info'}>
+              Compléter mon profil
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   const roleDisplay = role === 'founder' ? 'Fondateur' : role;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 flex flex-col">
-      <div className="flex-1 p-4">
+    <div className="min-h-screen animate-background-shift bg-gradient-to-br from-background via-accent/5 to-primary/10 flex flex-col">
+      {/* Session timeout warning */}
+      {showWarning && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={handleLogoutTimeout}>
+          <div className="bg-card p-6 rounded-lg shadow-lg max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-xl font-bold mb-4">Session expirée</h3>
+            <p className="mb-4">Votre session va expirer dans {Math.ceil(timeRemaining / 1000)} secondes pour des raisons de sécurité.</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={handleLogoutTimeout}>
+                Se déconnecter
+              </Button>
+              <Button onClick={handleStayLoggedIn}>
+                Rester connecté
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex-1 p-4" onClick={resetTimeout}>
+        <NotificationsListener userId={username} role={role} />
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex justify-between items-center">
             <ProfileHeader

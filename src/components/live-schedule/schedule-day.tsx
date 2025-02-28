@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Schedule } from "./types";
-import { User } from "lucide-react";
+import { User, RotateCcw } from "lucide-react";
 
 interface ScheduleDayProps {
   schedule: Schedule;
@@ -14,25 +14,38 @@ interface ScheduleDayProps {
     value: string | boolean
   ) => void;
   creatorName: string;
+  onReset: () => void;
 }
 
 export const ScheduleDay = ({ 
   schedule, 
   onUpdate, 
-  creatorName 
+  creatorName,
+  onReset
 }: ScheduleDayProps) => {
   return (
     <div className="p-4 border rounded-lg">
       <div className="flex items-center justify-between mb-4">
         <Label className="text-lg font-semibold">Horaires de Live</Label>
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-        >
-          <User className="w-4 h-4" />
-          {creatorName}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <User className="w-4 h-4" />
+            {creatorName}
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={onReset}
+            className="flex items-center gap-2"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Réinitialiser
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
