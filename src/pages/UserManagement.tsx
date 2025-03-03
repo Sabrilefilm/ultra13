@@ -1,14 +1,15 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { UserSearchBar } from "@/components/UserSearchBar";
 import { CreatorDetailsDialog } from "@/components/creator/CreatorDetailsDialog";
 import { UserTable } from "@/components/user-management/UserTable";
 import { RoleConfirmDialog } from "@/components/user-management/RoleConfirmDialog";
 import { useUserManagement } from "@/hooks/use-user-management";
+import { CreateAccountModal } from "@/components/CreateAccountModal";
 
 const UserManagement = () => {
   const navigate = useNavigate();
@@ -36,21 +37,52 @@ const UserManagement = () => {
     handleUsernameSave,
     handleViewDetails,
     togglePasswordVisibility,
+    resetAllSchedules
   } = useUserManagement();
+  
+  const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
+
+  // Rediriger si l'utilisateur n'est pas fondateur ou manager
+  useEffect(() => {
+    if (role !== 'founder' && role !== 'manager') {
+      navigate('/');
+    }
+  }, [role, navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4">
+    <div className="min-h-screen p-4">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/")}
-            className="h-10 w-10"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-bold">Gestion des Utilisateurs</h1>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/")}
+              className="h-10 w-10"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-2xl font-bold">Gestion des Utilisateurs</h1>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => setIsCreateAccountModalOpen(true)}
+            >
+              <Plus className="h-4 w-4" />
+              Ajouter un utilisateur
+            </Button>
+            
+            <Button
+              variant="destructive"
+              onClick={resetAllSchedules}
+              className="flex items-center gap-2"
+            >
+              Réinitialiser tous les horaires
+            </Button>
+          </div>
         </div>
 
         <div className="w-full max-w-sm mx-auto mb-6">
@@ -77,6 +109,7 @@ const UserManagement = () => {
                 setEditedUsername={setEditedUsername}
                 showPasswords={showPasswords}
                 togglePasswordVisibility={togglePasswordVisibility}
+                userRole={role}
               />
             )}
             {users.creator.length > 0 && (
@@ -93,6 +126,7 @@ const UserManagement = () => {
                 setEditedUsername={setEditedUsername}
                 showPasswords={showPasswords}
                 togglePasswordVisibility={togglePasswordVisibility}
+                userRole={role}
               />
             )}
             {users.agent.length > 0 && (
@@ -109,6 +143,7 @@ const UserManagement = () => {
                 setEditedUsername={setEditedUsername}
                 showPasswords={showPasswords}
                 togglePasswordVisibility={togglePasswordVisibility}
+                userRole={role}
               />
             )}
           </div>
@@ -130,6 +165,15 @@ const UserManagement = () => {
           onConfirm={handleRoleChangeConfirm}
           username={pendingRoleChange?.username}
           newRole={pendingRoleChange?.newRole}
+        />
+        
+        <CreateAccountModal
+          isOpen={isCreateAccountModalOpen}
+          onClose={() => setIsCreateAccountModalOpen(false)}
+          onSubmit={(data) => {
+            setIsCreateAccountModalOpen(false);
+            // Le hook handle déjà le refresh de la liste
+          }}
         />
       </div>
     </div>

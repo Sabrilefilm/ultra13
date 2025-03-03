@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
@@ -15,8 +16,14 @@ import { useAccountManagement } from "@/hooks/use-account-management";
 import { UpcomingMatches } from "@/components/dashboard/UpcomingMatches";
 import { CreateMatchPosterDialog } from "@/components/matches/CreateMatchPosterDialog";
 import { ImageIcon } from "lucide-react";
+import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
+import { InactivityWarning } from "@/components/InactivityWarning";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const { isAuthenticated, username, role, handleLogout, handleLogin } = useIndexAuth();
   const { platformSettings, handleUpdateSettings } = usePlatformSettings(role);
   const { handleCreateAccount } = useAccountManagement();
@@ -30,6 +37,58 @@ const Index = () => {
   const [isSponsorshipModalOpen, setIsSponsorshipModalOpen] = useState(false);
   const [showSponsorshipList, setShowSponsorshipList] = useState(false);
   const [isCreatePosterModalOpen, setIsCreatePosterModalOpen] = useState(false);
+  
+  const [hasCheckedPersonalInfo, setHasCheckedPersonalInfo] = useState(false);
+
+  useEffect(() => {
+    const checkPersonalInfo = async () => {
+      if (isAuthenticated && role === 'creator' && !hasCheckedPersonalInfo) {
+        try {
+          const { data: supabase } = await import('@/lib/supabase');
+          const { data: session } = await supabase.auth.getSession();
+          
+          if (session.session) {
+            const { data, error } = await supabase
+              .from("creator_profiles")
+              .select("first_name, last_name, address, id_card_number, email")
+              .eq("user_id", session.session.user.id)
+              .single();
+            
+            if (error || !data || !data.first_name || !data.last_name || !data.address || !data.id_card_number || !data.email) {
+              toast({
+                title: "Informations personnelles incomplètes",
+                description: "Vous devez remplir vos informations personnelles pour continuer",
+                variant: "destructive",
+              });
+              navigate("/personal-information");
+            }
+          }
+          
+          setHasCheckedPersonalInfo(true);
+        } catch (error) {
+          console.error("Erreur lors de la vérification des informations personnelles:", error);
+        }
+      }
+    };
+    
+    checkPersonalInfo();
+  }, [isAuthenticated, role, navigate, hasCheckedPersonalInfo, toast]);
+  
+  // Système de déconnexion automatique après inactivité
+  const { showWarning, dismissWarning, formattedTime } = useInactivityTimer({
+    timeout: 120000, // 2 minutes
+    onTimeout: () => {
+      handleLogout();
+      toast({
+        title: "Déconnexion automatique",
+        description: "Vous avez été déconnecté en raison d'inactivité.",
+      });
+    },
+    warningTime: 30000, // Afficher l'avertissement 30 secondes avant
+    onWarning: () => {
+      // L'avertissement est géré par le hook et affiché via showWarning
+    }
+  });
 
   if (!isAuthenticated) {
     return (
@@ -50,7 +109,7 @@ const Index = () => {
   const roleDisplay = role === 'founder' ? 'Fondateur' : role;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <div className="flex-1 p-4">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex justify-between items-center">
@@ -122,9 +181,18 @@ const Index = () => {
               setIsScheduleMatchModalOpen={setIsScheduleMatchModalOpen}
             />
 
-            <CreateMatchPosterDialog
-              isOpen={isCreatePosterModalOpen}
-              onClose={() => setIsCreatePosterModalOpen(false)}
+            {(['founder', 'manager', 'agent'].includes(role || '')) && (
+              <CreateMatchPosterDialog
+                isOpen={isCreatePosterModalOpen}
+                onClose={() => setIsCreatePosterModalOpen(false)}
+              />
+            )}
+            
+            <InactivityWarning
+              open={showWarning}
+              onStay={dismissWarning}
+              onLogout={handleLogout}
+              remainingTime={formattedTime}
             />
           </div>
         </div>

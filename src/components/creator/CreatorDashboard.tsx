@@ -17,6 +17,7 @@ export function CreatorDashboard({
   role = 'creator'
 }: CreatorDashboardProps) {
   const navigate = useNavigate();
+  const canCreatePosters = ['founder', 'manager', 'agent'].includes(role);
 
   const renderDashboardButtons = () => {
     switch (role) {
@@ -47,18 +48,11 @@ export function CreatorDashboard({
               <Handshake className="h-6 w-6" />
               <span>Mes parrainages</span>
             </Button>
-            <Button
-              variant="outline"
-              className="h-24 flex-col items-center justify-center space-y-2"
-              onClick={onCreatePoster}
-            >
-              <ImageIcon className="h-6 w-6" />
-              <span>Créer une affiche</span>
-            </Button>
           </>
         );
       case 'manager':
       case 'agent':
+      case 'founder':
         return (
           <>
             <Button
@@ -77,14 +71,16 @@ export function CreatorDashboard({
               <Handshake className="h-6 w-6" />
               <span>Liste des parrainages</span>
             </Button>
-            <Button
-              variant="outline"
-              className="h-24 flex-col items-center justify-center space-y-2"
-              onClick={onCreatePoster}
-            >
-              <ImageIcon className="h-6 w-6" />
-              <span>Créer une affiche</span>
-            </Button>
+            {canCreatePosters && (
+              <Button
+                variant="outline"
+                className="h-24 flex-col items-center justify-center space-y-2"
+                onClick={onCreatePoster}
+              >
+                <ImageIcon className="h-6 w-6" />
+                <span>Créer une affiche</span>
+              </Button>
+            )}
           </>
         );
       default:
