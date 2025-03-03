@@ -27,20 +27,30 @@ export const InactivityWarning: React.FC<InactivityWarningProps> = ({
 }) => {
   return (
     <AlertDialog open={open}>
-      <AlertDialogContent>
+      <AlertDialogContent className="bg-gray-800 border-gray-700 text-white">
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
+          <AlertDialogTitle className="flex items-center gap-2 text-white">
             <Clock className="h-5 w-5 text-amber-500" />
             Déconnexion imminente
           </AlertDialogTitle>
-          <AlertDialogDescription>
-            En raison d'inactivité, vous serez déconnecté dans {remainingTime}.
+          <AlertDialogDescription className="text-gray-300">
+            En raison d'inactivité, vous serez déconnecté dans <span className="font-bold text-amber-400">{remainingTime}</span>.
             Souhaitez-vous rester connecté?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onLogout}>Se déconnecter</AlertDialogCancel>
-          <AlertDialogAction onClick={onStay}>Rester connecté</AlertDialogAction>
+          <AlertDialogCancel 
+            onClick={onLogout}
+            className="bg-gray-700 text-white hover:bg-gray-600 border-gray-600"
+          >
+            Se déconnecter
+          </AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={onStay}
+            className="bg-amber-600 text-white hover:bg-amber-500"
+          >
+            Rester connecté
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

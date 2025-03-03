@@ -53,8 +53,8 @@ export const MatchCard = ({
                 <span className="text-xs text-gray-300">{matchTime}</span>
               </div>
               {isMatchOff && (
-                <span className="px-2 py-0.5 rounded-full bg-red-500/20 border border-red-500/30 text-red-400 text-xs">
-                  Match Off
+                <span className="px-2 py-0.5 rounded-full bg-red-500/20 border border-red-500/30 text-white text-xs">
+                  OFF BOOST
                 </span>
               )}
             </div>

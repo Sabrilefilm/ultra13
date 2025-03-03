@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 interface UseInactivityTimerProps {
   timeout: number; // en millisecondes
@@ -14,43 +14,47 @@ export const useInactivityTimer = ({
   warningTime,
   onWarning,
 }: UseInactivityTimerProps) => {
-  const [timer, setTimer] = useState<number | null>(null);
-  const [warningTimer, setWarningTimer] = useState<number | null>(null);
   const [remainingTime, setRemainingTime] = useState<number>(timeout);
   const [showWarning, setShowWarning] = useState(false);
+  
+  const timerRef = useRef<number | null>(null);
+  const warningTimerRef = useRef<number | null>(null);
+  const intervalRef = useRef<number | null>(null);
 
   const resetTimer = useCallback(() => {
     setRemainingTime(timeout);
     setShowWarning(false);
     
-    if (timer) window.clearTimeout(timer);
-    if (warningTimer) window.clearTimeout(warningTimer);
+    // Nettoyer les timers existants
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+    if (warningTimerRef.current) window.clearTimeout(warningTimerRef.current);
     
     // Configurer le timer d'avertissement
-    const newWarningTimer = window.setTimeout(() => {
+    warningTimerRef.current = window.setTimeout(() => {
       setShowWarning(true);
       onWarning();
     }, timeout - warningTime);
     
     // Configurer le timer de déconnexion
-    const newTimer = window.setTimeout(() => {
+    timerRef.current = window.setTimeout(() => {
       onTimeout();
     }, timeout);
-    
-    setTimer(newTimer);
-    setWarningTimer(newWarningTimer);
-  }, [timeout, warningTime, onTimeout, onWarning, timer, warningTimer]);
+  }, [timeout, warningTime, onTimeout, onWarning]);
 
   // Mettre à jour le temps restant
   useEffect(() => {
-    const interval = setInterval(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    
+    intervalRef.current = window.setInterval(() => {
       setRemainingTime((prev) => {
         if (prev <= 0) return 0;
         return prev - 1000;
       });
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, []);
 
   // Configurer les écouteurs d'événements pour réinitialiser le timer
@@ -58,9 +62,19 @@ export const useInactivityTimer = ({
     // Événements qui réinitialisent le timer
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
     
+    // Fonction wrapper pour limiter le taux de réinitialisation
+    let lastResetTime = Date.now();
+    const throttledReset = () => {
+      const now = Date.now();
+      if (now - lastResetTime > 1000) { // Limiter à une fois par seconde
+        lastResetTime = now;
+        resetTimer();
+      }
+    };
+    
     // Ajouter tous les écouteurs
     events.forEach(event => {
-      window.addEventListener(event, resetTimer);
+      window.addEventListener(event, throttledReset);
     });
     
     // Initialiser le timer
@@ -69,24 +83,28 @@ export const useInactivityTimer = ({
     // Nettoyer
     return () => {
       events.forEach(event => {
-        window.removeEventListener(event, resetTimer);
+        window.removeEventListener(event, throttledReset);
       });
       
-      if (timer) window.clearTimeout(timer);
-      if (warningTimer) window.clearTimeout(warningTimer);
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+      if (warningTimerRef.current) window.clearTimeout(warningTimerRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [resetTimer, timer, warningTimer]);
+  }, [resetTimer]);
 
-  const dismissWarning = () => {
+  const dismissWarning = useCallback(() => {
     setShowWarning(false);
     resetTimer();
-  };
+  }, [resetTimer]);
+
+  // Formatter le temps en minutes:secondes
+  const formattedTime = formatTime(showWarning ? (timeout - (timeout - warningTime)) : remainingTime);
 
   return {
     remainingTime,
     showWarning,
     dismissWarning,
-    formattedTime: formatTime(remainingTime),
+    formattedTime,
   };
 };
 

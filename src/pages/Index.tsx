@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ProfileHeader } from "@/components/ProfileHeader";
@@ -15,11 +14,11 @@ import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { useAccountManagement } from "@/hooks/use-account-management";
 import { UpcomingMatches } from "@/components/dashboard/UpcomingMatches";
 import { CreateMatchPosterDialog } from "@/components/matches/CreateMatchPosterDialog";
-import { ImageIcon } from "lucide-react";
 import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
 import { InactivityWarning } from "@/components/InactivityWarning";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -44,7 +43,6 @@ const Index = () => {
     const checkPersonalInfo = async () => {
       if (isAuthenticated && role === 'creator' && !hasCheckedPersonalInfo) {
         try {
-          const { data: supabase } = await import('@/lib/supabase');
           const { data: session } = await supabase.auth.getSession();
           
           if (session.session) {
@@ -74,7 +72,7 @@ const Index = () => {
     checkPersonalInfo();
   }, [isAuthenticated, role, navigate, hasCheckedPersonalInfo, toast]);
   
-  // Système de déconnexion automatique après inactivité
+  // Système de déconnexion automatique après inactivity
   const { showWarning, dismissWarning, formattedTime } = useInactivityTimer({
     timeout: 120000, // 2 minutes
     onTimeout: () => {
