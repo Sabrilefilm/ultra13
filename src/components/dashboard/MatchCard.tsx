@@ -38,6 +38,9 @@ export const MatchCard = ({
         match.winner_id ? 'bg-gradient-to-r from-gray-700 to-gray-800' : ''
       } ${isMatchOff ? 'opacity-75 bg-gray-700' : ''}`}
     >
+      <div className="mb-2 text-center">
+        <h3 className="text-white text-sm">Match de L'agence pour tout le monde</h3>
+      </div>
       <div className="flex items-center justify-between gap-4">
         {/* Section gauche: Infos principales */}
         <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -52,9 +55,13 @@ export const MatchCard = ({
                 <Clock className="w-3.5 h-3.5 text-purple-400" />
                 <span className="text-xs text-gray-300">{matchTime}</span>
               </div>
-              {isMatchOff && (
+              {isMatchOff ? (
                 <span className="px-2 py-0.5 rounded-full bg-red-500/20 border border-red-500/30 text-white text-xs">
-                  OFF BOOST
+                  SANS BOOST
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full bg-green-500/20 border border-green-500/30 text-white text-xs">
+                  AVEC BOOST
                 </span>
               )}
             </div>

@@ -118,11 +118,23 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
 
   const clearWinner = async (matchId: string) => {
     try {
+      // Récupérer le statut actuel du match
+      const { data, error: fetchError } = await supabase
+        .from('upcoming_matches')
+        .select('status')
+        .eq('id', matchId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      
+      // Déterminer si le match était "off" (sans boost) ou "scheduled" (avec boost)
+      const newStatus = data.status === 'off' ? 'off' : 'scheduled';
+      
       const { error } = await supabase
         .from('upcoming_matches')
         .update({
           winner_id: null,
-          status: 'scheduled'
+          status: newStatus
         })
         .eq('id', matchId);
 

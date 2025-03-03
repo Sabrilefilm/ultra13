@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { Switch } from "@/components/ui/switch";
 
 interface ScheduleMatchDialogProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const ScheduleMatchDialog = ({ isOpen, onClose }: ScheduleMatchDialogProp
   const [matchDate, setMatchDate] = useState("");
   const [matchTime, setMatchTime] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isBoost, setIsBoost] = useState(true);
   const { toast } = useToast();
 
   const generateMatchImage = async (creator1: string, creator2: string, matchDate: string) => {
@@ -59,7 +61,7 @@ export const ScheduleMatchDialog = ({ isOpen, onClose }: ScheduleMatchDialogProp
         opponent_id: creator2,
         match_date: matchDateTime.toISOString(),
         match_image: matchImage,
-        status: 'scheduled',
+        status: isBoost ? 'scheduled' : 'off',
         source: 'TikTok'
       });
 
@@ -75,6 +77,7 @@ export const ScheduleMatchDialog = ({ isOpen, onClose }: ScheduleMatchDialogProp
       setCreator2("");
       setMatchDate("");
       setMatchTime("");
+      setIsBoost(true);
     } catch (error) {
       console.error("Erreur lors de la programmation du match:", error);
       toast({
@@ -134,6 +137,28 @@ export const ScheduleMatchDialog = ({ isOpen, onClose }: ScheduleMatchDialogProp
                 onChange={(e) => setMatchTime(e.target.value)}
                 required
               />
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="boost-mode"
+              checked={isBoost}
+              onCheckedChange={setIsBoost}
+            />
+            <Label htmlFor="boost-mode" className="cursor-pointer">
+              {isBoost ? "Avec Boost" : "Sans Boost"}
+            </Label>
+          </div>
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <h3 className="text-black font-medium text-center mb-4">Match de L'agence pour tout le monde</h3>
+            <div className="flex justify-between items-center">
+              <div className="text-center flex-1">
+                <p className="font-bold">{creator1 || "Créateur 1"}</p>
+              </div>
+              <span className="text-xl font-bold mx-2">VS</span>
+              <div className="text-center flex-1">
+                <p className="font-bold">{creator2 || "Créateur 2"}</p>
+              </div>
             </div>
           </div>
           <DialogFooter>
