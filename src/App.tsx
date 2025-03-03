@@ -5,6 +5,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import UserManagement from "./pages/UserManagement";
 import NotificationManagement from "./pages/NotificationManagement";
+import PersonalInformation from "./pages/PersonalInformation";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/users" element={<UserManagement />} />
         <Route path="/notifications" element={<NotificationManagement />} />
+        <Route path="/personal-information" element={<PersonalInformation />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

@@ -3,267 +3,307 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
+import { supabase } from "@/lib/supabase";
+import { ArrowLeft, Save } from "lucide-react";
 
-export default function PersonalInformation() {
-  const navigate = useNavigate();
+const PersonalInformation = () => {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
+  const navigate = useNavigate();
+  
+  const [isLoading, setIsLoading] = useState(true);
+  const [savedProfile, setSavedProfile] = useState(false);
+  const [profile, setProfile] = useState({
+    firstName: "",
+    lastName: "",
     address: "",
-    id_card_number: "",
+    idCardNumber: "",
     email: "",
-    paypal_address: "",
     snapchat: "",
+    paypalAddress: ""
   });
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [isFormValidated, setIsFormValidated] = useState(false);
-
-  const { data: profile, isLoading } = useQuery({
-    queryKey: ["creator-profile"],
-    queryFn: async () => {
-      const { data: user } = await supabase.auth.getSession();
-      if (!user.session) {
-        toast({
-          title: "Non authentifié",
-          description: "Veuillez vous connecter pour accéder à cette page",
-          variant: "destructive",
-        });
-        navigate("/");
-        throw new Error("Non authentifié");
-      }
-
-      const { data, error } = await supabase
-        .from("creator_profiles")
-        .select("*")
-        .eq("user_id", user.session.user.id)
-        .single();
-
-      if (error && error.code !== "PGRST116") throw error;
-      if (data) {
-        setFormData(data);
-        validateFormData({...data});
-      }
-      return data;
-    },
-  });
-
-  // Vérifier si l'utilisateur a rempli ses informations personnelles
+  
+  const [authUser, setAuthUser] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  
+  // Récupérer les informations d'authentification
   useEffect(() => {
-    if (profile) {
-      const isProfileComplete = validateFormData(formData);
-      if (!isProfileComplete) {
-        toast({
-          title: "Informations incomplètes",
-          description: "Veuillez remplir toutes les informations obligatoires",
-          variant: "destructive",
-        });
-      }
-    }
-  }, [profile]);
-
-  const validateFormData = (data: typeof formData) => {
-    const errors: Record<string, string> = {};
-    const requiredFields = ['first_name', 'last_name', 'address', 'id_card_number', 'email'];
+    const storedUsername = localStorage.getItem('username');
+    const storedRole = localStorage.getItem('userRole');
     
-    let isValid = true;
-    requiredFields.forEach(field => {
-      if (!data[field as keyof typeof data]) {
-        errors[field] = "Ce champ est obligatoire";
-        isValid = false;
-      }
-    });
-
-    if (data.email && !/^\S+@\S+\.\S+$/.test(data.email)) {
-      errors.email = "Format d'email invalide";
-      isValid = false;
-    }
-
-    setFormErrors(errors);
-    setIsFormValidated(isValid);
-    return isValid;
-  };
-
-  const handleInputChange = (field: keyof typeof formData, value: string) => {
-    const newData = { ...formData, [field]: value };
-    setFormData(newData);
-    validateFormData(newData);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateFormData(formData)) {
-      toast({
-        title: "Erreur de validation",
-        description: "Veuillez remplir tous les champs obligatoires correctement",
-        variant: "destructive",
-      });
+    if (!storedUsername || !storedRole) {
+      navigate('/');
       return;
     }
-
+    
+    setAuthUser(storedUsername);
+    setUserRole(storedRole);
+    
+    const fetchUserProfile = async () => {
+      try {
+        // Récupérer l'ID de l'utilisateur à partir du nom d'utilisateur
+        const { data: userData, error: userError } = await supabase
+          .from("user_accounts")
+          .select("id")
+          .eq("username", storedUsername)
+          .single();
+        
+        if (userError || !userData) {
+          throw new Error("Utilisateur non trouvé");
+        }
+        
+        // Récupérer le profil du créateur
+        const { data, error } = await supabase
+          .from("creator_profiles")
+          .select("*")
+          .eq("user_id", userData.id);
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          const creatorProfile = data[0];
+          setProfile({
+            firstName: creatorProfile.first_name || "",
+            lastName: creatorProfile.last_name || "",
+            address: creatorProfile.address || "",
+            idCardNumber: creatorProfile.id_card_number || "",
+            email: creatorProfile.email || "",
+            snapchat: creatorProfile.snapchat || "",
+            paypalAddress: creatorProfile.paypal_address || ""
+          });
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement du profil:", error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de charger vos informations personnelles."
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchUserProfile();
+  }, [navigate, toast]);
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setProfile(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
     try {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session.session) throw new Error("Non authentifié");
-
-      const { error } = await supabase.from("creator_profiles").upsert({
-        user_id: session.session.user.id,
-        ...formData,
-        updated_at: new Date().toISOString(),
-      });
-
-      if (error) throw error;
-
+      // Récupérer l'ID de l'utilisateur
+      const { data: userData, error: userError } = await supabase
+        .from("user_accounts")
+        .select("id")
+        .eq("username", authUser)
+        .single();
+      
+      if (userError || !userData) {
+        throw new Error("Utilisateur non trouvé");
+      }
+      
+      // Vérifier si le profil existe déjà
+      const { data: existingProfile, error: profileCheckError } = await supabase
+        .from("creator_profiles")
+        .select("id")
+        .eq("user_id", userData.id);
+      
+      if (profileCheckError) throw profileCheckError;
+      
+      let result;
+      
+      if (existingProfile && existingProfile.length > 0) {
+        // Mise à jour du profil existant
+        result = await supabase
+          .from("creator_profiles")
+          .update({
+            first_name: profile.firstName,
+            last_name: profile.lastName,
+            address: profile.address,
+            id_card_number: profile.idCardNumber,
+            email: profile.email,
+            snapchat: profile.snapchat,
+            paypal_address: profile.paypalAddress
+          })
+          .eq("user_id", userData.id);
+      } else {
+        // Création d'un nouveau profil
+        result = await supabase
+          .from("creator_profiles")
+          .insert({
+            user_id: userData.id,
+            first_name: profile.firstName,
+            last_name: profile.lastName,
+            address: profile.address,
+            id_card_number: profile.idCardNumber,
+            email: profile.email,
+            snapchat: profile.snapchat,
+            paypal_address: profile.paypalAddress
+          });
+      }
+      
+      if (result.error) throw result.error;
+      
       toast({
         title: "Succès",
-        description: "Vos informations ont été mises à jour",
+        description: "Vos informations personnelles ont été enregistrées.",
       });
-      
-      // Rediriger vers la page principale après la sauvegarde
-      navigate("/");
+      setSavedProfile(true);
     } catch (error) {
+      console.error("Erreur lors de l'enregistrement du profil:", error);
       toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour vos informations",
         variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'enregistrer vos informations personnelles."
       });
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-400/20 to-pink-400/20 flex items-center justify-center">
-        <div className="animate-pulse text-xl font-medium text-white">Chargement...</div>
-      </div>
-    );
-  }
-
+  
+  const goBack = () => {
+    navigate("/");
+  };
+  
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-400/20 to-pink-400/20 p-4 md:p-8">
-      <div className="max-w-2xl mx-auto space-y-8 animate-fade-in">
-        <div className="flex items-center gap-4 bg-white/10 p-4 rounded-lg backdrop-blur-md">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              if (isFormValidated) {
-                navigate("/");
-              } else {
-                toast({
-                  title: "Informations incomplètes",
-                  description: "Veuillez remplir toutes les informations obligatoires avant de continuer",
-                  variant: "destructive",
-                });
-              }
-            }}
-            className="hover:bg-white/20"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 text-transparent bg-clip-text">
-            Informations Personnelles
-          </h1>
-        </div>
-
-        <Card className="backdrop-blur-md bg-white/10 border-white/20 shadow-xl">
-          <form onSubmit={handleSubmit} className="p-6 space-y-8">
-            <div className="grid gap-6">
+    <div className="min-h-screen bg-background p-4">
+      <div className="container mx-auto max-w-4xl py-8">
+        <Button
+          variant="ghost"
+          onClick={goBack}
+          className="mb-6"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Retour
+        </Button>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">Informations Personnelles</CardTitle>
+            <CardDescription>
+              Ces informations sont nécessaires pour la gestion de votre compte et des paiements.
+            </CardDescription>
+          </CardHeader>
+          <form onSubmit={handleSubmit}>
+            <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="first_name" className="text-white/80">Prénom <span className="text-red-500">*</span></Label>
+                  <Label htmlFor="firstName">Prénom</Label>
                   <Input
-                    id="first_name"
-                    value={formData.first_name}
-                    onChange={e => handleInputChange('first_name', e.target.value)}
-                    className={`bg-white/5 border ${formErrors.first_name ? 'border-red-500' : 'border-white/10'} focus:border-purple-400/50 transition-all text-white`}
+                    id="firstName"
+                    name="firstName"
+                    value={profile.firstName}
+                    onChange={handleInputChange}
+                    placeholder="Votre prénom"
+                    required
                   />
-                  {formErrors.first_name && <p className="text-sm text-red-500">{formErrors.first_name}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="last_name" className="text-white/80">Nom <span className="text-red-500">*</span></Label>
+                  <Label htmlFor="lastName">Nom</Label>
                   <Input
-                    id="last_name"
-                    value={formData.last_name}
-                    onChange={e => handleInputChange('last_name', e.target.value)}
-                    className={`bg-white/5 border ${formErrors.last_name ? 'border-red-500' : 'border-white/10'} focus:border-purple-400/50 transition-all text-white`}
+                    id="lastName"
+                    name="lastName"
+                    value={profile.lastName}
+                    onChange={handleInputChange}
+                    placeholder="Votre nom"
+                    required
                   />
-                  {formErrors.last_name && <p className="text-sm text-red-500">{formErrors.last_name}</p>}
                 </div>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="address" className="text-white/80">Adresse <span className="text-red-500">*</span></Label>
+                <Label htmlFor="address">Adresse complète</Label>
                 <Input
                   id="address"
-                  value={formData.address}
-                  onChange={e => handleInputChange('address', e.target.value)}
-                  className={`bg-white/5 border ${formErrors.address ? 'border-red-500' : 'border-white/10'} focus:border-purple-400/50 transition-all text-white`}
+                  name="address"
+                  value={profile.address}
+                  onChange={handleInputChange}
+                  placeholder="Votre adresse complète"
+                  required
                 />
-                {formErrors.address && <p className="text-sm text-red-500">{formErrors.address}</p>}
               </div>
-
+              
               <div className="space-y-2">
-                <Label htmlFor="id_card_number" className="text-white/80">Numéro de carte d'identité <span className="text-red-500">*</span></Label>
+                <Label htmlFor="idCardNumber">Numéro de carte d'identité</Label>
                 <Input
-                  id="id_card_number"
-                  value={formData.id_card_number}
-                  onChange={e => handleInputChange('id_card_number', e.target.value)}
-                  className={`bg-white/5 border ${formErrors.id_card_number ? 'border-red-500' : 'border-white/10'} focus:border-purple-400/50 transition-all text-white`}
+                  id="idCardNumber"
+                  name="idCardNumber"
+                  value={profile.idCardNumber}
+                  onChange={handleInputChange}
+                  placeholder="Numéro de votre carte d'identité"
+                  required
                 />
-                {formErrors.id_card_number && <p className="text-sm text-red-500">{formErrors.id_card_number}</p>}
               </div>
-
+              
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white/80">Email <span className="text-red-500">*</span></Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
-                  value={formData.email}
-                  onChange={e => handleInputChange('email', e.target.value)}
-                  className={`bg-white/5 border ${formErrors.email ? 'border-red-500' : 'border-white/10'} focus:border-purple-400/50 transition-all text-white`}
-                />
-                {formErrors.email && <p className="text-sm text-red-500">{formErrors.email}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="paypal_address" className="text-white/80">Adresse PayPal</Label>
-                <Input
-                  id="paypal_address"
-                  value={formData.paypal_address}
-                  onChange={e => handleInputChange('paypal_address', e.target.value)}
-                  className="bg-white/5 border border-white/10 focus:border-purple-400/50 transition-all text-white"
+                  value={profile.email}
+                  onChange={handleInputChange}
+                  placeholder="Votre adresse email"
+                  required
                 />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="snapchat" className="text-white/80">Snapchat</Label>
-                <Input
-                  id="snapchat"
-                  value={formData.snapchat}
-                  onChange={e => handleInputChange('snapchat', e.target.value)}
-                  className="bg-white/5 border border-white/10 focus:border-purple-400/50 transition-all text-white"
-                />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="snapchat">Snapchat (optionnel)</Label>
+                  <Input
+                    id="snapchat"
+                    name="snapchat"
+                    value={profile.snapchat}
+                    onChange={handleInputChange}
+                    placeholder="Votre pseudo Snapchat"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="paypalAddress">Adresse PayPal</Label>
+                  <Input
+                    id="paypalAddress"
+                    name="paypalAddress"
+                    value={profile.paypalAddress}
+                    onChange={handleInputChange}
+                    placeholder="Votre adresse PayPal pour les paiements"
+                    required
+                  />
+                </div>
               </div>
-            </div>
-
-            <div className="pt-4">
-              <p className="text-white/70 text-sm mb-4"><span className="text-red-500">*</span> Champs obligatoires</p>
-              <Button 
-                type="submit" 
-                className="w-full bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+            </CardContent>
+            <CardFooter className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={goBack}
               >
-                Enregistrer les modifications
+                Annuler
               </Button>
-            </div>
+              <Button
+                type="submit"
+                disabled={isLoading}
+              >
+                {isLoading ? "Enregistrement..." : "Enregistrer"}
+                {!isLoading && <Save className="ml-2 h-4 w-4" />}
+              </Button>
+            </CardFooter>
           </form>
         </Card>
       </div>
     </div>
   );
-}
+};
+
+export default PersonalInformation;
