@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,10 +9,12 @@ import { UserTable } from "@/components/user-management/UserTable";
 import { RoleConfirmDialog } from "@/components/user-management/RoleConfirmDialog";
 import { useUserManagement } from "@/hooks/use-user-management";
 import { CreateAccountModal } from "@/components/CreateAccountModal";
+import { useAccountManagement } from "@/hooks/use-account-management";
 
 const UserManagement = () => {
   const navigate = useNavigate();
   const { role } = useIndexAuth();
+  const { handleCreateAccount } = useAccountManagement();
   const {
     users,
     isLoading,
@@ -42,7 +43,6 @@ const UserManagement = () => {
   
   const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
 
-  // Rediriger si l'utilisateur n'est pas fondateur ou manager
   useEffect(() => {
     if (role !== 'founder' && role !== 'manager') {
       navigate('/');
@@ -170,10 +170,7 @@ const UserManagement = () => {
         <CreateAccountModal
           isOpen={isCreateAccountModalOpen}
           onClose={() => setIsCreateAccountModalOpen(false)}
-          onSubmit={(data) => {
-            setIsCreateAccountModalOpen(false);
-            // Le hook handle déjà le refresh de la liste
-          }}
+          onSubmit={handleCreateAccount}
         />
       </div>
     </div>

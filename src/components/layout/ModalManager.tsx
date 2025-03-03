@@ -20,7 +20,7 @@ interface ModalManagerProps {
   setShowSponsorshipList: (value: boolean) => void;
   selectedCreatorId: string;
   platformSettings: { diamondValue: number; minimumPayout: number; } | null;
-  handleCreateAccount: (role: 'creator' | 'manager', username: string, password: string) => Promise<void>;
+  handleCreateAccount: (role: 'creator' | 'manager' | 'agent', username: string, password: string) => Promise<void>;
   handleUpdateSettings: (diamondValue: number, minimumPayout: number) => Promise<void>;
   username: string;
   role: string;

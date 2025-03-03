@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 export const useAccountManagement = () => {
   const { toast } = useToast();
 
-  const handleCreateAccount = async (role: 'creator' | 'manager', username: string, password: string) => {
+  const handleCreateAccount = async (role: 'creator' | 'manager' | 'agent', username: string, password: string) => {
     try {
       const { error } = await supabase
         .from('user_accounts')
