@@ -57,9 +57,11 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
       
       if (fetchError) throw fetchError;
       
-      // Conserver le statut "off" pour les matchs sans boost
-      // Les matchs avec statut "scheduled" ou autre deviennent "completed"
-      const newStatus = matchData.status === 'off' ? 'completed_off' : 'completed';
+      // Utiliser des valeurs de statut qui sont autorisées dans la contrainte
+      // Vérifier si le match a un boost ou non
+      const newStatus = matchData.status === 'off' ? 'completed' : 'completed';
+      
+      console.log("Setting winner with status:", newStatus);  // Debugging log
       
       const { error } = await supabase
         .from('upcoming_matches')
@@ -69,7 +71,10 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
         })
         .eq('id', matchId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Update error details:", error);  // Detailed error logging
+        throw error;
+      }
 
       // Animation de confettis pendant 2 minutes
       const duration = 2 * 60 * 1000;
@@ -116,6 +121,7 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
       toast({
         title: "🎉 Gagnant défini !",
         description: "Le gagnant du match a été enregistré avec succès",
+        className: "bg-background border border-border"
       });
 
       queryClient.invalidateQueries({ queryKey: ['upcoming-matches', creatorId] });
@@ -125,6 +131,7 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
         title: "Erreur",
         description: "Une erreur est survenue lors de la définition du gagnant",
         variant: "destructive",
+        className: "bg-background border border-border"
       });
     }
   };
@@ -141,7 +148,6 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
       if (fetchError) throw fetchError;
       
       // Déterminer si le match était "off" (sans boost) ou "scheduled" (avec boost)
-      // Un match "completed_off" redevient "off", un match "completed" redevient "scheduled"
       const newStatus = data.status === 'completed_off' ? 'off' : 'scheduled';
       
       const { error } = await supabase
@@ -157,6 +163,7 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
       toast({
         title: "Gagnant effacé",
         description: "Le gagnant du match a été effacé avec succès",
+        className: "bg-background border border-border"
       });
 
       queryClient.invalidateQueries({ queryKey: ['upcoming-matches', creatorId] });
@@ -166,6 +173,34 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
         title: "Erreur",
         description: "Une erreur est survenue lors de l'effacement du gagnant",
         variant: "destructive",
+        className: "bg-background border border-border"
+      });
+    }
+  };
+
+  const updateMatchDetails = async (matchId: string, updatedData: any) => {
+    try {
+      const { error } = await supabase
+        .from('upcoming_matches')
+        .update(updatedData)
+        .eq('id', matchId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Match mis à jour",
+        description: "Les détails du match ont été mis à jour avec succès",
+        className: "bg-background border border-border"
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['upcoming-matches', creatorId] });
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du match:", error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la mise à jour du match",
+        variant: "destructive",
+        className: "bg-background border border-border"
       });
     }
   };
@@ -175,6 +210,7 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
     isLoading,
     handleDelete,
     setWinner,
-    clearWinner
+    clearWinner,
+    updateMatchDetails
   };
 };

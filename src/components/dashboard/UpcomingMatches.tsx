@@ -5,12 +5,13 @@ import { downloadImage } from "@/utils/download";
 import { MatchCard } from "./MatchCard";
 
 export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: string }) => {
-  const { matches, isLoading, handleDelete, setWinner, clearWinner } = useUpcomingMatches(role, creatorId);
+  const { matches, isLoading, handleDelete, setWinner, clearWinner, updateMatchDetails } = useUpcomingMatches(role, creatorId);
 
   if (isLoading) return <div>Chargement des matchs...</div>;
 
   const canManageMatch = role === 'founder' || role === 'manager';
   const canDeleteMatch = role === 'founder';
+  const isFounder = role === 'founder';
 
   console.log("Current role in UpcomingMatches:", role); // Debug log
 
@@ -33,6 +34,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
                 onClearWinner={clearWinner}
                 onDelete={handleDelete}
                 onDownload={downloadImage}
+                onUpdateMatch={isFounder ? updateMatchDetails : undefined}
               />
             ))}
           </div>

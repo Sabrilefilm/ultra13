@@ -1,6 +1,9 @@
+
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
-import { Download, Trash2, Trophy, X, Timer, Clock, Calendar } from "lucide-react";
+import { Download, Trash2, Trophy, X, Clock, Calendar, Edit } from "lucide-react";
+import { useState } from "react";
+import { EditMatchDialog } from "../matches/EditMatchDialog";
 
 interface MatchCardProps {
   match: any;
@@ -11,6 +14,7 @@ interface MatchCardProps {
   onClearWinner: (matchId: string) => void;
   onDelete: (matchId: string) => void;
   onDownload: (imageUrl: string, fileName: string) => void;
+  onUpdateMatch?: (matchId: string, updatedData: any) => Promise<void>;
 }
 
 export const MatchCard = ({
@@ -21,10 +25,13 @@ export const MatchCard = ({
   onSetWinner,
   onClearWinner,
   onDelete,
-  onDownload
+  onDownload,
+  onUpdateMatch
 }: MatchCardProps) => {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const isMatchOff = match.status === 'off' || match.status === 'completed_off';
   const showRequirements = ['agent', 'manager', 'creator'].includes(role);
+  const isFounder = role === 'founder';
 
   const matchTime = new Date(match.match_date).toLocaleTimeString('fr-FR', {
     hour: '2-digit',
@@ -112,6 +119,16 @@ export const MatchCard = ({
 
         {/* Section droite: Actions */}
         <div className="flex items-center gap-1 flex-shrink-0">
+          {isFounder && onUpdateMatch && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 bg-gray-600/50 text-blue-400 border-blue-500/30 hover:bg-blue-900/30"
+              onClick={() => setIsEditDialogOpen(true)}
+            >
+              <Edit className="w-3.5 h-3.5" />
+            </Button>
+          )}
           {match.match_image && (
             <Button
               variant="outline"
@@ -137,6 +154,15 @@ export const MatchCard = ({
           )}
         </div>
       </div>
+
+      {isFounder && onUpdateMatch && (
+        <EditMatchDialog 
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          match={match}
+          onUpdate={onUpdateMatch}
+        />
+      )}
     </div>
   );
 };
