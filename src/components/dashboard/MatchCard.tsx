@@ -47,155 +47,172 @@ export const MatchCard = ({
     minute: '2-digit'
   });
 
+  // Custom style based on match status
+  const getCardStyle = () => {
+    if (match.winner_id) {
+      return "bg-gradient-to-r from-indigo-50 to-purple-50 border-purple-200";
+    }
+    if (isMatchOff) {
+      return "bg-gray-50 border-gray-200";
+    }
+    if (isPastMatch && !match.winner_id) {
+      return "bg-gray-50 opacity-70 border-gray-200";
+    }
+    return "bg-white border-gray-200 hover:border-purple-300";
+  };
+
   return (
     <div 
-      className={`p-3 border rounded-lg transition-all duration-300 bg-[#333333] shadow-lg hover:shadow-xl ${
-        match.winner_id ? 'bg-gradient-to-r from-gray-700 to-gray-800' : ''
-      } ${isMatchOff ? 'opacity-75 bg-gray-700' : ''} ${isPastMatch && !match.winner_id ? 'opacity-50' : ''}`}
+      className={`rounded-xl shadow-sm border transition-all duration-300 hover:shadow-md ${getCardStyle()}`}
     >
-      <div className="mb-2 text-center">
-        <h3 className="text-white text-sm">Match de L'agence pour tout le monde</h3>
-      </div>
-      <div className="flex items-center justify-between gap-4">
-        {/* Section gauche: Infos principales */}
-        <div className="flex items-center gap-4 min-w-0 flex-1">
-          <div className="min-w-0">
-            <p className="font-bold text-white truncate">{match.creator_id} vs {match.opponent_id}</p>
+      <div className="p-4">
+        <div className="mb-2 text-center">
+          <h3 className="text-purple-800 text-xs font-medium tracking-wide uppercase">Match de L'agence</h3>
+        </div>
+        
+        {/* Main match info */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          {/* Left section: Main info */}
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <div className="min-w-0">
+              <p className="font-bold text-gray-800 text-lg mb-1.5">{match.creator_id} <span className="text-gray-400 mx-1">vs</span> {match.opponent_id}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1 text-gray-600">
+                  <Calendar className="w-3.5 h-3.5 text-purple-500" />
+                  <span className="text-sm">{formatDate(match.match_date)}</span>
+                </div>
+                <div className="flex items-center gap-1 text-gray-600">
+                  <Clock className="w-3.5 h-3.5 text-purple-500" />
+                  <span className="text-sm">{matchTime}</span>
+                </div>
+                {isMatchOff ? (
+                  <span className="px-2 py-0.5 rounded-full bg-red-50 border border-red-100 text-red-600 text-xs font-medium">
+                    SANS BOOST
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-full bg-green-50 border border-green-100 text-green-600 text-xs font-medium">
+                    AVEC BOOST
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Right section: Actions and winner */}
+          <div className="flex flex-col md:flex-row items-end md:items-center gap-3 mt-2 md:mt-0">
+            {/* Winner section */}
+            {match.winner_id ? (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-100/70 rounded-lg border border-purple-200">
+                <Trophy className="w-4 h-4 text-yellow-500" />
+                <span className="text-sm text-purple-800 font-medium whitespace-nowrap">
+                  {match.winner_id}
+                </span>
+                {canManageMatch && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-5 w-5 p-0 text-purple-400 hover:text-purple-700 hover:bg-purple-100 rounded-full"
+                    onClick={() => onClearWinner(match.id)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+            ) : (
+              canManageMatch && (
+                <div className="flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs bg-white text-purple-700 border-purple-200 hover:bg-purple-50"
+                    onClick={() => onSetWinner(match.id, match.creator_id)}
+                  >
+                    {match.creator_id}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs bg-white text-purple-700 border-purple-200 hover:bg-purple-50"
+                    onClick={() => onSetWinner(match.id, match.opponent_id)}
+                  >
+                    {match.opponent_id}
+                  </Button>
+                </div>
+              )
+            )}
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-1.5">
+              {canEdit && onUpdateMatch && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 bg-white text-blue-600 border-blue-200 hover:bg-blue-50"
+                  onClick={() => setIsEditDialogOpen(true)}
+                >
+                  <Edit className="w-3.5 h-3.5" />
+                </Button>
+              )}
+              {match.match_image && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                  onClick={() => onDownload(
+                    match.match_image,
+                    `match_${match.creator_id}_vs_${match.opponent_id}`
+                  )}
+                >
+                  <Download className="w-3.5 h-3.5" />
+                </Button>
+              )}
+              {canDeleteMatch && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 bg-white text-red-600 border-red-200 hover:bg-red-50"
+                  onClick={() => onDelete(match.id)}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Points section for won matches */}
+        {match.winner_id && (
+          <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2">
+            <div className="flex-1"></div>
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-purple-400" />
-                <span className="text-xs text-gray-300">{formatDate(match.match_date)}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-purple-400" />
-                <span className="text-xs text-gray-300">{matchTime}</span>
-              </div>
-              {isMatchOff ? (
-                <span className="px-2 py-0.5 rounded-full bg-red-500/20 border border-red-500/30 text-white text-xs">
-                  SANS BOOST
-                </span>
-              ) : (
-                <span className="px-2 py-0.5 rounded-full bg-green-500/20 border border-green-500/30 text-white text-xs">
-                  AVEC BOOST
-                </span>
-              )}
+              <span className="text-sm text-gray-700 font-medium">Points:</span>
+              <Input
+                type="number"
+                value={points}
+                onChange={(e) => setPoints(e.target.value)}
+                className="w-20 h-7 bg-white text-gray-800 border-gray-200 focus:border-purple-400"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 bg-white text-green-600 border-green-200 hover:bg-green-50"
+                onClick={handlePointsUpdate}
+              >
+                <FilePenLine className="w-3.5 h-3.5" />
+              </Button>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Section centrale: Gestion du gagnant */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {match.winner_id ? (
-            <div className="flex items-center gap-2 px-3 py-1 bg-gray-600/50 rounded-lg border border-gray-500/30">
-              <Trophy className="w-4 h-4 text-yellow-500" />
-              <span className="text-sm text-white font-medium whitespace-nowrap">
-                {match.winner_id}
-              </span>
-              {canManageMatch && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-5 w-5 p-0 text-gray-300 hover:text-white hover:bg-gray-700/50 rounded-full"
-                  onClick={() => onClearWinner(match.id)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              )}
-            </div>
-          ) : (
-            canManageMatch && (
-              <div className="flex gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs bg-gray-600/50 text-white border-gray-500/30 hover:bg-gray-700"
-                  onClick={() => onSetWinner(match.id, match.creator_id)}
-                >
-                  {match.creator_id}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs bg-gray-600/50 text-white border-gray-500/30 hover:bg-gray-700"
-                  onClick={() => onSetWinner(match.id, match.opponent_id)}
-                >
-                  {match.opponent_id}
-                </Button>
-              </div>
-            )
-          )}
-        </div>
-
-        {/* Section droite: Actions */}
-        <div className="flex items-center gap-1 flex-shrink-0">
-          {canEdit && onUpdateMatch && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 bg-gray-600/50 text-blue-400 border-blue-500/30 hover:bg-blue-900/30"
-              onClick={() => setIsEditDialogOpen(true)}
-            >
-              <Edit className="w-3.5 h-3.5" />
-            </Button>
-          )}
-          {match.match_image && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 bg-gray-600/50 text-white border-gray-500/30 hover:bg-gray-700"
-              onClick={() => onDownload(
-                match.match_image,
-                `match_${match.creator_id}_vs_${match.opponent_id}`
-              )}
-            >
-              <Download className="w-3.5 h-3.5" />
-            </Button>
-          )}
-          {canDeleteMatch && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 bg-gray-600/50 text-red-400 border-red-500/30 hover:bg-red-900/30"
-              onClick={() => onDelete(match.id)}
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </Button>
-          )}
-        </div>
+        {canEdit && onUpdateMatch && (
+          <EditMatchDialog 
+            isOpen={isEditDialogOpen}
+            onClose={() => setIsEditDialogOpen(false)}
+            match={match}
+            onUpdate={onUpdateMatch}
+          />
+        )}
       </div>
-
-      {/* Points section for won matches */}
-      {match.winner_id && (
-        <div className="mt-3 flex items-center gap-2">
-          <div className="flex-1"></div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-white">Points:</span>
-            <Input
-              type="number"
-              value={points}
-              onChange={(e) => setPoints(e.target.value)}
-              className="w-20 h-7 bg-gray-600/50 text-white border-gray-500/30"
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 bg-gray-600/50 text-green-400 border-green-500/30 hover:bg-green-900/30"
-              onClick={handlePointsUpdate}
-            >
-              <FilePenLine className="w-3.5 h-3.5" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {canEdit && onUpdateMatch && (
-        <EditMatchDialog 
-          isOpen={isEditDialogOpen}
-          onClose={() => setIsEditDialogOpen(false)}
-          match={match}
-          onUpdate={onUpdateMatch}
-        />
-      )}
     </div>
   );
 };
