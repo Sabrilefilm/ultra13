@@ -33,6 +33,7 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
       toast({
         title: "Match supprimé",
         description: "Le match a été supprimé avec succès",
+        className: "bg-background border border-border"
       });
 
       queryClient.invalidateQueries({ queryKey: ['upcoming-matches', creatorId] });
@@ -42,6 +43,7 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
         title: "Erreur",
         description: "Une erreur est survenue lors de la suppression du match",
         variant: "destructive",
+        className: "bg-background border border-border"
       });
     }
   };
@@ -57,9 +59,11 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
       
       if (fetchError) throw fetchError;
       
-      // Utiliser des valeurs de statut qui sont autorisées dans la contrainte
-      // Vérifier si le match a un boost ou non
-      const newStatus = matchData.status === 'off' ? 'completed' : 'completed';
+      // Déterminer le statut approprié en fonction du statut actuel
+      let newStatus = 'completed';
+      if (matchData.status === 'off') {
+        newStatus = 'completed_off';
+      }
       
       console.log("Setting winner with status:", newStatus);  // Debugging log
       

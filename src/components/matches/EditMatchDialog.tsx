@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ export const EditMatchDialog = ({ isOpen, onClose, match, onUpdate }: EditMatchD
   const [matchDate, setMatchDate] = useState(match?.match_date ? new Date(match.match_date).toISOString().split('T')[0] : "");
   const [matchTime, setMatchTime] = useState(match?.match_date ? new Date(match.match_date).toTimeString().slice(0, 5) : "");
   const [isBoost, setIsBoost] = useState(match?.status !== 'off' && match?.status !== 'completed_off');
+  const [points, setPoints] = useState(match?.points?.toString() || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,7 +44,8 @@ export const EditMatchDialog = ({ isOpen, onClose, match, onUpdate }: EditMatchD
         creator_id: creator1,
         opponent_id: creator2,
         match_date: matchDateTime.toISOString(),
-        status: newStatus
+        status: newStatus,
+        points: points ? parseInt(points) : match.points || 0
       });
       
       onClose();
@@ -55,7 +58,7 @@ export const EditMatchDialog = ({ isOpen, onClose, match, onUpdate }: EditMatchD
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="bg-background border border-border">
         <DialogHeader>
           <DialogTitle>Modifier le match</DialogTitle>
         </DialogHeader>
@@ -100,6 +103,18 @@ export const EditMatchDialog = ({ isOpen, onClose, match, onUpdate }: EditMatchD
               />
             </div>
           </div>
+          {match.winner_id && (
+            <div className="space-y-2">
+              <Label htmlFor="points">Points</Label>
+              <Input
+                id="points"
+                type="number"
+                value={points}
+                onChange={(e) => setPoints(e.target.value)}
+                placeholder="Nombre de points"
+              />
+            </div>
+          )}
           <div className="flex items-center space-x-2">
             <Switch
               id="boost-mode"

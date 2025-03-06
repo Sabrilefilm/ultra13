@@ -1,9 +1,10 @@
 
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
-import { Download, Trash2, Trophy, X, Clock, Calendar, Edit } from "lucide-react";
+import { Download, Trash2, Trophy, X, Clock, Calendar, Edit, FilePenLine } from "lucide-react";
 import { useState } from "react";
 import { EditMatchDialog } from "../matches/EditMatchDialog";
+import { Input } from "@/components/ui/input";
 
 interface MatchCardProps {
   match: any;
@@ -29,9 +30,17 @@ export const MatchCard = ({
   onUpdateMatch
 }: MatchCardProps) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [points, setPoints] = useState(match.points?.toString() || "");
   const isMatchOff = match.status === 'off' || match.status === 'completed_off';
   const showRequirements = ['agent', 'manager', 'creator'].includes(role);
-  const isFounder = role === 'founder';
+  const canEdit = ['agent', 'manager', 'founder'].includes(role);
+  const isPastMatch = new Date(match.match_date) < new Date();
+  
+  const handlePointsUpdate = () => {
+    if (onUpdateMatch && match.winner_id) {
+      onUpdateMatch(match.id, { points: parseInt(points) || 0 });
+    }
+  };
 
   const matchTime = new Date(match.match_date).toLocaleTimeString('fr-FR', {
     hour: '2-digit',
@@ -42,7 +51,7 @@ export const MatchCard = ({
     <div 
       className={`p-3 border rounded-lg transition-all duration-300 bg-[#333333] shadow-lg hover:shadow-xl ${
         match.winner_id ? 'bg-gradient-to-r from-gray-700 to-gray-800' : ''
-      } ${isMatchOff ? 'opacity-75 bg-gray-700' : ''}`}
+      } ${isMatchOff ? 'opacity-75 bg-gray-700' : ''} ${isPastMatch && !match.winner_id ? 'opacity-50' : ''}`}
     >
       <div className="mb-2 text-center">
         <h3 className="text-white text-sm">Match de L'agence pour tout le monde</h3>
@@ -119,7 +128,7 @@ export const MatchCard = ({
 
         {/* Section droite: Actions */}
         <div className="flex items-center gap-1 flex-shrink-0">
-          {isFounder && onUpdateMatch && (
+          {canEdit && onUpdateMatch && (
             <Button
               variant="outline"
               size="sm"
@@ -155,7 +164,31 @@ export const MatchCard = ({
         </div>
       </div>
 
-      {isFounder && onUpdateMatch && (
+      {/* Points section for won matches */}
+      {match.winner_id && (
+        <div className="mt-3 flex items-center gap-2">
+          <div className="flex-1"></div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-white">Points:</span>
+            <Input
+              type="number"
+              value={points}
+              onChange={(e) => setPoints(e.target.value)}
+              className="w-20 h-7 bg-gray-600/50 text-white border-gray-500/30"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 bg-gray-600/50 text-green-400 border-green-500/30 hover:bg-green-900/30"
+              onClick={handlePointsUpdate}
+            >
+              <FilePenLine className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {canEdit && onUpdateMatch && (
         <EditMatchDialog 
           isOpen={isEditDialogOpen}
           onClose={() => setIsEditDialogOpen(false)}
