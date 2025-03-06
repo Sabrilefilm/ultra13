@@ -101,8 +101,75 @@
     z-index: -1;
     animation: animate-background-shift 30s ease infinite;
   }
+
+  .dark body::before {
+    background: linear-gradient(
+      135deg,
+      #0a0a0f 0%,
+      #111827 25%,
+      #1e1b4b 50%,
+      #0f172a 75%,
+      #0a0a0f 100%
+    );
+    background-size: 400% 400%;
+  }
 }
 
+/* Toast styles with better visibility */
+.toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+}
+
+.toast {
+  background: white;
+  color: #333;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.3s ease-in;
+  border-left: 4px solid #8B5CF6;
+}
+
+.dark .toast {
+  background: #1e293b;
+  color: #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.toast-success {
+  border-left-color: #10B981;
+}
+
+.toast-error {
+  border-left-color: #EF4444;
+}
+
+.toast-warning {
+  border-left-color: #F59E0B;
+}
+
+/* Dark mode style helpers */
+.dark .card-dark {
+  @apply bg-dark-card text-dark-text border-dark-border;
+}
+
+.dark .text-dark {
+  @apply text-dark-text;
+}
+
+.dark .bg-dark {
+  @apply bg-dark-bg;
+}
+
+.dark .border-dark {
+  @apply border-dark-border;
+}
+
+/* Keep other existing styles */
 @keyframes animate-background-shift {
   0% {
     background-position: 0% 50%;
@@ -139,37 +206,6 @@
   font-size: 0.75rem;
   opacity: 0.5;
   text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-}
-
-/* Toast styles with backgrounds */
-.toast-container {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 9999;
-}
-
-.toast {
-  background: white;
-  color: #333;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin-bottom: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  animation: fadeIn 0.3s ease-in;
-  border-left: 4px solid #8B5CF6;
-}
-
-.toast-success {
-  border-left-color: #10B981;
-}
-
-.toast-error {
-  border-left-color: #EF4444;
-}
-
-.toast-warning {
-  border-left-color: #F59E0B;
 }
 
 @keyframes fadeIn {

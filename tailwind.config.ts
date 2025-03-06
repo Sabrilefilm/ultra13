@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -63,6 +62,12 @@ export default {
           hover: "#DC2626",
           foreground: "#ffffff",
         },
+        "dark-card": "#1E293B",
+        "dark-card-hover": "#2C3E50",
+        "dark-bg": "#0F172A",
+        "dark-text": "#E2E8F0",
+        "dark-muted": "#94A3B8",
+        "dark-border": "#334155",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -112,6 +117,7 @@ export default {
         glass: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
         glow: "0 0 15px rgba(139, 92, 246, 0.5)",
         highlight: "inset 0 1px 0 0 rgba(255, 255, 255, 0.05)",
+        "dark-glow": "0 0 15px rgba(139, 92, 246, 0.3)",
       },
     },
   },
