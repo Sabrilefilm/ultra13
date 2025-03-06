@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import { Download, Trash2, Trophy, X, Timer, Clock, Calendar } from "lucide-react";
@@ -24,7 +23,7 @@ export const MatchCard = ({
   onDelete,
   onDownload
 }: MatchCardProps) => {
-  const isMatchOff = match.status === 'off';
+  const isMatchOff = match.status === 'off' || match.status === 'completed_off';
   const showRequirements = ['agent', 'manager', 'creator'].includes(role);
 
   const matchTime = new Date(match.match_date).toLocaleTimeString('fr-FR', {
