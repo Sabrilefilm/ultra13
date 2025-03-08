@@ -145,16 +145,16 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
 
   const clearWinner = async (matchId: string) => {
     try {
-      // Récupérer les détails du match
+      // Récupérer les détails du match y compris la plateforme
       const { data, error: fetchError } = await supabase
         .from('upcoming_matches')
-        .select('status')
+        .select('status, platform') // Ensure we select both status and platform
         .eq('id', matchId)
         .single();
       
       if (fetchError) throw fetchError;
       
-      // Déterminer le statut approprié, en évitant 'completed_off'
+      // Déterminer le statut approprié
       // Utiliser des valeurs de statut conformes à la contrainte de la base de données
       const newStatus = data.status === 'completed' ? 
         (data.platform === 'TikTok' ? 'off' : 'scheduled') : 'scheduled';
