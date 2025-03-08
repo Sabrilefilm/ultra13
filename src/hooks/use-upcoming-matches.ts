@@ -50,22 +50,25 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
 
   const setWinner = async (matchId: string, winnerId: string) => {
     try {
-      // Récupérer le statut actuel du match avant de le modifier
+      // Récupérer les détails du match avant modification
       const { data: matchData, error: fetchError } = await supabase
         .from('upcoming_matches')
-        .select('status')
+        .select('*')
         .eq('id', matchId)
         .single();
       
       if (fetchError) throw fetchError;
       
-      // Déterminer le statut approprié en fonction du statut actuel
-      let newStatus = 'completed';
+      // Vérifier si le match est en mode "off" (sans boost)
+      // Utilisons des valeurs de statut valides conformes à la contrainte de la base de données
+      let newStatus;
       if (matchData.status === 'off') {
-        newStatus = 'completed_off';
+        newStatus = 'completed';  // Changé de 'completed_off' à 'completed'
+      } else {
+        newStatus = 'completed';
       }
       
-      console.log("Setting winner with status:", newStatus);  // Debugging log
+      console.log("Setting winner with status:", newStatus);  // Log de débogage
       
       const { error } = await supabase
         .from('upcoming_matches')
@@ -76,7 +79,7 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
         .eq('id', matchId);
 
       if (error) {
-        console.error("Update error details:", error);  // Detailed error logging
+        console.error("Update error details:", error);  // Log détaillé de l'erreur
         throw error;
       }
 
@@ -142,7 +145,7 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
 
   const clearWinner = async (matchId: string) => {
     try {
-      // Récupérer le statut actuel du match
+      // Récupérer les détails du match
       const { data, error: fetchError } = await supabase
         .from('upcoming_matches')
         .select('status')
@@ -151,8 +154,10 @@ export const useUpcomingMatches = (role: string, creatorId: string) => {
       
       if (fetchError) throw fetchError;
       
-      // Déterminer si le match était "off" (sans boost) ou "scheduled" (avec boost)
-      const newStatus = data.status === 'completed_off' ? 'off' : 'scheduled';
+      // Déterminer le statut approprié, en évitant 'completed_off'
+      // Utiliser des valeurs de statut conformes à la contrainte de la base de données
+      const newStatus = data.status === 'completed' ? 
+        (data.platform === 'TikTok' ? 'off' : 'scheduled') : 'scheduled';
       
       const { error } = await supabase
         .from('upcoming_matches')

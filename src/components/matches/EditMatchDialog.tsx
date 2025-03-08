@@ -18,7 +18,7 @@ export const EditMatchDialog = ({ isOpen, onClose, match, onUpdate }: EditMatchD
   const [creator2, setCreator2] = useState(match?.opponent_id || "");
   const [matchDate, setMatchDate] = useState(match?.match_date ? new Date(match.match_date).toISOString().split('T')[0] : "");
   const [matchTime, setMatchTime] = useState(match?.match_date ? new Date(match.match_date).toTimeString().slice(0, 5) : "");
-  const [isBoost, setIsBoost] = useState(match?.status !== 'off' && match?.status !== 'completed_off');
+  const [isBoost, setIsBoost] = useState(match?.status !== 'off');
   const [points, setPoints] = useState(match?.points?.toString() || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -29,14 +29,13 @@ export const EditMatchDialog = ({ isOpen, onClose, match, onUpdate }: EditMatchD
     try {
       const matchDateTime = new Date(`${matchDate}T${matchTime}`);
       
-      // Determine the correct status based on the current status and isBoost value
-      let newStatus = match.status;
-      
+      // Déterminer le statut correct en fonction de isBoost et winner_id
+      let newStatus;
       if (match.winner_id) {
-        // If there's a winner, we keep it as completed but change if it's boost or not
-        newStatus = isBoost ? 'completed' : 'completed_off';
+        // Pour les matchs avec un gagnant, utiliser toujours 'completed'
+        newStatus = 'completed';
       } else {
-        // If there's no winner, we use the standard statuses
+        // Pour les matchs sans gagnant
         newStatus = isBoost ? 'scheduled' : 'off';
       }
 
