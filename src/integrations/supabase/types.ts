@@ -332,6 +332,7 @@ export type Database = {
           match_image: string | null
           opponent_id: string
           platform: string
+          points: number | null
           source: string | null
           status: string
           updated_at: string
@@ -345,6 +346,7 @@ export type Database = {
           match_image?: string | null
           opponent_id: string
           platform?: string
+          points?: number | null
           source?: string | null
           status?: string
           updated_at?: string
@@ -358,6 +360,7 @@ export type Database = {
           match_image?: string | null
           opponent_id?: string
           platform?: string
+          points?: number | null
           source?: string | null
           status?: string
           updated_at?: string

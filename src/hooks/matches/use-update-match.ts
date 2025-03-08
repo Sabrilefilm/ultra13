@@ -9,12 +9,24 @@ export const useUpdateMatch = (creatorId: string) => {
 
   const updateMatchDetails = async (matchId: string, updatedData: any) => {
     try {
+      // Sanitize points field to ensure it's a valid integer
+      if (updatedData.points !== undefined) {
+        // Convert to integer or set to null if invalid
+        const pointsValue = parseInt(updatedData.points);
+        updatedData.points = isNaN(pointsValue) ? null : pointsValue;
+      }
+
+      console.log("Updating match with data:", updatedData);
+      
       const { error } = await supabase
         .from('upcoming_matches')
         .update(updatedData)
         .eq('id', matchId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Update error:", error);
+        throw error;
+      }
 
       toast({
         title: "Match mis à jour",
