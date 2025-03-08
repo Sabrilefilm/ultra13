@@ -20,7 +20,6 @@ export const useWinnerManagement = (creatorId: string) => {
       if (fetchError) throw fetchError;
       
       // Vérifier si le match est en mode "off" (sans boost)
-      // Utilisons des valeurs de statut valides conformes à la contrainte de la base de données
       let newStatus;
       if (matchData.status === 'off') {
         newStatus = 'completed';  
@@ -108,14 +107,13 @@ export const useWinnerManagement = (creatorId: string) => {
       // Récupérer les détails du match y compris la plateforme
       const { data, error: fetchError } = await supabase
         .from('upcoming_matches')
-        .select('status, platform') 
+        .select('*') 
         .eq('id', matchId)
         .single();
       
       if (fetchError) throw fetchError;
       
       // Déterminer le statut approprié
-      // Utiliser des valeurs de statut conformes à la contrainte de la base de données
       const newStatus = data.status === 'completed' ? 
         (data.platform === 'TikTok' ? 'off' : 'scheduled') : 'scheduled';
       
@@ -123,6 +121,7 @@ export const useWinnerManagement = (creatorId: string) => {
         .from('upcoming_matches')
         .update({
           winner_id: null,
+          points: null,
           status: newStatus
         })
         .eq('id', matchId);

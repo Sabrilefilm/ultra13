@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
-import { Download, Trash2, Trophy, X, Clock, Calendar, Edit, FilePenLine } from "lucide-react";
+import { Download, Trash2, Trophy, X, Clock, Calendar, Edit, Check } from "lucide-react";
 import { useState } from "react";
 import { EditMatchDialog } from "../matches/EditMatchDialog";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,7 @@ export const MatchCard = ({
 }: MatchCardProps) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [points, setPoints] = useState(match.points?.toString() || "");
+  const [isEditingPoints, setIsEditingPoints] = useState(false);
   const isMatchOff = match.status === 'off' || match.status === 'completed_off';
   const showRequirements = ['agent', 'manager', 'creator'].includes(role);
   const canEdit = ['agent', 'manager', 'founder'].includes(role);
@@ -40,6 +41,7 @@ export const MatchCard = ({
   const handlePointsUpdate = () => {
     if (onUpdateMatch && match.winner_id && canEditPoints) {
       onUpdateMatch(match.id, { points: parseInt(points) || 0 });
+      setIsEditingPoints(false);
     }
   };
 
@@ -107,11 +109,7 @@ export const MatchCard = ({
                 <Trophy className="w-4 h-4 text-yellow-500" />
                 <span className="text-sm text-purple-800 font-medium whitespace-nowrap dark:text-purple-300">
                   {match.winner_id}
-                  {match.points ? (
-                    <span className="ml-2 px-2 py-0.5 bg-yellow-100 rounded text-yellow-700 text-xs font-medium dark:bg-yellow-900/40 dark:text-yellow-300">
-                      {match.points} pts
-                    </span>
-                  ) : canEditPoints ? (
+                  {isEditingPoints && canEditPoints ? (
                     <div className="inline-flex items-center ml-2">
                       <Input
                         type="number"
@@ -125,10 +123,25 @@ export const MatchCard = ({
                         className="h-6 ml-1 p-0 w-6 bg-white text-green-600 border-green-200 hover:bg-green-50 dark:bg-slate-800 dark:border-green-800 dark:text-green-400 dark:hover:bg-slate-700"
                         onClick={handlePointsUpdate}
                       >
-                        <FilePenLine className="w-3 h-3" />
+                        <Check className="w-3 h-3" />
                       </Button>
                     </div>
-                  ) : null}
+                  ) : (
+                    match.points ? (
+                      <span className="ml-2 px-2 py-0.5 bg-yellow-100 rounded text-yellow-700 text-xs font-medium dark:bg-yellow-900/40 dark:text-yellow-300">
+                        {match.points} pts
+                      </span>
+                    ) : canEditPoints ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-2 h-6 px-2 py-0 text-xs bg-white text-purple-600 border-purple-200 hover:bg-purple-50 dark:bg-slate-800 dark:border-purple-800 dark:text-purple-400 dark:hover:bg-slate-700"
+                        onClick={() => setIsEditingPoints(true)}
+                      >
+                        + Points
+                      </Button>
+                    ) : null
+                  )}
                 </span>
                 {canManageMatch && (
                   <Button
