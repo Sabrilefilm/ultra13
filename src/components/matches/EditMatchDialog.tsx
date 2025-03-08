@@ -11,9 +11,10 @@ interface EditMatchDialogProps {
   onClose: () => void;
   match: any;
   onUpdate: (matchId: string, updatedData: any) => Promise<void>;
+  userRole?: string;
 }
 
-export const EditMatchDialog = ({ isOpen, onClose, match, onUpdate }: EditMatchDialogProps) => {
+export const EditMatchDialog = ({ isOpen, onClose, match, onUpdate, userRole = 'creator' }: EditMatchDialogProps) => {
   const [creator1, setCreator1] = useState(match?.creator_id || "");
   const [creator2, setCreator2] = useState(match?.opponent_id || "");
   const [matchDate, setMatchDate] = useState(match?.match_date ? new Date(match.match_date).toISOString().split('T')[0] : "");
@@ -21,6 +22,8 @@ export const EditMatchDialog = ({ isOpen, onClose, match, onUpdate }: EditMatchD
   const [isBoost, setIsBoost] = useState(match?.status !== 'off');
   const [points, setPoints] = useState(match?.points?.toString() || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const canEditPoints = ['founder', 'agent'].includes(userRole);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,13 +42,19 @@ export const EditMatchDialog = ({ isOpen, onClose, match, onUpdate }: EditMatchD
         newStatus = isBoost ? 'scheduled' : 'off';
       }
 
-      await onUpdate(match.id, {
+      const updatedData: any = {
         creator_id: creator1,
         opponent_id: creator2,
         match_date: matchDateTime.toISOString(),
-        status: newStatus,
-        points: points ? parseInt(points) : match.points || 0
-      });
+        status: newStatus
+      };
+
+      // Only include points in the update if the user is allowed to edit them
+      if (canEditPoints && points) {
+        updatedData.points = parseInt(points) || 0;
+      }
+
+      await onUpdate(match.id, updatedData);
       
       onClose();
     } catch (error) {
@@ -102,7 +111,7 @@ export const EditMatchDialog = ({ isOpen, onClose, match, onUpdate }: EditMatchD
               />
             </div>
           </div>
-          {match.winner_id && (
+          {match.winner_id && canEditPoints && (
             <div className="space-y-2">
               <Label htmlFor="points">Points</Label>
               <Input
