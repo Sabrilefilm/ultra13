@@ -5,6 +5,7 @@ import { Account } from "@/types/accounts";
 
 export const useAgencyMembers = (agentId: string) => {
   const [assignedCreators, setAssignedCreators] = useState<Account[]>([]);
+  const [unassignedCreators, setUnassignedCreators] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchAssignedCreators = async () => {
@@ -29,8 +30,29 @@ export const useAgencyMembers = (agentId: string) => {
     }
   };
 
+  const fetchUnassignedCreators = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("user_accounts")
+        .select("*")
+        .eq("role", "creator")
+        .is("agent_id", null);
+      
+      if (error) throw error;
+      
+      setUnassignedCreators(data as Account[]);
+    } catch (error) {
+      console.error("Error fetching unassigned creators:", error);
+      setUnassignedCreators([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchAssignedCreators();
+    fetchUnassignedCreators();
   }, [agentId]);
 
   const assignCreatorToAgent = async (creatorId: string, agentId: string) => {
@@ -44,6 +66,7 @@ export const useAgencyMembers = (agentId: string) => {
       if (error) throw error;
       
       await fetchAssignedCreators();
+      await fetchUnassignedCreators();
       return true;
     } catch (error) {
       console.error("Error assigning creator to agent:", error);
@@ -61,6 +84,7 @@ export const useAgencyMembers = (agentId: string) => {
       if (error) throw error;
       
       await fetchAssignedCreators();
+      await fetchUnassignedCreators();
       return true;
     } catch (error) {
       console.error("Error removing creator from agent:", error);
@@ -70,8 +94,11 @@ export const useAgencyMembers = (agentId: string) => {
 
   return {
     assignedCreators,
+    unassignedCreators,
     loading,
+    isLoading: loading, // Alias for loading to match naming in component
     fetchAssignedCreators,
+    fetchUnassignedCreators, 
     assignCreatorToAgent,
     removeCreatorFromAgent
   };
