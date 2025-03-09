@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ import { Account } from "@/types/accounts";
 import { useAgencyMembers } from "@/hooks/user-management/use-agency-members";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { CreatorSelect } from "@/components/live-schedule/creator-select";
 
 const AgencyAssignment = () => {
   const navigate = useNavigate();
@@ -32,7 +33,8 @@ const AgencyAssignment = () => {
     unassignedCreators,
     isLoading,
     assignCreatorToAgent,
-    removeCreatorFromAgent
+    removeCreatorFromAgent,
+    fetchUnassignedCreators
   } = useAgencyMembers(selectedAgentId);
 
   useEffect(() => {
@@ -109,51 +111,63 @@ const AgencyAssignment = () => {
     }
   };
 
+  const handleSelectCreator = (username: string) => {
+    setNewCreatorUsername(username);
+  };
+
   const handleAddCreator = async () => {
-    if (!newCreatorUsername.trim()) {
+    if (!newCreatorUsername) {
       toast({
         title: "Erreur",
-        description: "Veuillez entrer un nom d'utilisateur",
+        description: "Veuillez sélectionner un créateur",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      const { data, error } = await supabase
+      // Fetch the creator's ID based on the username
+      const { data: creatorData, error: creatorError } = await supabase
         .from("user_accounts")
-        .insert({
-          username: newCreatorUsername,
-          role: "creator",
-          password: "password123"
-        })
-        .select()
+        .select("id")
+        .eq("username", newCreatorUsername)
+        .eq("role", "creator")
         .single();
 
-      if (error) {
+      if (creatorError || !creatorData) {
         toast({
           title: "Erreur",
-          description: "Impossible de créer le créateur: " + error.message,
+          description: "Impossible de trouver le créateur sélectionné",
           variant: "destructive",
         });
         return;
       }
 
-      toast({
-        title: "Succès",
-        description: "Le créateur a été ajouté",
-      });
-      
-      setNewCreatorUsername("");
-      setIsAddCreatorOpen(false);
-      
-      const {
-        assignedCreators,
-        unassignedCreators,
-        isLoading,
-        assignCreatorToAgent,
-        removeCreatorFromAgent
-      } = useAgencyMembers(selectedAgentId);
+      if (selectedAgentId) {
+        const success = await assignCreatorToAgent(creatorData.id, selectedAgentId);
+        
+        if (success) {
+          toast({
+            title: "Succès",
+            description: "Le créateur a été assigné à l'agent",
+          });
+          
+          setNewCreatorUsername("");
+          setIsAddCreatorOpen(false);
+        } else {
+          toast({
+            title: "Erreur",
+            description: "Impossible d'assigner le créateur",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Veuillez sélectionner un agent",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Error:", error);
       toast({
@@ -221,20 +235,18 @@ const AgencyAssignment = () => {
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Ajouter un nouveau créateur</DialogTitle>
+                      <DialogTitle>Assigner un créateur</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                       <div className="space-y-2">
-                        <label htmlFor="username">Nom d'utilisateur</label>
-                        <Input
-                          id="username"
+                        <label htmlFor="creator">Sélectionner un créateur</label>
+                        <CreatorSelect 
+                          onSelect={handleSelectCreator}
                           value={newCreatorUsername}
-                          onChange={(e) => setNewCreatorUsername(e.target.value)}
-                          placeholder="Entrez le nom d'utilisateur"
                         />
                       </div>
                       <Button onClick={handleAddCreator} className="w-full">
-                        Ajouter
+                        Assigner
                       </Button>
                     </div>
                   </DialogContent>
