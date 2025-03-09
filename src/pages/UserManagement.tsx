@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, UsersRound } from "lucide-react";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { UserSearchBar } from "@/components/UserSearchBar";
 import { CreatorDetailsDialog } from "@/components/creator/CreatorDetailsDialog";
@@ -66,6 +67,17 @@ const UserManagement = () => {
           </div>
           
           <div className="flex items-center gap-2">
+            {role === 'founder' && (
+              <Button
+                variant="outline"
+                onClick={() => navigate("/agency-assignment")}
+                className="flex items-center gap-2"
+              >
+                <UsersRound className="h-4 w-4" />
+                Gestion agences/créateurs
+              </Button>
+            )}
+            
             <Button
               variant="outline"
               className="flex items-center gap-2"
