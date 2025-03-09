@@ -4,6 +4,8 @@ import { StatsCard } from "@/components/StatsCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface RoleStatsProps {
   role: string;
@@ -16,6 +18,8 @@ interface LiveSchedule {
 }
 
 export const RoleStats = ({ role, userId }: RoleStatsProps) => {
+  const navigate = useNavigate();
+
   // Requête pour récupérer les horaires de live
   const { data: liveSchedule, isError: isLiveScheduleError } = useQuery({
     queryKey: ["live-schedule", userId],
@@ -180,6 +184,39 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
           value="0%"
           icon={<Clock className="w-6 h-6 text-primary" />}
         />
+      </div>
+    );
+  }
+
+  if (role === 'agent') {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StatsCard
+            title="Créateurs Assignés"
+            value="0"
+            icon={<Users className="w-6 h-6 text-primary" />}
+          />
+          <StatsCard
+            title="Heures de Live"
+            value="0h"
+            icon={<Clock className="w-6 h-6 text-primary" />}
+          />
+          <StatsCard
+            title="Jours Streamés"
+            value="0j"
+            icon={<Calendar className="w-6 h-6 text-primary" />}
+          />
+        </div>
+        <div className="flex justify-end">
+          <Button 
+            onClick={() => navigate("/creator-stats")} 
+            className="flex items-center gap-2"
+          >
+            <Users className="h-4 w-4" />
+            Mais créateurs
+          </Button>
+        </div>
       </div>
     );
   }
