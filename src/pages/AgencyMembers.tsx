@@ -17,6 +17,7 @@ const AgencyMembers = () => {
   const { assignedCreators } = useAgencyMembers(agentId || "");
 
   useEffect(() => {
+    // Fix the type comparison error by checking if role is NOT one of the allowed roles
     if (role !== 'founder' && role !== 'manager' && role !== 'agent') {
       navigate('/');
     }

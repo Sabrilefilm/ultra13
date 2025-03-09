@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 
-type Role = 'client' | 'creator' | 'manager' | 'founder';
+// Update the Role type to include 'agent' which was missing
+type Role = 'client' | 'creator' | 'manager' | 'founder' | 'agent';
 
 export const useIndexAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
