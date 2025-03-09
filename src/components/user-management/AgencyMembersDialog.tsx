@@ -140,7 +140,7 @@ export const AgencyMembersDialog: React.FC<AgencyMembersDialogProps> = ({
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => assignCreatorToAgent(creator.id)}
+                              onClick={() => assignCreatorToAgent(creator.id, agentId)}
                               disabled={isLoading}
                             >
                               <PlusCircle className="h-4 w-4 mr-1" />
