@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Check, UserPlus, UserMinus } from "lucide-react";
+import { ArrowLeft, Check, UserPlus, UserMinus, Plus } from "lucide-react";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -16,6 +15,8 @@ import { supabase } from "@/lib/supabase";
 import { Account } from "@/types/accounts";
 import { useAgencyMembers } from "@/hooks/user-management/use-agency-members";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 const AgencyAssignment = () => {
   const navigate = useNavigate();
@@ -23,6 +24,8 @@ const AgencyAssignment = () => {
   const [agents, setAgents] = useState<Account[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState<string>("");
   const { toast } = useToast();
+  const [isAddCreatorOpen, setIsAddCreatorOpen] = useState(false);
+  const [newCreatorUsername, setNewCreatorUsername] = useState("");
   
   const {
     assignedCreators,
@@ -106,6 +109,61 @@ const AgencyAssignment = () => {
     }
   };
 
+  const handleAddCreator = async () => {
+    if (!newCreatorUsername.trim()) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez entrer un nom d'utilisateur",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("user_accounts")
+        .insert({
+          username: newCreatorUsername,
+          role: "creator",
+          password: "password123"
+        })
+        .select()
+        .single();
+
+      if (error) {
+        toast({
+          title: "Erreur",
+          description: "Impossible de créer le créateur: " + error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Succès",
+        description: "Le créateur a été ajouté",
+      });
+      
+      setNewCreatorUsername("");
+      setIsAddCreatorOpen(false);
+      
+      const {
+        assignedCreators,
+        unassignedCreators,
+        isLoading,
+        assignCreatorToAgent,
+        removeCreatorFromAgent
+      } = useAgencyMembers(selectedAgentId);
+    } catch (error) {
+      console.error("Error:", error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur s'est produite",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen p-4">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -154,6 +212,33 @@ const AgencyAssignment = () => {
             <CardHeader>
               <CardTitle className="flex justify-between items-center">
                 <span>Créateurs non assignés ({unassignedCreators.length})</span>
+                <Dialog open={isAddCreatorOpen} onOpenChange={setIsAddCreatorOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline">
+                      <Plus className="h-4 w-4 mr-1" />
+                      Ajouter un créateur
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Ajouter un nouveau créateur</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <label htmlFor="username">Nom d'utilisateur</label>
+                        <Input
+                          id="username"
+                          value={newCreatorUsername}
+                          onChange={(e) => setNewCreatorUsername(e.target.value)}
+                          placeholder="Entrez le nom d'utilisateur"
+                        />
+                      </div>
+                      <Button onClick={handleAddCreator} className="w-full">
+                        Ajouter
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </CardTitle>
             </CardHeader>
             <CardContent>
