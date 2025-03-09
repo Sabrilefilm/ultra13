@@ -22,7 +22,10 @@ export const useUserData = () => {
         .order("role", { ascending: true });
 
       if (error) throw error;
-      return data as (Account & { live_schedules: { hours: number; days: number }[] })[];
+      return data as (Account & { 
+        live_schedules: { hours: number; days: number }[],
+        agent_id?: string 
+      })[];
     },
   });
 

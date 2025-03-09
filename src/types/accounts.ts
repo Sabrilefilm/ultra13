@@ -5,6 +5,7 @@ export interface Account {
   password: string;
   role: string;
   email?: string;
+  agent_id?: string;
   profile?: {
     total_diamonds: number;
     days_streamed: number;

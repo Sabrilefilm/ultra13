@@ -180,7 +180,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                         </Button>
                       )}
                       
-                      {(isFounder || isManager) && (
+                      {(isFounder || isManager) && user.role === 'agent' && (
                         <Button
                           variant="outline"
                           size="sm"
