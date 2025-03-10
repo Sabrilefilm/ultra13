@@ -96,7 +96,7 @@ export const useAgencyMembers = (agentId: string) => {
     assignedCreators,
     unassignedCreators,
     loading,
-    isLoading: loading, // Alias for loading to match naming in component
+    isLoading: loading,
     fetchAssignedCreators,
     fetchUnassignedCreators, 
     assignCreatorToAgent,

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import { User } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 interface CreatorSelectProps {
   onSelect: (username: string) => void;
@@ -26,12 +26,13 @@ export const CreatorSelect = ({ onSelect, value }: CreatorSelectProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCreators = async () => {
+    const fetchUnassignedCreators = async () => {
       try {
         const { data, error } = await supabase
           .from("user_accounts")
           .select("id, username")
           .eq('role', 'creator')
+          .is('agent_id', null)  // Only select creators without an agent
           .order("username");
 
         if (error) throw error;
@@ -39,13 +40,17 @@ export const CreatorSelect = ({ onSelect, value }: CreatorSelectProps) => {
         setCreators(data || []);
       } catch (error) {
         console.error("Erreur lors du chargement des créateurs:", error);
-        toast.error("Erreur lors du chargement des créateurs");
+        toast({
+          title: "Erreur",
+          description: "Erreur lors du chargement des créateurs",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCreators();
+    fetchUnassignedCreators();
   }, []);
 
   return (
@@ -63,6 +68,10 @@ export const CreatorSelect = ({ onSelect, value }: CreatorSelectProps) => {
         {loading ? (
           <SelectItem value="loading" disabled>
             Chargement...
+          </SelectItem>
+        ) : creators.length === 0 ? (
+          <SelectItem value="none" disabled>
+            Aucun créateur disponible
           </SelectItem>
         ) : (
           creators.map((creator) => (
