@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,12 +32,10 @@ export const MatchCalendar = ({ matches, role, isLoading, creatorId }: MatchCale
   const canScheduleMatch = ['agent', 'manager', 'founder'].includes(role);
   const shouldShowCalendar = ['agent', 'manager', 'founder', 'creator'].includes(role);
 
-  // Si le rôle n'est pas autorisé à voir le calendrier, on ne l'affiche pas
   if (!shouldShowCalendar) {
     return null;
   }
 
-  // Function to get matches for a specific date
   const getMatchesForDate = (date: Date) => {
     return matches?.filter(match => {
       const matchDate = new Date(match.match_date);
@@ -50,7 +47,6 @@ export const MatchCalendar = ({ matches, role, isLoading, creatorId }: MatchCale
     });
   };
 
-  // Custom day render to show matches
   const renderDay = (day: Date, dayProps: DayContentProps) => {
     const dayMatches = getMatchesForDate(day);
     const hasMatches = dayMatches.length > 0;
@@ -77,7 +73,6 @@ export const MatchCalendar = ({ matches, role, isLoading, creatorId }: MatchCale
     );
   };
 
-  // Display matches for selected date
   const selectedDateMatches = selectedDate ? getMatchesForDate(selectedDate) : [];
 
   return (
@@ -110,15 +105,15 @@ export const MatchCalendar = ({ matches, role, isLoading, creatorId }: MatchCale
               className="rounded-md border-0 p-3 pointer-events-auto"
               locale={fr}
               components={{
-                Day: ({ date, ...dayProps }: DayContentProps) => (
+                Day: ({ date, ...props }: DayContentProps) => (
                   <button
-                    {...dayProps}
+                    {...props}
                     className={cn(
-                      dayProps.className,
+                      props.className,
                       "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
                     )}
                   >
-                    {renderDay(date, dayProps)}
+                    {renderDay(date, { date, ...props })}
                   </button>
                 ),
               }}
