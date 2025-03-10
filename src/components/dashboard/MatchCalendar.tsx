@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { fr } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
 import { ScheduleMatchDialog } from "../matches/ScheduleMatchDialog";
+import { DayContentProps } from "react-day-picker";
 
 interface Match {
   id: string;
@@ -44,7 +45,7 @@ export const MatchCalendar = ({ matches, role, isLoading, creatorId }: MatchCale
   };
 
   // Custom day render to show matches
-  const renderDay = (day: Date) => {
+  const renderDay = (day: Date, props: DayContentProps) => {
     const dayMatches = getMatchesForDate(day);
     const hasMatches = dayMatches.length > 0;
 
@@ -95,18 +96,18 @@ export const MatchCalendar = ({ matches, role, isLoading, creatorId }: MatchCale
             mode="single"
             selected={selectedDate}
             onSelect={setSelectedDate}
-            className="rounded-md border p-3"
+            className="rounded-md border p-3 pointer-events-auto"
             locale={fr}
             components={{
-              Day: ({ date, ...props }) => (
+              Day: ({ date, ...dayProps }: DayContentProps) => (
                 <button
-                  {...props}
+                  {...dayProps}
                   className={cn(
-                    props.className,
+                    dayProps.className,
                     "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
                   )}
                 >
-                  {renderDay(date)}
+                  {renderDay(date, dayProps)}
                 </button>
               ),
             }}
