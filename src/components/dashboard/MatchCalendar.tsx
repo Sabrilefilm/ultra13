@@ -50,9 +50,8 @@ export const MatchCalendar = ({ matches, isLoading, role, creatorId }: MatchCale
     });
   };
 
-  const renderDay = (props: DayContentProps) => {
-    const { date } = props;
-    const dayMatches = getMatchesForDate(date);
+  const renderDay = (day: Date) => {
+    const dayMatches = getMatchesForDate(day);
     const hasMatches = dayMatches && dayMatches.length > 0;
 
     return (
@@ -65,7 +64,7 @@ export const MatchCalendar = ({ matches, isLoading, role, creatorId }: MatchCale
             "text-sm",
             hasMatches && "font-medium text-purple-900 dark:text-purple-300"
           )}>
-            {format(date, "d")}
+            {format(day, "d")}
           </span>
         </div>
         {hasMatches && (
@@ -109,16 +108,13 @@ export const MatchCalendar = ({ matches, isLoading, role, creatorId }: MatchCale
               className="rounded-md border-0 p-3 pointer-events-auto"
               locale={fr}
               components={{
-                Day: (props) => {
-                  const { date, ...otherProps } = props;
+                Day: ({ date, ...props }) => {
                   return (
                     <button
-                      {...otherProps}
-                      className={cn(
-                        "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                      )}
+                      {...props}
+                      className="h-9 w-9 p-0 font-normal aria-selected:opacity-100"
                     >
-                      {renderDay(props)}
+                      {renderDay(date)}
                     </button>
                   );
                 },
