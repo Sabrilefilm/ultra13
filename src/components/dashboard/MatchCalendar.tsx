@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +26,7 @@ interface MatchCalendarProps {
   creatorId: string;
 }
 
-export const MatchCalendar = ({ matches, role, isLoading, creatorId }: MatchCalendarProps) => {
+export const MatchCalendar = ({ matches, isLoading, role, creatorId }: MatchCalendarProps) => {
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(new Date());
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   
@@ -37,7 +38,9 @@ export const MatchCalendar = ({ matches, role, isLoading, creatorId }: MatchCale
   }
 
   const getMatchesForDate = (date: Date) => {
-    return matches?.filter(match => {
+    if (!matches) return [];
+    
+    return matches.filter(match => {
       const matchDate = new Date(match.match_date);
       return (
         matchDate.getDate() === date.getDate() &&
@@ -47,9 +50,10 @@ export const MatchCalendar = ({ matches, role, isLoading, creatorId }: MatchCale
     });
   };
 
-  const renderDay = (day: Date, dayProps: DayContentProps) => {
-    const dayMatches = getMatchesForDate(day);
-    const hasMatches = dayMatches.length > 0;
+  const renderDay = (props: DayContentProps) => {
+    const { date } = props;
+    const dayMatches = getMatchesForDate(date);
+    const hasMatches = dayMatches && dayMatches.length > 0;
 
     return (
       <div className="relative w-full h-full">
@@ -61,7 +65,7 @@ export const MatchCalendar = ({ matches, role, isLoading, creatorId }: MatchCale
             "text-sm",
             hasMatches && "font-medium text-purple-900 dark:text-purple-300"
           )}>
-            {format(day, "d")}
+            {format(date, "d")}
           </span>
         </div>
         {hasMatches && (
@@ -105,7 +109,7 @@ export const MatchCalendar = ({ matches, role, isLoading, creatorId }: MatchCale
               className="rounded-md border-0 p-3 pointer-events-auto"
               locale={fr}
               components={{
-                Day: ({ date, ...props }: DayContentProps) => (
+                Day: (props: DayContentProps) => (
                   <button
                     {...props}
                     className={cn(
@@ -113,7 +117,7 @@ export const MatchCalendar = ({ matches, role, isLoading, creatorId }: MatchCale
                       "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
                     )}
                   >
-                    {renderDay(date, { date, ...props })}
+                    {renderDay(props)}
                   </button>
                 ),
               }}
@@ -127,8 +131,12 @@ export const MatchCalendar = ({ matches, role, isLoading, creatorId }: MatchCale
                 "Sélectionnez une date"
               )}
             </h3>
-            <div className="space-y-3">
-              {selectedDateMatches.length === 0 ? (
+            <div className="space-y-3 max-h-[400px] overflow-y-auto p-1">
+              {isLoading ? (
+                <div className="flex justify-center p-4">
+                  <div className="animate-pulse h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                </div>
+              ) : selectedDateMatches.length === 0 ? (
                 <div className="text-sm text-gray-500 dark:text-gray-400 p-4 border border-dashed border-gray-200 dark:border-gray-700 rounded-lg flex flex-col items-center justify-center">
                   <CalendarDays className="w-8 h-8 mb-2 text-purple-200 dark:text-purple-900" />
                   <p>Aucun match programmé pour cette date</p>
