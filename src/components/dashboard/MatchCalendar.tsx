@@ -109,17 +109,19 @@ export const MatchCalendar = ({ matches, isLoading, role, creatorId }: MatchCale
               className="rounded-md border-0 p-3 pointer-events-auto"
               locale={fr}
               components={{
-                Day: ({ date, className, ...props }: DayContentProps) => (
-                  <button
-                    {...props}
-                    className={cn(
-                      className,
-                      "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                    )}
-                  >
-                    {renderDay({ date, ...props } as DayContentProps)}
-                  </button>
-                ),
+                Day: (props) => {
+                  const { date, ...otherProps } = props;
+                  return (
+                    <button
+                      {...otherProps}
+                      className={cn(
+                        "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
+                      )}
+                    >
+                      {renderDay(props)}
+                    </button>
+                  );
+                },
               }}
             />
           </div>
