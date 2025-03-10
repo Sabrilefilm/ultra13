@@ -98,7 +98,7 @@ export const MatchCalendar = ({ matches, role, isLoading, creatorId }: MatchCale
             className="rounded-md border p-3"
             locale={fr}
             components={{
-              day: ({ date, ...props }) => (
+              Day: ({ date, ...props }) => (
                 <button
                   {...props}
                   className={cn(
