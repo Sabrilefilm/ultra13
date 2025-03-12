@@ -54,7 +54,7 @@ export const ExcelImportButton = () => {
           // Check if user exists
           const { data: existingUser, error: userCheckError } = await supabase
             .from("user_accounts")
-            .select("id")
+            .select("id, password")
             .eq("username", row.username)
             .single();
             
