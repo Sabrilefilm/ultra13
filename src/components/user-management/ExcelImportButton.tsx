@@ -81,22 +81,93 @@ export const ExcelImportButton = () => {
               continue;
             }
             
+            // Check if there are live schedule fields to update
+            if ((row.hours !== undefined || row.days !== undefined) && row.role === "creator") {
+              // Check if schedule exists for this creator
+              const { data: existingSchedule, error: scheduleCheckError } = await supabase
+                .from("live_schedules")
+                .select("id")
+                .eq("creator_id", existingUser.id)
+                .maybeSingle();
+                
+              if (scheduleCheckError) {
+                console.error("Error checking schedule:", scheduleCheckError);
+                errorCount++;
+                continue;
+              }
+              
+              const scheduleData = {
+                hours: row.hours !== undefined ? Number(row.hours) : 0,
+                days: row.days !== undefined ? Number(row.days) : 0,
+                creator_id: existingUser.id,
+                is_active: true
+              };
+              
+              if (existingSchedule) {
+                // Update existing schedule
+                const { error: scheduleUpdateError } = await supabase
+                  .from("live_schedules")
+                  .update({
+                    hours: scheduleData.hours,
+                    days: scheduleData.days
+                  })
+                  .eq("id", existingSchedule.id);
+                  
+                if (scheduleUpdateError) {
+                  console.error("Error updating schedule:", scheduleUpdateError);
+                  errorCount++;
+                  continue;
+                }
+              } else {
+                // Create new schedule
+                const { error: scheduleCreateError } = await supabase
+                  .from("live_schedules")
+                  .insert(scheduleData);
+                  
+                if (scheduleCreateError) {
+                  console.error("Error creating schedule:", scheduleCreateError);
+                  errorCount++;
+                  continue;
+                }
+              }
+            }
+            
             successCount++;
           } else if (row.username && row.password) {
             // Create new user
-            const { error: createError } = await supabase
+            const { data: newUser, error: createError } = await supabase
               .from("user_accounts")
               .insert({
                 username: row.username,
                 password: row.password,
                 role: row.role || "creator",
                 agent_id: row.agent_id || null
-              });
+              })
+              .select("id")
+              .single();
               
             if (createError) {
               console.error("Error creating user:", createError);
               errorCount++;
               continue;
+            }
+            
+            // If creator and has schedule data, create schedule
+            if (newUser && (row.hours !== undefined || row.days !== undefined) && row.role === "creator") {
+              const { error: scheduleCreateError } = await supabase
+                .from("live_schedules")
+                .insert({
+                  creator_id: newUser.id,
+                  hours: row.hours !== undefined ? Number(row.hours) : 0,
+                  days: row.days !== undefined ? Number(row.days) : 0,
+                  is_active: true
+                });
+                
+              if (scheduleCreateError) {
+                console.error("Error creating schedule:", scheduleCreateError);
+                errorCount++;
+                continue;
+              }
             }
             
             successCount++;
