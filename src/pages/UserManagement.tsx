@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, UsersRound } from "lucide-react";
+import { ArrowLeft, Plus, UsersRound, FileSpreadsheet } from "lucide-react";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { UserSearchBar } from "@/components/UserSearchBar";
 import { CreatorDetailsDialog } from "@/components/creator/CreatorDetailsDialog";
@@ -11,6 +11,7 @@ import { RoleConfirmDialog } from "@/components/user-management/RoleConfirmDialo
 import { useUserManagement } from "@/hooks/use-user-management";
 import { CreateAccountModal } from "@/components/CreateAccountModal";
 import { useAccountManagement } from "@/hooks/use-account-management";
+import { ExcelImportButton } from "@/components/user-management/ExcelImportButton";
 
 const UserManagement = () => {
   const navigate = useNavigate();
@@ -77,6 +78,8 @@ const UserManagement = () => {
                 Gestion agences/créateurs
               </Button>
             )}
+            
+            <ExcelImportButton />
             
             <Button
               variant="outline"
