@@ -62,9 +62,11 @@ export const ScheduleMatchDialog = ({
           </div>
           <div className="space-y-2">
             <Label>Deuxième créateur</Label>
-            <CreatorSelect
+            <Input
+              placeholder="Nom du deuxième créateur"
               value={creator2}
-              onSelect={(value) => setCreator2(value)}
+              onChange={(e) => setCreator2(e.target.value)}
+              required
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
