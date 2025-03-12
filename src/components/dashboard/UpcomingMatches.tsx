@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUpcomingMatches } from "@/hooks/use-upcoming-matches";
 import { downloadImage } from "@/utils/download";
@@ -9,7 +8,8 @@ import { useState } from "react";
 import { Search, ChevronDown, ChevronUp, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { toast } from "sonner";
+import autoTable from 'jspdf-autotable';
 
 export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: string }) => {
   const { matches, isLoading, handleDelete, setWinner, clearWinner, updateMatchDetails } = useUpcomingMatches(role, creatorId);
@@ -17,40 +17,42 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
   const [showAllUpcoming, setShowAllUpcoming] = useState(false);
   const [showAllPast, setShowAllPast] = useState(false);
 
-  // Define permission variables based on role
   const canManageMatch = ['agent', 'manager', 'founder'].includes(role);
   const canDeleteMatch = ['founder', 'manager'].includes(role);
   const canEditMatch = ['agent', 'manager', 'founder'].includes(role);
 
   const generatePDF = () => {
-    const doc = new jsPDF();
-    
-    // Add title
-    doc.setFontSize(16);
-    doc.text('Liste des Matchs', 14, 15);
-    doc.setFontSize(10);
+    try {
+      const doc = new jsPDF();
+      
+      doc.setFontSize(16);
+      doc.text('Liste des Matchs', 14, 15);
+      doc.setFontSize(10);
 
-    // Prepare data for the table
-    const tableData = matches?.map(match => [
-      new Date(match.match_date).toLocaleDateString('fr-FR'),
-      new Date(match.match_date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-      match.creator_id,
-      match.opponent_id,
-      match.status === 'scheduled' ? 'Programmé' : 
-      match.status === 'completed' ? 'Terminé' : 'Annulé'
-    ]) || [];
+      const tableData = matches?.map(match => [
+        new Date(match.match_date).toLocaleDateString('fr-FR'),
+        new Date(match.match_date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+        match.creator_id,
+        match.opponent_id,
+        match.status === 'scheduled' ? 'Programmé' : 
+        match.status === 'completed' ? 'Terminé' : 'Annulé'
+      ]) || [];
 
-    // Add the table
-    (doc as any).autoTable({
-      head: [['Date', 'Heure', 'Créateur 1', 'Créateur 2', 'Statut']],
-      body: tableData,
-      startY: 25,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [102, 16, 242] },
-    });
+      autoTable(doc, {
+        head: [['Date', 'Heure', 'Créateur 1', 'Créateur 2', 'Statut']],
+        body: tableData,
+        startY: 25,
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [102, 16, 242] },
+      });
 
-    // Save the PDF
-    doc.save('liste-des-matchs.pdf');
+      doc.save('liste-des-matchs.pdf');
+      
+      toast.success("PDF généré avec succès");
+    } catch (error) {
+      console.error("Erreur lors de la génération du PDF:", error);
+      toast.error("Erreur lors de la génération du PDF");
+    }
   };
 
   if (isLoading) return (
