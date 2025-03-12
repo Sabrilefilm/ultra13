@@ -26,18 +26,19 @@ export const CreatorSelect = ({ onSelect, value }: CreatorSelectProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUnassignedCreators = async () => {
+    const fetchCreators = async () => {
       try {
+        setLoading(true);
         const { data, error } = await supabase
           .from("user_accounts")
           .select("id, username")
           .eq('role', 'creator')
-          .is('agent_id', null)  // Only select creators without an agent
           .order("username");
 
         if (error) throw error;
 
         setCreators(data || []);
+        console.log("Fetched creators:", data);
       } catch (error) {
         console.error("Erreur lors du chargement des créateurs:", error);
         toast({
@@ -50,7 +51,7 @@ export const CreatorSelect = ({ onSelect, value }: CreatorSelectProps) => {
       }
     };
 
-    fetchUnassignedCreators();
+    fetchCreators();
   }, []);
 
   return (
@@ -75,7 +76,7 @@ export const CreatorSelect = ({ onSelect, value }: CreatorSelectProps) => {
           </SelectItem>
         ) : (
           creators.map((creator) => (
-            <SelectItem key={creator.username} value={creator.username}>
+            <SelectItem key={creator.id} value={creator.username}>
               {creator.username}
             </SelectItem>
           ))

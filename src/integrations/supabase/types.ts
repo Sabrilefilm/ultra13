@@ -370,6 +370,7 @@ export type Database = {
       }
       user_accounts: {
         Row: {
+          agent_id: string | null
           created_at: string
           id: string
           password: string
@@ -377,6 +378,7 @@ export type Database = {
           username: string
         }
         Insert: {
+          agent_id?: string | null
           created_at?: string
           id?: string
           password: string
@@ -384,6 +386,7 @@ export type Database = {
           username: string
         }
         Update: {
+          agent_id?: string | null
           created_at?: string
           id?: string
           password?: string
