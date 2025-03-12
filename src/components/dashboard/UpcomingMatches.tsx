@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUpcomingMatches } from "@/hooks/use-upcoming-matches";
 import { downloadImage } from "@/utils/download";
@@ -15,6 +16,11 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
   const [searchQuery, setSearchQuery] = useState("");
   const [showAllUpcoming, setShowAllUpcoming] = useState(false);
   const [showAllPast, setShowAllPast] = useState(false);
+
+  // Define permission variables based on role
+  const canManageMatch = ['agent', 'manager', 'founder'].includes(role);
+  const canDeleteMatch = ['founder', 'manager'].includes(role);
+  const canEditMatch = ['agent', 'manager', 'founder'].includes(role);
 
   const generatePDF = () => {
     const doc = new jsPDF();
