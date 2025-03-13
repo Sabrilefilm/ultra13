@@ -92,13 +92,29 @@ export const MatchCard = ({
     return "bg-white border-gray-200 hover:border-purple-300 dark:bg-slate-900 dark:border-slate-700 dark:hover:border-purple-700";
   };
 
+  // Fonction pour obtenir le statut du match
+  const getMatchStatus = () => {
+    if (match.winner_id) {
+      return "Terminé";
+    }
+    if (isCurrentMatch) {
+      return "En cours";
+    }
+    if (isPastMatch) {
+      return "Non joué";
+    }
+    return "En attente";
+  };
+
   return (
     <div 
       className={`rounded-xl shadow-sm border transition-all duration-300 hover:shadow-md ${getCardStyle()}`}
     >
       <div className="p-4">
         <div className="mb-2 text-center">
-          <h3 className="text-purple-800 text-xs font-medium tracking-wide uppercase dark:text-purple-400">Match de L'agence</h3>
+          <h3 className="text-xs font-medium tracking-wide uppercase dark:text-purple-400 badge-status badge-pending">
+            {getMatchStatus()}
+          </h3>
         </div>
         
         {/* Main match info */}
@@ -148,6 +164,13 @@ export const MatchCard = ({
                 {isCurrentMatch && !match.winner_id && (
                   <span className="px-2 py-0.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-medium animate-pulse dark:bg-blue-900/30 dark:border-blue-800/30 dark:text-blue-400">
                     EN COURS
+                  </span>
+                )}
+                
+                {/* Afficher l'agent concerné si disponible */}
+                {match.source && (
+                  <span className="px-2 py-0.5 rounded-full bg-purple-50 border border-purple-100 text-purple-600 text-xs font-medium dark:bg-purple-900/30 dark:border-purple-800/30 dark:text-purple-400">
+                    Agent: {match.source}
                   </span>
                 )}
               </div>

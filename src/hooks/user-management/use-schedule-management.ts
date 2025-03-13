@@ -35,14 +35,14 @@ export const useScheduleManagement = (refetch: () => void) => {
     }
   };
 
-  const addMatch = async (creator1: string, creator2: string, matchDate: Date, isBoost: boolean = true) => {
+  const addMatch = async (creator1: string, creator2: string, matchDate: Date, isBoost: boolean = true, agentName: string = "") => {
     try {
       const { error } = await supabase.from("upcoming_matches").insert({
         creator_id: creator1,
         opponent_id: creator2,
         match_date: matchDate.toISOString(),
         status: isBoost ? 'scheduled' : 'off',
-        source: 'TikTok'
+        source: agentName || 'TikTok'
       });
 
       if (error) {
@@ -57,6 +57,7 @@ export const useScheduleManagement = (refetch: () => void) => {
       toast({
         title: "Succès!",
         description: "Le match a été ajouté avec succès.",
+        className: "bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-200 text-purple-800"
       });
       return true;
     } catch (error) {

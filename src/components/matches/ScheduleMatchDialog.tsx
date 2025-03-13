@@ -24,6 +24,7 @@ export const ScheduleMatchDialog = ({
   const [creator1, setCreator1] = useState("");
   const [creator2, setCreator2] = useState("");
   const [isBoost, setIsBoost] = useState(true);
+  const [agentName, setAgentName] = useState("");
   const { addMatch } = useScheduleManagement(() => {
     onClose();
   });
@@ -35,11 +36,12 @@ export const ScheduleMatchDialog = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const matchDateTime = new Date(`${matchDate}T${matchTime}`);
-    const success = await addMatch(creator1, creator2, matchDateTime, isBoost);
+    const success = await addMatch(creator1, creator2, matchDateTime, isBoost, agentName);
     if (success) {
       onClose();
       setCreator1("");
       setCreator2("");
+      setAgentName("");
       setMatchDate(format(new Date(), "yyyy-MM-dd"));
       setMatchTime("12:00");
       setIsBoost(true);
@@ -48,44 +50,58 @@ export const ScheduleMatchDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="bg-white dark:bg-slate-900 border-purple-100 dark:border-purple-800/30">
         <DialogHeader>
-          <DialogTitle>Programmer un match TikTok</DialogTitle>
+          <DialogTitle className="text-xl text-center font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-700 to-indigo-600 dark:from-purple-400 dark:to-indigo-300">
+            Programmer un match TikTok
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>Premier créateur</Label>
+            <Label className="text-slate-700 dark:text-slate-300">Premier créateur</Label>
             <CreatorSelect
               value={creator1}
               onSelect={(value) => setCreator1(value)}
             />
           </div>
           <div className="space-y-2">
-            <Label>Deuxième créateur</Label>
+            <Label className="text-slate-700 dark:text-slate-300">Deuxième créateur</Label>
             <Input
               placeholder="Nom du deuxième créateur"
               value={creator2}
               onChange={(e) => setCreator2(e.target.value)}
               required
+              className="elegant-input"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-slate-700 dark:text-slate-300">Agent concerné</Label>
+            <Input
+              placeholder="Nom de l'agent"
+              value={agentName}
+              onChange={(e) => setAgentName(e.target.value)}
+              className="elegant-input"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Date du match</Label>
+              <Label className="text-slate-700 dark:text-slate-300">Date du match</Label>
               <Input
                 type="date"
                 value={matchDate}
                 onChange={(e) => setMatchDate(e.target.value)}
                 required
+                className="elegant-input"
               />
             </div>
             <div className="space-y-2">
-              <Label>Heure du match</Label>
+              <Label className="text-slate-700 dark:text-slate-300">Heure du match</Label>
               <Input
                 type="time"
                 value={matchTime}
                 onChange={(e) => setMatchTime(e.target.value)}
                 required
+                className="elegant-input"
               />
             </div>
           </div>
@@ -93,16 +109,17 @@ export const ScheduleMatchDialog = ({
             <Switch
               checked={isBoost}
               onCheckedChange={setIsBoost}
+              className="data-[state=checked]:bg-purple-600"
             />
-            <Label className="cursor-pointer">
+            <Label className="cursor-pointer text-slate-700 dark:text-slate-300">
               {isBoost ? "Avec Boost" : "Sans Boost"}
             </Label>
           </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+          <DialogFooter className="pt-4">
+            <Button type="button" variant="outline" onClick={onClose} className="border-gray-200 dark:border-gray-700">
               Annuler
             </Button>
-            <Button type="submit">
+            <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white">
               Programmer
             </Button>
           </DialogFooter>

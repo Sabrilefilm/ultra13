@@ -78,7 +78,7 @@ export const useWinnerManagement = (creatorId: string) => {
       zIndex: 999,
       gravity: 0.5,
       drift: 0,
-      colors: ['#00FF00', '#4CAF50', '#8BC34A', '#CDDC39', '#76ff03'], // Couleurs vertes
+      colors: ['#9b87f5', '#7E69AB', '#D6BCFA', '#F1F0FB'], // Couleurs dans la palette demandée
     };
 
     function randomInRange(min: number, max: number) {
@@ -114,7 +114,7 @@ export const useWinnerManagement = (creatorId: string) => {
     toast({
       title: "🎉 VICTOIRE! 🏆",
       description: "Notre créateur a remporté le match!",
-      className: "bg-green-100 border border-green-300 text-green-800"
+      className: "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300 text-purple-800"
     });
   };
 
@@ -123,7 +123,7 @@ export const useWinnerManagement = (creatorId: string) => {
     toast({
       title: "😔 Match terminé",
       description: "Le match est terminé, notre créateur n'a pas gagné cette fois-ci",
-      className: "bg-red-100 border border-red-300 text-red-800"
+      className: "bg-gradient-to-r from-slate-100 to-slate-200 border border-slate-300 text-slate-800"
     });
   };
 
@@ -179,7 +179,7 @@ export const useWinnerManagement = (creatorId: string) => {
       toast({
         title: "Gagnant effacé",
         description: "Le gagnant du match a été effacé avec succès",
-        className: "bg-background border border-border"
+        className: "bg-gradient-to-r from-slate-100 to-slate-200 border border-slate-300 text-slate-800"
       });
 
       queryClient.invalidateQueries({ queryKey: ['upcoming-matches', creatorId] });

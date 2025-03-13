@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUpcomingMatches } from "@/hooks/use-upcoming-matches";
 import { downloadImage } from "@/utils/download";
@@ -10,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import jsPDF from 'jspdf';
 import { toast } from "sonner";
 import autoTable from 'jspdf-autotable';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: string }) => {
   const { matches, isLoading, handleDelete, setWinner, clearWinner, updateMatchDetails } = useUpcomingMatches(role, creatorId);
@@ -25,28 +28,138 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
     try {
       const doc = new jsPDF();
       
-      doc.setFontSize(16);
-      doc.text('Liste des Matchs', 14, 15);
+      // Ajouter une entête élégante
+      doc.setFillColor(155, 135, 245);
+      doc.rect(0, 0, 210, 20, 'F');
+      
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(18);
+      doc.text('Agency Phocéen', 14, 14);
+      
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(0, 0, 0);
+      doc.text('Liste des Matchs', 14, 30);
+      
+      const today = format(new Date(), 'dd MMMM yyyy', { locale: fr });
       doc.setFontSize(10);
+      doc.text(`Généré le: ${today}`, 14, 38);
 
-      const tableData = matches?.map(match => [
-        new Date(match.match_date).toLocaleDateString('fr-FR'),
-        new Date(match.match_date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-        match.creator_id,
-        match.opponent_id,
-        match.status === 'scheduled' ? 'Programmé' : 
-        match.status === 'completed' ? 'Terminé' : 'Annulé'
-      ]) || [];
+      // Préparation des données
+      const currentDate = new Date();
+      const matchesData = matches || [];
+      
+      // Séparer les matchs par statut
+      const pendingMatches = matchesData.filter(match => 
+        (!match.winner_id && new Date(match.match_date) >= currentDate)
+      );
+      
+      const winMatches = matchesData.filter(match => 
+        (match.winner_id === match.creator_id)
+      );
+      
+      const lostMatches = matchesData.filter(match => 
+        (match.winner_id && match.winner_id !== match.creator_id)
+      );
 
-      autoTable(doc, {
-        head: [['Date', 'Heure', 'Créateur 1', 'Créateur 2', 'Statut']],
-        body: tableData,
-        startY: 25,
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [102, 16, 242] },
-      });
+      // Section des matchs en attente
+      doc.setFontSize(12);
+      doc.setTextColor(100, 100, 100);
+      doc.text('Matchs en attente', 14, 50);
+      
+      if (pendingMatches.length > 0) {
+        const pendingData = pendingMatches.map(match => [
+          format(new Date(match.match_date), 'dd/MM/yyyy'),
+          format(new Date(match.match_date), 'HH:mm'),
+          match.creator_id,
+          match.opponent_id,
+          match.status === 'off' ? 'Sans Boost' : 'Avec Boost',
+          match.source || '-'
+        ]);
+  
+        autoTable(doc, {
+          head: [['Date', 'Heure', 'Créateur', 'Adversaire', 'Type', 'Source']],
+          body: pendingData,
+          startY: 55,
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [155, 135, 245] },
+          theme: 'striped',
+        });
+      } else {
+        doc.text('Aucun match en attente', 14, 55);
+      }
 
-      doc.save('liste-des-matchs.pdf');
+      // Section des matchs gagnés
+      let y = doc.autoTable.previous.finalY || 55;
+      y += 15;
+      
+      doc.setFontSize(12);
+      doc.setTextColor(20, 150, 20);
+      doc.text('Matchs gagnés', 14, y);
+      
+      if (winMatches.length > 0) {
+        const winData = winMatches.map(match => [
+          format(new Date(match.match_date), 'dd/MM/yyyy'),
+          format(new Date(match.match_date), 'HH:mm'),
+          match.creator_id,
+          match.opponent_id,
+          match.points || '-',
+          match.source || '-'
+        ]);
+  
+        autoTable(doc, {
+          head: [['Date', 'Heure', 'Créateur', 'Adversaire', 'Points', 'Source']],
+          body: winData,
+          startY: y + 5,
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [75, 181, 67] },
+          theme: 'striped',
+        });
+      } else {
+        doc.text('Aucun match gagné', 14, y + 5);
+      }
+
+      // Section des matchs perdus
+      y = doc.autoTable.previous.finalY || y + 10;
+      y += 15;
+      
+      doc.setFontSize(12);
+      doc.setTextColor(181, 75, 67);
+      doc.text('Matchs perdus', 14, y);
+      
+      if (lostMatches.length > 0) {
+        const lostData = lostMatches.map(match => [
+          format(new Date(match.match_date), 'dd/MM/yyyy'),
+          format(new Date(match.match_date), 'HH:mm'),
+          match.creator_id,
+          match.opponent_id,
+          match.winner_id,
+          match.source || '-'
+        ]);
+  
+        autoTable(doc, {
+          head: [['Date', 'Heure', 'Créateur', 'Adversaire', 'Gagnant', 'Source']],
+          body: lostData,
+          startY: y + 5,
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [181, 75, 67] },
+          theme: 'striped',
+        });
+      } else {
+        doc.text('Aucun match perdu', 14, y + 5);
+      }
+
+      // Pied de page
+      y = doc.autoTable.previous.finalY || y + 10;
+      y += 15;
+      
+      doc.setFontSize(8);
+      doc.setTextColor(100, 100, 100);
+      doc.text('Agency Phocéen - Confidentiel', 14, y);
+      doc.text(`Total: ${matches?.length || 0} match(s)`, 14, y + 5);
+
+      doc.save('agency-phoceen-matchs.pdf');
       
       toast.success("PDF généré avec succès");
     } catch (error) {
@@ -56,7 +169,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
   };
 
   if (isLoading) return (
-    <Card className="bg-white dark:bg-dark-card text-black dark:text-white shadow-md rounded-xl overflow-hidden border-0">
+    <Card className="elegant-card">
       <CardContent className="p-8 flex justify-center items-center">
         <div className="animate-pulse flex flex-col items-center">
           <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
@@ -89,11 +202,13 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
   const pastToShow = showAllPast ? pastMatches : pastMatches.slice(0, INITIAL_MATCH_COUNT);
 
   return (
-    <Card className="bg-white dark:bg-dark-card text-black dark:text-white shadow-md rounded-xl overflow-hidden border-0 transition-colors duration-200">
-      <CardHeader className="border-b border-gray-100 dark:border-dark-border bg-gradient-to-r from-purple-50 to-white dark:from-slate-800 dark:to-slate-900 p-6 transition-colors duration-200">
+    <Card className="elegant-card">
+      <CardHeader className="elegant-header">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-2xl font-bold text-purple-900 dark:text-purple-300">Matchs</CardTitle>
-          <Button onClick={generatePDF} variant="outline" className="gap-2">
+          <CardTitle className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-700 to-indigo-600 dark:from-purple-400 dark:to-indigo-300">
+            Matchs
+          </CardTitle>
+          <Button onClick={generatePDF} variant="outline" className="gap-2 bg-white hover:bg-gray-50 dark:bg-slate-800 dark:hover:bg-slate-700 border-purple-200 dark:border-purple-800">
             <Download className="w-4 h-4" />
             Télécharger PDF
           </Button>
@@ -104,7 +219,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
           <Input
             placeholder="Rechercher un match..."
-            className="pl-10 bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-gray-700 focus:border-purple-400 dark:focus:border-purple-500 transition-all"
+            className="pl-10 elegant-input"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
