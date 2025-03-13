@@ -27,7 +27,7 @@ export const useWinnerManagement = (creatorId: string) => {
         newStatus = 'completed';
       }
       
-      console.log("Setting winner with status:", newStatus);  // Log de débogage
+      console.log("Setting winner with status:", newStatus);
       
       const { error } = await supabase
         .from('upcoming_matches')
@@ -38,57 +38,21 @@ export const useWinnerManagement = (creatorId: string) => {
         .eq('id', matchId);
 
       if (error) {
-        console.error("Update error details:", error);  // Log détaillé de l'erreur
+        console.error("Update error details:", error);
         throw error;
       }
 
-      // Animation de confettis pendant 2 minutes
-      const duration = 2 * 60 * 1000;
-      const animationEnd = Date.now() + duration;
-      const defaults = { 
-        startVelocity: 30, 
-        spread: 360, 
-        ticks: 60, 
-        zIndex: -1,
-        gravity: 0.5,
-        drift: 0
-      };
-
-      function randomInRange(min: number, max: number) {
-        return Math.random() * (max - min) + min;
+      // Déterminer le type d'animation basé sur si le premier créateur a gagné
+      if (winnerId === matchData.creator_id) {
+        // Animation spéciale pour le gagnant qui est le créateur principal
+        celebrateMainCreatorWin();
+      } else {
+        // Animation pour les autres gagnants
+        showOtherCreatorWin();
       }
 
-      const interval = setInterval(function() {
-        const timeLeft = animationEnd - Date.now();
-
-        if (timeLeft <= 0) {
-          return clearInterval(interval);
-        }
-
-        const particleCount = 100;
-
-        confetti({
-          ...defaults,
-          particleCount,
-          origin: { x: randomInRange(0.1, 0.3), y: 0 }
-        });
-        confetti({
-          ...defaults,
-          particleCount,
-          origin: { x: randomInRange(0.4, 0.6), y: 0 }
-        });
-        confetti({
-          ...defaults,
-          particleCount,
-          origin: { x: randomInRange(0.7, 0.9), y: 0 }
-        });
-      }, 100);
-
-      toast({
-        title: "🎉 Gagnant défini !",
-        description: "Le gagnant du match a été enregistré avec succès",
-        className: "bg-background border border-border"
-      });
+      // Supprimer les matchs anciens (plus de 3 mois)
+      cleanupOldMatches();
 
       queryClient.invalidateQueries({ queryKey: ['upcoming-matches', creatorId] });
     } catch (error) {
@@ -99,6 +63,90 @@ export const useWinnerManagement = (creatorId: string) => {
         variant: "destructive",
         className: "bg-background border border-border"
       });
+    }
+  };
+
+  // Célébration pour quand notre créateur principal gagne
+  const celebrateMainCreatorWin = () => {
+    // Animation de confettis pendant 2 minutes pour notre créateur
+    const duration = 2 * 60 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { 
+      startVelocity: 30, 
+      spread: 360, 
+      ticks: 60, 
+      zIndex: 999,
+      gravity: 0.5,
+      drift: 0,
+      colors: ['#00FF00', '#4CAF50', '#8BC34A', '#CDDC39', '#76ff03'], // Couleurs vertes
+    };
+
+    function randomInRange(min: number, max: number) {
+      return Math.random() * (max - min) + min;
+    }
+
+    const interval = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 100;
+
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: 0 }
+      });
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.4, 0.6), y: 0 }
+      });
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: 0 }
+      });
+    }, 100);
+
+    toast({
+      title: "🎉 VICTOIRE! 🏆",
+      description: "Notre créateur a remporté le match!",
+      className: "bg-green-100 border border-green-300 text-green-800"
+    });
+  };
+
+  // Animation pour quand un autre créateur gagne
+  const showOtherCreatorWin = () => {
+    toast({
+      title: "😔 Match terminé",
+      description: "Le match est terminé, notre créateur n'a pas gagné cette fois-ci",
+      className: "bg-red-100 border border-red-300 text-red-800"
+    });
+  };
+
+  // Nettoyage automatique des matchs anciens (plus de 3 mois)
+  const cleanupOldMatches = async () => {
+    try {
+      // Calculer la date limite (3 mois dans le passé)
+      const threeMonthsAgo = new Date();
+      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+      
+      // Supprimer les matchs plus anciens que 3 mois
+      const { error } = await supabase
+        .from('upcoming_matches')
+        .delete()
+        .lt('match_date', threeMonthsAgo.toISOString());
+      
+      if (error) {
+        console.error("Erreur lors du nettoyage des anciens matchs:", error);
+      } else {
+        console.log("Nettoyage automatique: matchs de plus de 3 mois supprimés");
+      }
+    } catch (error) {
+      console.error("Erreur lors du nettoyage des anciens matchs:", error);
     }
   };
 
@@ -148,6 +196,7 @@ export const useWinnerManagement = (creatorId: string) => {
 
   return {
     setWinner,
-    clearWinner
+    clearWinner,
+    cleanupOldMatches
   };
 };
