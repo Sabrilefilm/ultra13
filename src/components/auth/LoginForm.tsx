@@ -1,26 +1,23 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChevronRight, Rocket, Mail } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-
 interface LoginFormProps {
   onLogin: (username: string, password: string) => void;
   onForgotPassword: () => void;
 }
-
-export const LoginForm = ({ onLogin, onForgotPassword }: LoginFormProps) => {
+export const LoginForm = ({
+  onLogin,
+  onForgotPassword
+}: LoginFormProps) => {
   const [username, setUsername] = useState(() => localStorage.getItem('username') || "");
   const [password, setPassword] = useState("");
-
   const handleSubmit = () => {
     onLogin(username, password);
   };
-
-  return (
-    <div className="min-h-screen bg-[#111827] text-white p-4 flex flex-col items-center justify-center">
+  return <div className="min-h-screen bg-[#111827] text-white p-4 flex flex-col items-center justify-center">
       <div className="w-full max-w-[450px] mx-auto space-y-8">
         <div className="text-center space-y-6">
           <div className="flex flex-col items-center justify-center space-y-2">
@@ -54,53 +51,26 @@ export const LoginForm = ({ onLogin, onForgotPassword }: LoginFormProps) => {
               <Label htmlFor="username" className="text-white/90">
                 Identifiant
               </Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="Votre identifiant"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSubmit()}
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12"
-              />
+              <Input id="username" type="text" placeholder="Votre identifiant" value={username} onChange={e => setUsername(e.target.value)} onKeyPress={e => e.key === "Enter" && handleSubmit()} className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-white/90">
                 Mot de passe
               </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Votre mot de passe"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSubmit()}
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12"
-              />
+              <Input id="password" type="password" placeholder="Votre mot de passe" value={password} onChange={e => setPassword(e.target.value)} onKeyPress={e => e.key === "Enter" && handleSubmit()} className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12" />
             </div>
             <div className="flex justify-between items-center">
-              <Button
-                variant="link"
-                className="text-sm text-white/60 hover:text-purple-400 p-0"
-                onClick={onForgotPassword}
-              >
+              <Button variant="link" className="text-sm text-white/60 hover:text-purple-400 p-0" onClick={onForgotPassword}>
                 Mot de passe oublié ?
               </Button>
-              <Button
-                variant="link"
-                className="text-sm text-white/60 hover:text-purple-400 p-0"
-                onClick={() => window.location.href = 'mailto:Contact@Phoceenagency.fr'}
-              >
+              <Button variant="link" className="text-sm text-white/60 hover:text-purple-400 p-0" onClick={() => window.location.href = 'mailto:Contact@Phoceenagency.fr'}>
                 Contacter le support
               </Button>
             </div>
           </div>
 
           <div className="space-y-4">
-            <Button
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-6 flex items-center justify-center group transition-all"
-              onClick={handleSubmit}
-            >
+            <Button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-6 flex items-center justify-center group transition-all" onClick={handleSubmit}>
               <span>Se connecter</span>
               <ChevronRight className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
             </Button>
@@ -121,10 +91,9 @@ export const LoginForm = ({ onLogin, onForgotPassword }: LoginFormProps) => {
       </div>
 
       <div className="fixed bottom-8 flex gap-6 text-sm text-white/40">
-        <button className="hover:text-white/60 transition-colors">Aide</button>
-        <button className="hover:text-white/60 transition-colors">Confidentialité</button>
-        <button className="hover:text-white/60 transition-colors">Conditions</button>
+        
+        
+        
       </div>
-    </div>
-  );
+    </div>;
 };
