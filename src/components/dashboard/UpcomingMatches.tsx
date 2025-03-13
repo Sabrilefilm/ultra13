@@ -10,7 +10,7 @@ import { Search, ChevronDown, ChevronUp, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import jsPDF from 'jspdf';
 import { toast } from "sonner";
-import autoTable from 'jspdf-autotable';
+import 'jspdf-autotable';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -78,7 +78,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
           match.source || '-'
         ]);
   
-        autoTable(doc, {
+        (doc as any).autoTable({
           head: [['Date', 'Heure', 'Créateur', 'Adversaire', 'Type', 'Source']],
           body: pendingData,
           startY: 55,
@@ -91,7 +91,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
       }
 
       // Section des matchs gagnés
-      let y = doc.autoTable.previous.finalY || 55;
+      let y = (doc as any).lastAutoTable?.finalY || 55;
       y += 15;
       
       doc.setFontSize(12);
@@ -108,7 +108,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
           match.source || '-'
         ]);
   
-        autoTable(doc, {
+        (doc as any).autoTable({
           head: [['Date', 'Heure', 'Créateur', 'Adversaire', 'Points', 'Source']],
           body: winData,
           startY: y + 5,
@@ -121,7 +121,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
       }
 
       // Section des matchs perdus
-      y = doc.autoTable.previous.finalY || y + 10;
+      y = (doc as any).lastAutoTable?.finalY || y + 10;
       y += 15;
       
       doc.setFontSize(12);
@@ -138,7 +138,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
           match.source || '-'
         ]);
   
-        autoTable(doc, {
+        (doc as any).autoTable({
           head: [['Date', 'Heure', 'Créateur', 'Adversaire', 'Gagnant', 'Source']],
           body: lostData,
           startY: y + 5,
@@ -151,7 +151,7 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
       }
 
       // Pied de page
-      y = doc.autoTable.previous.finalY || y + 10;
+      y = (doc as any).lastAutoTable?.finalY || y + 10;
       y += 15;
       
       doc.setFontSize(8);
