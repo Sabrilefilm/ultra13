@@ -9,16 +9,18 @@ import { useState } from "react";
 import { Search, ChevronDown, ChevronUp, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import jsPDF from 'jspdf';
-import { toast } from "sonner";
 import 'jspdf-autotable';
+import { toast } from "sonner";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Loading } from "@/components/ui/loading";
 
 export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: string }) => {
   const { matches, isLoading, handleDelete, setWinner, clearWinner, updateMatchDetails } = useUpcomingMatches(role, creatorId);
   const [searchQuery, setSearchQuery] = useState("");
   const [showAllUpcoming, setShowAllUpcoming] = useState(false);
   const [showAllPast, setShowAllPast] = useState(false);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
 
   const canManageMatch = ['agent', 'manager', 'founder'].includes(role);
   const canDeleteMatch = ['founder', 'manager'].includes(role);
@@ -26,6 +28,8 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
 
   const generatePDF = () => {
     try {
+      setGeneratingPdf(true);
+      
       const doc = new jsPDF();
       
       // Ajouter une entête élégante
@@ -165,16 +169,15 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
     } catch (error) {
       console.error("Erreur lors de la génération du PDF:", error);
       toast.error("Erreur lors de la génération du PDF");
+    } finally {
+      setGeneratingPdf(false);
     }
   };
 
   if (isLoading) return (
     <Card className="elegant-card">
-      <CardContent className="p-8 flex justify-center items-center">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
-          <div className="h-24 w-full bg-gray-100 dark:bg-gray-800 rounded"></div>
-        </div>
+      <CardContent className="p-8">
+        <Loading size="large" text="Chargement des matchs..." />
       </CardContent>
     </Card>
   );
@@ -208,9 +211,23 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
           <CardTitle className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-700 to-indigo-600 dark:from-purple-400 dark:to-indigo-300">
             Matchs
           </CardTitle>
-          <Button onClick={generatePDF} variant="outline" className="gap-2 bg-white hover:bg-gray-50 dark:bg-slate-800 dark:hover:bg-slate-700 border-purple-200 dark:border-purple-800">
-            <Download className="w-4 h-4" />
-            Télécharger PDF
+          <Button 
+            onClick={generatePDF} 
+            variant="outline" 
+            className="gap-2 bg-white hover:bg-gray-50 dark:bg-slate-800 dark:hover:bg-slate-700 border-purple-200 dark:border-purple-800"
+            disabled={generatingPdf}
+          >
+            {generatingPdf ? (
+              <>
+                <div className="w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+                Génération...
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" />
+                Télécharger PDF
+              </>
+            )}
           </Button>
         </div>
       </CardHeader>

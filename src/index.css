@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
@@ -87,6 +86,7 @@
     overflow-x: hidden;
     min-height: 100vh;
     font-family: 'Inter', sans-serif;
+    margin-top: 70px;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -226,6 +226,41 @@
   }
 }
 
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes shine {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
 .agency-text {
   font-family: 'Playfair Display', serif;
   animation: subtle-glow 3s ease-in-out infinite;
@@ -237,6 +272,26 @@
 .agency-title {
   font-family: 'Playfair Display', serif;
   @apply text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-500 font-bold;
+}
+
+.floating-element {
+  animation: float 6s ease-in-out infinite;
+}
+
+.pulse-ring {
+  animation: pulse-ring 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+.shining-text {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shine 3s infinite;
+  -webkit-background-clip: text;
 }
 
 .copyright-text {
@@ -253,6 +308,30 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Add loading animation class */
+.loading-animation {
+  display: inline-block;
+}
+
+.loading-animation::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  margin-left: 8px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  animation: spinner 0.6s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
   }
 }
 

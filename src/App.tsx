@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -11,8 +11,24 @@ import CreatorStats from "./pages/CreatorStats";
 import AgencyAssignment from "./pages/AgencyAssignment";
 import ExternalMatches from "./pages/ExternalMatches";
 import Contact from "./pages/Contact";
+import { Loading } from "./components/ui/loading";
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate initial app loading
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <Loading fullScreen size="large" text="Agency Phocéen se charge..." />;
+  }
+
   return (
     <Router>
       <Routes>
