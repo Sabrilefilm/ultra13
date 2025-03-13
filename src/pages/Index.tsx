@@ -1,14 +1,15 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
-import { RewardsPanel } from "@/components/RewardsPanel";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { FounderDashboard } from "@/components/dashboard/FounderDashboard";
 import { RoleStats } from "@/components/dashboard/RoleStats";
 import { CreatorDashboard } from "@/components/creator/CreatorDashboard";
 import { ModalManager } from "@/components/layout/ModalManager";
 import { Footer } from "@/components/layout/Footer";
+import { Header } from "@/components/layout/Header";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { useAccountManagement } from "@/hooks/use-account-management";
@@ -104,25 +105,26 @@ const Index = () => {
     );
   }
 
-  const roleDisplay = role === 'founder' ? 'Fondateur' : role;
-
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#111827] text-white">
+      <Header role={role} username={username} />
+      
       <div className="flex-1 p-4">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex justify-between items-center">
             <ProfileHeader
               username={username}
-              handle={`@${roleDisplay}`}
+              handle={`@${role === 'founder' ? 'Fondateur' : role}`}
             />
             <div className="flex items-center gap-4">
-              <div className="text-sm text-muted-foreground text-right">
+              <div className="text-sm text-white/60 text-right">
                 <p className="lowercase">vous devez obligatoirement faire</p>
                 <p className="lowercase">7J 15H de lives</p>
               </div>
               <Button
                 variant="outline"
                 onClick={handleLogout}
+                className="border-white/10 bg-white/5 hover:bg-white/10 text-white"
               >
                 Déconnexion
               </Button>
@@ -155,7 +157,6 @@ const Index = () => {
             )}
 
             <RoleStats role={role || ''} userId={username} />
-            <RewardsPanel role={role || ''} userId={username} />
             <UpcomingMatches role={role || ''} creatorId={username} />
 
             <ModalManager
