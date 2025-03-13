@@ -31,20 +31,18 @@ function App() {
 
   return (
     <Router>
-      <div className="bg-gradient-to-br from-blue-900 to-sky-800 min-h-screen">
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/users" element={<UserManagement />} />
-          <Route path="/notifications" element={<NotificationManagement />} />
-          <Route path="/personal-information" element={<PersonalInformation />} />
-          <Route path="/agency-members/:agentId" element={<AgencyMembers />} />
-          <Route path="/creator-stats" element={<CreatorStats />} />
-          <Route path="/agency-assignment" element={<AgencyAssignment />} />
-          <Route path="/external-matches" element={<ExternalMatches />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/users" element={<UserManagement />} />
+        <Route path="/notifications" element={<NotificationManagement />} />
+        <Route path="/personal-information" element={<PersonalInformation />} />
+        <Route path="/agency-members/:agentId" element={<AgencyMembers />} />
+        <Route path="/creator-stats" element={<CreatorStats />} />
+        <Route path="/agency-assignment" element={<AgencyAssignment />} />
+        <Route path="/external-matches" element={<ExternalMatches />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </Router>
   );
 }

@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { FileText, Handshake } from "lucide-react";
+import { Plus, FileText, Handshake, ImageIcon } from "lucide-react";
 
 interface CreatorDashboardProps {
   onOpenSponsorshipForm: () => void;
@@ -17,6 +17,7 @@ export function CreatorDashboard({
   role = 'creator'
 }: CreatorDashboardProps) {
   const navigate = useNavigate();
+  const canCreatePosters = ['founder', 'manager', 'agent'].includes(role);
 
   const renderDashboardButtons = () => {
     switch (role) {
@@ -36,8 +37,16 @@ export function CreatorDashboard({
               className="h-24 flex-col items-center justify-center space-y-2"
               onClick={onOpenSponsorshipForm}
             >
-              <Handshake className="h-6 w-6" />
+              <Plus className="h-6 w-6" />
               <span>Demander un parrainage</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-24 flex-col items-center justify-center space-y-2"
+              onClick={onOpenSponsorshipList}
+            >
+              <Handshake className="h-6 w-6" />
+              <span>Mes parrainages</span>
             </Button>
           </>
         );
@@ -62,6 +71,16 @@ export function CreatorDashboard({
               <Handshake className="h-6 w-6" />
               <span>Liste des parrainages</span>
             </Button>
+            {canCreatePosters && (
+              <Button
+                variant="outline"
+                className="h-24 flex-col items-center justify-center space-y-2"
+                onClick={onCreatePoster}
+              >
+                <ImageIcon className="h-6 w-6" />
+                <span>Créer une affiche</span>
+              </Button>
+            )}
           </>
         );
       default:
@@ -70,7 +89,7 @@ export function CreatorDashboard({
   };
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-4 md:grid-cols-3">
       {renderDashboardButtons()}
     </div>
   );

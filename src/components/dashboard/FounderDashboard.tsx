@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { UserRound, Plus, CalendarDays, TrendingUp, Bell } from "lucide-react";
+import { UserRound, Plus, CalendarDays, ImageIcon, TrendingUp, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface FounderDashboardProps {
@@ -28,9 +28,9 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <Card className="p-4 space-y-8 bg-white/10 backdrop-blur-sm border-sky-200/20">
+      <Card className="p-4 space-y-8">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-sky-100">Gestion des Utilisateurs</h3>
+          <h3 className="text-lg font-medium">Gestion des Utilisateurs</h3>
           <Button
             variant="ghost"
             size="icon"
@@ -49,9 +49,9 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({
         </Button>
       </Card>
 
-      <Card className="p-4 space-y-8 bg-white/10 backdrop-blur-sm border-sky-200/20">
+      <Card className="p-4 space-y-8">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-sky-100">Gestion des Notifications</h3>
+          <h3 className="text-lg font-medium">Gestion des Notifications</h3>
           <Button
             variant="ghost"
             size="icon"
@@ -69,9 +69,9 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({
         </Button>
       </Card>
 
-      <Card className="p-4 space-y-8 bg-white/10 backdrop-blur-sm border-sky-200/20">
+      <Card className="p-4 space-y-8">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-sky-100">Calendrier</h3>
+          <h3 className="text-lg font-medium">Calendrier</h3>
           <Button
             variant="ghost"
             size="icon"
@@ -89,9 +89,29 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({
         </Button>
       </Card>
 
-      <Card className="p-4 space-y-8 bg-white/10 backdrop-blur-sm border-sky-200/20">
+      <Card className="p-4 space-y-8">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-sky-100">Récompenses</h3>
+          <h3 className="text-lg font-medium">Posters</h3>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onCreatePoster}
+          >
+            <ImageIcon className="h-5 w-5" />
+          </Button>
+        </div>
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={onCreatePoster}
+        >
+          Créer un poster
+        </Button>
+      </Card>
+
+      <Card className="p-4 space-y-8">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium">Récompenses</h3>
           <Button
             variant="ghost"
             size="icon"
