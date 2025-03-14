@@ -1,14 +1,13 @@
 
 import { useState } from "react";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { AuthView } from "@/components/auth/AuthView";
+import { DashboardView } from "@/components/dashboard/DashboardView";
 import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { useAccountManagement } from "@/hooks/use-account-management";
 import { usePersonalInfoCheck } from "@/hooks/use-personal-info-check";
 import { useToast } from "@/hooks/use-toast";
-import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
 
 const Index = () => {
   const { toast } = useToast();
@@ -40,19 +39,17 @@ const Index = () => {
   }
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <UltraDashboard
-        username={username}
-        role={role || ''}
-        onLogout={handleLogout}
-        platformSettings={platformSettings}
-        handleCreateAccount={handleCreateAccount}
-        handleUpdateSettings={handleUpdateSettings}
-        showWarning={showWarning}
-        dismissWarning={dismissWarning}
-        formattedTime={formattedTime}
-      />
-    </SidebarProvider>
+    <DashboardView
+      username={username}
+      role={role || ''}
+      onLogout={handleLogout}
+      platformSettings={platformSettings}
+      handleCreateAccount={handleCreateAccount}
+      handleUpdateSettings={handleUpdateSettings}
+      showWarning={showWarning}
+      dismissWarning={dismissWarning}
+      formattedTime={formattedTime}
+    />
   );
 }
 

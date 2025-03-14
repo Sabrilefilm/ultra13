@@ -1,83 +1,117 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
-interface InactivityTimerProps {
-  timeout: number;
+interface UseInactivityTimerProps {
+  timeout: number; // en millisecondes
   onTimeout: () => void;
-  warningTime: number;
-  onWarning?: () => void;
+  warningTime: number; // en millisecondes avant timeout
+  onWarning: () => void;
 }
 
 export const useInactivityTimer = ({
   timeout,
   onTimeout,
   warningTime,
-  onWarning
-}: InactivityTimerProps) => {
-  const [lastActivity, setLastActivity] = useState<number>(Date.now());
+  onWarning,
+}: UseInactivityTimerProps) => {
+  const [remainingTime, setRemainingTime] = useState<number>(timeout);
   const [showWarning, setShowWarning] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(warningTime / 1000);
-  const [formattedTime, setFormattedTime] = useState("00:30");
+  
+  const timerRef = useRef<number | null>(null);
+  const warningTimerRef = useRef<number | null>(null);
+  const intervalRef = useRef<number | null>(null);
 
   const resetTimer = useCallback(() => {
-    setLastActivity(Date.now());
+    setRemainingTime(timeout);
     setShowWarning(false);
+    
+    // Nettoyer les timers existants
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+    if (warningTimerRef.current) window.clearTimeout(warningTimerRef.current);
+    
+    // Configurer le timer d'avertissement
+    warningTimerRef.current = window.setTimeout(() => {
+      setShowWarning(true);
+      onWarning();
+    }, timeout - warningTime);
+    
+    // Configurer le timer de déconnexion
+    timerRef.current = window.setTimeout(() => {
+      onTimeout();
+    }, timeout);
+  }, [timeout, warningTime, onTimeout, onWarning]);
+
+  // Mettre à jour le temps restant
+  useEffect(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    
+    intervalRef.current = window.setInterval(() => {
+      setRemainingTime((prev) => {
+        if (prev <= 0) return 0;
+        return prev - 1000;
+      });
+    }, 1000);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, []);
 
+  // Configurer les écouteurs d'événements pour réinitialiser le timer
+  useEffect(() => {
+    // Événements qui réinitialisent le timer
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+    
+    // Fonction wrapper pour limiter le taux de réinitialisation
+    let lastResetTime = Date.now();
+    const throttledReset = () => {
+      const now = Date.now();
+      if (now - lastResetTime > 1000) { // Limiter à une fois par seconde
+        lastResetTime = now;
+        resetTimer();
+      }
+    };
+    
+    // Ajouter tous les écouteurs
+    events.forEach(event => {
+      window.addEventListener(event, throttledReset);
+    });
+    
+    // Initialiser le timer
+    resetTimer();
+    
+    // Nettoyer
+    return () => {
+      events.forEach(event => {
+        window.removeEventListener(event, throttledReset);
+      });
+      
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+      if (warningTimerRef.current) window.clearTimeout(warningTimerRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [resetTimer]);
+
   const dismissWarning = useCallback(() => {
+    setShowWarning(false);
     resetTimer();
   }, [resetTimer]);
 
-  useEffect(() => {
-    const formatTime = (seconds: number) => {
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    };
-
-    const handleActivity = () => resetTimer();
-
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const elapsed = now - lastActivity;
-      
-      if (elapsed >= timeout) {
-        onTimeout();
-        resetTimer();
-      } else if (elapsed >= timeout - warningTime) {
-        if (!showWarning) {
-          setShowWarning(true);
-          if (onWarning) onWarning();
-        }
-        
-        // Calculate remaining time
-        const remaining = Math.max(0, (timeout - elapsed) / 1000);
-        setTimeRemaining(remaining);
-        setFormattedTime(formatTime(remaining));
-      }
-    }, 1000);
-
-    // Add event listeners for user activity
-    window.addEventListener("mousemove", handleActivity);
-    window.addEventListener("mousedown", handleActivity);
-    window.addEventListener("keypress", handleActivity);
-    window.addEventListener("scroll", handleActivity);
-    window.addEventListener("touchstart", handleActivity);
-
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener("mousemove", handleActivity);
-      window.removeEventListener("mousedown", handleActivity);
-      window.removeEventListener("keypress", handleActivity);
-      window.removeEventListener("scroll", handleActivity);
-      window.removeEventListener("touchstart", handleActivity);
-    };
-  }, [lastActivity, timeout, warningTime, onTimeout, onWarning, resetTimer, showWarning]);
+  // Formatter le temps en minutes:secondes
+  const formattedTime = formatTime(showWarning ? (timeout - (timeout - warningTime)) : remainingTime);
 
   return {
+    remainingTime,
     showWarning,
     dismissWarning,
-    timeRemaining,
-    formattedTime
+    formattedTime,
   };
+};
+
+// Formatter le temps en minutes:secondes
+const formatTime = (ms: number): string => {
+  const seconds = Math.floor((ms / 1000) % 60);
+  const minutes = Math.floor((ms / 1000 / 60) % 60);
+  
+  return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 };
