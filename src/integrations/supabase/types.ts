@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      chats: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          read: boolean | null
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          read?: boolean | null
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          read?: boolean | null
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       crawled_pages: {
         Row: {
           content: string | null
@@ -130,6 +157,57 @@ export type Database = {
           },
         ]
       }
+      creator_rules: {
+        Row: {
+          created_at: string | null
+          description: string
+          id: string
+          rule_type: string
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          id?: string
+          rule_type: string
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          id?: string
+          rule_type?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      identity_documents: {
+        Row: {
+          document_back: string | null
+          document_front: string | null
+          id: string
+          uploaded_at: string | null
+          user_id: string
+          verified: boolean | null
+        }
+        Insert: {
+          document_back?: string | null
+          document_front?: string | null
+          id?: string
+          uploaded_at?: string | null
+          user_id: string
+          verified?: boolean | null
+        }
+        Update: {
+          document_back?: string | null
+          document_front?: string | null
+          id?: string
+          uploaded_at?: string | null
+          user_id?: string
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
       live_schedules: {
         Row: {
           created_at: string
@@ -208,6 +286,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      penalties: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          created_by: string
+          duration_days: number | null
+          id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          created_by: string
+          duration_days?: number | null
+          id?: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          created_by?: string
+          duration_days?: number | null
+          id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       platform_settings: {
         Row: {
@@ -323,6 +431,42 @@ export type Database = {
         }
         Relationships: []
       }
+      transfer_requests: {
+        Row: {
+          created_at: string | null
+          creator_id: string
+          current_agent_id: string
+          id: string
+          reason: string | null
+          rejection_reason: string | null
+          requested_agent_id: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id: string
+          current_agent_id: string
+          id?: string
+          reason?: string | null
+          rejection_reason?: string | null
+          requested_agent_id: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string
+          current_agent_id?: string
+          id?: string
+          reason?: string | null
+          rejection_reason?: string | null
+          requested_agent_id?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       upcoming_matches: {
         Row: {
           created_at: string
@@ -372,26 +516,38 @@ export type Database = {
         Row: {
           agent_id: string | null
           created_at: string
+          email: string | null
           id: string
+          last_active: string | null
           password: string
           role: string
+          status_color: string | null
           username: string
+          warnings: number | null
         }
         Insert: {
           agent_id?: string | null
           created_at?: string
+          email?: string | null
           id?: string
+          last_active?: string | null
           password: string
           role: string
+          status_color?: string | null
           username: string
+          warnings?: number | null
         }
         Update: {
           agent_id?: string | null
           created_at?: string
+          email?: string | null
           id?: string
+          last_active?: string | null
           password?: string
           role?: string
+          status_color?: string | null
           username?: string
+          warnings?: number | null
         }
         Relationships: []
       }

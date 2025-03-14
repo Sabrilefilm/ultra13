@@ -1,7 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronRight, Rocket, Mail } from "lucide-react";
+import { ChevronRight, Rocket, Mail, Shield, Lock } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 interface LoginFormProps {
@@ -51,13 +52,39 @@ export const LoginForm = ({
               <Label htmlFor="username" className="text-white/90">
                 Identifiant
               </Label>
-              <Input id="username" type="text" placeholder="Votre identifiant" value={username} onChange={e => setUsername(e.target.value)} onKeyPress={e => e.key === "Enter" && handleSubmit()} className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12" />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Shield className="h-5 w-5 text-white/40" />
+                </div>
+                <Input 
+                  id="username" 
+                  type="text" 
+                  placeholder="Votre identifiant" 
+                  value={username} 
+                  onChange={e => setUsername(e.target.value)} 
+                  onKeyPress={e => e.key === "Enter" && handleSubmit()} 
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12 pl-10" 
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-white/90">
                 Mot de passe
               </Label>
-              <Input id="password" type="password" placeholder="Votre mot de passe" value={password} onChange={e => setPassword(e.target.value)} onKeyPress={e => e.key === "Enter" && handleSubmit()} className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12" />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-white/40" />
+                </div>
+                <Input 
+                  id="password" 
+                  type="password" 
+                  placeholder="Votre mot de passe" 
+                  value={password} 
+                  onChange={e => setPassword(e.target.value)} 
+                  onKeyPress={e => e.key === "Enter" && handleSubmit()} 
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12 pl-10" 
+                />
+              </div>
             </div>
             <div className="flex justify-between items-center">
               <Button variant="link" className="text-sm text-white/60 hover:text-purple-400 p-0" onClick={onForgotPassword}>
