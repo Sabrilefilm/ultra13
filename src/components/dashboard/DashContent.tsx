@@ -5,6 +5,9 @@ import { UpcomingMatches } from "@/components/dashboard/UpcomingMatches";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { PenaltyManager } from "@/components/penalties/PenaltyManager";
 import { StatCards } from "@/components/dashboard/StatCards";
+import { FounderDashboard } from "@/components/dashboard/FounderDashboard";
+import { Card } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 interface DashContentProps {
   username: string;
@@ -19,50 +22,70 @@ export const DashContent = ({
   currentPage,
   onAction
 }: DashContentProps) => {
+  const navigate = useNavigate();
+
   const renderPageContent = () => {
     switch (currentPage) {
       case 'dashboard':
-        return (
+        return role === 'founder' ? (
+          <FounderDashboard
+            onCreateAccount={() => onAction('openCreateAccount')}
+            onConfigureRewards={() => onAction('openRewardSettings')}
+            onOpenLiveSchedule={(creatorId) => onAction('openLiveSchedule', creatorId)}
+            onScheduleMatch={() => onAction('openScheduleMatch')}
+            onOpenSponsorships={() => onAction('openSponsorshipForm')}
+            onCreatePoster={() => onAction('openCreatePoster')}
+            username={username}
+          />
+        ) : (
           <>
             <ProfileHeader 
               username={username}
               handle={`@${role === 'founder' ? 'Fondateur' : role}`}
             />
-            <div className="mb-8">
+            <div className="mb-6">
               <StatCards role={role} />
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-[#1e293b]/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <Card className="bg-[#1e1f2e]/90 backdrop-blur-sm border border-gray-800/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
                 <h3 className="text-xl font-semibold mb-4 text-white/90">Statistiques</h3>
                 <RoleStats role={role} userId={username} />
-              </div>
-              <div className="bg-[#1e293b]/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
+              </Card>
+              <Card className="bg-[#1e1f2e]/90 backdrop-blur-sm border border-gray-800/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
                 <h3 className="text-xl font-semibold mb-4 text-white/90">Matchs à venir</h3>
                 <UpcomingMatches role={role} creatorId={username} />
-              </div>
+              </Card>
             </div>
           </>
         );
       case 'penalties':
         return (
-          <div className="bg-[#1e293b]/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 shadow-sm">
+          <Card className="bg-[#1e1f2e]/90 backdrop-blur-sm border border-gray-800/50 rounded-xl p-6 shadow-sm">
             <h3 className="text-xl font-semibold mb-4 text-white/90">Gestion des pénalités</h3>
             <PenaltyManager username={username} role={role} />
-          </div>
+          </Card>
         );
       case 'team':
         return (
-          <div className="bg-[#1e293b]/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 shadow-sm">
+          <Card className="bg-[#1e1f2e]/90 backdrop-blur-sm border border-gray-800/50 rounded-xl p-6 shadow-sm">
             <h3 className="text-xl font-semibold mb-4 text-white/90">Gestion d'équipe</h3>
-            <p className="text-gray-400">Fonctionnalité disponible pour les agents, managers et fondateurs.</p>
-          </div>
+            {['agent', 'manager', 'founder'].includes(role) ? (
+              <p className="text-gray-400">Accédez à la gestion des membres de votre équipe.</p>
+            ) : (
+              <p className="text-gray-400">Fonctionnalité disponible pour les agents, managers et fondateurs.</p>
+            )}
+          </Card>
         );
       case 'schedule':
         return (
-          <div className="bg-[#1e293b]/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 shadow-sm">
+          <Card className="bg-[#1e1f2e]/90 backdrop-blur-sm border border-gray-800/50 rounded-xl p-6 shadow-sm">
             <h3 className="text-xl font-semibold mb-4 text-white/90">Planning</h3>
-            <p className="text-gray-400">Fonctionnalité disponible pour les agents, managers et fondateurs.</p>
-          </div>
+            {['agent', 'manager', 'founder'].includes(role) ? (
+              <p className="text-gray-400">Gérez le planning des créateurs et des événements.</p>
+            ) : (
+              <p className="text-gray-400">Fonctionnalité disponible pour les agents, managers et fondateurs.</p>
+            )}
+          </Card>
         );
       default:
         return (
