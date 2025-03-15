@@ -17,17 +17,9 @@ import {
   LogOut,
   Home,
   AlertOctagon,
-  MessageCircle,
-  Image as ImageIcon,
-  Video,
-  Music,
-  BookOpen,
-  Briefcase,
   Users,
-  Settings,
-  User,
-  HelpCircle,
-  Clock
+  Clock,
+  Rocket
 } from "lucide-react";
 
 interface UltraSidebarProps {
@@ -47,61 +39,45 @@ export const UltraSidebar = ({
 }: UltraSidebarProps) => {
   const { toggleSidebar } = useSidebar();
 
+  // Créons les éléments du menu de base disponibles pour tous les rôles
   const menuItems = [
     { 
       title: "Tableau de bord", 
       icon: <Home />, 
       action: () => onAction('navigateTo', 'dashboard'),
-      active: currentPage === 'dashboard'
-    },
-    { 
-      title: "Outils de chat", 
-      icon: <MessageCircle />, 
-      action: () => onAction('navigateTo', 'chat'),
-      active: currentPage === 'chat'
-    },
-    { 
-      title: "Outils d'image", 
-      icon: <ImageIcon />, 
-      action: () => onAction('navigateTo', 'image'),
-      active: currentPage === 'image'
-    },
-    { 
-      title: "Outils vidéo", 
-      icon: <Video />, 
-      action: () => onAction('navigateTo', 'video'),
-      active: currentPage === 'video'
-    },
-    { 
-      title: "Outils audio", 
-      icon: <Music />, 
-      action: () => onAction('navigateTo', 'audio'),
-      active: currentPage === 'audio'
+      active: currentPage === 'dashboard',
+      roles: ['founder', 'manager', 'agent', 'creator', 'client']
     },
     { 
       title: "Pénalités", 
       icon: <AlertOctagon />, 
       action: () => onAction('navigateTo', 'penalties'),
-      active: currentPage === 'penalties'
+      active: currentPage === 'penalties',
+      roles: ['founder', 'manager', 'agent', 'creator']
+    }
+  ];
+  
+  // Options avancées uniquement pour founder, manager et agent
+  const advancedMenuItems = [
+    { 
+      title: "Gestion d'équipe", 
+      icon: <Users />, 
+      action: () => onAction('navigateTo', 'team'),
+      active: currentPage === 'team',
+      roles: ['founder', 'manager', 'agent']
     },
     { 
       title: "Planning", 
       icon: <Clock />, 
       action: () => onAction('navigateTo', 'schedule'),
-      active: currentPage === 'schedule'
-    },
+      active: currentPage === 'schedule',
+      roles: ['founder', 'manager', 'agent']
+    }
   ];
-  
-  if (role === 'founder' || role === 'manager' || role === 'agent') {
-    menuItems.push(
-      { 
-        title: "Gestion d'équipe", 
-        icon: <Users />, 
-        action: () => onAction('navigateTo', 'team'),
-        active: currentPage === 'team'
-      }
-    );
-  }
+
+  // Fusionner et filtrer les éléments du menu selon le rôle
+  const filteredMenuItems = [...menuItems, ...advancedMenuItems]
+    .filter(item => item.roles.includes(role));
 
   return (
     <Sidebar>
@@ -109,6 +85,7 @@ export const UltraSidebar = ({
       <SidebarHeader className="border-b border-gray-700/50">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
+            <Rocket className="w-6 h-6 text-purple-400" />
             <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
               ULTRA
             </span>
@@ -119,7 +96,7 @@ export const UltraSidebar = ({
       
       <SidebarContent>
         <SidebarMenu>
-          {menuItems.map((item, index) => (
+          {filteredMenuItems.map((item, index) => (
             <SidebarMenuItem key={index}>
               <SidebarMenuButton 
                 onClick={item.action}
@@ -137,7 +114,7 @@ export const UltraSidebar = ({
       <SidebarFooter className="border-t border-gray-700/50">
         <div className="p-4">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-white">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white">
               {username.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 overflow-hidden">
@@ -149,11 +126,14 @@ export const UltraSidebar = ({
           <Button
             variant="outline"
             size="sm"
-            className="w-full justify-start text-gray-400 border-gray-700 hover:text-white"
+            className="w-full justify-start text-gray-400 border-gray-700 hover:text-white group transition-all duration-300 overflow-hidden"
             onClick={onLogout}
           >
-            <LogOut className="h-4 w-4 mr-2" />
-            Déconnexion
+            <div className="relative flex items-center w-full">
+              <LogOut className="h-4 w-4 mr-2 transition-transform group-hover:-translate-x-1 group-hover:scale-110 duration-300" />
+              <span className="transition-transform group-hover:-translate-x-1 duration-300">Déconnexion</span>
+              <span className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent w-0 group-hover:w-full transition-all duration-500 rounded-lg"></span>
+            </div>
           </Button>
         </div>
       </SidebarFooter>

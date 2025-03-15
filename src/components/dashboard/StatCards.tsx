@@ -1,10 +1,10 @@
 
 import {
-  MessageSquare,
-  Image,
-  Video,
-  FileAudio,
-  FileText
+  Trophy,
+  Clock,
+  Calendar,
+  Target,
+  Award
 } from "lucide-react";
 
 interface StatCardsProps {
@@ -14,11 +14,11 @@ interface StatCardsProps {
 export const StatCards = ({ role }: StatCardsProps) => {
   // Ces valeurs seraient normalement récupérées depuis une API
   const stats = [
-    { title: "Chats", value: 0, icon: <MessageSquare className="w-6 h-6" /> },
-    { title: "Images", value: 0, icon: <Image className="w-6 h-6" /> },
-    { title: "Vidéos", value: 0, icon: <Video className="w-6 h-6" /> },
-    { title: "Audio", value: 0, icon: <FileAudio className="w-6 h-6" /> },
-    { title: "Documents", value: 0, icon: <FileText className="w-6 h-6" /> }
+    { title: "Matchs", value: 0, icon: <Trophy className="w-6 h-6" /> },
+    { title: "Heures de live", value: 0, icon: <Clock className="w-6 h-6" /> },
+    { title: "Jours streamés", value: 0, icon: <Calendar className="w-6 h-6" /> },
+    { title: "Objectifs", value: 0, icon: <Target className="w-6 h-6" /> },
+    { title: "Récompenses", value: 0, icon: <Award className="w-6 h-6" /> }
   ];
 
   return (
@@ -26,12 +26,14 @@ export const StatCards = ({ role }: StatCardsProps) => {
       {stats.map((stat, index) => (
         <div
           key={index}
-          className="bg-[#1e293b]/80 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 flex flex-col items-center justify-center transition-all hover:bg-[#1e293b] hover:border-gray-600/50"
+          className="bg-gradient-to-br from-[#1e293b]/90 to-[#1e293b]/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 flex flex-col items-center justify-center transition-all hover:from-[#1e293b] hover:to-[#1e293b]/90 hover:border-purple-700/30 hover:shadow-lg hover:shadow-purple-900/10 group"
         >
-          <div className="text-4xl font-bold text-white mb-1">{stat.value}</div>
-          <div className="flex items-center gap-2 text-gray-400">
+          <div className="mb-2 text-purple-400/80 group-hover:text-purple-400 transition-colors duration-300">
             {stat.icon}
-            <span>{stat.title}</span>
+          </div>
+          <div className="text-3xl font-bold text-white mb-1 group-hover:text-white/90">{stat.value}</div>
+          <div className="text-gray-400 group-hover:text-gray-300 text-sm transition-colors duration-300">
+            {stat.title}
           </div>
         </div>
       ))}

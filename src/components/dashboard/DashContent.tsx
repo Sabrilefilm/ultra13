@@ -28,15 +28,42 @@ export const DashContent = ({
               username={username}
               handle={`@${role === 'founder' ? 'Fondateur' : role}`}
             />
-            <StatCards role={role} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-              <RoleStats role={role} userId={username} />
-              <UpcomingMatches role={role} creatorId={username} />
+            <div className="mb-8">
+              <StatCards role={role} />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-[#1e293b]/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
+                <h3 className="text-xl font-semibold mb-4 text-white/90">Statistiques</h3>
+                <RoleStats role={role} userId={username} />
+              </div>
+              <div className="bg-[#1e293b]/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
+                <h3 className="text-xl font-semibold mb-4 text-white/90">Matchs à venir</h3>
+                <UpcomingMatches role={role} creatorId={username} />
+              </div>
             </div>
           </>
         );
       case 'penalties':
-        return <PenaltyManager username={username} role={role} />;
+        return (
+          <div className="bg-[#1e293b]/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 shadow-sm">
+            <h3 className="text-xl font-semibold mb-4 text-white/90">Gestion des pénalités</h3>
+            <PenaltyManager username={username} role={role} />
+          </div>
+        );
+      case 'team':
+        return (
+          <div className="bg-[#1e293b]/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 shadow-sm">
+            <h3 className="text-xl font-semibold mb-4 text-white/90">Gestion d'équipe</h3>
+            <p className="text-gray-400">Fonctionnalité disponible pour les agents, managers et fondateurs.</p>
+          </div>
+        );
+      case 'schedule':
+        return (
+          <div className="bg-[#1e293b]/70 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 shadow-sm">
+            <h3 className="text-xl font-semibold mb-4 text-white/90">Planning</h3>
+            <p className="text-gray-400">Fonctionnalité disponible pour les agents, managers et fondateurs.</p>
+          </div>
+        );
       default:
         return (
           <div className="flex items-center justify-center h-64">
@@ -49,9 +76,11 @@ export const DashContent = ({
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
           {currentPage === 'dashboard' ? 'Tableau de bord' : 
            currentPage === 'penalties' ? 'Gestion des pénalités' : 
+           currentPage === 'team' ? 'Gestion d\'équipe' : 
+           currentPage === 'schedule' ? 'Planning' : 
            'Ultra by Phocéen Agency'}
         </h1>
         <div className="text-sm text-white/60">
