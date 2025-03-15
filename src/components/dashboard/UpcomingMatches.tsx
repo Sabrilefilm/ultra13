@@ -39,7 +39,12 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
       doc.setFont("helvetica", "bold");
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(18);
-      doc.text('Agency Phocéen', 14, 14);
+      doc.text('ULTRA by Phocéen Agency', 14, 14);
+      
+      // Ajouter le site web
+      doc.setFontSize(10);
+      doc.setTextColor(255, 255, 255);
+      doc.text('ultra.phocéenagency.fr', doc.internal.pageSize.getWidth() / 2, 14, { align: 'center' });
       
       doc.setFontSize(12);
       doc.setFont("helvetica", "normal");
@@ -162,8 +167,9 @@ export const UpcomingMatches = ({ role, creatorId }: { role: string; creatorId: 
       doc.setTextColor(100, 100, 100);
       doc.text('Agency Phocéen - Confidentiel', 14, y);
       doc.text(`Total: ${matches?.length || 0} match(s)`, 14, y + 5);
+      doc.text(`Généré le: ${format(new Date(), 'dd/MM/yyyy à HH:mm:ss', { locale: fr })}`, doc.internal.pageSize.getWidth() - 14, y + 5, { align: 'right' });
 
-      doc.save('agency-phoceen-matchs.pdf');
+      doc.save('ultra-phoceen-agency-matchs.pdf');
       
       toast.success("PDF généré avec succès");
     } catch (error) {
