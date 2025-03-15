@@ -1,150 +1,255 @@
-
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import React, { useState } from "react";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarProvider,
-  SidebarRail,
-  useSidebar
-} from "@/components/ui/sidebar";
-import {
-  LogOut,
   Home,
-  AlertOctagon,
+  User,
+  Calendar,
+  AlertTriangle,
   Users,
-  Clock,
+  Mail as MailIcon,
+  Shield,
+  Zap,
+  Bell,
+  ChevronsLeft,
+  ChevronsRight,
+  LogOut,
   Rocket,
-  BookOpen
+  Menu as MenuIcon,
+  X as XIcon,
+  MessageSquare,
+  ScrollText,
 } from "lucide-react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { supabase } from "@/lib/supabase";
 
-interface UltraSidebarProps {
-  username: string;
-  role: string;
-  onLogout: () => void;
-  onAction: (action: string, data?: any) => void;
-  currentPage: string;
+interface NavItemProps {
+  to: string;
+  icon: React.ReactNode;
+  label: string;
+  isExpanded: boolean;
 }
 
-export const UltraSidebar = ({
-  username,
-  role,
-  onLogout,
-  onAction,
-  currentPage
-}: UltraSidebarProps) => {
-  const { toggleSidebar } = useSidebar();
+const NavItem: React.FC<NavItemProps> = ({
+  to,
+  icon,
+  label,
+  isExpanded,
+}) => {
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        cn(
+          "flex items-center p-2 rounded hover:bg-gray-800 transition-colors",
+          isExpanded ? "justify-start" : "justify-center",
+          isActive ? "bg-purple-700 text-white" : "text-gray-400"
+        )
+      }
+    >
+      {icon}
+      <span
+        className={cn(
+          "ml-2 transition-opacity duration-200",
+          isExpanded ? "opacity-100" : "opacity-0 w-0"
+        )}
+      >
+        {label}
+      </span>
+    </NavLink>
+  );
+};
 
-  // Créons les éléments du menu de base disponibles pour tous les rôles
-  const menuItems = [
-    { 
-      title: "Tableau de bord", 
-      icon: <Home />, 
-      action: () => onAction('navigateTo', 'dashboard'),
-      active: currentPage === 'dashboard',
-      roles: ['founder', 'manager', 'agent', 'creator', 'client']
-    },
-    { 
-      title: "Pénalités", 
-      icon: <AlertOctagon />, 
-      action: () => onAction('navigateTo', 'penalties'),
-      active: currentPage === 'penalties',
-      roles: ['founder', 'manager', 'agent', 'creator']
-    },
-    { 
-      title: "Règlement intérieur", 
-      icon: <BookOpen />, 
-      action: () => onAction('navigateTo', 'internal-rules'),
-      active: currentPage === 'internal-rules',
-      roles: ['founder', 'manager', 'agent', 'creator', 'client']
-    }
-  ];
-  
-  // Options avancées uniquement pour founder, manager et agent
-  const advancedMenuItems = [
-    { 
-      title: "Gestion d'équipe", 
-      icon: <Users />, 
-      action: () => onAction('navigateTo', 'team'),
-      active: currentPage === 'team',
-      roles: ['founder', 'manager', 'agent']
-    },
-    { 
-      title: "Planning", 
-      icon: <Clock />, 
-      action: () => onAction('navigateTo', 'schedule'),
-      active: currentPage === 'schedule',
-      roles: ['founder', 'manager', 'agent']
-    }
-  ];
+export const UltraSidebar = () => {
+  const [isExpanded, setIsExpanded] useState(true);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  // Fusionner et filtrer les éléments du menu selon le rôle
-  const filteredMenuItems = [...menuItems, ...advancedMenuItems]
-    .filter(item => item.roles.includes(role));
+  const toggleSidebar = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const confirmLogout = () => {
+    const confirm = window.confirm("Êtes-vous sûr de vouloir vous déconnecter ?");
+    if (confirm) {
+      handleLogout();
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate("/");
+      toast({
+        title: "Déconnexion réussie",
+        description: "Vous avez été déconnecté avec succès.",
+      });
+    } catch (error: any) {
+      console.error("Logout error:", error.message);
+      toast({
+        variant: "destructive",
+        title: "Erreur de déconnexion",
+        description: "Une erreur s'est produite lors de la déconnexion.",
+      });
+    }
+  };
 
   return (
-    <Sidebar>
-      <SidebarRail />
-      <SidebarHeader className="border-b border-gray-700/50">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <Rocket className="w-6 h-6 text-purple-400" />
-            <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
-              ULTRA
-            </span>
-            <span className="text-sm text-white/70">by Phocéen Agency</span>
-          </div>
+    <aside
+      className={cn(
+        "h-screen fixed left-0 top-0 z-40 flex flex-col bg-[#0e0e16] border-r border-gray-800/40 text-white transition-transform",
+        isExpanded ? "w-64" : "w-20",
+        isMobile && !isExpanded ? "-translate-x-full" : "translate-x-0"
+      )}
+    >
+      {isMobile && (
+        <div
+          className={cn(
+            "fixed z-40 flex items-center justify-center w-12 h-12 bg-purple-600 rounded-full shadow-lg cursor-pointer transition-all duration-200",
+            isExpanded ? "left-60 top-4" : "left-4 top-4"
+          )}
+          onClick={toggleSidebar}
+        >
+          {isExpanded ? (
+            <XIcon className="w-6 h-6 text-white" />
+          ) : (
+            <MenuIcon className="w-6 h-6 text-white" />
+          )}
         </div>
-      </SidebarHeader>
-      
-      <SidebarContent>
-        <SidebarMenu>
-          {filteredMenuItems.map((item, index) => (
-            <SidebarMenuItem key={index}>
-              <SidebarMenuButton 
-                onClick={item.action}
-                isActive={item.active}
-                className={`${item.active ? 'bg-purple-600/20 text-purple-400 border-l-4 border-purple-500' : ''}`}
-              >
-                {item.icon}
-                <span>{item.title}</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarContent>
-      
-      <SidebarFooter className="border-t border-gray-700/50">
-        <div className="p-4">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white">
-              {username.charAt(0).toUpperCase()}
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <p className="text-sm font-medium text-white truncate">{username}</p>
-              <p className="text-xs text-gray-400 truncate">{role}</p>
-            </div>
-          </div>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-start text-gray-400 border-gray-700 hover:text-white group transition-all duration-300 overflow-hidden"
-            onClick={onLogout}
+      )}
+
+      <div className="flex items-center justify-between h-16 px-4 border-b border-gray-800/40">
+        <div className="flex items-center">
+          <Rocket className="w-6 h-6 text-purple-400" />
+          <span
+            className={cn(
+              "ml-2 font-bold transition-opacity duration-200",
+              isExpanded ? "opacity-100" : "opacity-0"
+            )}
           >
-            <div className="relative flex items-center w-full">
-              <LogOut className="h-4 w-4 mr-2 transition-transform group-hover:-translate-x-1 group-hover:scale-110 duration-300" />
-              <span className="transition-transform group-hover:-translate-x-1 duration-300">Déconnexion</span>
-              <span className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent w-0 group-hover:w-full transition-all duration-500 rounded-lg"></span>
-            </div>
-          </Button>
+            ULTRA
+          </span>
         </div>
-      </SidebarFooter>
-    </Sidebar>
+        {!isMobile && (
+          <button
+            onClick={toggleSidebar}
+            className="p-1 rounded hover:bg-gray-800"
+          >
+            {isExpanded ? (
+              <ChevronsLeft className="w-5 h-5 text-gray-400" />
+            ) : (
+              <ChevronsRight className="w-5 h-5 text-gray-400" />
+            )}
+          </button>
+        )}
+      </div>
+
+      <ScrollArea className="flex-1">
+        <div className="p-4">
+          <nav className="space-y-2">
+            <NavItem
+              to="/"
+              icon={<Home className="w-5 h-5" />}
+              label="Tableau de bord"
+              isExpanded={isExpanded}
+            />
+            <NavItem
+              to="/personal-information"
+              icon={<User className="w-5 h-5" />}
+              label="Profil"
+              isExpanded={isExpanded}
+            />
+            <NavItem
+              to="/messages"
+              icon={<MessageSquare className="w-5 h-5" />}
+              label="Messages"
+              isExpanded={isExpanded}
+            />
+            <NavItem
+              to="/penalties"
+              icon={<AlertTriangle className="w-5 h-5" />}
+              label="Pénalités"
+              isExpanded={isExpanded}
+            />
+            <NavItem
+              to="/team"
+              icon={<Users className="w-5 h-5" />}
+              label="Équipe"
+              isExpanded={isExpanded}
+            />
+            <NavItem
+              to="/schedule"
+              icon={<Calendar className="w-5 h-5" />}
+              label="Planning"
+              isExpanded={isExpanded}
+            />
+            <NavItem
+              to="/internal-rules"
+              icon={<ScrollText className="w-5 h-5" />}
+              label="Règlement"
+              isExpanded={isExpanded}
+            />
+            <NavItem
+              to="/contact"
+              icon={<MailIcon className="w-5 h-5" />}
+              label="Contact"
+              isExpanded={isExpanded}
+            />
+          </nav>
+
+          {isExpanded && (
+            <div className="mt-6 pt-6 border-t border-gray-800/40">
+              <h3 className="mb-2 text-xs font-semibold text-gray-400 uppercase">
+                Administration
+              </h3>
+              <nav className="space-y-2">
+                <NavItem
+                  to="/users"
+                  icon={<Shield className="w-5 h-5" />}
+                  label="Gestion Utilisateurs"
+                  isExpanded={isExpanded}
+                />
+                <NavItem
+                  to="/external-matches"
+                  icon={<Zap className="w-5 h-5" />}
+                  label="Matchs Externes"
+                  isExpanded={isExpanded}
+                />
+                <NavItem
+                  to="/notifications"
+                  icon={<Bell className="w-5 h-5" />}
+                  label="Notifications"
+                  isExpanded={isExpanded}
+                />
+              </nav>
+            </div>
+          )}
+        </div>
+      </ScrollArea>
+
+      <div className="p-4 border-t border-gray-800/40">
+        <button
+          onClick={confirmLogout}
+          className={cn(
+            "flex items-center w-full p-2 rounded hover:bg-gray-800 transition-colors",
+            isExpanded ? "justify-start" : "justify-center"
+          )}
+        >
+          <LogOut className="w-5 h-5 text-gray-400" />
+          <span
+            className={cn(
+              "ml-2 text-gray-300 transition-opacity duration-200",
+              isExpanded ? "opacity-100" : "opacity-0 w-0"
+            )}
+          >
+            Déconnexion
+          </span>
+        </button>
+      </div>
+    </aside>
   );
 };

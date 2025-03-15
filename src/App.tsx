@@ -15,6 +15,7 @@ import Penalties from "./pages/Penalties";
 import Schedule from "./pages/Schedule";
 import TeamManagement from "./pages/TeamManagement";
 import InternalRules from "./pages/InternalRules";
+import Messages from "./pages/Messages";
 import { Loading } from "./components/ui/loading";
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/team" element={<TeamManagement />} />
         <Route path="/internal-rules" element={<InternalRules />} />
+        <Route path="/messages" element={<Messages />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
