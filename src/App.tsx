@@ -11,6 +11,10 @@ import CreatorStats from "./pages/CreatorStats";
 import AgencyAssignment from "./pages/AgencyAssignment";
 import ExternalMatches from "./pages/ExternalMatches";
 import Contact from "./pages/Contact";
+import Penalties from "./pages/Penalties";
+import Schedule from "./pages/Schedule";
+import TeamManagement from "./pages/TeamManagement";
+import InternalRules from "./pages/InternalRules";
 import { Loading } from "./components/ui/loading";
 
 function App() {
@@ -26,7 +30,7 @@ function App() {
   }, []);
 
   if (isLoading) {
-    return <Loading fullScreen size="large" text="Agency Phocéen se charge..." />;
+    return <Loading fullScreen size="large" text="Ultra se charge..." />;
   }
 
   return (
@@ -41,6 +45,10 @@ function App() {
         <Route path="/agency-assignment" element={<AgencyAssignment />} />
         <Route path="/external-matches" element={<ExternalMatches />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/penalties" element={<Penalties />} />
+        <Route path="/schedule" element={<Schedule />} />
+        <Route path="/team" element={<TeamManagement />} />
+        <Route path="/internal-rules" element={<InternalRules />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

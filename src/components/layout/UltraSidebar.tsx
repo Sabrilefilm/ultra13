@@ -19,7 +19,8 @@ import {
   AlertOctagon,
   Users,
   Clock,
-  Rocket
+  Rocket,
+  BookOpen
 } from "lucide-react";
 
 interface UltraSidebarProps {
@@ -54,6 +55,13 @@ export const UltraSidebar = ({
       action: () => onAction('navigateTo', 'penalties'),
       active: currentPage === 'penalties',
       roles: ['founder', 'manager', 'agent', 'creator']
+    },
+    { 
+      title: "Règlement intérieur", 
+      icon: <BookOpen />, 
+      action: () => onAction('navigateTo', 'internal-rules'),
+      active: currentPage === 'internal-rules',
+      roles: ['founder', 'manager', 'agent', 'creator', 'client']
     }
   ];
   

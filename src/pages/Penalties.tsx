@@ -1,23 +1,18 @@
 
-import { useState } from "react";
+import React from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AuthView } from "@/components/auth/AuthView";
-import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
+import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { useAccountManagement } from "@/hooks/use-account-management";
-import { usePersonalInfoCheck } from "@/hooks/use-personal-info-check";
+import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
 import { useToast } from "@/hooks/use-toast";
-import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
 
-const Index = () => {
+const Penalties = () => {
   const { toast } = useToast();
-  const { isAuthenticated, username, role, handleLogout, handleLogin } = useIndexAuth();
+  const { isAuthenticated, username, role, handleLogout } = useIndexAuth();
   const { platformSettings, handleUpdateSettings } = usePlatformSettings(role);
   const { handleCreateAccount } = useAccountManagement();
-  
-  // Check personal info for creators
-  usePersonalInfoCheck(isAuthenticated, role);
   
   // Inactivity timer for automatic logout
   const { showWarning, dismissWarning, formattedTime } = useInactivityTimer({
@@ -36,7 +31,8 @@ const Index = () => {
   });
 
   if (!isAuthenticated) {
-    return <AuthView onLogin={handleLogin} />;
+    window.location.href = '/';
+    return null;
   }
 
   return (
@@ -51,10 +47,10 @@ const Index = () => {
         showWarning={showWarning}
         dismissWarning={dismissWarning}
         formattedTime={formattedTime}
-        currentPage="dashboard"
+        currentPage="penalties"
       />
     </SidebarProvider>
   );
 }
 
-export default Index;
+export default Penalties;

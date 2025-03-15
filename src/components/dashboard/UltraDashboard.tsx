@@ -16,6 +16,7 @@ interface UltraDashboardProps {
   showWarning: boolean;
   dismissWarning: () => void;
   formattedTime: string;
+  currentPage?: string;
 }
 
 export const UltraDashboard = ({
@@ -27,7 +28,8 @@ export const UltraDashboard = ({
   handleUpdateSettings,
   showWarning,
   dismissWarning,
-  formattedTime
+  formattedTime,
+  currentPage = 'dashboard'
 }: UltraDashboardProps) => {
   // Modal states
   const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
@@ -38,7 +40,6 @@ export const UltraDashboard = ({
   const [isSponsorshipModalOpen, setIsSponsorshipModalOpen] = useState(false);
   const [showSponsorshipList, setShowSponsorshipList] = useState(false);
   const [isCreatePosterModalOpen, setIsCreatePosterModalOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState('dashboard');
 
   const onAction = (action: string, data?: any) => {
     switch (action) {
@@ -65,7 +66,7 @@ export const UltraDashboard = ({
         setIsCreatePosterModalOpen(true);
         break;
       case 'navigateTo':
-        setCurrentPage(data);
+        window.location.href = data === 'dashboard' ? '/' : `/${data}`;
         break;
       default:
         break;
