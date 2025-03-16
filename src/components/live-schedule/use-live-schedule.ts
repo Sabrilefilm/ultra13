@@ -100,7 +100,8 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
         hours: schedule.hours,
         days: schedule.days,
         is_active: schedule.is_active,
-        creator_name: schedule.user_accounts?.username || 'Inconnu'
+        creator_name: schedule.user_accounts?.username || 'Inconnu',
+        creator_id: schedule.creator_id
       }));
 
       setAllCreatorSchedules(formattedSchedules);

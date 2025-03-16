@@ -9,7 +9,7 @@ import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
 import { useToast } from "@/hooks/use-toast";
 import { LiveScheduleModal } from "@/components/live-schedule";
 import { Button } from "@/components/ui/button";
-import { Download, Plus } from "lucide-react";
+import { Download, Plus, Calendar } from "lucide-react";
 import { useUpcomingMatches } from "@/hooks/use-upcoming-matches";
 import { ScheduleMatchDialog } from "@/components/matches/ScheduleMatchDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
