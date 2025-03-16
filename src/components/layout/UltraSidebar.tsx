@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Home,
@@ -33,6 +32,14 @@ interface NavItemProps {
   isExpanded: boolean;
 }
 
+interface UltraSidebarProps {
+  username: string;
+  role: string;
+  onLogout: () => void;
+  onAction?: (action: string, data?: any) => void;
+  currentPage?: string;
+}
+
 const NavItem: React.FC<NavItemProps> = ({
   to,
   icon,
@@ -63,7 +70,13 @@ const NavItem: React.FC<NavItemProps> = ({
   );
 };
 
-export const UltraSidebar = () => {
+export const UltraSidebar = ({
+  username,
+  role,
+  onLogout,
+  onAction,
+  currentPage = 'dashboard'
+}: UltraSidebarProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const navigate = useNavigate();
@@ -89,6 +102,9 @@ export const UltraSidebar = () => {
         title: "Déconnexion réussie",
         description: "Vous avez été déconnecté avec succès.",
       });
+      if (onLogout) {
+        onLogout();
+      }
     } catch (error: any) {
       console.error("Logout error:", error.message);
       toast({
