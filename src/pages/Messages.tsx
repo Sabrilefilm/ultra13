@@ -32,7 +32,8 @@ const Messages = () => {
     sendMessage,
     sendingMessage,
     loadingConversations,
-    loadingMessages
+    loadingMessages,
+    unreadCount
   } = useMessages(userId);
 
   useEffect(() => {
@@ -104,7 +105,7 @@ const Messages = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/')}
+              onClick={() => navigate("/")}
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             >
               <ArrowLeft className="h-5 w-5" />

@@ -22,6 +22,8 @@ export const useMessages = (userId: string) => {
   const { data: conversations, isLoading: loadingConversations } = useQuery({
     queryKey: ['conversations', userId],
     queryFn: async () => {
+      if (!userId) return [];
+      
       // Get all messages involving the current user
       const { data: sentMessages, error: sentError } = await supabase
         .from('chats')
@@ -51,6 +53,7 @@ export const useMessages = (userId: string) => {
       
       return userDetails || [];
     },
+    enabled: !!userId,
     retry: 1,
   });
 
@@ -58,7 +61,7 @@ export const useMessages = (userId: string) => {
   const { data: messages, isLoading: loadingMessages } = useQuery({
     queryKey: ['messages', userId, activeContact],
     queryFn: async () => {
-      if (!activeContact) return [];
+      if (!activeContact || !userId) return [];
       
       const { data, error } = await supabase
         .from('chats')
@@ -69,14 +72,14 @@ export const useMessages = (userId: string) => {
       if (error) throw error;
       return data || [];
     },
-    enabled: !!activeContact,
+    enabled: !!activeContact && !!userId,
     retry: 1,
   });
 
   // Mark messages as read when conversation is opened
   useEffect(() => {
     const markAsRead = async () => {
-      if (!activeContact || !messages?.length) return;
+      if (!activeContact || !messages?.length || !userId) return;
       
       const unreadMessages = messages.filter(msg => 
         msg.receiver_id === userId && !msg.read
@@ -99,7 +102,7 @@ export const useMessages = (userId: string) => {
   // Send a new message
   const { mutate: sendMessage, isPending: sendingMessage } = useMutation({
     mutationFn: async () => {
-      if (!activeContact || !newMessage.trim()) return;
+      if (!activeContact || !newMessage.trim() || !userId) return;
       
       const { error } = await supabase
         .from('chats')
@@ -127,6 +130,8 @@ export const useMessages = (userId: string) => {
   const { data: unreadCount, isLoading: loadingUnread } = useQuery({
     queryKey: ['unread', userId],
     queryFn: async () => {
+      if (!userId) return 0;
+      
       const { data, error, count } = await supabase
         .from('chats')
         .select('*', { count: 'exact' })
@@ -136,8 +141,38 @@ export const useMessages = (userId: string) => {
       if (error) throw error;
       return count || 0;
     },
+    enabled: !!userId,
     retry: 1,
   });
+
+  // Set up real-time subscription for new messages
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel('public:chats')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chats',
+        filter: `receiver_id=eq.${userId}`
+      }, (payload) => {
+        queryClient.invalidateQueries({ queryKey: ['messages'] });
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+        queryClient.invalidateQueries({ queryKey: ['unread'] });
+        
+        // Show notification for new message
+        if (payload.new && payload.new.sender_id !== userId) {
+          const sender = conversations?.find(c => c.id === payload.new.sender_id);
+          toast.success(`Nouveau message de ${sender?.username || 'Utilisateur'}`);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId, conversations, queryClient]);
 
   return {
     conversations,

@@ -16,6 +16,8 @@ import Schedule from "./pages/Schedule";
 import TeamManagement from "./pages/TeamManagement";
 import InternalRules from "./pages/InternalRules";
 import Messages from "./pages/Messages";
+import Transfers from "./pages/Transfers";
+import Documents from "./pages/Documents";
 import { Loading } from "./components/ui/loading";
 
 function App() {
@@ -51,6 +53,8 @@ function App() {
         <Route path="/team" element={<TeamManagement />} />
         <Route path="/internal-rules" element={<InternalRules />} />
         <Route path="/messages" element={<Messages />} />
+        <Route path="/transfers" element={<Transfers />} />
+        <Route path="/documents" element={<Documents />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
