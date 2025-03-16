@@ -5,12 +5,13 @@ export function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(false);
 
   useEffect(() => {
+    // Create MediaQueryList object
     const media = window.matchMedia(query);
     
-    // Set initial value
+    // Initial check
     setMatches(media.matches);
     
-    // Define callback for media query change
+    // Define listener function
     const listener = (e: MediaQueryListEvent) => {
       setMatches(e.matches);
     };
@@ -18,7 +19,7 @@ export function useMediaQuery(query: string): boolean {
     // Add event listener
     media.addEventListener("change", listener);
     
-    // Cleanup on unmount
+    // Cleanup function
     return () => {
       media.removeEventListener("change", listener);
     };

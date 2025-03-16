@@ -11,4 +11,5 @@ export interface Schedule {
   days: number;
   is_active: boolean;
   creator_name?: string;
+  creator_id?: string;
 }

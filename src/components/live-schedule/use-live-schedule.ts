@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [allCreatorSchedules, setAllCreatorSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
   const [profileId, setProfileId] = useState<string | null>(null);
   const [creatorName, setCreatorName] = useState("");
@@ -78,6 +79,36 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
     }
   };
 
+  const fetchAllCreatorSchedules = async () => {
+    try {
+      const { data: schedulesData, error: schedulesError } = await supabase
+        .from("live_schedules")
+        .select(`
+          id, 
+          hours, 
+          days, 
+          is_active, 
+          creator_id,
+          user_accounts(username)
+        `)
+        .order('days', { ascending: false });
+
+      if (schedulesError) throw schedulesError;
+
+      const formattedSchedules: Schedule[] = schedulesData.map(schedule => ({
+        id: schedule.id,
+        hours: schedule.hours,
+        days: schedule.days,
+        is_active: schedule.is_active,
+        creator_name: schedule.user_accounts?.username || 'Inconnu'
+      }));
+
+      setAllCreatorSchedules(formattedSchedules);
+    } catch (error) {
+      console.error("Erreur lors du chargement de tous les horaires:", error);
+    }
+  };
+
   const handleSave = async () => {
     if (!profileId) return;
 
@@ -110,6 +141,9 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
         if (error) throw error;
       }
 
+      // Mettre à jour la liste complète
+      await fetchAllCreatorSchedules();
+
       toast.success("Horaires mis à jour avec succès");
       return true;
     } catch (error) {
@@ -140,23 +174,28 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
   };
 
   useEffect(() => {
-    if (isOpen && creatorId) {
-      console.log("Modal opened for creator:", creatorId);
-      setLoading(true);
-      const initializeData = async () => {
-        const id = await fetchProfileId(creatorId);
-        if (id) {
-          await fetchSchedules(id);
-        } else {
-          setLoading(false);
-        }
-      };
-      initializeData();
+    if (isOpen) {
+      fetchAllCreatorSchedules();
+      
+      if (creatorId) {
+        console.log("Modal opened for creator:", creatorId);
+        setLoading(true);
+        const initializeData = async () => {
+          const id = await fetchProfileId(creatorId);
+          if (id) {
+            await fetchSchedules(id);
+          } else {
+            setLoading(false);
+          }
+        };
+        initializeData();
+      }
     }
   }, [isOpen, creatorId]);
 
   return {
     schedules,
+    allCreatorSchedules,
     loading,
     updateSchedule,
     handleSave,

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import {
   Home,
   User,
@@ -30,6 +31,7 @@ interface NavItemProps {
   icon: React.ReactNode;
   label: string;
   isExpanded: boolean;
+  badge?: number;
 }
 
 interface UltraSidebarProps {
@@ -45,13 +47,14 @@ const NavItem: React.FC<NavItemProps> = ({
   icon,
   label,
   isExpanded,
+  badge,
 }) => {
   return (
     <NavLink
       to={to}
       className={({ isActive }) =>
         cn(
-          "flex items-center p-2 rounded hover:bg-gray-800 transition-colors",
+          "flex items-center p-2 rounded hover:bg-gray-800 transition-colors relative",
           isExpanded ? "justify-start" : "justify-center",
           isActive ? "bg-purple-700 text-white" : "text-gray-400"
         )
@@ -66,6 +69,12 @@ const NavItem: React.FC<NavItemProps> = ({
       >
         {label}
       </span>
+      
+      {badge !== undefined && badge > 0 && (
+        <span className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full transform translate-x-1 -translate-y-1 animate-pulse">
+          {badge > 99 ? "99+" : badge}
+        </span>
+      )}
     </NavLink>
   );
 };
@@ -81,6 +90,7 @@ export const UltraSidebar = ({
   const isMobile = useMediaQuery("(max-width: 768px)");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const toggleSidebar = () => {
     setIsExpanded(!isExpanded);
@@ -115,10 +125,55 @@ export const UltraSidebar = ({
     }
   };
 
+  // Fetch unread message count
+  useEffect(() => {
+    if (!username) return;
+
+    const fetchUnreadCount = async () => {
+      try {
+        const { data: userData } = await supabase.auth.getSession();
+        if (!userData.session) return;
+
+        const userId = userData.session.user.id;
+        const { data, error, count } = await supabase
+          .from("chats")
+          .select("*", { count: "exact" })
+          .eq("receiver_id", userId)
+          .eq("read", false);
+
+        if (error) throw error;
+        setUnreadCount(count || 0);
+      } catch (error) {
+        console.error("Error fetching unread messages:", error);
+      }
+    };
+
+    fetchUnreadCount();
+
+    // Subscribe to realtime changes for new messages
+    const channel = supabase
+      .channel('public:chats')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chats'
+      }, fetchUnreadCount)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'chats'
+      }, fetchUnreadCount)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [username]);
+
   return (
     <aside
       className={cn(
-        "h-screen fixed left-0 top-0 z-40 flex flex-col bg-[#0e0e16] border-r border-gray-800/40 text-white transition-transform",
+        "h-screen fixed left-0 top-0 z-40 flex flex-col bg-[#0e0e16] border-r border-gray-800/40 text-white transition-all duration-300",
         isExpanded ? "w-64" : "w-20",
         isMobile && !isExpanded ? "-translate-x-full" : "translate-x-0"
       )}
@@ -185,6 +240,7 @@ export const UltraSidebar = ({
               icon={<MessageSquare className="w-5 h-5" />}
               label="Messages"
               isExpanded={isExpanded}
+              badge={unreadCount}
             />
             <NavItem
               to="/penalties"
