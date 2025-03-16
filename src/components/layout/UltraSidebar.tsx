@@ -1,362 +1,195 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Sidebar } from "@/components/ui/sidebar";
 import {
-  Home,
-  User,
   Calendar,
+  User,
+  Bell,
+  FileText,
+  Contact,
   AlertTriangle,
   Users,
-  Mail as MailIcon,
-  Shield,
-  Zap,
-  Bell,
-  ChevronsLeft,
-  ChevronsRight,
-  LogOut,
-  Rocket,
-  Menu as MenuIcon,
-  X as XIcon,
   MessageSquare,
-  ScrollText,
-  FileText,
-  UserCheck
+  Book,
+  RefreshCw,
+  UserCheck,
+  ClipboardList,
+  LayoutDashboard,
+  Shield,
+  Trophy
 } from "lucide-react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { supabase } from "@/lib/supabase";
-
-interface NavItemProps {
-  to: string;
-  icon: React.ReactNode;
-  label: string;
-  isExpanded: boolean;
-  badge?: number;
-}
 
 interface UltraSidebarProps {
   username: string;
   role: string;
   onLogout: () => void;
-  onAction?: (action: string, data?: any) => void;
-  currentPage?: string;
+  currentPage: string;
 }
-
-const NavItem: React.FC<NavItemProps> = ({
-  to,
-  icon,
-  label,
-  isExpanded,
-  badge,
-}) => {
-  return (
-    <NavLink
-      to={to}
-      className={({ isActive }) =>
-        cn(
-          "flex items-center p-2 rounded transition-all duration-200 relative group",
-          isExpanded ? "justify-start" : "justify-center",
-          isActive 
-            ? "bg-purple-600 text-white shadow-md" 
-            : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
-        )
-      }
-    >
-      <div className="flex items-center justify-center">
-        {icon}
-      </div>
-      <span
-        className={cn(
-          "ml-2 transition-all duration-300 whitespace-nowrap",
-          isExpanded ? "opacity-100 w-auto" : "opacity-0 w-0 absolute"
-        )}
-      >
-        {label}
-      </span>
-      
-      {!isExpanded && (
-        <div className="absolute left-full pl-2 ml-1 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity rounded bg-gray-900 text-white text-xs py-1 px-2 whitespace-nowrap z-50">
-          {label}
-        </div>
-      )}
-      
-      {badge !== undefined && badge > 0 && (
-        <span className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full transform translate-x-1 -translate-y-1 animate-pulse">
-          {badge > 99 ? "99+" : badge}
-        </span>
-      )}
-    </NavLink>
-  );
-};
 
 export const UltraSidebar = ({
   username,
   role,
   onLogout,
-  onAction,
-  currentPage = 'dashboard'
+  currentPage
 }: UltraSidebarProps) => {
-  const [isExpanded, setIsExpanded] = useState(true);
-  const isMobile = useMediaQuery("(max-width: 768px)");
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [unreadCount, setUnreadCount] = useState(0);
 
-  const toggleSidebar = () => {
-    setIsExpanded(!isExpanded);
-  };
-
-  const confirmLogout = () => {
-    const confirm = window.confirm("Êtes-vous sûr de vouloir vous déconnecter ?");
-    if (confirm) {
-      handleLogout();
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      navigate("/");
-      toast({
-        title: "Déconnexion réussie",
-        description: "Vous avez été déconnecté avec succès.",
-      });
-      if (onLogout) {
-        onLogout();
+  // Déterminer les liens en fonction du rôle
+  const getNavLinks = () => {
+    const links = [
+      { 
+        path: "/", 
+        label: "Tableau de bord", 
+        icon: <LayoutDashboard className="h-5 w-5" />, 
+        id: "dashboard",
+        roles: ["founder", "manager", "agent", "creator", "viewer"] 
+      },
+      { 
+        path: "/matches", 
+        label: "Matchs", 
+        icon: <Trophy className="h-5 w-5" />, 
+        id: "matches",
+        roles: ["founder", "manager", "agent", "creator", "viewer"] 
+      },
+      { 
+        path: "/schedule", 
+        label: "Planning & Horaires", 
+        icon: <Calendar className="h-5 w-5" />, 
+        id: "schedule",
+        roles: ["founder", "manager", "agent"] 
+      },
+      { 
+        path: "/users", 
+        label: "Gestion utilisateurs", 
+        icon: <User className="h-5 w-5" />, 
+        id: "users",
+        roles: ["founder", "manager"] 
+      },
+      { 
+        path: "/agency-assignment", 
+        label: "Attribution agences", 
+        icon: <UserCheck className="h-5 w-5" />, 
+        id: "agency-assignment",
+        roles: ["founder"] 
+      },
+      { 
+        path: "/team", 
+        label: "Équipe", 
+        icon: <Users className="h-5 w-5" />, 
+        id: "team",
+        roles: ["founder", "manager"] 
+      },
+      { 
+        path: "/transfers", 
+        label: "Transferts", 
+        icon: <RefreshCw className="h-5 w-5" />, 
+        id: "transfers",
+        roles: ["founder", "manager", "agent", "creator"] 
+      },
+      { 
+        path: "/documents", 
+        label: "Documents", 
+        icon: <FileText className="h-5 w-5" />, 
+        id: "documents",
+        roles: ["founder", "manager", "agent", "creator"] 
+      },
+      { 
+        path: "/notifications", 
+        label: "Notifications", 
+        icon: <Bell className="h-5 w-5" />, 
+        id: "notifications",
+        roles: ["founder", "manager"] 
+      },
+      { 
+        path: "/internal-rules", 
+        label: "Règlement interne", 
+        icon: <Book className="h-5 w-5" />, 
+        id: "internal-rules",
+        roles: ["founder", "manager", "agent", "creator", "viewer"] 
+      },
+      { 
+        path: "/penalties", 
+        label: "Pénalités", 
+        icon: <AlertTriangle className="h-5 w-5" />, 
+        id: "penalties",
+        roles: ["founder", "manager"] 
+      },
+      { 
+        path: "/contact", 
+        label: "Contact", 
+        icon: <Contact className="h-5 w-5" />, 
+        id: "contact",
+        roles: ["founder", "manager", "agent", "creator", "viewer"] 
+      },
+      { 
+        path: "/messages", 
+        label: "Messages", 
+        icon: <MessageSquare className="h-5 w-5" />, 
+        id: "messages",
+        roles: ["founder", "manager", "agent", "creator"] 
+      },
+      { 
+        path: "/personal-information", 
+        label: "Mes informations", 
+        icon: <ClipboardList className="h-5 w-5" />, 
+        id: "personal-information",
+        roles: ["founder", "manager", "agent", "creator"] 
       }
-    } catch (error: any) {
-      console.error("Logout error:", error.message);
-      toast({
-        variant: "destructive",
-        title: "Erreur de déconnexion",
-        description: "Une erreur s'est produite lors de la déconnexion.",
-      });
-    }
+    ];
+
+    return links.filter(link => link.roles.includes(role));
   };
-
-  // Fetch unread message count
-  useEffect(() => {
-    if (!username) return;
-
-    const fetchUnreadCount = async () => {
-      try {
-        const { data: userData } = await supabase.auth.getSession();
-        if (!userData.session) return;
-
-        const userId = userData.session.user.id;
-        const { data, error, count } = await supabase
-          .from("chats")
-          .select("*", { count: "exact" })
-          .eq("receiver_id", userId)
-          .eq("read", false);
-
-        if (error) throw error;
-        setUnreadCount(count || 0);
-      } catch (error) {
-        console.error("Error fetching unread messages:", error);
-      }
-    };
-
-    fetchUnreadCount();
-
-    // Subscribe to realtime changes for new messages
-    const channel = supabase
-      .channel('public:chats')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'chats'
-      }, fetchUnreadCount)
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'chats'
-      }, fetchUnreadCount)
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [username]);
 
   return (
-    <>
-      <aside
-        className={cn(
-          "h-screen fixed left-0 top-0 z-40 flex flex-col bg-gradient-to-b from-[#0e0e16] to-[#111827] border-r border-gray-800/40 text-white transition-all duration-300 backdrop-blur-sm",
-          isExpanded ? "w-64" : "w-20",
-          isMobile && !isExpanded ? "-translate-x-full" : "translate-x-0"
-        )}
-      >
-        {isMobile && (
-          <div
-            className={cn(
-              "fixed z-40 flex items-center justify-center w-12 h-12 bg-purple-600 rounded-full shadow-lg cursor-pointer transition-all duration-200",
-              isExpanded ? "left-60 top-4" : "left-4 top-4"
-            )}
-            onClick={toggleSidebar}
-          >
-            {isExpanded ? (
-              <XIcon className="w-6 h-6 text-white" />
-            ) : (
-              <MenuIcon className="w-6 h-6 text-white" />
-            )}
+    <Sidebar 
+      className="hidden md:flex fixed inset-y-0 left-0 z-30 w-64 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-950" 
+      closeOnSelect={false}
+    >
+      <div className="flex flex-col h-full p-4">
+        <div className="mb-6 flex justify-center">
+          <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 shadow-md">
+            <Shield className="h-6 w-6 text-white" />
           </div>
-        )}
-
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-800/40">
-          <div className="flex items-center">
-            <Rocket className="w-6 h-6 text-purple-400" />
-            <span
-              className={cn(
-                "ml-2 font-bold transition-opacity duration-200",
-                isExpanded ? "opacity-100" : "opacity-0"
-              )}
-            >
-              ULTRA
-            </span>
-          </div>
-          {!isMobile && (
-            <button
-              onClick={toggleSidebar}
-              className="p-1 rounded hover:bg-gray-800 transition-colors"
-            >
-              {isExpanded ? (
-                <ChevronsLeft className="w-5 h-5 text-gray-400" />
-              ) : (
-                <ChevronsRight className="w-5 h-5 text-gray-400" />
-              )}
-            </button>
-          )}
         </div>
 
-        <ScrollArea className="flex-1">
-          <div className="p-4">
-            <nav className="space-y-2">
-              <NavItem
-                to="/"
-                icon={<Home className="w-5 h-5" />}
-                label="Tableau de bord"
-                isExpanded={isExpanded}
-              />
-              <NavItem
-                to="/personal-information"
-                icon={<User className="w-5 h-5" />}
-                label="Profil"
-                isExpanded={isExpanded}
-              />
-              <NavItem
-                to="/messages"
-                icon={<MessageSquare className="w-5 h-5" />}
-                label="Messages"
-                isExpanded={isExpanded}
-                badge={unreadCount}
-              />
-              <NavItem
-                to="/penalties"
-                icon={<AlertTriangle className="w-5 h-5" />}
-                label="Pénalités"
-                isExpanded={isExpanded}
-              />
-              <NavItem
-                to="/team"
-                icon={<Users className="w-5 h-5" />}
-                label="Équipe"
-                isExpanded={isExpanded}
-              />
-              <NavItem
-                to="/schedule"
-                icon={<Calendar className="w-5 h-5" />}
-                label="Planning"
-                isExpanded={isExpanded}
-              />
-              <NavItem
-                to="/internal-rules"
-                icon={<ScrollText className="w-5 h-5" />}
-                label="Règlement"
-                isExpanded={isExpanded}
-              />
-              <NavItem
-                to="/contact"
-                icon={<MailIcon className="w-5 h-5" />}
-                label="Contact"
-                isExpanded={isExpanded}
-              />
-              <NavItem
-                to="/documents"
-                icon={<FileText className="w-5 h-5" />}
-                label="Documents"
-                isExpanded={isExpanded}
-              />
-              <NavItem
-                to="/transfers"
-                icon={<UserCheck className="w-5 h-5" />}
-                label="Transferts"
-                isExpanded={isExpanded}
-              />
-            </nav>
+        <nav className="space-y-1 flex-1 overflow-y-auto">
+          {getNavLinks().map((link) => (
+            <Link key={link.path} to={link.path}>
+              <Button
+                variant={currentPage === link.id ? "secondary" : "ghost"}
+                className={`w-full justify-start mb-1 ${
+                  currentPage === link.id
+                    ? "bg-purple-100 text-purple-900 dark:bg-purple-900/20 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/30"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}
+              >
+                <span className="mr-3">{link.icon}</span>
+                {link.label}
+              </Button>
+            </Link>
+          ))}
+        </nav>
 
-            {isExpanded && (
-              <div className="mt-6 pt-6 border-t border-gray-800/40">
-                <h3 className="mb-2 text-xs font-semibold text-gray-400 uppercase">
-                  Administration
-                </h3>
-                <nav className="space-y-2">
-                  <NavItem
-                    to="/users"
-                    icon={<Shield className="w-5 h-5" />}
-                    label="Gestion Utilisateurs"
-                    isExpanded={isExpanded}
-                  />
-                  <NavItem
-                    to="/external-matches"
-                    icon={<Zap className="w-5 h-5" />}
-                    label="Matchs Externes"
-                    isExpanded={isExpanded}
-                  />
-                  <NavItem
-                    to="/notifications"
-                    icon={<Bell className="w-5 h-5" />}
-                    label="Notifications"
-                    isExpanded={isExpanded}
-                  />
-                </nav>
-              </div>
-            )}
+        <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
+          <div className="px-3 py-2 mb-2 rounded-md bg-gray-50 dark:bg-gray-900">
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              {username}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+              {role}
+            </p>
           </div>
-        </ScrollArea>
-
-        <div className="p-4 border-t border-gray-800/40">
-          <button
-            onClick={confirmLogout}
-            className={cn(
-              "flex items-center w-full p-2 rounded hover:bg-gray-800 transition-colors",
-              isExpanded ? "justify-start" : "justify-center"
-            )}
+          <Button
+            variant="outline"
+            className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-900/20"
+            onClick={onLogout}
           >
-            <LogOut className="w-5 h-5 text-gray-400" />
-            <span
-              className={cn(
-                "ml-2 text-gray-300 transition-opacity duration-200",
-                isExpanded ? "opacity-100" : "opacity-0 w-0"
-              )}
-            >
-              Déconnexion
-            </span>
-          </button>
+            Déconnexion
+          </Button>
         </div>
-      </aside>
-      
-      {/* Overlay */}
-      {isMobile && isExpanded && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-30 backdrop-blur-sm lg:hidden"
-          onClick={toggleSidebar}
-        />
-      )}
-    </>
+      </div>
+    </Sidebar>
   );
 };

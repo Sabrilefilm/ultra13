@@ -1,100 +1,56 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useIndexAuth } from '@/hooks/use-index-auth';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-
-interface Document {
-  id: string;
-  user_id: string;
-  document_front: string;
-  document_back: string;
-  uploaded_at: string;
-  verified: boolean;
-  username: string;
-}
 
 export const useDocuments = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAuthenticated, userId, username, role, handleLogout } = useIndexAuth();
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState('');
-  const [username, setUsername] = useState('');
-  const [role, setRole] = useState('');
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [userDocument, setUserDocument] = useState<Document | null>(null);
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [userDocument, setUserDocument] = useState<any>(null);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [selectedTab, setSelectedTab] = useState('all');
 
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
+  const fetchDocuments = async () => {
+    try {
+      if (!isAuthenticated) return;
+      
+      setLoading(true);
+      
+      // Admin users get all documents
+      if (role === 'founder' || role === 'manager') {
+        const { data, error } = await supabase
+          .from('identity_documents')
+          .select(`
+            *,
+            user_accounts(username)
+          `)
+          .order('uploaded_at', { ascending: false });
         
-        if (!data.session?.user) {
-          navigate('/');
-          return;
-        }
-        
-        setUserId(data.session.user.id);
-        
-        const { data: userData, error } = await supabase
-          .from('profiles')
-          .select('role, username')
-          .eq('id', data.session.user.id)
-          .single();
-          
         if (error) throw error;
         
-        setRole(userData?.role || 'creator');
-        setUsername(userData?.username || data.session.user.email || 'User');
+        // Format the data to include username
+        const formattedDocs = data.map(doc => ({
+          ...doc,
+          username: doc.user_accounts?.username || 'Inconnu'
+        }));
         
-        if (userData?.role === 'founder' || userData?.role === 'manager') {
-          await fetchAllDocuments();
-        } else {
-          await fetchUserDocument(data.session.user.id);
-        }
-      } catch (error) {
-        console.error('Error checking session:', error);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Une erreur est survenue lors de la vérification de session",
-        });
-        navigate('/');
-      } finally {
-        setLoading(false);
+        setDocuments(formattedDocs);
+      } else {
+        // Regular users only get their own document
+        await fetchUserDocument(userId);
       }
-    };
-    
-    checkSession();
-  }, [navigate]);
-
-  const fetchAllDocuments = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('identity_documents')
-        .select(`
-          *,
-          user:user_id(username)
-        `)
-        .order('uploaded_at', { ascending: false });
-        
-      if (error) throw error;
-      
-      const formattedDocs = data.map(doc => ({
-        ...doc,
-        username: doc.user?.username || 'Utilisateur inconnu'
-      }));
-      
-      setDocuments(formattedDocs);
     } catch (error) {
       console.error('Error fetching documents:', error);
       toast({
-        variant: "destructive",
         title: "Erreur",
-        description: "Impossible de charger les documents",
+        description: "Impossible de charger les documents.",
+        variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -104,22 +60,14 @@ export const useDocuments = () => {
         .from('identity_documents')
         .select('*')
         .eq('user_id', userId)
-        .single();
-        
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
+        .maybeSingle();
       
-      if (data) {
-        setUserDocument(data as Document);
-      }
+      if (error) throw error;
+      setUserDocument(data);
+      return data;
     } catch (error) {
       console.error('Error fetching user document:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de charger votre document",
-      });
+      return null;
     }
   };
 
@@ -129,39 +77,31 @@ export const useDocuments = () => {
         .from('identity_documents')
         .update({ verified })
         .eq('id', docId);
-        
+      
       if (error) throw error;
       
       toast({
-        title: "Succès",
-        description: verified 
-          ? "Document vérifié avec succès" 
-          : "Document marqué comme non vérifié",
+        title: verified ? "Document vérifié" : "Document non vérifié",
+        description: `Le document a été marqué comme ${verified ? 'vérifié' : 'non vérifié'}.`,
+        variant: verified ? "default" : "default",
       });
       
-      if (role === 'founder' || role === 'manager') {
-        await fetchAllDocuments();
-      } else {
-        await fetchUserDocument(userId);
-      }
+      fetchDocuments();
     } catch (error) {
       console.error('Error verifying document:', error);
       toast({
-        variant: "destructive",
         title: "Erreur",
-        description: "Impossible de mettre à jour le statut du document",
+        description: "Impossible de mettre à jour le statut du document.",
+        variant: "destructive",
       });
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      navigate('/');
-    } catch (error) {
-      console.error('Error signing out:', error);
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchDocuments();
     }
-  };
+  }, [isAuthenticated]);
 
   return {
     loading,

@@ -4,7 +4,7 @@ export interface Schedule {
   hours: number;
   days: number;
   is_active: boolean;
-  creator_name: string;
+  creator_name?: string;
   creator_id: string;
 }
 

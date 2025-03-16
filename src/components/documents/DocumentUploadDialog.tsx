@@ -1,29 +1,17 @@
 
 import { useState } from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle 
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { UploadCloud, X, AlertCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Loader2, FileText, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface DocumentUploadDialogProps {
   isOpen: boolean;
   onClose: () => void;
   userId: string;
-  existingDocument?: {
-    id: string;
-    document_front: string;
-    document_back: string;
-  };
+  existingDocument?: any;
   onSuccess: () => void;
 }
 
@@ -34,252 +22,281 @@ export const DocumentUploadDialog = ({
   existingDocument,
   onSuccess
 }: DocumentUploadDialogProps) => {
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const [frontFile, setFrontFile] = useState<File | null>(null);
   const [backFile, setBackFile] = useState<File | null>(null);
-  const [frontPreview, setFrontPreview] = useState<string>(existingDocument?.document_front || '');
-  const [backPreview, setBackPreview] = useState<string>(existingDocument?.document_back || '');
-  const [loading, setLoading] = useState(false);
+  const [frontPreview, setFrontPreview] = useState<string | null>(existingDocument?.document_front || null);
+  const [backPreview, setBackPreview] = useState<string | null>(existingDocument?.document_back || null);
+  const [uploading, setUploading] = useState(false);
+  const [errors, setErrors] = useState<{ front?: string; back?: string }>({});
 
-  const handleFrontFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+  const handleFileChange = (side: 'front' | 'back', file: File | null) => {
+    if (!file) return;
+
+    // Validation
+    if (!file.type.startsWith('image/')) {
+      setErrors(prev => ({ ...prev, [side]: 'Veuillez sélectionner une image (JPG, PNG)' }));
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB max
+      setErrors(prev => ({ ...prev, [side]: 'La taille maximum est 5MB' }));
+      return;
+    }
+
+    // Clear previous error
+    setErrors(prev => ({ ...prev, [side]: undefined }));
+
+    // Set file and preview
+    if (side === 'front') {
       setFrontFile(file);
-      const previewUrl = URL.createObjectURL(file);
-      setFrontPreview(previewUrl);
-    }
-  };
-
-  const handleBackFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFrontPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
       setBackFile(file);
-      const previewUrl = URL.createObjectURL(file);
-      setBackPreview(previewUrl);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBackPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const clearFrontFile = () => {
-    setFrontFile(null);
-    if (frontPreview && !existingDocument?.document_front) {
-      URL.revokeObjectURL(frontPreview);
+  const clearFile = (side: 'front' | 'back') => {
+    if (side === 'front') {
+      setFrontFile(null);
+      setFrontPreview(existingDocument?.document_front || null);
+    } else {
+      setBackFile(null);
+      setBackPreview(existingDocument?.document_back || null);
     }
-    setFrontPreview(existingDocument?.document_front || '');
+    setErrors(prev => ({ ...prev, [side]: undefined }));
   };
 
-  const clearBackFile = () => {
-    setBackFile(null);
-    if (backPreview && !existingDocument?.document_back) {
-      URL.revokeObjectURL(backPreview);
-    }
-    setBackPreview(existingDocument?.document_back || '');
-  };
-
-  const uploadDocument = async () => {
+  const handleSubmit = async () => {
     if (!frontFile && !backFile && !existingDocument) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Veuillez sélectionner au moins un fichier à télécharger",
+      setErrors({
+        front: 'Veuillez sélectionner une image',
+        back: 'Veuillez sélectionner une image'
       });
       return;
     }
 
+    if (Object.values(errors).some(error => error)) {
+      return;
+    }
+
+    setUploading(true);
+
     try {
-      setLoading(true);
-
-      // Upload front image if exists
-      let frontPath = existingDocument?.document_front || '';
+      // Upload front file if selected
+      let frontUrl = existingDocument?.document_front;
       if (frontFile) {
-        const fileName = `${userId}_front_${Date.now()}`;
-        const { data: frontData, error: frontError } = await supabase.storage
-          .from('identity_documents')
-          .upload(fileName, frontFile);
+        const frontFilePath = `documents/${userId}/front-${Date.now()}`;
+        const { error: frontUploadError } = await supabase.storage
+          .from('id_documents')
+          .upload(frontFilePath, frontFile);
 
-        if (frontError) throw frontError;
+        if (frontUploadError) throw frontUploadError;
         
-        const { data } = supabase.storage.from('identity_documents').getPublicUrl(frontData.path);
-        frontPath = data.publicUrl;
+        const { data: frontData } = supabase.storage
+          .from('id_documents')
+          .getPublicUrl(frontFilePath);
+          
+        frontUrl = frontData.publicUrl;
       }
 
-      // Upload back image if exists
-      let backPath = existingDocument?.document_back || '';
+      // Upload back file if selected
+      let backUrl = existingDocument?.document_back;
       if (backFile) {
-        const fileName = `${userId}_back_${Date.now()}`;
-        const { data: backData, error: backError } = await supabase.storage
-          .from('identity_documents')
-          .upload(fileName, backFile);
+        const backFilePath = `documents/${userId}/back-${Date.now()}`;
+        const { error: backUploadError } = await supabase.storage
+          .from('id_documents')
+          .upload(backFilePath, backFile);
 
-        if (backError) throw backError;
+        if (backUploadError) throw backUploadError;
         
-        const { data } = supabase.storage.from('identity_documents').getPublicUrl(backData.path);
-        backPath = data.publicUrl;
+        const { data: backData } = supabase.storage
+          .from('id_documents')
+          .getPublicUrl(backFilePath);
+          
+        backUrl = backData.publicUrl;
       }
 
-      // Update or insert document record
+      // Save document info in database
       if (existingDocument) {
-        const { error } = await supabase
+        // Update existing document
+        const { error: updateError } = await supabase
           .from('identity_documents')
           .update({
-            document_front: frontPath || existingDocument.document_front,
-            document_back: backPath || existingDocument.document_back,
+            document_front: frontUrl,
+            document_back: backUrl,
             uploaded_at: new Date().toISOString(),
-            verified: false // Reset verification status on update
+            verified: false // Reset verification when document is updated
           })
           .eq('id', existingDocument.id);
 
-        if (error) throw error;
+        if (updateError) throw updateError;
       } else {
-        const { error } = await supabase
+        // Insert new document
+        const { error: insertError } = await supabase
           .from('identity_documents')
           .insert({
             user_id: userId,
-            document_front: frontPath,
-            document_back: backPath,
-            verified: false
+            document_front: frontUrl,
+            document_back: backUrl
           });
 
-        if (error) throw error;
+        if (insertError) throw insertError;
       }
 
-      toast({
-        title: "Succès",
-        description: "Document téléchargé avec succès",
-      });
-
+      toast.success('Document téléchargé avec succès');
       onSuccess();
       onClose();
     } catch (error) {
       console.error('Error uploading document:', error);
-      toast({
-        variant: "destructive",
+      uiToast({
         title: "Erreur",
-        description: "Une erreur est survenue lors du téléchargement du document",
+        description: "Impossible de télécharger le document. Veuillez réessayer.",
+        variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setUploading(false);
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Télécharger un document d'identité</DialogTitle>
-          <DialogDescription>
-            Téléchargez une pièce d'identité valide (carte d'identité ou passeport)
-          </DialogDescription>
+          <DialogTitle>Télécharger votre document d'identité</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="front">Recto de la pièce d'identité</Label>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-4 h-48 relative">
-                {frontPreview ? (
-                  <>
-                    <img 
-                      src={frontPreview} 
-                      alt="Front preview" 
-                      className="max-h-full max-w-full object-contain"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-2 right-2 bg-black/20 hover:bg-black/30 text-white rounded-full h-8 w-8 p-1"
-                      onClick={clearFrontFile}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-center space-y-2">
-                    <FileText className="h-10 w-10 text-gray-400" />
-                    <div className="font-medium text-gray-900 dark:text-gray-100">
-                      Glissez-déposez ici ou
-                    </div>
-                    <Button variant="outline" size="sm" asChild>
-                      <label htmlFor="front-upload">
-                        Parcourir
-                        <input
-                          id="front-upload"
-                          type="file"
-                          className="sr-only"
-                          accept="image/*"
-                          onChange={handleFrontFileChange}
-                        />
-                      </label>
-                    </Button>
-                  </div>
-                )}
-              </div>
+        <div className="grid gap-6 py-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Recto de la carte d'identité</label>
+            <div className="border-2 border-dashed rounded-lg p-6 border-gray-300 dark:border-gray-700 relative">
+              {frontPreview ? (
+                <div className="relative">
+                  <img 
+                    src={frontPreview} 
+                    alt="Document preview" 
+                    className="w-full h-36 object-contain rounded-lg"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2 h-6 w-6 rounded-full"
+                    onClick={() => clearFile('front')}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <UploadCloud className="mb-4 h-10 w-10 text-gray-400" />
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Cliquez ou glissez-déposez votre fichier</p>
+                  <input
+                    type="file"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange('front', e.target.files?.[0] || null)}
+                  />
+                  <Button 
+                    type="button" 
+                    variant="secondary"
+                    size="sm"
+                    className="relative z-10"
+                  >
+                    Choisir un fichier
+                  </Button>
+                </div>
+              )}
+              {errors.front && (
+                <div className="mt-2 text-red-500 text-xs flex items-center">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  {errors.front}
+                </div>
+              )}
             </div>
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="back">Verso de la pièce d'identité</Label>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-4 h-48 relative">
-                {backPreview ? (
-                  <>
-                    <img 
-                      src={backPreview} 
-                      alt="Back preview" 
-                      className="max-h-full max-w-full object-contain"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-2 right-2 bg-black/20 hover:bg-black/30 text-white rounded-full h-8 w-8 p-1"
-                      onClick={clearBackFile}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-center space-y-2">
-                    <FileText className="h-10 w-10 text-gray-400" />
-                    <div className="font-medium text-gray-900 dark:text-gray-100">
-                      Glissez-déposez ici ou
-                    </div>
-                    <Button variant="outline" size="sm" asChild>
-                      <label htmlFor="back-upload">
-                        Parcourir
-                        <input
-                          id="back-upload"
-                          type="file"
-                          className="sr-only"
-                          accept="image/*"
-                          onChange={handleBackFileChange}
-                        />
-                      </label>
-                    </Button>
-                  </div>
-                )}
-              </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Verso de la carte d'identité</label>
+            <div className="border-2 border-dashed rounded-lg p-6 border-gray-300 dark:border-gray-700 relative">
+              {backPreview ? (
+                <div className="relative">
+                  <img 
+                    src={backPreview} 
+                    alt="Document preview" 
+                    className="w-full h-36 object-contain rounded-lg"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2 h-6 w-6 rounded-full"
+                    onClick={() => clearFile('back')}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <UploadCloud className="mb-4 h-10 w-10 text-gray-400" />
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Cliquez ou glissez-déposez votre fichier</p>
+                  <input
+                    type="file"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange('back', e.target.files?.[0] || null)}
+                  />
+                  <Button 
+                    type="button" 
+                    variant="secondary"
+                    size="sm"
+                    className="relative z-10"
+                  >
+                    Choisir un fichier
+                  </Button>
+                </div>
+              )}
+              {errors.back && (
+                <div className="mt-2 text-red-500 text-xs flex items-center">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  {errors.back}
+                </div>
+              )}
             </div>
           </div>
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={loading}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onClose} 
+            disabled={uploading}
+          >
             Annuler
           </Button>
           <Button 
-            onClick={uploadDocument} 
-            disabled={loading || (!frontFile && !backFile && !existingDocument)}
-            className="bg-purple-600 hover:bg-purple-700"
+            type="button" 
+            onClick={handleSubmit} 
+            disabled={uploading}
+            className="bg-purple-600 hover:bg-purple-700 text-white"
           >
-            {loading ? (
+            {uploading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-transparent border-t-current"></div>
                 Téléchargement...
               </>
             ) : (
-              <>
-                <Upload className="mr-2 h-4 w-4" />
-                {existingDocument ? 'Mettre à jour' : 'Télécharger'}
-              </>
+              'Télécharger'
             )}
           </Button>
         </DialogFooter>

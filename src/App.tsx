@@ -18,6 +18,7 @@ import InternalRules from "./pages/InternalRules";
 import Messages from "./pages/Messages";
 import Transfers from "./pages/Transfers";
 import Documents from "./pages/Documents";
+import Matches from "./pages/Matches";
 import { Loading } from "./components/ui/loading";
 
 function App() {
@@ -55,6 +56,7 @@ function App() {
         <Route path="/messages" element={<Messages />} />
         <Route path="/transfers" element={<Transfers />} />
         <Route path="/documents" element={<Documents />} />
+        <Route path="/matches" element={<Matches />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

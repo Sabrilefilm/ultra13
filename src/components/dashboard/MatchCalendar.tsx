@@ -8,16 +8,7 @@ import { format } from "date-fns";
 import { fr } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
 import { ScheduleMatchDialog } from "../matches/ScheduleMatchDialog";
-import { DayContentProps } from "react-day-picker";
-
-interface Match {
-  id: string;
-  creator_id: string;
-  opponent_id: string;
-  match_date: string;
-  status: string;
-  winner_id?: string;
-}
+import { Match } from "@/types/matches";
 
 interface MatchCalendarProps {
   matches: Match[];
@@ -108,7 +99,7 @@ export const MatchCalendar = ({ matches, isLoading, role, creatorId }: MatchCale
               className="rounded-md border-0 p-3 pointer-events-auto"
               locale={fr}
               components={{
-                Day: ({ date, ...props }) => {
+                Day: ({ date, ...props }: any) => {
                   return (
                     <button
                       {...props}
