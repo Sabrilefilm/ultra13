@@ -18,6 +18,7 @@ const Messages = () => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string>('');
   const [role, setRole] = useState<string>('');
+  const [username, setUsername] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('messages');
   
@@ -46,16 +47,17 @@ const Messages = () => {
         
         setUserId(data.session.user.id);
         
-        // Get user role
+        // Get user role and username
         const { data: userData, error } = await supabase
           .from('profiles')
-          .select('role')
+          .select('role, username')
           .eq('id', data.session.user.id)
           .single();
           
         if (error) throw error;
         
         setRole(userData?.role || 'creator');
+        setUsername(userData?.username || data.session.user.email || 'User');
       } catch (error) {
         console.error('Error checking session:', error);
         toast.error('Une erreur est survenue lors de la vérification de session');
@@ -74,13 +76,27 @@ const Messages = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   if (loading) {
     return <Loading fullScreen size="large" text="Chargement de la messagerie..." />;
   }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex">
-      <UltraSidebar />
+      <UltraSidebar 
+        username={username}
+        role={role}
+        onLogout={handleLogout}
+        currentPage="messages"
+      />
       
       <div className="flex-1 flex flex-col">
         <div className="bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-gray-800 p-4 flex items-center justify-between shadow-sm">
