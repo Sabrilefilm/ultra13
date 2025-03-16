@@ -1,7 +1,14 @@
+
 import { useState, useEffect } from "react";
 import { Schedule } from "./types";
-import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { 
+  fetchProfileByUsername, 
+  fetchScheduleByCreatorId, 
+  fetchAllCreatorSchedules,
+  saveSchedule
+} from "./api/schedule-service";
+import { updateScheduleField, initializeSchedule } from "./utils/state-manager";
 
 export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -10,187 +17,78 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
   const [profileId, setProfileId] = useState<string | null>(null);
   const [creatorName, setCreatorName] = useState("");
 
-  const fetchProfileId = async (username: string) => {
+  const initializeData = async () => {
     try {
-      console.log("Fetching profile for username:", username);
-
-      const { data: userAccount, error: userError } = await supabase
-        .from("user_accounts")
-        .select("id, username")
-        .eq("username", username)
-        .eq("role", "creator")
-        .single();
-
-      if (userError) {
-        console.error("Database error:", userError);
-        throw userError;
+      setLoading(true);
+      // Load all creator schedules
+      const allSchedules = await fetchAllCreatorSchedules();
+      setAllCreatorSchedules(allSchedules);
+      
+      if (creatorId) {
+        console.log("Modal opened for creator:", creatorId);
+        // Get creator profile
+        const userAccount = await fetchProfileByUsername(creatorId);
+        
+        if (userAccount) {
+          setProfileId(userAccount.id);
+          setCreatorName(userAccount.username);
+          
+          // Get creator's schedule
+          const scheduleData = await fetchScheduleByCreatorId(userAccount.id);
+          
+          // Initialize schedule object
+          const schedule = initializeSchedule(userAccount.id, userAccount.username, scheduleData);
+          setSchedules([schedule]);
+        }
       }
-
-      if (!userAccount) {
-        console.log("No user account found for username:", username);
-        toast.error(`Aucun profil trouvé pour ${username}`);
-        return null;
-      }
-
-      console.log("User account found:", userAccount);
-      setProfileId(userAccount.id);
-      setCreatorName(userAccount.username);
-      return userAccount.id;
-
     } catch (error) {
-      console.error("Erreur lors de la récupération du profil:", error);
-      toast.error("Erreur lors de la récupération du profil");
-      return null;
-    }
-  };
-
-  const fetchSchedules = async (id: string) => {
-    try {
-      console.log("Fetching schedules for id:", id);
-
-      const { data, error } = await supabase
-        .from("live_schedules")
-        .select("*")
-        .eq("creator_id", id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') { // PGRST116 est le code pour "aucun résultat"
-        throw error;
-      }
-
-      console.log("Schedule found:", data);
-
-      // Initialiser avec un seul horaire par créateur
-      const schedule: Schedule = {
-        id: data?.id || 'new-schedule',
-        hours: data?.hours || 0,
-        days: data?.days || 0,
-        is_active: true,
-        creator_name: creatorName,
-        creator_id: id
-      };
-
-      setSchedules([schedule]);
-    } catch (error) {
-      console.error("Erreur lors du chargement des horaires:", error);
-      toast.error("Erreur lors du chargement des horaires");
+      console.error("Error initializing data:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchAllCreatorSchedules = async () => {
-    try {
-      const { data: schedulesData, error: schedulesError } = await supabase
-        .from("live_schedules")
-        .select(`
-          id, 
-          hours, 
-          days, 
-          is_active, 
-          creator_id,
-          user_accounts(username)
-        `)
-        .order('days', { ascending: false });
-
-      if (schedulesError) throw schedulesError;
-
-      const formattedSchedules: Schedule[] = schedulesData.map(schedule => ({
-        id: schedule.id,
-        hours: schedule.hours,
-        days: schedule.days,
-        is_active: schedule.is_active,
-        creator_name: schedule.user_accounts?.username || 'Inconnu',
-        creator_id: schedule.creator_id
-      }));
-
-      setAllCreatorSchedules(formattedSchedules);
-    } catch (error) {
-      console.error("Erreur lors du chargement de tous les horaires:", error);
-    }
-  };
-
+  // Handle saving schedules
   const handleSave = async () => {
-    if (!profileId) return;
+    if (!profileId) return false;
 
     try {
       setLoading(true);
-      const schedule = schedules[0]; // On ne garde qu'un seul horaire
-
-      const data = {
-        creator_id: profileId,
-        hours: schedule.hours,
-        days: schedule.days,
-        is_active: true,
-      };
-
-      if (schedule.id.startsWith('new-')) {
-        const { error } = await supabase
-          .from("live_schedules")
-          .insert(data);
-        
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("live_schedules")
-          .update({
-            hours: schedule.hours,
-            days: schedule.days,
-          })
-          .eq("id", schedule.id);
-          
-        if (error) throw error;
+      const schedule = schedules[0]; // We only keep one schedule
+      
+      // Save the schedule
+      const success = await saveSchedule(schedule, profileId);
+      
+      if (success) {
+        // Refresh all schedules
+        const allSchedules = await fetchAllCreatorSchedules();
+        setAllCreatorSchedules(allSchedules);
+        toast.success("Horaires mis à jour avec succès");
+        return true;
       }
-
-      // Mettre à jour la liste complète
-      await fetchAllCreatorSchedules();
-
-      toast.success("Horaires mis à jour avec succès");
-      return true;
+      
+      return false;
     } catch (error) {
-      console.error("Erreur lors de la sauvegarde des horaires:", error);
-      toast.error("Erreur lors de la sauvegarde des horaires");
+      console.error("Error saving schedule:", error);
       return false;
     } finally {
       setLoading(false);
     }
   };
 
+  // Update a schedule field
   const updateSchedule = (
     scheduleId: string,
     field: "hours" | "days" | "is_active",
     value: string | boolean
   ) => {
-    setSchedules((prev) => {
-      const newSchedules = prev.map((schedule) =>
-        schedule.id === scheduleId
-          ? { 
-              ...schedule, 
-              [field]: field === "is_active" ? value : Number(value)
-            }
-          : schedule
-      );
-      return newSchedules;
-    });
+    updateScheduleField(setSchedules, scheduleId, field, value);
   };
 
+  // Initialize data when modal opens
   useEffect(() => {
     if (isOpen) {
-      fetchAllCreatorSchedules();
-      
-      if (creatorId) {
-        console.log("Modal opened for creator:", creatorId);
-        setLoading(true);
-        const initializeData = async () => {
-          const id = await fetchProfileId(creatorId);
-          if (id) {
-            await fetchSchedules(id);
-          } else {
-            setLoading(false);
-          }
-        };
-        initializeData();
-      }
+      initializeData();
     }
   }, [isOpen, creatorId]);
 
