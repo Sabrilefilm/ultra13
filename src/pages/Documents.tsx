@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UltraSidebar } from '@/components/layout/UltraSidebar';
@@ -46,7 +45,6 @@ const Documents = () => {
         
         setUserId(data.session.user.id);
         
-        // Get user role and username
         const { data: userData, error } = await supabase
           .from('profiles')
           .select('role, username')
@@ -59,10 +57,8 @@ const Documents = () => {
         setUsername(userData?.username || data.session.user.email || 'User');
         
         if (role === 'founder' || role === 'manager') {
-          // Load all documents if founder or manager
           await fetchAllDocuments();
         } else {
-          // Load only user's document
           await fetchUserDocument(data.session.user.id);
         }
       } catch (error) {
@@ -93,7 +89,6 @@ const Documents = () => {
         
       if (error) throw error;
       
-      // Format documents with username
       const formattedDocs = data.map(doc => ({
         ...doc,
         username: doc.user?.username || 'Utilisateur inconnu'
@@ -118,7 +113,7 @@ const Documents = () => {
         .eq('user_id', userId)
         .single();
         
-      if (error && error.code !== 'PGRST116') { // PGRST116 = "No rows returned"
+      if (error && error.code !== 'PGRST116') {
         throw error;
       }
       
@@ -151,7 +146,6 @@ const Documents = () => {
           : "Document marqué comme non vérifié",
       });
       
-      // Refresh documents
       if (role === 'founder' || role === 'manager') {
         await fetchAllDocuments();
       } else {
@@ -246,7 +240,7 @@ const Documents = () => {
                               {new Date(doc.uploaded_at).toLocaleDateString('fr-FR')}
                             </p>
                           </div>
-                          <Badge variant={doc.verified ? "success" : "destructive"}>
+                          <Badge variant={doc.verified ? "secondary" : "destructive"} className={doc.verified ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" : ""}>
                             {doc.verified ? 'Vérifié' : 'Non vérifié'}
                           </Badge>
                         </div>
@@ -344,7 +338,10 @@ const Documents = () => {
                           Document téléchargé le {new Date(userDocument.uploaded_at).toLocaleDateString('fr-FR')}
                         </p>
                       </div>
-                      <Badge variant={userDocument.verified ? "success" : "warning"}>
+                      <Badge 
+                        variant={userDocument.verified ? "secondary" : "outline"} 
+                        className={userDocument.verified ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100"}
+                      >
                         {userDocument.verified ? 'Vérifié' : 'En attente de vérification'}
                       </Badge>
                     </div>

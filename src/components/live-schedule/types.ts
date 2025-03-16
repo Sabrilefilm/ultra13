@@ -7,3 +7,9 @@ export interface Schedule {
   creator_name: string;
   creator_id: string;
 }
+
+export interface LiveScheduleModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  creatorId: string;
+}

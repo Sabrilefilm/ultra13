@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UltraSidebar } from '@/components/layout/UltraSidebar';
@@ -42,7 +41,6 @@ const Transfers = () => {
         
         setUserId(data.session.user.id);
         
-        // Get user role and username
         const { data: userData, error } = await supabase
           .from('profiles')
           .select('role, username')
@@ -54,7 +52,6 @@ const Transfers = () => {
         setRole(userData?.role || 'creator');
         setUsername(userData?.username || data.session.user.email || 'User');
         
-        // Load transfer requests
         await fetchTransferRequests();
       } catch (error) {
         console.error('Error checking session:', error);
@@ -77,7 +74,6 @@ const Transfers = () => {
       let query;
       
       if (role === 'founder') {
-        // Founder sees all requests
         query = supabase
           .from('transfer_requests')
           .select(`
@@ -88,7 +84,6 @@ const Transfers = () => {
           `)
           .order('created_at', { ascending: false });
       } else if (role === 'manager') {
-        // Manager sees requests involving his agents
         query = supabase
           .from('transfer_requests')
           .select(`
@@ -100,7 +95,6 @@ const Transfers = () => {
           .or(`current_agent_id.eq.${userId},requested_agent_id.eq.${userId}`)
           .order('created_at', { ascending: false });
       } else if (role === 'agent') {
-        // Agent sees requests involving him
         query = supabase
           .from('transfer_requests')
           .select(`
@@ -112,7 +106,6 @@ const Transfers = () => {
           .or(`current_agent_id.eq.${userId},requested_agent_id.eq.${userId}`)
           .order('created_at', { ascending: false });
       } else {
-        // Creator sees his own requests
         query = supabase
           .from('transfer_requests')
           .select(`
@@ -142,7 +135,6 @@ const Transfers = () => {
 
   const handleApproveTransfer = async (requestId) => {
     try {
-      // Update transfer request status
       const { error: updateError } = await supabase
         .from('transfer_requests')
         .update({ status: 'approved' })
@@ -150,7 +142,6 @@ const Transfers = () => {
         
       if (updateError) throw updateError;
       
-      // Get the transfer request details
       const { data: requestData, error: fetchError } = await supabase
         .from('transfer_requests')
         .select('*')
@@ -159,7 +150,6 @@ const Transfers = () => {
         
       if (fetchError) throw fetchError;
       
-      // Update the creator's agent in user_accounts
       const { error: updateAgentError } = await supabase
         .from('user_accounts')
         .update({ agent_id: requestData.requested_agent_id })
@@ -183,7 +173,7 @@ const Transfers = () => {
     }
   };
 
-  const handleRejectTransfer = async (requestId, rejectionReason) => {
+  const handleRejectTransfer = async (requestId: string, rejectionReason?: string) => {
     try {
       const { error } = await supabase
         .from('transfer_requests')

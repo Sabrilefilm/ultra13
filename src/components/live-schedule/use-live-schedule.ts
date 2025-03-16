@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Schedule } from "./types";
 import { supabase } from "@/lib/supabase";
@@ -101,7 +100,7 @@ export const useLiveSchedule = (isOpen: boolean, creatorId: string) => {
         hours: schedule.hours,
         days: schedule.days,
         is_active: schedule.is_active,
-        creator_name: schedule.user_accounts ? schedule.user_accounts.username : 'Inconnu',
+        creator_name: schedule.user_accounts?.username || 'Inconnu',
         creator_id: schedule.creator_id
       }));
 

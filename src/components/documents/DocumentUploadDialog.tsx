@@ -98,7 +98,8 @@ export const DocumentUploadDialog = ({
 
         if (frontError) throw frontError;
         
-        frontPath = `${supabase.storageUrl}/object/public/identity_documents/${frontData.path}`;
+        const { data } = supabase.storage.from('identity_documents').getPublicUrl(frontData.path);
+        frontPath = data.publicUrl;
       }
 
       // Upload back image if exists
@@ -111,7 +112,8 @@ export const DocumentUploadDialog = ({
 
         if (backError) throw backError;
         
-        backPath = `${supabase.storageUrl}/object/public/identity_documents/${backData.path}`;
+        const { data } = supabase.storage.from('identity_documents').getPublicUrl(backData.path);
+        backPath = data.publicUrl;
       }
 
       // Update or insert document record
