@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,13 +23,9 @@ export const LoginForm = ({
           <div className="flex flex-col items-center justify-center space-y-2">
             <div className="flex items-center gap-2">
               <Rocket className="w-14 h-14 text-purple-500 animate-pulse" />
-              <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-400 bg-clip-text text-transparent">
-                AGENCY
-              </h1>
+              <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-400 bg-clip-text text-transparent">ULTRA</h1>
             </div>
-            <p className="agency-text text-2xl bg-gradient-to-br from-white via-[#38bdf8] to-[#0ea5e9] bg-clip-text text-transparent">
-              PHOCÉEN
-            </p>
+            <p className="agency-text text-2xl bg-gradient-to-br from-white via-[#38bdf8] to-[#0ea5e9] bg-clip-text text-transparent">BY AGENCY PHOCÉEN</p>
           </div>
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold text-white/90">
@@ -56,15 +51,7 @@ export const LoginForm = ({
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Shield className="h-5 w-5 text-white/40" />
                 </div>
-                <Input 
-                  id="username" 
-                  type="text" 
-                  placeholder="Votre identifiant" 
-                  value={username} 
-                  onChange={e => setUsername(e.target.value)} 
-                  onKeyPress={e => e.key === "Enter" && handleSubmit()} 
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12 pl-10" 
-                />
+                <Input id="username" type="text" placeholder="Votre identifiant" value={username} onChange={e => setUsername(e.target.value)} onKeyPress={e => e.key === "Enter" && handleSubmit()} className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12 pl-10" />
               </div>
             </div>
             <div className="space-y-2">
@@ -75,15 +62,7 @@ export const LoginForm = ({
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-white/40" />
                 </div>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  placeholder="Votre mot de passe" 
-                  value={password} 
-                  onChange={e => setPassword(e.target.value)} 
-                  onKeyPress={e => e.key === "Enter" && handleSubmit()} 
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12 pl-10" 
-                />
+                <Input id="password" type="password" placeholder="Votre mot de passe" value={password} onChange={e => setPassword(e.target.value)} onKeyPress={e => e.key === "Enter" && handleSubmit()} className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12 pl-10" />
               </div>
             </div>
             <div className="flex justify-between items-center">
