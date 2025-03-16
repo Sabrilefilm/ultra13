@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Home,
@@ -63,7 +64,7 @@ const NavItem: React.FC<NavItemProps> = ({
 };
 
 export const UltraSidebar = () => {
-  const [isExpanded, setIsExpanded] useState(true);
+  const [isExpanded, setIsExpanded] = useState(true);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const navigate = useNavigate();
   const { toast } = useToast();
