@@ -3,21 +3,27 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 
 export const useFetchMatches = (creatorId: string) => {
-  const { data: matches, isLoading } = useQuery({
+  const { data: matches, isLoading, error } = useQuery({
     queryKey: ['upcoming-matches', creatorId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('upcoming_matches')
-        .select('*')
-        .order('match_date', { ascending: true });
-      
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('upcoming_matches')
+          .select('*')
+          .order('match_date', { ascending: true });
+        
+        if (error) throw error;
+        return data || [];
+      } catch (err) {
+        console.error("Erreur lors du chargement des matchs:", err);
+        return [];
+      }
     }
   });
 
   return {
-    matches,
-    isLoading
+    matches: matches || [],
+    isLoading,
+    error
   };
 };

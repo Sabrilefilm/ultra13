@@ -21,7 +21,7 @@ import { fr } from "date-fns/locale";
 const Matches = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isAuthenticated, username, role, handleLogout } = useIndexAuth();
+  const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
   const { matches, isLoading } = useUpcomingMatches(role || '', username || '');
   const [isMatchDialogOpen, setIsMatchDialogOpen] = useState(false);
   
@@ -69,7 +69,7 @@ const Matches = () => {
       doc.text(`Exporté le ${format(new Date(), "dd MMMM yyyy à HH:mm", { locale: fr })}`, 14, 30);
       
       // Prepare data for table
-      const tableColumn = ["Date", "Créateur", "Adversaire", "Statut", "Points", "Plateforme"];
+      const tableColumn = ["Date", "Créateur", "Adversaire", "Statut", "Points", "Plateforme", "Type"];
       const tableRows = matches.map(match => {
         const matchDate = new Date(match.match_date);
         const formattedDate = format(matchDate, "dd/MM/yyyy HH:mm", { locale: fr });
@@ -81,13 +81,17 @@ const Matches = () => {
         if (match.status === "off") status = "Hors boost";
         if (match.status === "completed_off") status = "Terminé (hors boost)";
         
+        // Add match type (with boost or without)
+        const matchType = match.with_boost ? "Avec boost" : "Sans boost";
+        
         return [
           formattedDate,
           match.creator_id || match.creator1_name || "N/A",
           match.opponent_id || match.creator2_name || "N/A",
           status,
           match.points?.toString() || "N/A",
-          match.platform || "TikTok"
+          match.platform || "TikTok",
+          matchType
         ];
       });
       
@@ -98,7 +102,7 @@ const Matches = () => {
         startY: 40,
         theme: 'grid',
         styles: { fontSize: 9, cellPadding: 3 },
-        headStyles: { fillColor: [100, 50, 150], textColor: [255, 255, 255] },
+        headStyles: { fillColor: [155, 135, 245], textColor: [255, 255, 255] },
         alternateRowStyles: { fillColor: [240, 236, 250] }
       });
       
@@ -161,7 +165,7 @@ const Matches = () => {
               <Button
                 onClick={exportMatchesToPDF}
                 variant="outline"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 border-purple-300 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/30"
               >
                 <FileDown className="h-4 w-4" />
                 Exporter en PDF

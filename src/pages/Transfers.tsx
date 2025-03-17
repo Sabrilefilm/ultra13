@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UltraSidebar } from '@/components/layout/UltraSidebar';
@@ -17,6 +18,7 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { TransferRequestDialog } from '@/components/transfers/TransferRequestDialog';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 const Transfers = () => {
   const navigate = useNavigate();
@@ -32,27 +34,27 @@ const Transfers = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const { data } = await supabase.auth.getSession();
+        // Vérifier l'authentification via localStorage
+        const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+        const storedUsername = localStorage.getItem('username');
+        const storedRole = localStorage.getItem('userRole');
+        const storedUserId = localStorage.getItem('userId');
         
-        if (!data.session?.user) {
+        if (!isAuthenticated || !storedUsername || !storedRole) {
+          toast({
+            variant: "destructive",
+            title: "Session expirée",
+            description: "Veuillez vous reconnecter",
+          });
           navigate('/');
           return;
         }
         
-        setUserId(data.session.user.id);
+        setUserId(storedUserId || '');
+        setRole(storedRole);
+        setUsername(storedUsername);
         
-        const { data: userData, error } = await supabase
-          .from('profiles')
-          .select('role, username')
-          .eq('id', data.session.user.id)
-          .single();
-          
-        if (error) throw error;
-        
-        setRole(userData?.role || 'creator');
-        setUsername(userData?.username || data.session.user.email || 'User');
-        
-        await fetchTransferRequests();
+        await fetchTransferRequests(storedUserId || '', storedRole);
       } catch (error) {
         console.error('Error checking session:', error);
         toast({
@@ -67,13 +69,13 @@ const Transfers = () => {
     };
     
     checkSession();
-  }, [navigate]);
+  }, [navigate, toast]);
 
-  const fetchTransferRequests = async () => {
+  const fetchTransferRequests = async (userIdParam = userId, roleParam = role) => {
     try {
       let query;
       
-      if (role === 'founder') {
+      if (roleParam === 'founder') {
         query = supabase
           .from('transfer_requests')
           .select(`
@@ -83,7 +85,7 @@ const Transfers = () => {
             requested_agent:requested_agent_id(id, username)
           `)
           .order('created_at', { ascending: false });
-      } else if (role === 'manager') {
+      } else if (roleParam === 'manager') {
         query = supabase
           .from('transfer_requests')
           .select(`
@@ -92,9 +94,9 @@ const Transfers = () => {
             current_agent:current_agent_id(id, username),
             requested_agent:requested_agent_id(id, username)
           `)
-          .or(`current_agent_id.eq.${userId},requested_agent_id.eq.${userId}`)
+          .or(`current_agent_id.eq.${userIdParam},requested_agent_id.eq.${userIdParam}`)
           .order('created_at', { ascending: false });
-      } else if (role === 'agent') {
+      } else if (roleParam === 'agent') {
         query = supabase
           .from('transfer_requests')
           .select(`
@@ -103,7 +105,7 @@ const Transfers = () => {
             current_agent:current_agent_id(id, username),
             requested_agent:requested_agent_id(id, username)
           `)
-          .or(`current_agent_id.eq.${userId},requested_agent_id.eq.${userId}`)
+          .or(`current_agent_id.eq.${userIdParam},requested_agent_id.eq.${userIdParam}`)
           .order('created_at', { ascending: false });
       } else {
         query = supabase
@@ -114,7 +116,7 @@ const Transfers = () => {
             current_agent:current_agent_id(id, username),
             requested_agent:requested_agent_id(id, username)
           `)
-          .eq('creator_id', userId)
+          .eq('creator_id', userIdParam)
           .order('created_at', { ascending: false });
       }
       
@@ -203,7 +205,7 @@ const Transfers = () => {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
+      localStorage.clear();
       navigate('/');
     } catch (error) {
       console.error('Error signing out:', error);
@@ -220,161 +222,163 @@ const Transfers = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex">
-      <UltraSidebar 
-        username={username}
-        role={role}
-        onLogout={handleLogout}
-        currentPage="transfers"
-      />
-      
-      <div className="flex-1 flex flex-col">
-        <div className="bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-gray-800 p-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/")}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-xl font-bold">Gestion des Transferts</h1>
+    <SidebarProvider defaultOpen={true}>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex">
+        <UltraSidebar 
+          username={username}
+          role={role}
+          onLogout={handleLogout}
+          currentPage="transfers"
+        />
+        
+        <div className="flex-1 flex flex-col">
+          <div className="bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-gray-800 p-4 flex items-center justify-between shadow-sm">
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/")}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <h1 className="text-xl font-bold">Gestion des Transferts</h1>
+            </div>
+            
+            {(role === 'creator' || role === 'agent') && (
+              <Button
+                onClick={() => setShowTransferDialog(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Demande de transfert
+              </Button>
+            )}
           </div>
           
-          {(role === 'creator' || role === 'agent') && (
-            <Button
-              onClick={() => setShowTransferDialog(true)}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Demande de transfert
-            </Button>
-          )}
-        </div>
-        
-        <div className="flex-1 p-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Demandes de transfert</CardTitle>
-              <Tabs defaultValue="pending" value={selectedTab} onValueChange={setSelectedTab}>
-                <TabsList>
-                  <TabsTrigger value="pending">En attente</TabsTrigger>
-                  <TabsTrigger value="approved">Approuvées</TabsTrigger>
-                  <TabsTrigger value="rejected">Rejetées</TabsTrigger>
-                  <TabsTrigger value="all">Toutes</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </CardHeader>
-            <CardContent>
-              {filteredRequests.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Créateur</TableHead>
-                      <TableHead>Agent actuel</TableHead>
-                      <TableHead>Agent demandé</TableHead>
-                      <TableHead>Raison</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead>Date</TableHead>
-                      {(role === 'founder' || role === 'manager') && selectedTab === 'pending' && (
-                        <TableHead>Actions</TableHead>
-                      )}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredRequests.map((request) => (
-                      <TableRow key={request.id}>
-                        <TableCell>{request.creator?.username || 'Inconnu'}</TableCell>
-                        <TableCell>{request.current_agent?.username || 'Aucun'}</TableCell>
-                        <TableCell>{request.requested_agent?.username || 'Inconnu'}</TableCell>
-                        <TableCell className="max-w-xs truncate">{request.reason || 'Non spécifiée'}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            {request.status === 'pending' && (
-                              <Clock className="h-4 w-4 text-amber-500 mr-1" />
-                            )}
-                            {request.status === 'approved' && (
-                              <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
-                            )}
-                            {request.status === 'rejected' && (
-                              <XCircle className="h-4 w-4 text-red-500 mr-1" />
-                            )}
-                            <span className="capitalize">
-                              {request.status === 'pending' ? 'En attente' : 
-                               request.status === 'approved' ? 'Approuvée' : 'Rejetée'}
-                            </span>
-                          </div>
-                          {request.status === 'rejected' && request.rejection_reason && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                              Raison: {request.rejection_reason}
-                            </p>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {new Date(request.created_at).toLocaleDateString('fr-FR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                          })}
-                        </TableCell>
-                        {(role === 'founder' || role === 'manager') && request.status === 'pending' && (
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                className="text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-green-950"
-                                onClick={() => handleApproveTransfer(request.id)}
-                              >
-                                Approuver
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                className="text-red-600 border-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-                                onClick={() => handleRejectTransfer(request.id)}
-                              >
-                                Rejeter
-                              </Button>
-                            </div>
-                          </TableCell>
+          <div className="flex-1 p-4">
+            <Card className="shadow-md border-purple-100 dark:border-purple-900/30">
+              <CardHeader className="bg-gradient-to-r from-purple-50 to-white dark:from-purple-950/30 dark:to-slate-950">
+                <CardTitle className="text-lg text-purple-900 dark:text-purple-100">Demandes de transfert</CardTitle>
+                <Tabs defaultValue="pending" value={selectedTab} onValueChange={setSelectedTab}>
+                  <TabsList className="bg-purple-100 dark:bg-purple-900/30">
+                    <TabsTrigger value="pending" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">En attente</TabsTrigger>
+                    <TabsTrigger value="approved" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">Approuvées</TabsTrigger>
+                    <TabsTrigger value="rejected" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">Rejetées</TabsTrigger>
+                    <TabsTrigger value="all" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">Toutes</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </CardHeader>
+              <CardContent>
+                {filteredRequests.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Créateur</TableHead>
+                        <TableHead>Agent actuel</TableHead>
+                        <TableHead>Agent demandé</TableHead>
+                        <TableHead>Raison</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead>Date</TableHead>
+                        {(role === 'founder' || role === 'manager') && selectedTab === 'pending' && (
+                          <TableHead>Actions</TableHead>
                         )}
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-                    <Clock className="h-8 w-8 text-gray-500 dark:text-gray-400" />
+                    </TableHeader>
+                    <TableBody>
+                      {filteredRequests.map((request) => (
+                        <TableRow key={request.id}>
+                          <TableCell>{request.creator?.username || 'Inconnu'}</TableCell>
+                          <TableCell>{request.current_agent?.username || 'Aucun'}</TableCell>
+                          <TableCell>{request.requested_agent?.username || 'Inconnu'}</TableCell>
+                          <TableCell className="max-w-xs truncate">{request.reason || 'Non spécifiée'}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              {request.status === 'pending' && (
+                                <Clock className="h-4 w-4 text-amber-500 mr-1" />
+                              )}
+                              {request.status === 'approved' && (
+                                <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
+                              )}
+                              {request.status === 'rejected' && (
+                                <XCircle className="h-4 w-4 text-red-500 mr-1" />
+                              )}
+                              <span className="capitalize">
+                                {request.status === 'pending' ? 'En attente' : 
+                                 request.status === 'approved' ? 'Approuvée' : 'Rejetée'}
+                              </span>
+                            </div>
+                            {request.status === 'rejected' && request.rejection_reason && (
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Raison: {request.rejection_reason}
+                              </p>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {new Date(request.created_at).toLocaleDateString('fr-FR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric'
+                            })}
+                          </TableCell>
+                          {(role === 'founder' || role === 'manager') && request.status === 'pending' && (
+                            <TableCell>
+                              <div className="flex space-x-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  className="text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-green-950"
+                                  onClick={() => handleApproveTransfer(request.id)}
+                                >
+                                  Approuver
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  className="text-red-600 border-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+                                  onClick={() => handleRejectTransfer(request.id)}
+                                >
+                                  Rejeter
+                                </Button>
+                              </div>
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mb-4">
+                      <Clock className="h-8 w-8 text-purple-500 dark:text-purple-400" />
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 mb-2">Aucune demande de transfert</p>
+                    {role === 'creator' && (
+                      <Button
+                        onClick={() => setShowTransferDialog(true)}
+                        variant="outline"
+                        className="mt-4 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300"
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Faire une demande
+                      </Button>
+                    )}
                   </div>
-                  <p className="text-gray-600 dark:text-gray-300 mb-2">Aucune demande de transfert</p>
-                  {role === 'creator' && (
-                    <Button
-                      onClick={() => setShowTransferDialog(true)}
-                      variant="outline"
-                      className="mt-4"
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Faire une demande
-                    </Button>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
 
-      <TransferRequestDialog
-        isOpen={showTransferDialog}
-        onClose={() => setShowTransferDialog(false)}
-        userId={userId}
-        role={role}
-        onSuccess={fetchTransferRequests}
-      />
-    </div>
+        <TransferRequestDialog
+          isOpen={showTransferDialog}
+          onClose={() => setShowTransferDialog(false)}
+          userId={userId}
+          role={role}
+          onSuccess={() => fetchTransferRequests()}
+        />
+      </div>
+    </SidebarProvider>
   );
 };
 
