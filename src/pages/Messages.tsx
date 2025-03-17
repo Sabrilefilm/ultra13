@@ -8,11 +8,13 @@ import { useMessages } from '@/hooks/use-messages';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Users, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Users, MessageSquare, Bell } from 'lucide-react';
 import { UltraSidebar } from '@/components/layout/UltraSidebar';
 import { Loading } from '@/components/ui/loading';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 
 const Messages = () => {
   const navigate = useNavigate();
@@ -21,6 +23,7 @@ const Messages = () => {
   const [username, setUsername] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('messages');
+  const { toast: uiToast } = useToast();
   
   const {
     conversations,
@@ -37,39 +40,59 @@ const Messages = () => {
   } = useMessages(userId);
 
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        
-        if (!data.session?.user) {
-          navigate('/');
-          return;
-        }
-        
-        setUserId(data.session.user.id);
-        
-        // Get user role and username
-        const { data: userData, error } = await supabase
-          .from('profiles')
-          .select('role, username')
-          .eq('id', data.session.user.id)
-          .single();
-          
-        if (error) throw error;
-        
-        setRole(userData?.role || 'creator');
-        setUsername(userData?.username || data.session.user.email || 'User');
-      } catch (error) {
-        console.error('Error checking session:', error);
-        toast.error('Une erreur est survenue lors de la vérification de session');
+    const checkAuth = () => {
+      const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+      const storedUsername = localStorage.getItem('username');
+      const storedRole = localStorage.getItem('userRole');
+      
+      if (!isAuthenticated || !storedUsername || !storedRole) {
+        uiToast({
+          title: "Session expirée",
+          description: "Veuillez vous reconnecter",
+          variant: "destructive",
+          duration: 5000,
+        });
         navigate('/');
-      } finally {
-        setLoading(false);
+        return;
       }
+      
+      // Get user id from user_accounts table
+      const fetchUserId = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('user_accounts')
+            .select('id')
+            .eq('username', storedUsername)
+            .single();
+            
+          if (error) throw error;
+          
+          if (data?.id) {
+            setUserId(data.id);
+            setUsername(storedUsername);
+            setRole(storedRole);
+          } else {
+            throw new Error('User not found');
+          }
+        } catch (error) {
+          console.error('Error fetching user:', error);
+          uiToast({
+            title: "Erreur",
+            description: "Impossible de récupérer les données utilisateur",
+            variant: "destructive",
+            duration: 5000,
+          });
+          navigate('/');
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchUserId();
     };
     
-    checkSession();
-  }, [navigate]);
+    checkAuth();
+  }, [navigate, uiToast]);
 
   const handleSendMessage = () => {
     if (newMessage.trim() && activeContact) {
@@ -77,13 +100,9 @@ const Messages = () => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      navigate('/');
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/');
   };
 
   if (loading) {
@@ -111,6 +130,11 @@ const Messages = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <h1 className="text-xl font-bold">Messagerie</h1>
+            {unreadCount > 0 && (
+              <Badge variant="destructive" className="ml-2">
+                {unreadCount} non lu{unreadCount > 1 ? 's' : ''}
+              </Badge>
+            )}
           </div>
           
           <div className="md:hidden">
@@ -140,6 +164,7 @@ const Messages = () => {
                       setActiveTab('messages');
                     }}
                     isLoading={loadingConversations}
+                    unreadMessages={unreadCount}
                   />
                 </div>
                 
@@ -148,7 +173,12 @@ const Messages = () => {
                     <>
                       <div className="bg-white dark:bg-slate-900 p-3 border-b border-gray-200 dark:border-gray-800">
                         <div className="flex items-center">
-                          {conversations?.find(c => c.id === activeContact)?.username || 'Conversation'}
+                          <span className="font-medium">
+                            {conversations?.find(c => c.id === activeContact)?.username || 'Conversation'}
+                          </span>
+                          <span className="ml-2 text-sm text-gray-500">
+                            ({conversations?.find(c => c.id === activeContact)?.role || ''})
+                          </span>
                         </div>
                       </div>
                       

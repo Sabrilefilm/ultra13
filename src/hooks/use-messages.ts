@@ -13,6 +13,15 @@ interface Message {
   read: boolean;
 }
 
+interface Contact {
+  id: string;
+  username: string;
+  role: string;
+  unreadCount?: number;
+  lastMessage?: string;
+  lastMessageTime?: string;
+}
+
 export const useMessages = (userId: string) => {
   const queryClient = useQueryClient();
   const [activeContact, setActiveContact] = useState<string | null>(null);
@@ -25,23 +34,42 @@ export const useMessages = (userId: string) => {
       if (!userId) return [];
       
       // Get all messages involving the current user
-      const { data: sentMessages, error: sentError } = await supabase
+      const { data: messages, error } = await supabase
         .from('chats')
-        .select('receiver_id, sender_id, created_at')
+        .select('receiver_id, sender_id, created_at, message, read')
         .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
         .order('created_at', { ascending: false });
       
-      if (sentError) throw sentError;
+      if (error) throw error;
       
       // Extract unique user IDs (conversation partners)
-      const uniqueUsers = new Set<string>();
-      sentMessages?.forEach(msg => {
+      const userCounts: Record<string, { 
+        unreadCount: number, 
+        lastMessage?: string,
+        lastMessageTime?: string
+      }> = {};
+      
+      messages?.forEach(msg => {
         const partnerId = msg.sender_id === userId ? msg.receiver_id : msg.sender_id;
-        uniqueUsers.add(partnerId);
+        
+        if (!userCounts[partnerId]) {
+          userCounts[partnerId] = { unreadCount: 0 };
+        }
+        
+        // Count unread messages
+        if (msg.receiver_id === userId && !msg.read) {
+          userCounts[partnerId].unreadCount += 1;
+        }
+        
+        // Track last message
+        if (!userCounts[partnerId].lastMessage) {
+          userCounts[partnerId].lastMessage = msg.message;
+          userCounts[partnerId].lastMessageTime = msg.created_at;
+        }
       });
       
       // Get user details for all conversation partners
-      const partnerIds = Array.from(uniqueUsers);
+      const partnerIds = Object.keys(userCounts);
       if (partnerIds.length === 0) return [];
       
       const { data: userDetails, error: userError } = await supabase
@@ -51,7 +79,13 @@ export const useMessages = (userId: string) => {
       
       if (userError) throw userError;
       
-      return userDetails || [];
+      // Combine user details with unread counts
+      return userDetails?.map(user => ({
+        ...user,
+        unreadCount: userCounts[user.id].unreadCount,
+        lastMessage: userCounts[user.id].lastMessage,
+        lastMessageTime: userCounts[user.id].lastMessageTime
+      })) || [];
     },
     enabled: !!userId,
     retry: 1,
@@ -92,7 +126,11 @@ export const useMessages = (userId: string) => {
           .in('id', unreadMessages.map(msg => msg.id));
         
         if (error) console.error('Error marking messages as read:', error);
-        else queryClient.invalidateQueries({ queryKey: ['messages'] });
+        else {
+          queryClient.invalidateQueries({ queryKey: ['messages'] });
+          queryClient.invalidateQueries({ queryKey: ['conversations'] });
+          queryClient.invalidateQueries({ queryKey: ['unread'] });
+        }
       }
     };
     
@@ -119,6 +157,7 @@ export const useMessages = (userId: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages'] });
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['unread'] });
     },
     onError: (error) => {
       console.error('Error sending message:', error);
@@ -161,18 +200,28 @@ export const useMessages = (userId: string) => {
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
         queryClient.invalidateQueries({ queryKey: ['unread'] });
         
-        // Show notification for new message
-        if (payload.new && payload.new.sender_id !== userId) {
+        // Show notification for new message if not from current user and not in active conversation
+        if (payload.new && payload.new.sender_id !== userId && 
+            (!activeContact || activeContact !== payload.new.sender_id)) {
           const sender = conversations?.find(c => c.id === payload.new.sender_id);
           toast.success(`Nouveau message de ${sender?.username || 'Utilisateur'}`);
         }
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'chats'
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['messages'] });
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+        queryClient.invalidateQueries({ queryKey: ['unread'] });
       })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, conversations, queryClient]);
+  }, [userId, conversations, queryClient, activeContact]);
 
   return {
     conversations,

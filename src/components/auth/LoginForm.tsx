@@ -1,23 +1,58 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronRight, Rocket, Mail, Shield, Lock } from "lucide-react";
-import { useState } from "react";
+import { ChevronRight, Rocket, Mail, Shield, Lock, Loader2 } from "lucide-react";
+import { useState, FormEvent } from "react";
 import { Link } from "react-router-dom";
+
 interface LoginFormProps {
   onLogin: (username: string, password: string) => void;
   onForgotPassword: () => void;
 }
+
 export const LoginForm = ({
   onLogin,
   onForgotPassword
 }: LoginFormProps) => {
   const [username, setUsername] = useState(() => localStorage.getItem('username') || "");
   const [password, setPassword] = useState("");
-  const handleSubmit = () => {
-    onLogin(username, password);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e?: FormEvent) => {
+    if (e) e.preventDefault();
+    
+    if (!username.trim()) {
+      setError("Veuillez saisir votre identifiant");
+      return;
+    }
+    
+    if (!password.trim()) {
+      setError("Veuillez saisir votre mot de passe");
+      return;
+    }
+    
+    setError(null);
+    setIsLoading(true);
+    
+    try {
+      await onLogin(username, password);
+    } catch (err) {
+      console.error("Login error:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
-  return <div className="min-h-screen bg-[#111827] text-white p-4 flex flex-col items-center justify-center">
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSubmit();
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="min-h-screen bg-[#111827] text-white p-4 flex flex-col items-center justify-center">
       <div className="w-full max-w-[450px] mx-auto space-y-8">
         <div className="text-center space-y-6">
           <div className="flex flex-col items-center justify-center space-y-2">
@@ -43,6 +78,12 @@ export const LoginForm = ({
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/10 rounded-full -ml-16 -mb-16 blur-2xl"></div>
           
           <div className="space-y-4 relative">
+            {error && (
+              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+                {error}
+              </div>
+            )}
+            
             <div className="space-y-2">
               <Label htmlFor="username" className="text-white/90">
                 Identifiant
@@ -51,7 +92,17 @@ export const LoginForm = ({
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Shield className="h-5 w-5 text-white/40" />
                 </div>
-                <Input id="username" type="text" placeholder="Votre identifiant" value={username} onChange={e => setUsername(e.target.value)} onKeyPress={e => e.key === "Enter" && handleSubmit()} className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12 pl-10" />
+                <Input 
+                  id="username" 
+                  type="text" 
+                  placeholder="Votre identifiant" 
+                  value={username} 
+                  onChange={e => setUsername(e.target.value)} 
+                  onKeyPress={handleKeyPress}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12 pl-10" 
+                  autoComplete="username"
+                  disabled={isLoading}
+                />
               </div>
             </div>
             <div className="space-y-2">
@@ -62,23 +113,44 @@ export const LoginForm = ({
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-white/40" />
                 </div>
-                <Input id="password" type="password" placeholder="Votre mot de passe" value={password} onChange={e => setPassword(e.target.value)} onKeyPress={e => e.key === "Enter" && handleSubmit()} className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12 pl-10" />
+                <Input 
+                  id="password" 
+                  type="password" 
+                  placeholder="Votre mot de passe" 
+                  value={password} 
+                  onChange={e => setPassword(e.target.value)} 
+                  onKeyPress={handleKeyPress}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12 pl-10" 
+                  autoComplete="current-password"
+                  disabled={isLoading}
+                />
               </div>
             </div>
             <div className="flex justify-between items-center">
-              <Button variant="link" className="text-sm text-white/60 hover:text-purple-400 p-0" onClick={onForgotPassword}>
+              <Button variant="link" className="text-sm text-white/60 hover:text-purple-400 p-0" onClick={onForgotPassword} type="button" disabled={isLoading}>
                 Mot de passe oublié ?
               </Button>
-              <Button variant="link" className="text-sm text-white/60 hover:text-purple-400 p-0" onClick={() => window.location.href = 'mailto:Contact@Phoceenagency.fr'}>
+              <Button variant="link" className="text-sm text-white/60 hover:text-purple-400 p-0" onClick={() => window.location.href = 'mailto:Contact@Phoceenagency.fr'} type="button" disabled={isLoading}>
                 Contacter le support
               </Button>
             </div>
           </div>
 
           <div className="space-y-4">
-            <Button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-6 flex items-center justify-center group transition-all" onClick={handleSubmit}>
-              <span>Se connecter</span>
-              <ChevronRight className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+            <Button 
+              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-6 flex items-center justify-center group transition-all" 
+              onClick={() => handleSubmit()}
+              disabled={isLoading}
+              type="submit"
+            >
+              {isLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin mr-2" />
+              ) : (
+                <>
+                  <span>Se connecter</span>
+                  <ChevronRight className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
             </Button>
             <div className="flex items-center justify-center">
               <Link to="/external-matches" className="text-sm text-center text-white/60 hover:text-purple-400 flex items-center gap-1">
@@ -101,5 +173,6 @@ export const LoginForm = ({
         
         
       </div>
-    </div>;
+    </form>
+  );
 };

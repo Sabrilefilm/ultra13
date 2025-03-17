@@ -3,13 +3,18 @@ import { useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Search, MessageCircle } from 'lucide-react';
+import { Search, MessageCircle, Circle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { format, isToday, isYesterday } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface Contact {
   id: string;
   username: string;
   role: string;
+  unreadCount?: number;
+  lastMessage?: string;
+  lastMessageTime?: string;
 }
 
 interface ContactListProps {
@@ -17,13 +22,15 @@ interface ContactListProps {
   activeContactId: string | null;
   onSelectContact: (contactId: string) => void;
   isLoading: boolean;
+  unreadMessages?: number;
 }
 
 export const ContactList = ({ 
   contacts, 
   activeContactId, 
   onSelectContact, 
-  isLoading 
+  isLoading,
+  unreadMessages = 0
 }: ContactListProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -32,6 +39,20 @@ export const ContactList = ({
         contact.username.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : contacts;
+
+  // Sort contacts: unread first, then by last message time
+  const sortedContacts = [...filteredContacts].sort((a, b) => {
+    // First sort by unread count (desc)
+    if ((a.unreadCount || 0) > 0 && (b.unreadCount || 0) === 0) return -1;
+    if ((a.unreadCount || 0) === 0 && (b.unreadCount || 0) > 0) return 1;
+    
+    // Then sort by last message time (desc)
+    if (a.lastMessageTime && b.lastMessageTime) {
+      return new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime();
+    }
+    
+    return 0;
+  });
 
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -63,6 +84,26 @@ export const ContactList = ({
     }
   };
 
+  const formatMessageTime = (dateString?: string) => {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    
+    if (isToday(date)) {
+      return format(date, 'HH:mm', { locale: fr });
+    } else if (isYesterday(date)) {
+      return 'Hier';
+    } else {
+      return format(date, 'dd/MM', { locale: fr });
+    }
+  };
+
+  const truncateMessage = (message?: string, length = 30) => {
+    if (!message) return '';
+    if (message.length <= length) return message;
+    return message.substring(0, length) + '...';
+  };
+
   if (isLoading) {
     return (
       <div className="flex flex-col h-full items-center justify-center p-6">
@@ -88,8 +129,8 @@ export const ContactList = ({
       
       <ScrollArea className="flex-1">
         <div className="p-2">
-          {filteredContacts.length > 0 ? (
-            filteredContacts.map((contact) => (
+          {sortedContacts.length > 0 ? (
+            sortedContacts.map((contact) => (
               <div
                 key={contact.id}
                 className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
@@ -99,21 +140,42 @@ export const ContactList = ({
                 }`}
                 onClick={() => onSelectContact(contact.id)}
               >
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback className={`${getRoleColor(contact.role)} text-white`}>
-                    {contact.username.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar className="h-12 w-12">
+                    <AvatarFallback className={`${getRoleColor(contact.role)} text-white`}>
+                      {contact.username.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {(contact.unreadCount || 0) > 0 && (
+                    <div className="absolute -top-1 -right-1">
+                      <Badge variant="destructive" className="h-5 min-w-5 flex items-center justify-center rounded-full px-1.5 text-xs">
+                        {contact.unreadCount}
+                      </Badge>
+                    </div>
+                  )}
+                </div>
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                    <p className={`font-medium text-gray-900 dark:text-gray-100 truncate ${(contact.unreadCount || 0) > 0 ? 'font-bold' : ''}`}>
                       {contact.username}
                     </p>
+                    {contact.lastMessageTime && (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {formatMessageTime(contact.lastMessageTime)}
+                      </span>
+                    )}
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {getRoleName(contact.role)}
-                  </p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {getRoleName(contact.role)}
+                    </p>
+                  </div>
+                  {contact.lastMessage && (
+                    <p className={`text-sm text-gray-600 dark:text-gray-300 truncate mt-1 ${(contact.unreadCount || 0) > 0 ? 'font-semibold' : ''}`}>
+                      {truncateMessage(contact.lastMessage)}
+                    </p>
+                  )}
                 </div>
               </div>
             ))
