@@ -4,7 +4,7 @@ import { UltraSidebar } from '@/components/layout/UltraSidebar';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Upload } from 'lucide-react';
 import { Loading } from '@/components/ui/loading';
-import { DocumentUploadDialog } from '@/components/documents/DocumentUploadDialog';
+import { DocumentUploadDialog } from '@/components/documents/upload/DocumentUploadDialog';
 import { useDocuments } from '@/hooks/documents/use-documents';
 import { UserDocumentView } from '@/components/documents/UserDocumentView';
 import { AdminDocumentsView } from '@/components/documents/AdminDocumentsView';
