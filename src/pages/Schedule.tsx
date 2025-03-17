@@ -18,7 +18,7 @@ import { saveAs } from "file-saver";
 
 const Schedule = () => {
   const { toast } = useToast();
-  const { isAuthenticated, username, role, handleLogout } = useIndexAuth();
+  const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
   const { platformSettings, handleUpdateSettings } = usePlatformSettings(role);
   const { handleCreateAccount } = useAccountManagement();
   const { matches, isLoading } = useUpcomingMatches(role || '', username || '');
@@ -122,6 +122,7 @@ const Schedule = () => {
       <UltraDashboard
         username={username}
         role={role || ''}
+        userId={userId || ''}
         onLogout={handleLogout}
         platformSettings={platformSettings}
         handleCreateAccount={handleCreateAccount}

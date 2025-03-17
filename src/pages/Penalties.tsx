@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const Penalties = () => {
   const { toast } = useToast();
-  const { isAuthenticated, username, role, handleLogout } = useIndexAuth();
+  const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
   const { platformSettings, handleUpdateSettings } = usePlatformSettings(role);
   const { handleCreateAccount } = useAccountManagement();
   
@@ -40,6 +40,7 @@ const Penalties = () => {
       <UltraDashboard
         username={username}
         role={role || ''}
+        userId={userId || ''}
         onLogout={handleLogout}
         platformSettings={platformSettings}
         handleCreateAccount={handleCreateAccount}
