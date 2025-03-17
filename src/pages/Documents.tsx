@@ -20,11 +20,14 @@ const Documents = () => {
     userDocument,
     showUploadDialog,
     selectedTab,
+    documentType,
+    setDocumentType,
     setSelectedTab,
     setShowUploadDialog,
     handleVerifyDocument,
     handleLogout,
-    fetchUserDocument
+    fetchUserDocument,
+    fetchDocuments
   } = useDocuments();
 
   if (loading) {
@@ -76,7 +79,10 @@ const Documents = () => {
           ) : (
             <UserDocumentView 
               userDocument={userDocument} 
-              onShowUploadDialog={() => setShowUploadDialog(true)} 
+              onShowUploadDialog={() => setShowUploadDialog(true)}
+              onChangeDocumentType={setDocumentType}
+              documentType={documentType}
+              fetchDocuments={fetchDocuments}
             />
           )}
         </div>
@@ -88,6 +94,7 @@ const Documents = () => {
         userId={userId}
         existingDocument={userDocument || undefined}
         onSuccess={() => fetchUserDocument(userId)}
+        documentType={documentType}
       />
     </div>
   );

@@ -13,6 +13,7 @@ export const useDocuments = () => {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [selectedTab, setSelectedTab] = useState('all');
   const [userId, setUserId] = useState<string>('');
+  const [documentType, setDocumentType] = useState<'identity' | 'other'>('identity');
 
   const fetchDocuments = async () => {
     try {
@@ -44,10 +45,16 @@ export const useDocuments = () => {
         if (error) throw error;
         
         // Format the data to include username
-        const formattedDocs = data.map(doc => ({
-          ...doc,
-          username: doc.user_accounts?.username || 'Inconnu'
-        }));
+        const formattedDocs = data.map(doc => {
+          // Ensure document URLs are correctly formatted with getPublicUrl
+          const formattedDoc = {
+            ...doc,
+            username: doc.user_accounts?.username || 'Inconnu',
+            document_front: doc.document_front ? doc.document_front : null,
+            document_back: doc.document_back ? doc.document_back : null
+          };
+          return formattedDoc;
+        });
         
         setDocuments(formattedDocs);
       } else {
@@ -75,7 +82,19 @@ export const useDocuments = () => {
         .maybeSingle();
       
       if (error) throw error;
-      setUserDocument(data);
+      
+      // Ensure document URLs are correctly formatted
+      if (data) {
+        const formattedDoc = {
+          ...data,
+          document_front: data.document_front ? data.document_front : null,
+          document_back: data.document_back ? data.document_back : null
+        };
+        setUserDocument(formattedDoc);
+      } else {
+        setUserDocument(null);
+      }
+      
       return data;
     } catch (error) {
       console.error('Error fetching user document:', error);
@@ -124,10 +143,13 @@ export const useDocuments = () => {
     showUploadDialog,
     selectedTab,
     userId,
+    documentType,
+    setDocumentType,
     setSelectedTab,
     setShowUploadDialog,
     handleVerifyDocument,
     handleLogout,
-    fetchUserDocument
+    fetchUserDocument,
+    fetchDocuments
   };
 };

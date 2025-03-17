@@ -11,6 +11,7 @@ interface DocumentCardProps {
   verified: boolean;
   documentFront?: string;
   documentBack?: string;
+  documentType?: string;
   onVerify: (docId: string, verified: boolean) => Promise<void>;
 }
 
@@ -21,6 +22,7 @@ export const DocumentCard = ({
   verified,
   documentFront,
   documentBack,
+  documentType = 'identity',
   onVerify
 }: DocumentCardProps) => {
   return (
@@ -31,6 +33,9 @@ export const DocumentCard = ({
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {new Date(uploadedAt).toLocaleDateString('fr-FR')}
           </p>
+          <Badge className="mt-1" variant="outline">
+            {documentType === 'identity' ? 'Carte d\'identité' : 'Autre document'}
+          </Badge>
         </div>
         <Badge variant={verified ? "secondary" : "destructive"} className={verified ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" : ""}>
           {verified ? 'Vérifié' : 'Non vérifié'}
@@ -38,7 +43,9 @@ export const DocumentCard = ({
       </div>
       <div className="p-4 grid grid-cols-2 gap-2">
         <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Recto</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+            {documentType === 'identity' ? 'Recto' : 'Page 1'}
+          </p>
           {documentFront ? (
             <a 
               href={documentFront} 
@@ -48,7 +55,7 @@ export const DocumentCard = ({
             >
               <img 
                 src={documentFront} 
-                alt="Recto" 
+                alt={documentType === 'identity' ? 'Recto' : 'Page 1'} 
                 className="w-full h-full object-cover"
               />
             </a>
@@ -59,7 +66,9 @@ export const DocumentCard = ({
           )}
         </div>
         <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Verso</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+            {documentType === 'identity' ? 'Verso' : 'Page 2'}
+          </p>
           {documentBack ? (
             <a 
               href={documentBack} 
@@ -69,7 +78,7 @@ export const DocumentCard = ({
             >
               <img 
                 src={documentBack} 
-                alt="Verso" 
+                alt={documentType === 'identity' ? 'Verso' : 'Page 2'} 
                 className="w-full h-full object-cover"
               />
             </a>

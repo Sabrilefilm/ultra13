@@ -12,6 +12,7 @@ interface Document {
   uploaded_at: string;
   verified: boolean;
   username: string;
+  document_type?: string;
 }
 
 interface AdminDocumentsViewProps {
@@ -31,6 +32,8 @@ export const AdminDocumentsView = ({
     if (selectedTab === 'all') return true;
     if (selectedTab === 'verified') return doc.verified;
     if (selectedTab === 'unverified') return !doc.verified;
+    if (selectedTab === 'identity') return doc.document_type === 'identity' || !doc.document_type;
+    if (selectedTab === 'other') return doc.document_type === 'other';
     return true;
   });
 
@@ -43,6 +46,8 @@ export const AdminDocumentsView = ({
             <TabsTrigger value="all">Tous</TabsTrigger>
             <TabsTrigger value="verified">Vérifiés</TabsTrigger>
             <TabsTrigger value="unverified">Non vérifiés</TabsTrigger>
+            <TabsTrigger value="identity">Cartes d'identité</TabsTrigger>
+            <TabsTrigger value="other">Autres documents</TabsTrigger>
           </TabsList>
         </Tabs>
       </CardHeader>
@@ -58,6 +63,7 @@ export const AdminDocumentsView = ({
                 verified={doc.verified}
                 documentFront={doc.document_front}
                 documentBack={doc.document_back}
+                documentType={doc.document_type || 'identity'}
                 onVerify={onVerifyDocument}
               />
             ))}

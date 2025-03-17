@@ -6,6 +6,7 @@ import { UploadCloud, X, AlertCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface DocumentUploadDialogProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface DocumentUploadDialogProps {
   userId: string;
   existingDocument?: any;
   onSuccess: () => void;
+  documentType: 'identity' | 'other';
 }
 
 export const DocumentUploadDialog = ({
@@ -20,7 +22,8 @@ export const DocumentUploadDialog = ({
   onClose,
   userId,
   existingDocument,
-  onSuccess
+  onSuccess,
+  documentType
 }: DocumentUploadDialogProps) => {
   const { toast: uiToast } = useToast();
   const [frontFile, setFrontFile] = useState<File | null>(null);
@@ -29,6 +32,7 @@ export const DocumentUploadDialog = ({
   const [backPreview, setBackPreview] = useState<string | null>(existingDocument?.document_back || null);
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<{ front?: string; back?: string }>({});
+  const [selectedDocType, setSelectedDocType] = useState<string>(documentType);
 
   const handleFileChange = (side: 'front' | 'back', file: File | null) => {
     if (!file) return;
@@ -76,6 +80,12 @@ export const DocumentUploadDialog = ({
     setErrors(prev => ({ ...prev, [side]: undefined }));
   };
 
+  const getDocumentTitle = () => {
+    return selectedDocType === 'identity' 
+      ? "Télécharger votre carte d'identité" 
+      : "Télécharger un autre document";
+  };
+
   const handleSubmit = async () => {
     if (!frontFile && !backFile && !existingDocument) {
       setErrors({
@@ -95,8 +105,8 @@ export const DocumentUploadDialog = ({
       // Upload front file if selected
       let frontUrl = existingDocument?.document_front;
       if (frontFile) {
-        const frontFilePath = `documents/${userId}/front-${Date.now()}`;
-        const { error: frontUploadError } = await supabase.storage
+        const frontFilePath = `documents/${userId}/${selectedDocType}-front-${Date.now()}`;
+        const { error: frontUploadError, data: frontUploadData } = await supabase.storage
           .from('id_documents')
           .upload(frontFilePath, frontFile);
 
@@ -112,8 +122,8 @@ export const DocumentUploadDialog = ({
       // Upload back file if selected
       let backUrl = existingDocument?.document_back;
       if (backFile) {
-        const backFilePath = `documents/${userId}/back-${Date.now()}`;
-        const { error: backUploadError } = await supabase.storage
+        const backFilePath = `documents/${userId}/${selectedDocType}-back-${Date.now()}`;
+        const { error: backUploadError, data: backUploadData } = await supabase.storage
           .from('id_documents')
           .upload(backFilePath, backFile);
 
@@ -134,6 +144,7 @@ export const DocumentUploadDialog = ({
           .update({
             document_front: frontUrl,
             document_back: backUrl,
+            document_type: selectedDocType,
             uploaded_at: new Date().toISOString(),
             verified: false // Reset verification when document is updated
           })
@@ -147,7 +158,8 @@ export const DocumentUploadDialog = ({
           .insert({
             user_id: userId,
             document_front: frontUrl,
-            document_back: backUrl
+            document_back: backUrl,
+            document_type: selectedDocType
           });
 
         if (insertError) throw insertError;
@@ -172,12 +184,30 @@ export const DocumentUploadDialog = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Télécharger votre document d'identité</DialogTitle>
+          <DialogTitle>{getDocumentTitle()}</DialogTitle>
         </DialogHeader>
         
         <div className="grid gap-6 py-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Recto de la carte d'identité</label>
+            <label className="block text-sm font-medium mb-2">Type de document</label>
+            <Select 
+              value={selectedDocType} 
+              onValueChange={(value) => setSelectedDocType(value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner un type de document" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="identity">Carte d'identité</SelectItem>
+                <SelectItem value="other">Autre document</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              {selectedDocType === 'identity' ? 'Recto de la carte d\'identité' : 'Première page'}
+            </label>
             <div className="border-2 border-dashed rounded-lg p-6 border-gray-300 dark:border-gray-700 relative">
               {frontPreview ? (
                 <div className="relative">
@@ -226,7 +256,9 @@ export const DocumentUploadDialog = ({
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-2">Verso de la carte d'identité</label>
+            <label className="block text-sm font-medium mb-2">
+              {selectedDocType === 'identity' ? 'Verso de la carte d\'identité' : 'Deuxième page (optionnel)'}
+            </label>
             <div className="border-2 border-dashed rounded-lg p-6 border-gray-300 dark:border-gray-700 relative">
               {backPreview ? (
                 <div className="relative">
