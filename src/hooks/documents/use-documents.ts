@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export const useDocuments = () => {
   const { toast } = useToast();
-  const { isAuthenticated, userId, username, role, handleLogout } = useIndexAuth();
+  const { isAuthenticated, username, role, handleLogout } = useIndexAuth();
   const [loading, setLoading] = useState(true);
   const [documents, setDocuments] = useState<any[]>([]);
   const [userDocument, setUserDocument] = useState<any>(null);
@@ -40,7 +40,16 @@ export const useDocuments = () => {
         setDocuments(formattedDocs);
       } else {
         // Regular users only get their own document
-        await fetchUserDocument(userId);
+        // Get user id from username
+        const { data: userData, error: userError } = await supabase
+          .from('user_accounts')
+          .select('id')
+          .eq('username', username)
+          .single();
+          
+        if (userError) throw userError;
+        
+        await fetchUserDocument(userData.id);
       }
     } catch (error) {
       console.error('Error fetching documents:', error);
@@ -105,7 +114,6 @@ export const useDocuments = () => {
 
   return {
     loading,
-    userId,
     username,
     role,
     documents,

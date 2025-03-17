@@ -41,6 +41,14 @@ export const UserTable: React.FC<UserTableProps> = ({
   const navigate = useNavigate();
   const isFounder = userRole === 'founder';
   const isManager = userRole === 'manager';
+  const canSeePasswords = isFounder || isManager;
+  
+  // Les managers ne peuvent attribuer que le rôle d'agent aux créateurs
+  const canChangeRole = (user: Account, newRole: string) => {
+    if (isFounder) return true;
+    if (isManager && user.role === 'creator' && newRole === 'agent') return true;
+    return false;
+  };
 
   return (
     <Card>
@@ -54,7 +62,7 @@ export const UserTable: React.FC<UserTableProps> = ({
               <tr className="border-b">
                 <th className="px-4 py-2 text-left">Nom d'utilisateur</th>
                 <th className="px-4 py-2 text-left">Rôle</th>
-                <th className="px-4 py-2 text-left">Mot de passe</th>
+                {canSeePasswords && <th className="px-4 py-2 text-left">Mot de passe</th>}
                 <th className="px-4 py-2 text-left">Affiliation</th>
                 <th className="px-4 py-2 text-right">Actions</th>
               </tr>
@@ -104,13 +112,18 @@ export const UserTable: React.FC<UserTableProps> = ({
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    {isFounder ? (
+                    {(isFounder || (isManager && user.role === 'creator')) ? (
                       <select
                         value={user.role}
-                        onChange={(e) => onRoleChange(user.id, e.target.value, user.username)}
+                        onChange={(e) => {
+                          if (canChangeRole(user, e.target.value)) {
+                            onRoleChange(user.id, e.target.value, user.username);
+                          }
+                        }}
                         className="bg-secondary/20 rounded px-2 py-1 text-sm"
+                        disabled={!canChangeRole(user, 'agent')}
                       >
-                        <option value="manager">Manager</option>
+                        {isFounder && <option value="manager">Manager</option>}
                         <option value="creator">Créateur</option>
                         <option value="agent">Agent</option>
                       </select>
@@ -120,23 +133,25 @@ export const UserTable: React.FC<UserTableProps> = ({
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <span>{showPasswords[user.id] ? user.password : '••••••••'}</span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => togglePasswordVisibility(user.id)}
-                      >
-                        {showPasswords[user.id] ? (
-                          <EyeOff className="h-3 w-3" />
-                        ) : (
-                          <Eye className="h-3 w-3" />
-                        )}
-                      </Button>
-                    </div>
-                  </td>
+                  {canSeePasswords && (
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <span>{showPasswords[user.id] ? user.password : '••••••••'}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => togglePasswordVisibility(user.id)}
+                        >
+                          {showPasswords[user.id] ? (
+                            <EyeOff className="h-3 w-3" />
+                          ) : (
+                            <Eye className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </div>
+                    </td>
+                  )}
                   <td className="px-4 py-3">
                     {user.role === 'creator' ? (
                       <span>Créateur</span>

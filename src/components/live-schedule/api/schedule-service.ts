@@ -1,125 +1,116 @@
 
-import { supabase } from "@/lib/supabase";
-import { Schedule } from "../types";
-import { toast } from "sonner";
+import { supabase } from '@/lib/supabase';
+import { Schedule } from '@/components/live-schedule/types';
+import { toast } from 'sonner';
 
-export async function fetchProfileByUsername(username: string) {
+export const fetchScheduleForCreator = async (creatorId: string): Promise<Schedule | null> => {
   try {
-    console.log("Fetching profile for username:", username);
-
-    const { data: userAccount, error: userError } = await supabase
-      .from("user_accounts")
-      .select("id, username")
-      .eq("username", username)
-      .eq("role", "creator")
-      .single();
-
-    if (userError) {
-      console.error("Database error:", userError);
-      throw userError;
-    }
-
-    if (!userAccount) {
-      console.log("No user account found for username:", username);
-      toast.error(`Aucun profil trouvé pour ${username}`);
-      return null;
-    }
-
-    console.log("User account found:", userAccount);
-    return userAccount;
-  } catch (error) {
-    console.error("Erreur lors de la récupération du profil:", error);
-    toast.error("Erreur lors de la récupération du profil");
-    return null;
-  }
-}
-
-export async function fetchScheduleByCreatorId(id: string) {
-  try {
-    console.log("Fetching schedules for id:", id);
-
     const { data, error } = await supabase
-      .from("live_schedules")
-      .select("*")
-      .eq("creator_id", id)
-      .single();
+      .from('live_schedules')
+      .select('*')
+      .eq('creator_id', creatorId)
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 est le code pour "aucun résultat"
+    if (error) {
       throw error;
     }
 
-    console.log("Schedule found:", data);
     return data;
   } catch (error) {
-    console.error("Erreur lors du chargement des horaires:", error);
-    toast.error("Erreur lors du chargement des horaires");
+    console.error('Erreur lors de la récupération du planning :', error);
+    toast.error('Impossible de récupérer le planning');
     return null;
   }
-}
+};
 
-export async function fetchAllCreatorSchedules() {
+export const createOrUpdateSchedule = async (
+  schedule: { hours: number; days: number },
+  creatorId: string
+): Promise<boolean> => {
   try {
-    const { data: schedulesData, error: schedulesError } = await supabase
-      .from("live_schedules")
-      .select(`
-        id, 
-        hours, 
-        days, 
-        is_active, 
-        creator_id,
-        user_accounts(username)
-      `)
-      .order('days', { ascending: false });
+    // Check if a schedule already exists for this creator
+    const { data: existingSchedule, error: checkError } = await supabase
+      .from('live_schedules')
+      .select('id')
+      .eq('creator_id', creatorId)
+      .maybeSingle();
 
-    if (schedulesError) throw schedulesError;
+    if (checkError) {
+      throw checkError;
+    }
 
-    const formattedSchedules: Schedule[] = schedulesData.map(schedule => ({
-      id: schedule.id,
-      hours: schedule.hours,
-      days: schedule.days,
-      is_active: schedule.is_active,
-      creator_name: schedule.user_accounts?.username || 'Inconnu',
-      creator_id: schedule.creator_id
-    }));
-
-    return formattedSchedules;
-  } catch (error) {
-    console.error("Erreur lors du chargement de tous les horaires:", error);
-    return [];
-  }
-}
-
-export async function saveSchedule(schedule: Schedule, profileId: string) {
-  try {
-    const data = {
-      creator_id: profileId,
-      hours: schedule.hours,
-      days: schedule.days,
-      is_active: true,
-    };
-
-    if (schedule.id.startsWith('new-')) {
-      const { error } = await supabase
-        .from("live_schedules")
-        .insert(data);
-      
-      if (error) throw error;
-    } else {
-      const { error } = await supabase
-        .from("live_schedules")
+    if (existingSchedule) {
+      // Update existing schedule
+      const { error: updateError } = await supabase
+        .from('live_schedules')
         .update({
           hours: schedule.hours,
           days: schedule.days,
+          is_active: true
         })
-        .eq("id", schedule.id);
-        
-      if (error) throw error;
+        .eq('id', existingSchedule.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+    } else {
+      // Create new schedule
+      const { error: insertError } = await supabase
+        .from('live_schedules')
+        .insert({
+          creator_id: creatorId,
+          hours: schedule.hours,
+          days: schedule.days,
+          is_active: true
+        });
+
+      if (insertError) {
+        throw insertError;
+      }
     }
 
     return true;
   } catch (error) {
-    console.error("Erreur lors de la sauvegarde des horaires:", error);
-    toast.error("Erreur lors de la sauvegarde des horaires");
+    console.error('Erreur lors de la mise à jour du planning :', error);
+    toast.error('Impossible de mettre à jour le planning');
     return false;
   }
-}
+};
+
+export const fetchCreators = async (): Promise<any[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('user_accounts')
+      .select('id, username')
+      .eq('role', 'creator');
+
+    if (error) {
+      throw error;
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Erreur lors de la récupération des créateurs :', error);
+    toast.error('Impossible de récupérer la liste des créateurs');
+    return [];
+  }
+};
+
+export const getCreatorName = async (creatorId: string): Promise<string> => {
+  try {
+    const { data, error } = await supabase
+      .from('user_accounts')
+      .select('username')
+      .eq('id', creatorId)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data.username || 'Inconnu';
+  } catch (error) {
+    console.error('Erreur lors de la récupération du nom du créateur :', error);
+    return 'Inconnu';
+  }
+};

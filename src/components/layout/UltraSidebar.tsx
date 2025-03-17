@@ -18,7 +18,8 @@ import {
   ClipboardList,
   LayoutDashboard,
   Shield,
-  Trophy
+  Trophy,
+  Rocket
 } from "lucide-react";
 
 interface UltraSidebarProps {
@@ -26,13 +27,15 @@ interface UltraSidebarProps {
   role: string;
   onLogout: () => void;
   currentPage: string;
+  onAction?: (action: string, data?: any) => void;
 }
 
 export const UltraSidebar = ({
   username,
   role,
   onLogout,
-  currentPage
+  currentPage,
+  onAction
 }: UltraSidebarProps) => {
   const navigate = useNavigate();
 
@@ -118,17 +121,10 @@ export const UltraSidebar = ({
       },
       { 
         path: "/contact", 
-        label: "Contact", 
-        icon: <Contact className="h-5 w-5" />, 
+        label: "Contact & Messages", 
+        icon: <MessageSquare className="h-5 w-5" />, 
         id: "contact",
         roles: ["founder", "manager", "agent", "creator", "viewer"] 
-      },
-      { 
-        path: "/messages", 
-        label: "Messages", 
-        icon: <MessageSquare className="h-5 w-5" />, 
-        id: "messages",
-        roles: ["founder", "manager", "agent", "creator"] 
       },
       { 
         path: "/personal-information", 
@@ -142,15 +138,21 @@ export const UltraSidebar = ({
     return links.filter(link => link.roles.includes(role));
   };
 
+  // Fonction pour gérer les actions
+  const handleAction = (action: string, data?: any) => {
+    if (onAction) {
+      onAction(action, data);
+    }
+  };
+
   return (
     <Sidebar 
-      className="hidden md:flex fixed inset-y-0 left-0 z-30 w-64 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-950" 
-      closeOnSelect={false}
+      className="hidden md:flex fixed inset-y-0 left-0 z-30 w-64 border-r border-gray-200 dark:border-gray-800 bg-gradient-to-b from-indigo-900 to-purple-900 shadow-xl" 
     >
       <div className="flex flex-col h-full p-4">
         <div className="mb-6 flex justify-center">
-          <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 shadow-md">
-            <Shield className="h-6 w-6 text-white" />
+          <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 shadow-md">
+            <Rocket className="h-6 w-6 text-white" />
           </div>
         </div>
 
@@ -161,8 +163,8 @@ export const UltraSidebar = ({
                 variant={currentPage === link.id ? "secondary" : "ghost"}
                 className={`w-full justify-start mb-1 ${
                   currentPage === link.id
-                    ? "bg-purple-100 text-purple-900 dark:bg-purple-900/20 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/30"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    ? "bg-white/20 text-white dark:bg-white/10 dark:text-white hover:bg-white/30 dark:hover:bg-white/20"
+                    : "text-white/80 dark:text-white/70 hover:bg-white/10 dark:hover:bg-white/10"
                 }`}
               >
                 <span className="mr-3">{link.icon}</span>
@@ -172,18 +174,18 @@ export const UltraSidebar = ({
           ))}
         </nav>
 
-        <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
-          <div className="px-3 py-2 mb-2 rounded-md bg-gray-50 dark:bg-gray-900">
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+        <div className="pt-4 border-t border-white/20">
+          <div className="px-3 py-2 mb-2 rounded-md bg-white/10 backdrop-blur-sm">
+            <p className="text-sm font-medium text-white">
               {username}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+            <p className="text-xs text-white/70 capitalize">
               {role}
             </p>
           </div>
           <Button
             variant="outline"
-            className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-900/20"
+            className="w-full border-red-300/30 text-white hover:bg-red-500/20 hover:text-white dark:border-red-900/30 dark:text-white"
             onClick={onLogout}
           >
             Déconnexion

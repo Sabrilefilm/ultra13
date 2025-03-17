@@ -20,6 +20,7 @@ import Transfers from "./pages/Transfers";
 import Documents from "./pages/Documents";
 import Matches from "./pages/Matches";
 import { Loading } from "./components/ui/loading";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -39,26 +40,28 @@ function App() {
 
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/users" element={<UserManagement />} />
-        <Route path="/notifications" element={<NotificationManagement />} />
-        <Route path="/personal-information" element={<PersonalInformation />} />
-        <Route path="/agency-members/:agentId" element={<AgencyMembers />} />
-        <Route path="/creator-stats" element={<CreatorStats />} />
-        <Route path="/agency-assignment" element={<AgencyAssignment />} />
-        <Route path="/external-matches" element={<ExternalMatches />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/penalties" element={<Penalties />} />
-        <Route path="/schedule" element={<Schedule />} />
-        <Route path="/team" element={<TeamManagement />} />
-        <Route path="/internal-rules" element={<InternalRules />} />
-        <Route path="/messages" element={<Messages />} />
-        <Route path="/transfers" element={<Transfers />} />
-        <Route path="/documents" element={<Documents />} />
-        <Route path="/matches" element={<Matches />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <SidebarProvider defaultOpen={true}>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/users" element={<UserManagement />} />
+          <Route path="/notifications" element={<NotificationManagement />} />
+          <Route path="/personal-information" element={<PersonalInformation />} />
+          <Route path="/agency-members/:agentId" element={<AgencyMembers />} />
+          <Route path="/creator-stats" element={<CreatorStats />} />
+          <Route path="/agency-assignment" element={<AgencyAssignment />} />
+          <Route path="/external-matches" element={<ExternalMatches />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/penalties" element={<Penalties />} />
+          <Route path="/schedule" element={<Schedule />} />
+          <Route path="/team" element={<TeamManagement />} />
+          <Route path="/internal-rules" element={<InternalRules />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/transfers" element={<Transfers />} />
+          <Route path="/documents" element={<Documents />} />
+          <Route path="/matches" element={<Matches />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </SidebarProvider>
     </Router>
   );
 }
