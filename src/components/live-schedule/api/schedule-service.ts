@@ -114,3 +114,60 @@ export const getCreatorName = async (creatorId: string): Promise<string> => {
     return 'Inconnu';
   }
 };
+
+// Add missing exported functions
+export const fetchProfileByUsername = async (username: string): Promise<any> => {
+  try {
+    const { data, error } = await supabase
+      .from('user_accounts')
+      .select('id, username')
+      .eq('username', username)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Erreur lors de la récupération du profil :', error);
+    toast.error('Impossible de récupérer le profil');
+    return null;
+  }
+};
+
+export const fetchScheduleByCreatorId = async (creatorId: string): Promise<Schedule | null> => {
+  return fetchScheduleForCreator(creatorId);
+};
+
+export const fetchAllCreatorSchedules = async (): Promise<Schedule[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('live_schedules')
+      .select(`
+        *,
+        user_accounts(username)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Erreur lors de la récupération des plannings :', error);
+    toast.error('Impossible de récupérer les plannings');
+    return [];
+  }
+};
+
+export const saveSchedule = async (
+  schedule: Schedule,
+  creatorId: string
+): Promise<boolean> => {
+  return createOrUpdateSchedule({
+    hours: schedule.hours,
+    days: schedule.days
+  }, creatorId);
+};

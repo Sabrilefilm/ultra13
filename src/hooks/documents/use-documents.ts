@@ -12,12 +12,24 @@ export const useDocuments = () => {
   const [userDocument, setUserDocument] = useState<any>(null);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [selectedTab, setSelectedTab] = useState('all');
+  const [userId, setUserId] = useState<string>('');
 
   const fetchDocuments = async () => {
     try {
       if (!isAuthenticated) return;
       
       setLoading(true);
+      
+      // Get user id from username
+      const { data: userData, error: userError } = await supabase
+        .from('user_accounts')
+        .select('id')
+        .eq('username', username)
+        .single();
+        
+      if (userError) throw userError;
+      
+      setUserId(userData.id);
       
       // Admin users get all documents
       if (role === 'founder' || role === 'manager') {
@@ -40,15 +52,6 @@ export const useDocuments = () => {
         setDocuments(formattedDocs);
       } else {
         // Regular users only get their own document
-        // Get user id from username
-        const { data: userData, error: userError } = await supabase
-          .from('user_accounts')
-          .select('id')
-          .eq('username', username)
-          .single();
-          
-        if (userError) throw userError;
-        
         await fetchUserDocument(userData.id);
       }
     } catch (error) {
@@ -120,6 +123,7 @@ export const useDocuments = () => {
     userDocument,
     showUploadDialog,
     selectedTab,
+    userId,
     setSelectedTab,
     setShowUploadDialog,
     handleVerifyDocument,

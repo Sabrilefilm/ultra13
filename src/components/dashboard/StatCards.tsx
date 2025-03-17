@@ -9,9 +9,17 @@ import {
 
 interface StatCardsProps {
   role: string;
+  onOpenSponsorshipForm?: () => void;
+  onOpenSponsorshipList?: () => void;
+  onCreatePoster?: () => void;
 }
 
-export const StatCards = ({ role }: StatCardsProps) => {
+export const StatCards = ({ 
+  role, 
+  onOpenSponsorshipForm, 
+  onOpenSponsorshipList, 
+  onCreatePoster 
+}: StatCardsProps) => {
   // Ces valeurs seraient normalement récupérées depuis une API
   const stats = [
     { title: "Matchs", value: 5, icon: <Trophy className="w-5 h-5" /> },
