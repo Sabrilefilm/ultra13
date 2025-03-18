@@ -9,7 +9,7 @@ import { ModalManager } from "@/components/layout/ModalManager";
 interface UltraDashboardProps {
   username: string;
   role: string;
-  userId: string; // Added this property to fix the type error
+  userId: string;
   onLogout: () => void;
   platformSettings: { diamondValue: number; minimumPayout: number; } | null;
   handleCreateAccount: (role: 'creator' | 'manager' | 'agent', username: string, password: string) => Promise<void>;
@@ -23,7 +23,7 @@ interface UltraDashboardProps {
 export const UltraDashboard = ({
   username,
   role,
-  userId, // Added this to the destructured props
+  userId,
   onLogout,
   platformSettings,
   handleCreateAccount,
@@ -80,6 +80,7 @@ export const UltraDashboard = ({
       <UltraSidebar 
         username={username}
         role={role}
+        userId={userId}
         onLogout={onLogout}
         onAction={onAction}
         currentPage={currentPage}

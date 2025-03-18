@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -25,6 +24,7 @@ import {
 interface UltraSidebarProps {
   username: string;
   role: string;
+  userId?: string;
   onLogout: () => void;
   currentPage: string;
   onAction?: (action: string, data?: any) => void;
@@ -33,13 +33,13 @@ interface UltraSidebarProps {
 export const UltraSidebar = ({
   username,
   role,
+  userId,
   onLogout,
   currentPage,
   onAction
 }: UltraSidebarProps) => {
   const navigate = useNavigate();
 
-  // Déterminer les liens en fonction du rôle
   const getNavLinks = () => {
     const links = [
       { 
@@ -138,7 +138,6 @@ export const UltraSidebar = ({
     return links.filter(link => link.roles.includes(role));
   };
 
-  // Fonction pour gérer les actions
   const handleAction = (action: string, data?: any) => {
     if (onAction) {
       onAction(action, data);
