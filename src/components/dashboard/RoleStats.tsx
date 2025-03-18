@@ -145,17 +145,26 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
   }
 
   if (role === 'creator') {
+    // Calculer le nombre total d'heures de live par mois
+    const monthlyHours = liveSchedule ? (liveSchedule.hours * liveSchedule.days) : 0;
+    const requiredHours = 15; // Objectif mensuel requis
+    const requiredDays = 7; // Jours requis par mois
+    
+    // Déterminer si l'objectif est atteint
+    const hoursCompleted = monthlyHours >= requiredHours;
+    const daysCompleted = (liveSchedule?.days || 0) >= requiredDays;
+    
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatsCard
-          title="Heures de Live"
-          value={`${liveSchedule?.hours || 0}h`}
-          icon={<Clock className="w-6 h-6 text-primary" />}
+          title="Heures de Live / Mois"
+          value={`${monthlyHours}h / ${requiredHours}h`}
+          icon={<Clock className={`w-6 h-6 ${hoursCompleted ? "text-green-500" : "text-primary"}`} />}
         />
         <StatsCard
-          title="Jours Streamés"
-          value={`${liveSchedule?.days || 0}j`}
-          icon={<Calendar className="w-6 h-6 text-primary" />}
+          title="Jours Streamés / Mois"
+          value={`${liveSchedule?.days || 0}j / ${requiredDays}j`}
+          icon={<Calendar className={`w-6 h-6 ${daysCompleted ? "text-green-500" : "text-primary"}`} />}
         />
         <StatsCard
           title="Diamants Reçus"
@@ -198,13 +207,13 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
             icon={<Users className="w-6 h-6 text-primary" />}
           />
           <StatsCard
-            title="Heures de Live"
-            value="0h"
+            title="Heures de Live / Mois"
+            value="0h / 15h"
             icon={<Clock className="w-6 h-6 text-primary" />}
           />
           <StatsCard
-            title="Jours Streamés"
-            value="0j"
+            title="Jours Streamés / Mois"
+            value="0j / 7j"
             icon={<Calendar className="w-6 h-6 text-primary" />}
           />
         </div>
@@ -214,7 +223,7 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
             className="flex items-center gap-2"
           >
             <Users className="h-4 w-4" />
-            Mais créateurs
+            Mes créateurs
           </Button>
         </div>
       </div>

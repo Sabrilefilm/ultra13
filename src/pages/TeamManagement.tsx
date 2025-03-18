@@ -61,78 +61,80 @@ const TeamManagement = () => {
         currentPage="team"
       />
       
-      <div className="p-6 md:ml-64 space-y-6">
-        <Card className="bg-white dark:bg-slate-900 shadow-lg border-purple-100 dark:border-purple-900/30">
-          <CardHeader className="bg-gradient-to-r from-purple-50 to-white dark:from-purple-950/30 dark:to-slate-950">
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Users className="h-6 w-6 text-purple-500" />
-                Gestion d'Équipe
-              </CardTitle>
+      <div className="flex justify-center w-full p-6 md:ml-64">
+        <div className="w-full max-w-6xl space-y-6">
+          <Card className="bg-white dark:bg-slate-900 shadow-lg border-purple-100 dark:border-purple-900/30">
+            <CardHeader className="bg-gradient-to-r from-purple-50 to-white dark:from-purple-950/30 dark:to-slate-950">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Users className="h-6 w-6 text-purple-500" />
+                  Gestion d'Équipe
+                </CardTitle>
+                
+                {(role === 'founder' || role === 'manager') && (
+                  <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Ajouter un membre
+                  </Button>
+                )}
+              </div>
               
-              {(role === 'founder' || role === 'manager') && (
-                <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Ajouter un membre
-                </Button>
-              )}
-            </div>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-4">
+                <TabsList className="grid grid-cols-3 bg-purple-100 dark:bg-purple-900/30">
+                  <TabsTrigger value="members" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                    <Users className="h-4 w-4 mr-2" />
+                    Membres
+                  </TabsTrigger>
+                  <TabsTrigger value="schedule" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Planning
+                  </TabsTrigger>
+                  <TabsTrigger value="performance" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Performance
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </CardHeader>
             
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-4">
-              <TabsList className="grid grid-cols-3 bg-purple-100 dark:bg-purple-900/30">
-                <TabsTrigger value="members" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
-                  <Users className="h-4 w-4 mr-2" />
-                  Membres
-                </TabsTrigger>
-                <TabsTrigger value="schedule" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Planning
-                </TabsTrigger>
-                <TabsTrigger value="performance" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  Performance
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </CardHeader>
-          
-          <CardContent className="p-0">
-            <ScrollArea className="h-[600px]">
-              <TabsContent value="members" className="mt-0 p-6">
-                <div className="flex justify-center items-center h-64">
-                  <div className="text-center">
-                    <Users className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400">
-                      Module des membres de l'équipe en cours de développement
-                    </p>
+            <CardContent className="p-0">
+              <ScrollArea className="h-[600px]">
+                <TabsContent value="members" className="mt-0 p-6">
+                  <div className="flex justify-center items-center h-64">
+                    <div className="text-center">
+                      <Users className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
+                      <p className="text-gray-500 dark:text-gray-400">
+                        Module des membres de l'équipe en cours de développement
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="schedule" className="mt-0 p-6">
-                <div className="flex justify-center items-center h-64">
-                  <div className="text-center">
-                    <Calendar className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400">
-                      Module de planning d'équipe en cours de développement
-                    </p>
+                </TabsContent>
+                
+                <TabsContent value="schedule" className="mt-0 p-6">
+                  <div className="flex justify-center items-center h-64">
+                    <div className="text-center">
+                      <Calendar className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
+                      <p className="text-gray-500 dark:text-gray-400">
+                        Module de planning d'équipe en cours de développement
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="performance" className="mt-0 p-6">
-                <div className="flex justify-center items-center h-64">
-                  <div className="text-center">
-                    <BarChart3 className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400">
-                      Module de performance d'équipe en cours de développement
-                    </p>
+                </TabsContent>
+                
+                <TabsContent value="performance" className="mt-0 p-6">
+                  <div className="flex justify-center items-center h-64">
+                    <div className="text-center">
+                      <BarChart3 className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
+                      <p className="text-gray-500 dark:text-gray-400">
+                        Module de performance d'équipe en cours de développement
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </TabsContent>
-            </ScrollArea>
-          </CardContent>
-        </Card>
+                </TabsContent>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </SidebarProvider>
   );

@@ -35,6 +35,37 @@ export const useScheduleManagement = (refetch: () => void) => {
     }
   };
 
+  const resetRewards = async () => {
+    try {
+      const { error } = await supabase
+        .from("creator_rewards")
+        .update({ payment_status: 'paid' })
+        .eq('payment_status', 'pending');
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Erreur!",
+          description: "Impossible de réinitialiser les récompenses.",
+        });
+        return;
+      }
+
+      toast({
+        title: "Succès!",
+        description: "Toutes les récompenses ont été marquées comme payées.",
+        className: "bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-200 text-purple-800"
+      });
+      refetch();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur!",
+        description: "Une erreur s'est produite lors de la réinitialisation des récompenses.",
+      });
+    }
+  };
+
   const addMatch = async (creator1: string, creator2: string, matchDate: Date, isBoost: boolean = true, agentName: string = "") => {
     try {
       const { error } = await supabase.from("upcoming_matches").insert({
@@ -72,6 +103,7 @@ export const useScheduleManagement = (refetch: () => void) => {
 
   return {
     resetAllSchedules,
+    resetRewards,
     addMatch
   };
 };

@@ -1,13 +1,15 @@
 
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Diamond, Settings } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Diamond, Settings, RotateCcw } from "lucide-react";
 import { AddRewardDialog } from "./AddRewardDialog";
 import { RewardsTable } from "./RewardsTable";
 import { useRewards } from "./useRewards";
 import { Button } from "@/components/ui/button";
 import { RewardSettingsModal } from "../RewardSettingsModal";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
+import { useScheduleManagement } from "@/hooks/user-management/use-schedule-management";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface RewardsPanelProps {
   role: string;
@@ -19,6 +21,15 @@ export function RewardsPanel({ role, userId }: RewardsPanelProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { data: rewards, isLoading, refetch } = useRewards(role, userId);
   const { platformSettings, handleUpdateSettings } = usePlatformSettings(role);
+  const queryClient = useQueryClient();
+  const { resetRewards } = useScheduleManagement(() => {
+    queryClient.invalidateQueries({ queryKey: ["rewards"] });
+    refetch();
+  });
+
+  const handleResetRewards = async () => {
+    await resetRewards();
+  };
 
   if (isLoading) {
     return (
@@ -29,6 +40,9 @@ export function RewardsPanel({ role, userId }: RewardsPanelProps) {
       </Card>
     );
   }
+
+  const pendingRewards = rewards?.filter(reward => reward.payment_status === 'pending') || [];
+  const hasPendingRewards = pendingRewards.length > 0;
 
   return (
     <Card>
@@ -46,11 +60,14 @@ export function RewardsPanel({ role, userId }: RewardsPanelProps) {
             >
               <Settings className="h-4 w-4" />
             </Button>
-            <AddRewardDialog
-              isOpen={isDialogOpen}
-              onOpenChange={setIsDialogOpen}
-              onSuccess={refetch}
-            />
+            <Button 
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => setIsDialogOpen(true)}
+            >
+              <Diamond className="h-4 w-4" />
+              Ajouter des diamants
+            </Button>
           </div>
         )}
       </CardHeader>
@@ -72,12 +89,30 @@ export function RewardsPanel({ role, userId }: RewardsPanelProps) {
         <RewardsTable rewards={rewards || []} />
       </CardContent>
       {role === 'founder' && (
-        <RewardSettingsModal
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
-          onSubmit={handleUpdateSettings}
-          currentSettings={platformSettings || undefined}
-        />
+        <>
+          <CardFooter className="flex justify-end">
+            {hasPendingRewards && (
+              <Button 
+                onClick={handleResetRewards}
+                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700"
+              >
+                <RotateCcw className="h-4 w-4" />
+                Marquer toutes les récompenses comme payées
+              </Button>
+            )}
+          </CardFooter>
+          <AddRewardDialog
+            isOpen={isDialogOpen}
+            onOpenChange={setIsDialogOpen}
+            onSuccess={refetch}
+          />
+          <RewardSettingsModal
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+            onSubmit={handleUpdateSettings}
+            currentSettings={platformSettings || undefined}
+          />
+        </>
       )}
     </Card>
   );
