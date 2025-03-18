@@ -35,56 +35,48 @@ export function useTransferRequests(userId: string, role: string) {
       setLoading(true);
       let query;
       
-      if (roleParam === 'founder') {
-        query = supabase
-          .from('transfer_requests')
-          .select(`
-            *,
-            creator:creator_id(id, username),
-            current_agent:current_agent_id(id, username),
-            requested_agent:requested_agent_id(id, username)
-          `)
-          .order('created_at', { ascending: false });
-      } else if (roleParam === 'manager') {
-        query = supabase
-          .from('transfer_requests')
-          .select(`
-            *,
-            creator:creator_id(id, username),
-            current_agent:current_agent_id(id, username),
-            requested_agent:requested_agent_id(id, username)
-          `)
-          .or(`current_agent_id.eq.${userIdParam},requested_agent_id.eq.${userIdParam}`)
-          .order('created_at', { ascending: false });
-      } else if (roleParam === 'agent') {
-        query = supabase
-          .from('transfer_requests')
-          .select(`
-            *,
-            creator:creator_id(id, username),
-            current_agent:current_agent_id(id, username),
-            requested_agent:requested_agent_id(id, username)
-          `)
-          .or(`current_agent_id.eq.${userIdParam},requested_agent_id.eq.${userIdParam}`)
-          .order('created_at', { ascending: false });
-      } else {
-        query = supabase
-          .from('transfer_requests')
-          .select(`
-            *,
-            creator:creator_id(id, username),
-            current_agent:current_agent_id(id, username),
-            requested_agent:requested_agent_id(id, username)
-          `)
-          .eq('creator_id', userIdParam)
-          .order('created_at', { ascending: false });
-      }
-      
-      const { data, error } = await query;
+      // Use separate queries instead of foreign key joins
+      const { data, error } = await supabase
+        .from('transfer_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
       
-      setTransferRequests(data || []);
+      if (data) {
+        // Filter based on role
+        let filteredData;
+        if (roleParam === 'founder') {
+          filteredData = data;
+        } else if (roleParam === 'manager' || roleParam === 'agent') {
+          filteredData = data.filter(request => 
+            request.current_agent_id === userIdParam || 
+            request.requested_agent_id === userIdParam
+          );
+        } else {
+          filteredData = data.filter(request => request.creator_id === userIdParam);
+        }
+        
+        // Now fetch the related user data for each request
+        const enrichedRequests = await Promise.all(
+          filteredData.map(async (request) => {
+            const [creatorData, currentAgentData, requestedAgentData] = await Promise.all([
+              fetchUserById(request.creator_id),
+              fetchUserById(request.current_agent_id),
+              fetchUserById(request.requested_agent_id)
+            ]);
+            
+            return {
+              ...request,
+              creator: creatorData,
+              current_agent: currentAgentData,
+              requested_agent: requestedAgentData
+            };
+          })
+        );
+        
+        setTransferRequests(enrichedRequests);
+      }
     } catch (error) {
       console.error('Error fetching transfer requests:', error);
       toast({
@@ -94,6 +86,27 @@ export function useTransferRequests(userId: string, role: string) {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Helper function to fetch user data by ID
+  const fetchUserById = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_accounts')
+        .select('id, username')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching user:', error);
+        return { id: userId, username: 'Inconnu' };
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error in fetchUserById:', error);
+      return { id: userId, username: 'Inconnu' };
     }
   };
 
