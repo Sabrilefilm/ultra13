@@ -101,9 +101,62 @@ export const useScheduleManagement = (refetch: () => void) => {
     }
   };
 
+  const processTransfer = async (requestId: string, status: 'approved' | 'rejected', rejectionReason?: string) => {
+    try {
+      // First update the transfer request status
+      const { error: updateError } = await supabase
+        .from('transfer_requests')
+        .update({ 
+          status: status,
+          rejection_reason: status === 'rejected' ? (rejectionReason || 'Demande rejetée') : null 
+        })
+        .eq('id', requestId);
+        
+      if (updateError) throw updateError;
+      
+      // If approved, get the request data to update the creator's agent
+      if (status === 'approved') {
+        const { data: requestData, error: fetchError } = await supabase
+          .from('transfer_requests')
+          .select('*')
+          .eq('id', requestId)
+          .single();
+          
+        if (fetchError) throw fetchError;
+        
+        // Update the creator's agent
+        const { error: updateAgentError } = await supabase
+          .from('user_accounts')
+          .update({ agent_id: requestData.requested_agent_id })
+          .eq('id', requestData.creator_id);
+          
+        if (updateAgentError) throw updateAgentError;
+      }
+      
+      toast({
+        title: "Succès",
+        description: status === 'approved' 
+          ? "Transfert approuvé avec succès" 
+          : "Transfert rejeté avec succès",
+        className: "bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-200 text-purple-800"
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error processing transfer:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur!",
+        description: `Une erreur est survenue lors du traitement du transfert.`,
+      });
+      return false;
+    }
+  };
+
   return {
     resetAllSchedules,
     resetRewards,
-    addMatch
+    addMatch,
+    processTransfer
   };
 };

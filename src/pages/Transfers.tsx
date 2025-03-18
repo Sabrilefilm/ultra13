@@ -19,6 +19,8 @@ import {
 } from '@/components/ui/table';
 import { TransferRequestDialog } from '@/components/transfers/TransferRequestDialog';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { useScheduleManagement } from '@/hooks/user-management/use-schedule-management'; 
+import { useQueryClient } from '@tanstack/react-query';
 
 const Transfers = () => {
   const navigate = useNavigate();
@@ -30,6 +32,12 @@ const Transfers = () => {
   const [transferRequests, setTransferRequests] = useState([]);
   const [showTransferDialog, setShowTransferDialog] = useState(false);
   const [selectedTab, setSelectedTab] = useState('pending');
+  const queryClient = useQueryClient();
+  
+  const { processTransfer } = useScheduleManagement(() => {
+    fetchTransferRequests();
+    queryClient.invalidateQueries({ queryKey: ["transfers"] });
+  });
 
   useEffect(() => {
     const checkSession = async () => {
@@ -73,6 +81,7 @@ const Transfers = () => {
 
   const fetchTransferRequests = async (userIdParam = userId, roleParam = role) => {
     try {
+      setLoading(true);
       let query;
       
       if (roleParam === 'founder') {
@@ -132,74 +141,22 @@ const Transfers = () => {
         title: "Erreur",
         description: "Une erreur est survenue lors du chargement des demandes de transfert",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleApproveTransfer = async (requestId) => {
-    try {
-      const { error: updateError } = await supabase
-        .from('transfer_requests')
-        .update({ status: 'approved' })
-        .eq('id', requestId);
-        
-      if (updateError) throw updateError;
-      
-      const { data: requestData, error: fetchError } = await supabase
-        .from('transfer_requests')
-        .select('*')
-        .eq('id', requestId)
-        .single();
-        
-      if (fetchError) throw fetchError;
-      
-      const { error: updateAgentError } = await supabase
-        .from('user_accounts')
-        .update({ agent_id: requestData.requested_agent_id })
-        .eq('id', requestData.creator_id);
-        
-      if (updateAgentError) throw updateAgentError;
-      
-      toast({
-        title: "Succès",
-        description: "Transfert approuvé avec succès",
-      });
-      
+    const success = await processTransfer(requestId, 'approved');
+    if (success) {
       fetchTransferRequests();
-    } catch (error) {
-      console.error('Error approving transfer:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'approbation du transfert",
-      });
     }
   };
 
-  const handleRejectTransfer = async (requestId: string, rejectionReason?: string) => {
-    try {
-      const { error } = await supabase
-        .from('transfer_requests')
-        .update({ 
-          status: 'rejected',
-          rejection_reason: rejectionReason || 'Demande rejetée'
-        })
-        .eq('id', requestId);
-        
-      if (error) throw error;
-      
-      toast({
-        title: "Succès",
-        description: "Transfert rejeté avec succès",
-      });
-      
+  const handleRejectTransfer = async (requestId, rejectionReason = 'Demande rejetée') => {
+    const success = await processTransfer(requestId, 'rejected', rejectionReason);
+    if (success) {
       fetchTransferRequests();
-    } catch (error) {
-      console.error('Error rejecting transfer:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors du rejet du transfert",
-      });
     }
   };
 
@@ -227,6 +184,7 @@ const Transfers = () => {
         <UltraSidebar 
           username={username}
           role={role}
+          userId={userId}
           onLogout={handleLogout}
           currentPage="transfers"
         />
@@ -256,7 +214,7 @@ const Transfers = () => {
             )}
           </div>
           
-          <div className="flex-1 p-4">
+          <div className="flex-1 p-4 max-w-6xl mx-auto w-full">
             <Card className="shadow-md border-purple-100 dark:border-purple-900/30">
               <CardHeader className="bg-gradient-to-r from-purple-50 to-white dark:from-purple-950/30 dark:to-slate-950">
                 <CardTitle className="text-lg text-purple-900 dark:text-purple-100">Demandes de transfert</CardTitle>
