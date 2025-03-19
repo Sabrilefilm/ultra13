@@ -41,7 +41,9 @@ export const UserTable: React.FC<UserTableProps> = ({
   const navigate = useNavigate();
   const isFounder = userRole === 'founder';
   const isManager = userRole === 'manager';
-  const canSeePasswords = isFounder || isManager;
+  
+  // Seul le fondateur peut voir les mots de passe
+  const canSeePasswords = isFounder;
   
   // Les managers ne peuvent attribuer que le rôle d'agent aux créateurs
   const canChangeRole = (user: Account, newRole: string) => {

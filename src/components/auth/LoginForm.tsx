@@ -52,7 +52,7 @@ export const LoginForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="min-h-screen bg-[#111827] text-white p-4 flex flex-col items-center justify-center">
+    <div className="flex items-center justify-center min-h-screen bg-[#111827] text-white p-4">
       <div className="w-full max-w-[450px] mx-auto space-y-8">
         <div className="text-center space-y-6">
           <div className="flex flex-col items-center justify-center space-y-2">
@@ -167,12 +167,6 @@ export const LoginForm = ({
           </div>
         </div>
       </div>
-
-      <div className="fixed bottom-8 flex gap-6 text-sm text-white/40">
-        
-        
-        
-      </div>
-    </form>
+    </div>
   );
 };

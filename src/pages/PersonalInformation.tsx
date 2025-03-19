@@ -97,6 +97,83 @@ const PersonalInformation = () => {
     }));
   };
   
+  // Mise à jour automatique du profil quand un champ change
+  useEffect(() => {
+    const updateTimer = setTimeout(async () => {
+      if (!authUser || isLoading) return;
+      
+      try {
+        // Récupérer l'ID de l'utilisateur
+        const { data: userData, error: userError } = await supabase
+          .from("user_accounts")
+          .select("id")
+          .eq("username", authUser)
+          .single();
+        
+        if (userError || !userData) {
+          console.error("Utilisateur non trouvé pour la sauvegarde automatique");
+          return;
+        }
+        
+        // Vérifier si le profil existe déjà
+        const { data: existingProfile, error: profileCheckError } = await supabase
+          .from("creator_profiles")
+          .select("id")
+          .eq("user_id", userData.id);
+        
+        if (profileCheckError) {
+          console.error("Erreur lors de la vérification du profil:", profileCheckError);
+          return;
+        }
+        
+        let result;
+        
+        if (existingProfile && existingProfile.length > 0) {
+          // Mise à jour du profil existant
+          result = await supabase
+            .from("creator_profiles")
+            .update({
+              first_name: profile.firstName,
+              last_name: profile.lastName,
+              address: profile.address,
+              id_card_number: profile.idCardNumber,
+              email: profile.email,
+              snapchat: profile.snapchat,
+              paypal_address: profile.paypalAddress,
+              updated_at: new Date().toISOString()
+            })
+            .eq("user_id", userData.id);
+        } else {
+          // Création d'un nouveau profil
+          result = await supabase
+            .from("creator_profiles")
+            .insert({
+              user_id: userData.id,
+              first_name: profile.firstName,
+              last_name: profile.lastName,
+              address: profile.address,
+              id_card_number: profile.idCardNumber,
+              email: profile.email,
+              snapchat: profile.snapchat,
+              paypal_address: profile.paypalAddress
+            });
+        }
+        
+        if (result.error) {
+          console.error("Erreur lors de la sauvegarde automatique:", result.error);
+          return;
+        }
+        
+        // On ne montre pas de toast pour ne pas perturber l'utilisateur
+        setSavedProfile(true);
+      } catch (error) {
+        console.error("Erreur lors de la sauvegarde automatique:", error);
+      }
+    }, 1000); // Attendre 1 seconde après la dernière modification
+    
+    return () => clearTimeout(updateTimer);
+  }, [profile, authUser, isLoading]);
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -134,7 +211,8 @@ const PersonalInformation = () => {
             id_card_number: profile.idCardNumber,
             email: profile.email,
             snapchat: profile.snapchat,
-            paypal_address: profile.paypalAddress
+            paypal_address: profile.paypalAddress,
+            updated_at: new Date().toISOString()
           })
           .eq("user_id", userData.id);
       } else {
@@ -191,8 +269,11 @@ const PersonalInformation = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl font-bold">Informations Personnelles</CardTitle>
-            <CardDescription>
+            <CardDescription className="text-base">
               Ces informations sont nécessaires pour la gestion de votre compte et des paiements.
+              <span className="block mt-2 text-green-500 font-medium">
+                Vos modifications sont automatiquement enregistrées.
+              </span>
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
@@ -283,21 +364,26 @@ const PersonalInformation = () => {
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={goBack}
-              >
-                Annuler
-              </Button>
-              <Button
-                type="submit"
-                disabled={isLoading}
-              >
-                {isLoading ? "Enregistrement..." : "Enregistrer"}
-                {!isLoading && <Save className="ml-2 h-4 w-4" />}
-              </Button>
+            <CardFooter className="flex justify-between gap-2">
+              <span className="text-sm text-muted-foreground italic">
+                {savedProfile ? "Modifications enregistrées" : ""}
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={goBack}
+                >
+                  Retour
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Enregistrement..." : "Enregistrer manuellement"}
+                  {!isLoading && <Save className="ml-2 h-4 w-4" />}
+                </Button>
+              </div>
             </CardFooter>
           </form>
         </Card>

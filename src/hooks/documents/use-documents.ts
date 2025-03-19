@@ -28,35 +28,58 @@ export const useDocuments = () => {
         .eq('username', username)
         .single();
         
-      if (userError) throw userError;
+      if (userError) {
+        console.error('Error fetching user data:', userError);
+        toast({
+          title: "Erreur",
+          description: "Impossible de trouver votre compte utilisateur.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
       
       setUserId(userData.id);
       
       // Admin users get all documents
       if (role === 'founder' || role === 'manager') {
-        const { data, error } = await supabase
-          .from('identity_documents')
-          .select(`
-            *,
-            user_accounts(username)
-          `)
-          .order('uploaded_at', { ascending: false });
-        
-        if (error) throw error;
-        
-        // Format the data to include username
-        const formattedDocs = data.map(doc => {
-          // Ensure document URLs are correctly formatted with getPublicUrl
-          const formattedDoc = {
-            ...doc,
-            username: doc.user_accounts?.username || 'Inconnu',
-            document_front: doc.document_front ? doc.document_front : null,
-            document_back: doc.document_back ? doc.document_back : null
-          };
-          return formattedDoc;
-        });
-        
-        setDocuments(formattedDocs);
+        try {
+          const { data, error } = await supabase
+            .from('identity_documents')
+            .select('*')
+            .order('uploaded_at', { ascending: false });
+          
+          if (error) throw error;
+          
+          // Get user data for each document
+          const enrichedDocs = await Promise.all(
+            (data || []).map(async (doc) => {
+              try {
+                const { data: userData, error: userError } = await supabase
+                  .from('user_accounts')
+                  .select('username')
+                  .eq('id', doc.user_id)
+                  .single();
+                
+                return {
+                  ...doc,
+                  username: userError ? 'Inconnu' : userData?.username || 'Inconnu',
+                };
+              } catch (error) {
+                console.error('Error fetching user for document:', error);
+                return {
+                  ...doc,
+                  username: 'Inconnu',
+                };
+              }
+            })
+          );
+          
+          setDocuments(enrichedDocs);
+        } catch (error) {
+          console.error('Error fetching all documents:', error);
+          throw error;
+        }
       } else {
         // Regular users only get their own document
         await fetchUserDocument(userData.id);
