@@ -8,6 +8,7 @@ import { StatCards } from "@/components/dashboard/StatCards";
 import { FounderDashboard } from "@/components/dashboard/FounderDashboard";
 import { Card } from "@/components/ui/card";
 import { InternalRulesContent } from "@/components/rules/InternalRulesContent";
+import { CreatorRulesContent } from "@/components/rules/CreatorRulesContent";
 import { useNavigate } from "react-router-dom";
 
 interface DashContentProps {
@@ -90,6 +91,8 @@ export const DashContent = ({
         );
       case 'internal-rules':
         return <InternalRulesContent />;
+      case 'creator-rules':
+        return <CreatorRulesContent />;
       default:
         return (
           <div className="flex items-center justify-center h-64">
@@ -108,6 +111,7 @@ export const DashContent = ({
            currentPage === 'team' ? 'Gestion d\'équipe' : 
            currentPage === 'schedule' ? 'Planning' : 
            currentPage === 'internal-rules' ? 'Règlement intérieur' :
+           currentPage === 'creator-rules' ? 'Règles des créateurs' :
            'Ultra by Phocéen Agency'}
         </h1>
         <div className="text-sm text-white/60">

@@ -19,6 +19,7 @@ import Messages from "./pages/Messages";
 import Transfers from "./pages/Transfers";
 import Documents from "./pages/Documents";
 import Matches from "./pages/Matches";
+import CreatorRules from "./pages/CreatorRules";
 import { Loading } from "./components/ui/loading";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
@@ -55,6 +56,7 @@ function App() {
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/team" element={<TeamManagement />} />
           <Route path="/internal-rules" element={<InternalRules />} />
+          <Route path="/creator-rules" element={<CreatorRules />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/transfers" element={<Transfers />} />
           <Route path="/documents" element={<Documents />} />
