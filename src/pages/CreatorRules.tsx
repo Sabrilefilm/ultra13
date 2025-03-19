@@ -5,6 +5,7 @@ import { useIndexAuth } from "@/hooks/use-index-auth";
 import { useAccountManagement } from "@/hooks/use-account-management";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { useToast } from "@/hooks/use-toast";
+import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
 
 const CreatorRules = () => {
   const {
