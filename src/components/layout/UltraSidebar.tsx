@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/ui/sidebar";
@@ -12,13 +13,15 @@ import {
   Users,
   MessageSquare,
   Book,
-  RefreshCw,
+  RefreshCcw,
   UserCheck,
   ClipboardList,
   LayoutDashboard,
   Shield,
   Trophy,
-  Rocket
+  Rocket,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 
 interface UltraSidebarProps {
@@ -39,6 +42,11 @@ export const UltraSidebar = ({
   onAction
 }: UltraSidebarProps) => {
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(false);
+
+  const toggleSidebar = () => {
+    setCollapsed(!collapsed);
+  };
 
   const getNavLinks = () => {
     const links = [
@@ -54,6 +62,13 @@ export const UltraSidebar = ({
         label: "Matchs", 
         icon: <Trophy className="h-5 w-5" />, 
         id: "matches",
+        roles: ["founder", "manager", "agent", "creator", "viewer"] 
+      },
+      { 
+        path: "/messages", 
+        label: "Messagerie", 
+        icon: <MessageSquare className="h-5 w-5" />, 
+        id: "messages",
         roles: ["founder", "manager", "agent", "creator", "viewer"] 
       },
       { 
@@ -87,7 +102,7 @@ export const UltraSidebar = ({
       { 
         path: "/transfers", 
         label: "Transferts", 
-        icon: <RefreshCw className="h-5 w-5" />, 
+        icon: <RefreshCcw className="h-5 w-5" />, 
         id: "transfers",
         roles: ["founder", "manager", "agent", "creator"] 
       },
@@ -121,8 +136,8 @@ export const UltraSidebar = ({
       },
       { 
         path: "/contact", 
-        label: "Contact & Messages", 
-        icon: <MessageSquare className="h-5 w-5" />, 
+        label: "Contact", 
+        icon: <Contact className="h-5 w-5" />, 
         id: "contact",
         roles: ["founder", "manager", "agent", "creator", "viewer"] 
       },
@@ -145,52 +160,65 @@ export const UltraSidebar = ({
   };
 
   return (
-    <Sidebar 
-      className="hidden md:flex fixed inset-y-0 left-0 z-30 w-64 border-r border-gray-200 dark:border-gray-800 bg-gradient-to-b from-indigo-900 to-purple-900 shadow-xl" 
-    >
-      <div className="flex flex-col h-full p-4">
-        <div className="mb-6 flex justify-center">
-          <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 shadow-md">
-            <Rocket className="h-6 w-6 text-white" />
+    <div className="relative">
+      <Sidebar 
+        className={`hidden md:flex fixed inset-y-0 left-0 z-30 ${collapsed ? 'w-20' : 'w-64'} border-r border-gray-200 dark:border-gray-800 bg-gradient-to-b from-indigo-900 to-purple-900 shadow-xl transition-all duration-300`} 
+      >
+        <div className="flex flex-col h-full p-4">
+          <div className="mb-6 flex justify-center">
+            <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 shadow-md">
+              <Rocket className="h-6 w-6 text-white" />
+            </div>
+          </div>
+
+          <nav className="space-y-1 flex-1 overflow-y-auto">
+            {getNavLinks().map((link) => (
+              <Link key={link.path} to={link.path}>
+                <Button
+                  variant={currentPage === link.id ? "secondary" : "ghost"}
+                  className={`w-full justify-${collapsed ? 'center' : 'start'} mb-1 ${
+                    currentPage === link.id
+                      ? "bg-white/20 text-white dark:bg-white/10 dark:text-white hover:bg-white/30 dark:hover:bg-white/20"
+                      : "text-white/80 dark:text-white/70 hover:bg-white/10 dark:hover:bg-white/10"
+                  }`}
+                >
+                  <span className="mr-3">{link.icon}</span>
+                  {!collapsed && <span>{link.label}</span>}
+                </Button>
+              </Link>
+            ))}
+          </nav>
+
+          <div className="pt-4 border-t border-white/20">
+            {!collapsed && (
+              <div className="px-3 py-2 mb-2 rounded-md bg-white/10 backdrop-blur-sm">
+                <p className="text-sm font-medium text-white">
+                  {username}
+                </p>
+                <p className="text-xs text-white/70 capitalize">
+                  {role}
+                </p>
+              </div>
+            )}
+            <Button
+              variant="outline"
+              className={`${collapsed ? 'w-12 justify-center' : 'w-full'} border-red-300/30 text-white hover:bg-red-500/20 hover:text-white dark:border-red-900/30 dark:text-white`}
+              onClick={onLogout}
+            >
+              {collapsed ? "X" : "Déconnexion"}
+            </Button>
           </div>
         </div>
-
-        <nav className="space-y-1 flex-1 overflow-y-auto">
-          {getNavLinks().map((link) => (
-            <Link key={link.path} to={link.path}>
-              <Button
-                variant={currentPage === link.id ? "secondary" : "ghost"}
-                className={`w-full justify-start mb-1 ${
-                  currentPage === link.id
-                    ? "bg-white/20 text-white dark:bg-white/10 dark:text-white hover:bg-white/30 dark:hover:bg-white/20"
-                    : "text-white/80 dark:text-white/70 hover:bg-white/10 dark:hover:bg-white/10"
-                }`}
-              >
-                <span className="mr-3">{link.icon}</span>
-                {link.label}
-              </Button>
-            </Link>
-          ))}
-        </nav>
-
-        <div className="pt-4 border-t border-white/20">
-          <div className="px-3 py-2 mb-2 rounded-md bg-white/10 backdrop-blur-sm">
-            <p className="text-sm font-medium text-white">
-              {username}
-            </p>
-            <p className="text-xs text-white/70 capitalize">
-              {role}
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            className="w-full border-red-300/30 text-white hover:bg-red-500/20 hover:text-white dark:border-red-900/30 dark:text-white"
-            onClick={onLogout}
-          >
-            Déconnexion
-          </Button>
-        </div>
-      </div>
-    </Sidebar>
+      </Sidebar>
+      
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={toggleSidebar}
+        className="fixed z-40 top-4 left-[268px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-md md:flex hidden"
+      >
+        {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+      </Button>
+    </div>
   );
 };
