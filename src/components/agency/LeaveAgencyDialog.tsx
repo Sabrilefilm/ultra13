@@ -29,7 +29,7 @@ export function LeaveAgencyDialog() {
         description: "Votre demande a été transmise au fondateur",
       });
       setIsOpen(false);
-      navigate("/contact");
+      navigate("/messages");
     } else {
       setConfirmationStep(true);
     }

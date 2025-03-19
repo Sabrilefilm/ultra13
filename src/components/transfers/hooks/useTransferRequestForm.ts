@@ -163,7 +163,10 @@ export function useTransferRequestForm(
           status: 'pending'
         });
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error submitting transfer request:', error);
+        throw error;
+      }
       
       toast({
         title: "Succès",

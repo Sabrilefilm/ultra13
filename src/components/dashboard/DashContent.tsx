@@ -6,6 +6,7 @@ import { ProfileHeader } from "@/components/ProfileHeader";
 import { PenaltyManager } from "@/components/penalties/PenaltyManager";
 import { StatCards } from "@/components/dashboard/StatCards";
 import { FounderDashboard } from "@/components/dashboard/FounderDashboard";
+import { CreatorDashboard } from "@/components/creator/CreatorDashboard";
 import { Card } from "@/components/ui/card";
 import { InternalRulesContent } from "@/components/rules/InternalRulesContent";
 import { CreatorRulesContent } from "@/components/rules/CreatorRulesContent";
@@ -38,6 +39,13 @@ export const DashContent = ({
             onOpenSponsorships={() => onAction('openSponsorshipForm')}
             onCreatePoster={() => onAction('openCreatePoster')}
             username={username}
+          />
+        ) : role === 'creator' ? (
+          <CreatorDashboard 
+            onOpenSponsorshipForm={() => onAction('openSponsorshipForm')}
+            onOpenSponsorshipList={() => onAction('openSponsorshipList')}
+            onCreatePoster={() => onAction('openCreatePoster')}
+            role={role}
           />
         ) : (
           <>
