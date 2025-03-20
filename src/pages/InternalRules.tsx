@@ -1,4 +1,3 @@
-
 import React from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
@@ -11,59 +10,61 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText, Shield, UserCheck } from "lucide-react";
-
 const InternalRules = () => {
-  const { toast } = useToast();
-  const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
-  const { platformSettings, handleUpdateSettings } = usePlatformSettings(role);
-  const { handleCreateAccount } = useAccountManagement();
-  
+  const {
+    toast
+  } = useToast();
+  const {
+    isAuthenticated,
+    username,
+    role,
+    userId,
+    handleLogout
+  } = useIndexAuth();
+  const {
+    platformSettings,
+    handleUpdateSettings
+  } = usePlatformSettings(role);
+  const {
+    handleCreateAccount
+  } = useAccountManagement();
+
   // Inactivity timer for automatic logout
-  const { showWarning, dismissWarning, formattedTime } = useInactivityTimer({
-    timeout: 120000, // 2 minutes
+  const {
+    showWarning,
+    dismissWarning,
+    formattedTime
+  } = useInactivityTimer({
+    timeout: 120000,
+    // 2 minutes
     onTimeout: () => {
       handleLogout();
       toast({
         title: "Déconnexion automatique",
-        description: "Vous avez été déconnecté en raison d'inactivité.",
+        description: "Vous avez été déconnecté en raison d'inactivité."
       });
     },
     warningTime: 30000,
     onWarning: () => {}
   });
-
   if (!isAuthenticated) {
     window.location.href = '/';
     return null;
   }
-
-  return (
-    <SidebarProvider defaultOpen={true}>
-      <UltraDashboard
-        username={username}
-        role={role || ''}
-        userId={userId || ''}
-        onLogout={handleLogout}
-        platformSettings={platformSettings}
-        handleCreateAccount={handleCreateAccount}
-        handleUpdateSettings={handleUpdateSettings}
-        showWarning={showWarning}
-        dismissWarning={dismissWarning}
-        formattedTime={formattedTime}
-        currentPage="internal-rules"
-      />
+  return <SidebarProvider defaultOpen={true}>
+      <UltraDashboard username={username} role={role || ''} userId={userId || ''} onLogout={handleLogout} platformSettings={platformSettings} handleCreateAccount={handleCreateAccount} handleUpdateSettings={handleUpdateSettings} showWarning={showWarning} dismissWarning={dismissWarning} formattedTime={formattedTime} currentPage="internal-rules" />
       
       <div className="p-6 md:ml-64 space-y-6">
         <Card className="bg-white dark:bg-slate-900 shadow-lg border-purple-100 dark:border-purple-900/30">
-          <CardHeader className="bg-gradient-to-r from-purple-50 to-white dark:from-purple-950/30 dark:to-slate-950">
+          <CardHeader className="bg-gradient-to-r from-purple-50 to-white dark:from-purple-950/30 dark:to-slate-950 bg-slate-950">
             <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Shield className="h-6 w-6 text-purple-500" />
               Règlement Interne Ultra
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-6 bg-gray-950">
             <Tabs defaultValue="general" className="w-full">
-              <TabsList className="grid grid-cols-3 mb-6 bg-purple-100 dark:bg-purple-900/30">
+              <TabsList className="grid grid-cols-3 mb-6 bg-indigo-950">
                 <TabsTrigger value="general" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
                   Règles Générales
                 </TabsTrigger>
@@ -150,11 +151,9 @@ const InternalRules = () => {
         </Card>
         
         <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>Le règlement interne est sujet à modification. Dernière mise à jour: {new Date().toLocaleDateString('fr-FR')}</p>
+          <p className="text-center">Le règlement interne est sujet à modification. Dernière mise à jour: {new Date().toLocaleDateString('fr-FR')}</p>
         </div>
       </div>
-    </SidebarProvider>
-  );
-}
-
+    </SidebarProvider>;
+};
 export default InternalRules;
