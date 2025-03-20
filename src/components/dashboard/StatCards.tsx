@@ -9,6 +9,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 interface StatCardsProps {
   role: string;
@@ -25,11 +28,55 @@ export const StatCards = ({
 }: StatCardsProps) => {
   const navigate = useNavigate();
   
+  // Récupérer les horaires du créateur connecté
+  const { data: liveSchedule } = useQuery({
+    queryKey: ["creator-stats-schedule"],
+    queryFn: async () => {
+      if (role !== "creator") return null;
+      
+      try {
+        // Récupérer l'ID de l'utilisateur connecté
+        const { data: session } = await supabase.auth.getSession();
+        const userId = session?.session?.user?.id;
+
+        if (!userId) {
+          return null;
+        }
+
+        // Récupérer l'horaire de live
+        const { data: scheduleData, error } = await supabase
+          .from("live_schedules")
+          .select("hours, days")
+          .eq("creator_id", userId)
+          .maybeSingle();
+
+        if (error) {
+          throw error;
+        }
+
+        return scheduleData || { hours: 0, days: 0 };
+      } catch (error) {
+        console.error("Erreur lors de la récupération des horaires:", error);
+        toast.error("Impossible de récupérer vos horaires de live");
+        return null;
+      }
+    },
+    enabled: role === "creator"
+  });
+
   // Ces valeurs seraient normalement récupérées depuis une API
   const stats = [
     { title: "Matchs", value: 5, icon: <Trophy className="w-5 h-5" /> },
-    { title: "Heures de live", value: 42, icon: <Clock className="w-5 h-5" /> },
-    { title: "Jours streamés", value: 7, icon: <Calendar className="w-5 h-5" /> },
+    { 
+      title: "Heures de live", 
+      value: liveSchedule?.hours || 0, 
+      icon: <Clock className="w-5 h-5" /> 
+    },
+    { 
+      title: "Jours streamés", 
+      value: liveSchedule?.days || 0, 
+      icon: <Calendar className="w-5 h-5" /> 
+    },
     { title: "Objectifs", value: 3, icon: <Target className="w-5 h-5" /> },
   ];
 
@@ -40,7 +87,7 @@ export const StatCards = ({
 
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
         {stats.map((stat, index) => (
           <div
             key={index}
