@@ -13,6 +13,7 @@ interface Message {
   message: string;
   created_at: string;
   read: boolean;
+  attachment_url?: string;
 }
 
 interface MessageListProps {
@@ -118,6 +119,18 @@ export const MessageList = ({ messages, currentUserId, isLoading }: MessageListP
                         }`}
                       >
                         <p className="whitespace-pre-wrap break-words">{message.message}</p>
+                        
+                        {/* Display attachment if exists */}
+                        {message.attachment_url && (
+                          <div className="mt-2">
+                            <img 
+                              src={message.attachment_url} 
+                              alt="Attachment" 
+                              className="max-w-full rounded cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => window.open(message.attachment_url, '_blank')}
+                            />
+                          </div>
+                        )}
                       </div>
                       
                       <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">

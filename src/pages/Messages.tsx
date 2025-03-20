@@ -8,13 +8,29 @@ import { useMessages } from '@/hooks/use-messages';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Users, MessageSquare, Bell } from 'lucide-react';
+import { ArrowLeft, Users, MessageSquare, Bell, Archive, Plus, X } from 'lucide-react';
 import { UltraSidebar } from '@/components/layout/UltraSidebar';
 import { Loading } from '@/components/ui/loading';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Messages = () => {
   const navigate = useNavigate();
@@ -23,6 +39,9 @@ const Messages = () => {
   const [username, setUsername] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('messages');
+  const [isNewMessageDialogOpen, setIsNewMessageDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<string>('');
+  const isMobile = useIsMobile();
   const { toast: uiToast } = useToast();
   
   const {
@@ -36,7 +55,14 @@ const Messages = () => {
     sendingMessage,
     loadingConversations,
     loadingMessages,
-    unreadCount
+    unreadCount,
+    allUsers,
+    loadingUsers,
+    archiveConversation,
+    archiving,
+    handleAttachment,
+    attachmentPreview,
+    clearAttachment
   } = useMessages(userId);
 
   useEffect(() => {
@@ -95,7 +121,7 @@ const Messages = () => {
   }, [navigate, uiToast]);
 
   const handleSendMessage = () => {
-    if (newMessage.trim() && activeContact) {
+    if ((newMessage.trim() || attachmentPreview) && activeContact) {
       sendMessage();
     }
   };
@@ -103,6 +129,30 @@ const Messages = () => {
   const handleLogout = () => {
     localStorage.clear();
     navigate('/');
+  };
+
+  const handleStartNewConversation = () => {
+    if (!selectedUser) {
+      toast.error('Veuillez sélectionner un destinataire');
+      return;
+    }
+    
+    setActiveContact(selectedUser);
+    setIsNewMessageDialogOpen(false);
+    setSelectedUser('');
+    if (isMobile) {
+      setActiveTab('messages');
+    }
+  };
+
+  const getUserById = (id: string) => {
+    return allUsers?.find(user => user.id === id);
+  };
+
+  const handleArchive = () => {
+    if (window.confirm('Êtes-vous sûr de vouloir archiver cette conversation ?')) {
+      archiveConversation();
+    }
   };
 
   if (loading) {
@@ -137,17 +187,29 @@ const Messages = () => {
             )}
           </div>
           
-          <div className="md:hidden">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList>
-                <TabsTrigger value="contacts">
-                  <Users className="h-5 w-5" />
-                </TabsTrigger>
-                <TabsTrigger value="messages">
-                  <MessageSquare className="h-5 w-5" />
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsNewMessageDialogOpen(true)}
+              className="hidden md:flex items-center gap-1"
+            >
+              <Plus className="h-4 w-4" />
+              Nouvelle conversation
+            </Button>
+            
+            <div className="md:hidden">
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList>
+                  <TabsTrigger value="contacts">
+                    <Users className="h-5 w-5" />
+                  </TabsTrigger>
+                  <TabsTrigger value="messages">
+                    <MessageSquare className="h-5 w-5" />
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
           </div>
         </div>
         
@@ -156,12 +218,25 @@ const Messages = () => {
             <CardContent className="p-0 h-full">
               <div className="md:flex h-full">
                 <div className={`w-full md:w-1/3 md:border-r border-gray-200 dark:border-gray-800 h-full ${activeTab !== 'contacts' ? 'hidden md:block' : ''}`}>
+                  <div className="flex justify-between items-center p-3 border-b border-gray-200 dark:border-gray-800">
+                    <h2 className="font-medium">Contacts</h2>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsNewMessageDialogOpen(true)}
+                      className="md:hidden"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
                   <ContactList
                     contacts={conversations || []}
                     activeContactId={activeContact}
                     onSelectContact={(id) => {
                       setActiveContact(id);
-                      setActiveTab('messages');
+                      if (isMobile) {
+                        setActiveTab('messages');
+                      }
                     }}
                     isLoading={loadingConversations}
                     unreadMessages={unreadCount}
@@ -171,15 +246,28 @@ const Messages = () => {
                 <div className={`flex flex-col w-full md:w-2/3 h-full ${activeTab !== 'messages' ? 'hidden md:block' : ''}`}>
                   {activeContact ? (
                     <>
-                      <div className="bg-white dark:bg-slate-900 p-3 border-b border-gray-200 dark:border-gray-800">
+                      <div className="bg-white dark:bg-slate-900 p-3 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
                         <div className="flex items-center">
                           <span className="font-medium">
-                            {conversations?.find(c => c.id === activeContact)?.username || 'Conversation'}
+                            {conversations?.find(c => c.id === activeContact)?.username || allUsers?.find(u => u.id === activeContact)?.username || 'Conversation'}
                           </span>
                           <span className="ml-2 text-sm text-gray-500">
-                            ({conversations?.find(c => c.id === activeContact)?.role || ''})
+                            ({conversations?.find(c => c.id === activeContact)?.role || allUsers?.find(u => u.id === activeContact)?.role || ''})
                           </span>
                         </div>
+                        
+                        {role === 'founder' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleArchive}
+                            disabled={archiving}
+                            className="text-gray-500"
+                          >
+                            <Archive className="h-4 w-4 mr-1" />
+                            {isMobile ? '' : 'Archiver'}
+                          </Button>
+                        )}
                       </div>
                       
                       <div className="flex-1 overflow-hidden">
@@ -195,6 +283,9 @@ const Messages = () => {
                         onChange={setNewMessage}
                         onSend={handleSendMessage}
                         isSending={sendingMessage}
+                        onAttachFile={handleAttachment}
+                        attachmentPreview={attachmentPreview}
+                        onClearAttachment={clearAttachment}
                       />
                     </>
                   ) : (
@@ -204,6 +295,15 @@ const Messages = () => {
                       </div>
                       <p className="text-gray-600 dark:text-gray-300 mb-2">Sélectionnez une conversation</p>
                       <p className="text-gray-400 dark:text-gray-500 text-sm">Choisissez un contact pour commencer à discuter</p>
+                      
+                      <Button
+                        variant="outline"
+                        className="mt-4"
+                        onClick={() => setIsNewMessageDialogOpen(true)}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Nouvelle conversation
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -212,6 +312,50 @@ const Messages = () => {
           </Card>
         </div>
       </div>
+      
+      {/* New Message Dialog */}
+      <Dialog open={isNewMessageDialogOpen} onOpenChange={setIsNewMessageDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Nouvelle conversation</DialogTitle>
+            <DialogDescription>
+              Sélectionnez un utilisateur pour commencer une nouvelle conversation.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <Select value={selectedUser} onValueChange={setSelectedUser}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner un utilisateur" />
+              </SelectTrigger>
+              <SelectContent>
+                {loadingUsers ? (
+                  <div className="flex justify-center p-2">
+                    <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin border-gray-500"></div>
+                  </div>
+                ) : allUsers?.length === 0 ? (
+                  <div className="p-2 text-sm text-gray-500">Aucun utilisateur disponible</div>
+                ) : (
+                  allUsers?.map(user => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.username} ({user.role})
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsNewMessageDialogOpen(false)}>
+              Annuler
+            </Button>
+            <Button onClick={handleStartNewConversation}>
+              Commencer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

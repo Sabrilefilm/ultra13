@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from '@/lib/supabase';
 import { LogOut, AlertTriangle } from "lucide-react";
 
 export function LeaveAgencyDialog() {
@@ -21,16 +22,66 @@ export function LeaveAgencyDialog() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleLeaveAgency = (type: "amicable" | "other") => {
+  const handleLeaveAgency = async (type: "amicable" | "other") => {
     setLeaveType(type);
     
     if (type === "amicable") {
-      toast({
-        title: "Message envoyé",
-        description: "Votre demande a été transmise au fondateur",
-      });
-      setIsOpen(false);
-      navigate("/messages");
+      try {
+        // Get current user id
+        const username = localStorage.getItem('username');
+        if (!username) {
+          toast({
+            title: "Erreur",
+            description: "Impossible de récupérer votre identifiant",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        // Get user id from username
+        const { data: userData, error: userError } = await supabase
+          .from('user_accounts')
+          .select('id')
+          .eq('username', username)
+          .single();
+          
+        if (userError) throw userError;
+        
+        // Get founder id
+        const { data: founderData, error: founderError } = await supabase
+          .from('user_accounts')
+          .select('id')
+          .eq('role', 'founder')
+          .single();
+          
+        if (founderError) throw founderError;
+        
+        // Send message to founder
+        const { error: messageError } = await supabase
+          .from('chats')
+          .insert({
+            sender_id: userData.id,
+            receiver_id: founderData.id,
+            message: `Bonjour, je souhaite quitter l'agence à l'amiable. Merci de traiter ma demande.`,
+            read: false,
+          });
+          
+        if (messageError) throw messageError;
+        
+        toast({
+          title: "Message envoyé",
+          description: "Votre demande a été transmise au fondateur",
+        });
+        setIsOpen(false);
+        navigate("/messages");
+      } catch (error) {
+        console.error("Error sending message:", error);
+        toast({
+          title: "Erreur",
+          description: "Impossible d'envoyer votre demande au fondateur",
+          variant: "destructive",
+        });
+      }
     } else {
       setConfirmationStep(true);
     }
@@ -38,17 +89,11 @@ export function LeaveAgencyDialog() {
 
   return (
     <>
-      <Button 
-        variant="destructive" 
-        className="w-full flex items-center gap-2 relative group"
-        onClick={() => setIsOpen(true)}
-      >
-        <AlertTriangle className="h-5 w-5 group-hover:animate-pulse" />
-        <LogOut className="h-5 w-5 mr-1" />
-        Je souhaite quitter l'agence
-      </Button>
-      
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <span className="sr-only">Ouvrir le dialogue</span>
+        </DialogTrigger>
+        
         <DialogContent className="sm:max-w-[500px]">
           {!confirmationStep ? (
             <>
@@ -124,6 +169,13 @@ export function LeaveAgencyDialog() {
           )}
         </DialogContent>
       </Dialog>
+      
+      {/* Trigger button - hidden visually but accessible to JavaScript */}
+      <div 
+        className="absolute inset-0 w-full h-full cursor-pointer"
+        onClick={() => setIsOpen(true)}
+        aria-hidden="true"
+      />
     </>
   );
 }

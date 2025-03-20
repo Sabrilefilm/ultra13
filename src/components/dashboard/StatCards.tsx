@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface StatCardsProps {
   role: string;
@@ -27,41 +28,68 @@ export const StatCards = ({
   onCreatePoster 
 }: StatCardsProps) => {
   const navigate = useNavigate();
+  const isMobile = useMediaQuery("(max-width: 768px)");
   
   // Récupérer les horaires du créateur connecté
-  const { data: liveSchedule } = useQuery({
+  const { data: liveSchedule, isLoading } = useQuery({
     queryKey: ["creator-stats-schedule"],
     queryFn: async () => {
-      if (role !== "creator") return null;
-      
       try {
         // Récupérer l'ID de l'utilisateur connecté
         const { data: session } = await supabase.auth.getSession();
         const userId = session?.session?.user?.id;
-
+        
         if (!userId) {
-          return null;
+          // Si pas connecté, essayer d'utiliser l'username stocké en localStorage
+          const username = localStorage.getItem('username');
+          if (!username) return { hours: 0, days: 0 };
+          
+          // Récupérer l'user_id à partir du username
+          const { data: userData, error: userError } = await supabase
+            .from('user_accounts')
+            .select('id')
+            .eq('username', username)
+            .maybeSingle();
+            
+          if (userError || !userData) {
+            console.error('Erreur lors de la récupération de l\'ID utilisateur:', userError);
+            return { hours: 0, days: 0 };
+          }
+          
+          // Récupérer l'horaire de live avec l'user_id trouvé
+          const { data: scheduleData, error } = await supabase
+            .from('live_schedules')
+            .select('hours, days')
+            .eq('creator_id', userData.id)
+            .maybeSingle();
+            
+          if (error) {
+            console.error('Erreur lors de la récupération des horaires:', error);
+            return { hours: 0, days: 0 };
+          }
+          
+          return scheduleData || { hours: 0, days: 0 };
         }
-
-        // Récupérer l'horaire de live
+        
+        // Si connecté avec Supabase Auth, utiliser directement l'userId
         const { data: scheduleData, error } = await supabase
-          .from("live_schedules")
-          .select("hours, days")
-          .eq("creator_id", userId)
+          .from('live_schedules')
+          .select('hours, days')
+          .eq('creator_id', userId)
           .maybeSingle();
 
         if (error) {
-          throw error;
+          console.error('Erreur lors de la récupération des horaires:', error);
+          return { hours: 0, days: 0 };
         }
 
         return scheduleData || { hours: 0, days: 0 };
       } catch (error) {
         console.error("Erreur lors de la récupération des horaires:", error);
         toast.error("Impossible de récupérer vos horaires de live");
-        return null;
+        return { hours: 0, days: 0 };
       }
-    },
-    enabled: role === "creator"
+    }
   });
 
   // Ces valeurs seraient normalement récupérées depuis une API
@@ -96,7 +124,13 @@ export const StatCards = ({
             <div className="mb-2 text-purple-400/80 group-hover:text-purple-400 transition-colors duration-300">
               {stat.icon}
             </div>
-            <div className="text-2xl font-bold text-white mb-1 group-hover:text-white/90">{stat.value}</div>
+            <div className="text-2xl font-bold text-white mb-1 group-hover:text-white/90">
+              {isLoading ? (
+                <div className="h-6 w-8 bg-gray-800 animate-pulse rounded"></div>
+              ) : (
+                stat.value
+              )}
+            </div>
             <div className="text-gray-400 group-hover:text-gray-300 text-xs transition-colors duration-300">
               {stat.title}
             </div>
@@ -111,7 +145,7 @@ export const StatCards = ({
           className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2"
         >
           <MessageSquare className="h-5 w-5" />
-          Messagerie
+          {isMobile ? "Messages" : "Messagerie"}
         </Button>
       </div>
     </>
