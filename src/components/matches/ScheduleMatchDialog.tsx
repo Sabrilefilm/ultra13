@@ -62,7 +62,7 @@ export const ScheduleMatchDialog = ({
           </div>
           <div className="space-y-2">
             <Label className="text-slate-700 dark:text-slate-300">Agent concerné</Label>
-            <Input placeholder="Nom de l'agent" value={agentName} onChange={e => setAgentName(e.target.value)} className="elegant-input" />
+            <Input placeholder="Nom de l'agent" value={agentName} onChange={e => setAgentName(e.target.value)} className="elegant-input bg-gray-800" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
