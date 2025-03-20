@@ -5,6 +5,8 @@ import { UltraSidebar } from "@/components/layout/UltraSidebar";
 import { CreateMatchPosterDialog } from "@/components/matches/CreateMatchPosterDialog";
 import { ModalManager } from "@/components/layout/ModalManager";
 import { RedesignedDashContent } from "@/components/dashboard/RedesignedDashContent";
+import { MenuIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface UltraDashboardProps {
   username: string;
@@ -43,6 +45,7 @@ export const UltraDashboard = ({
   const [showSponsorshipList, setShowSponsorshipList] = useState(false);
   const [isCreatePosterModalOpen, setIsCreatePosterModalOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const onAction = (action: string, data?: any) => {
     switch (action) {
@@ -74,6 +77,9 @@ export const UltraDashboard = ({
       case 'toggleSidebar':
         setSidebarCollapsed(!sidebarCollapsed);
         break;
+      case 'toggleMobileMenu':
+        setMobileMenuOpen(!mobileMenuOpen);
+        break;
       default:
         break;
     }
@@ -81,15 +87,34 @@ export const UltraDashboard = ({
 
   return (
     <div className="flex h-screen w-full bg-gradient-to-br from-slate-900 to-slate-950 text-white overflow-hidden">
-      <UltraSidebar 
-        username={username}
-        role={role}
-        userId={userId}
-        onLogout={onLogout}
-        onAction={onAction}
-        currentPage={currentPage}
-        collapsed={sidebarCollapsed}
-      />
+      {/* Mobile menu button */}
+      <div className="md:hidden fixed top-4 left-4 z-50">
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="bg-slate-800/60 backdrop-blur-sm border-slate-700"
+          onClick={() => onAction('toggleMobileMenu')}
+        >
+          <MenuIcon className="h-5 w-5" />
+        </Button>
+      </div>
+      
+      {/* Sidebar - hidden on mobile unless toggled */}
+      <div className={`${mobileMenuOpen ? 'fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden' : 'hidden md:block'}`}>
+        <div className={`${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} 
+                         transition-transform duration-300 h-full w-64 md:w-auto z-50`}>
+          <UltraSidebar 
+            username={username}
+            role={role}
+            userId={userId}
+            onLogout={onLogout}
+            onAction={onAction}
+            currentPage={currentPage}
+            isMobileOpen={mobileMenuOpen}
+            setMobileMenuOpen={setMobileMenuOpen}
+          />
+        </div>
+      </div>
       
       <div className="flex-1 overflow-auto pb-20 transition-all duration-300">
         <RedesignedDashContent

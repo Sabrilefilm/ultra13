@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DocumentSideForm } from './DocumentSideForm';
 import { useDocumentUpload } from './useDocumentUpload';
+import { AlertCircle } from 'lucide-react';
 
 interface DocumentUploadDialogProps {
   isOpen: boolean;
@@ -34,34 +35,43 @@ export const DocumentUploadDialog = ({
     clearFile,
     getDocumentTitle,
     handleSubmit,
-    setSelectedDocType
+    setSelectedDocType,
+    fileError
   } = useDocumentUpload({ 
     userId, 
     existingDocument, 
     onSuccess, 
-    onClose 
+    onClose,
+    initialDocType
   });
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-slate-800 border-slate-700">
         <DialogHeader>
-          <DialogTitle>{getDocumentTitle()}</DialogTitle>
+          <DialogTitle className="text-white">{getDocumentTitle()}</DialogTitle>
         </DialogHeader>
         
         <div className="grid gap-6 py-4">
+          {fileError && (
+            <div className="p-3 bg-red-900/30 border border-red-700/50 rounded-lg flex items-start gap-2">
+              <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-red-300">{fileError}</div>
+            </div>
+          )}
+          
           <div>
-            <label className="block text-sm font-medium mb-2">Type de document</label>
+            <label className="block text-sm font-medium mb-2 text-white/90">Type de document</label>
             <Select 
               value={selectedDocType} 
-              onValueChange={(value) => setSelectedDocType(value)}
+              onValueChange={(value) => setSelectedDocType(value as 'identity' | 'other')}
             >
-              <SelectTrigger>
+              <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                 <SelectValue placeholder="Sélectionner un type de document" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="identity">Carte d'identité</SelectItem>
-                <SelectItem value="other">Autre document</SelectItem>
+              <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                <SelectItem value="identity" className="text-white hover:bg-slate-700">Carte d'identité</SelectItem>
+                <SelectItem value="other" className="text-white hover:bg-slate-700">Autre document</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -91,6 +101,7 @@ export const DocumentUploadDialog = ({
             variant="outline" 
             onClick={onClose} 
             disabled={uploading}
+            className="bg-slate-700 hover:bg-slate-600 border-slate-600 text-white"
           >
             Annuler
           </Button>

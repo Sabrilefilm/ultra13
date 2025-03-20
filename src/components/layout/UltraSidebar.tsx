@@ -1,224 +1,248 @@
 
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Sidebar } from "@/components/ui/sidebar";
-import {
-  Calendar,
-  User,
-  Bell,
-  FileText,
-  Contact,
-  AlertTriangle,
-  Users,
-  MessageSquare,
-  Book,
-  RefreshCcw,
-  UserCheck,
-  ClipboardList,
-  LayoutDashboard,
-  Shield,
-  Trophy,
-  Rocket,
+import { 
+  Home, 
+  Users, 
+  Calendar, 
+  Briefcase, 
+  Award, 
+  Bookmark, 
+  MessageSquare, 
+  Settings, 
+  LogOut, 
+  ChevronRight, 
   ChevronLeft,
-  ChevronRight
+  FileText,
+  Trophy,
+  X
 } from "lucide-react";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { SidebarLogo } from "./SidebarLogo";
+
+interface SidebarItem {
+  icon: React.ElementType;
+  label: string;
+  action: string;
+  data?: string;
+  roles: string[];
+}
 
 interface UltraSidebarProps {
   username: string;
   role: string;
   userId?: string;
   onLogout: () => void;
-  currentPage: string;
   onAction?: (action: string, data?: any) => void;
+  currentPage?: string;
+  isMobileOpen?: boolean;
+  setMobileMenuOpen?: (isOpen: boolean) => void;
 }
 
-export const UltraSidebar = ({
-  username,
-  role,
+export const UltraSidebar = ({ 
+  username, 
+  role, 
   userId,
-  onLogout,
-  currentPage,
-  onAction
+  onLogout, 
+  onAction,
+  currentPage = 'dashboard',
+  isMobileOpen,
+  setMobileMenuOpen
 }: UltraSidebarProps) => {
-  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  
+  // Reset collapse state on mobile/desktop switch
+  useEffect(() => {
+    if (isMobile) {
+      setCollapsed(false);
+    }
+  }, [isMobile]);
 
-  const toggleSidebar = () => {
-    setCollapsed(!collapsed);
-  };
+  const sidebarItems: SidebarItem[] = [
+    { 
+      icon: Home, 
+      label: "Tableau de bord", 
+      action: "navigateTo", 
+      data: "dashboard",
+      roles: ["founder", "manager", "agent", "creator"]
+    },
+    { 
+      icon: Users, 
+      label: "Utilisateurs", 
+      action: "navigateTo", 
+      data: "user-management",
+      roles: ["founder", "manager"]
+    },
+    { 
+      icon: Calendar, 
+      label: "Planning", 
+      action: "navigateTo", 
+      data: "schedule",
+      roles: ["founder", "manager", "agent", "creator"]
+    },
+    { 
+      icon: Trophy, 
+      label: "Matchs", 
+      action: "navigateTo", 
+      data: "matches",
+      roles: ["founder", "manager", "agent", "creator"]
+    },
+    { 
+      icon: Briefcase, 
+      label: "Transferts", 
+      action: "navigateTo", 
+      data: "transfers",
+      roles: ["founder", "manager", "creator"]
+    },
+    { 
+      icon: Award, 
+      label: "Récompenses", 
+      action: "navigateTo", 
+      data: "rewards-management",
+      roles: ["founder", "manager", "creator"]
+    },
+    { 
+      icon: MessageSquare, 
+      label: "Messagerie", 
+      action: "navigateTo", 
+      data: "messages",
+      roles: ["founder", "manager", "agent", "creator"]
+    },
+    { 
+      icon: FileText, 
+      label: "Documents", 
+      action: "navigateTo", 
+      data: "documents",
+      roles: ["founder", "manager", "agent", "creator"]
+    },
+    { 
+      icon: Bookmark, 
+      label: "Sanctions", 
+      action: "navigateTo", 
+      data: "penalties",
+      roles: ["founder", "manager"]
+    },
+    { 
+      icon: Settings, 
+      label: "Règles", 
+      action: "navigateTo", 
+      data: role === "creator" ? "creator-rules" : "internal-rules",
+      roles: ["founder", "manager", "agent", "creator"]
+    },
+  ];
 
-  const getNavLinks = () => {
-    const links = [
-      { 
-        path: "/", 
-        label: "Tableau de bord", 
-        icon: <LayoutDashboard className="h-5 w-5" />, 
-        id: "dashboard",
-        roles: ["founder", "manager", "agent", "creator", "viewer"] 
-      },
-      { 
-        path: "/matches", 
-        label: "Matchs", 
-        icon: <Trophy className="h-5 w-5" />, 
-        id: "matches",
-        roles: ["founder", "manager", "agent", "creator", "viewer"] 
-      },
-      { 
-        path: "/messages", 
-        label: "Messagerie", 
-        icon: <MessageSquare className="h-5 w-5" />, 
-        id: "messages",
-        roles: ["founder", "manager", "agent", "creator", "viewer"] 
-      },
-      { 
-        path: "/schedule", 
-        label: "Planning & Horaires", 
-        icon: <Calendar className="h-5 w-5" />, 
-        id: "schedule",
-        roles: ["founder", "manager", "agent"] 
-      },
-      { 
-        path: "/users", 
-        label: "Gestion utilisateurs", 
-        icon: <User className="h-5 w-5" />, 
-        id: "users",
-        roles: ["founder", "manager"] 
-      },
-      { 
-        path: "/agency-assignment", 
-        label: "Attribution agences", 
-        icon: <UserCheck className="h-5 w-5" />, 
-        id: "agency-assignment",
-        roles: ["founder"] 
-      },
-      { 
-        path: "/team", 
-        label: "Équipe", 
-        icon: <Users className="h-5 w-5" />, 
-        id: "team",
-        roles: ["founder", "manager"] 
-      },
-      { 
-        path: "/transfers", 
-        label: "Transferts", 
-        icon: <RefreshCcw className="h-5 w-5" />, 
-        id: "transfers",
-        roles: ["founder", "manager", "agent", "creator"] 
-      },
-      { 
-        path: "/documents", 
-        label: "Documents", 
-        icon: <FileText className="h-5 w-5" />, 
-        id: "documents",
-        roles: ["founder", "manager", "agent", "creator"] 
-      },
-      { 
-        path: "/notifications", 
-        label: "Notifications", 
-        icon: <Bell className="h-5 w-5" />, 
-        id: "notifications",
-        roles: ["founder", "manager"] 
-      },
-      { 
-        path: "/internal-rules", 
-        label: "Règlement interne", 
-        icon: <Book className="h-5 w-5" />, 
-        id: "internal-rules",
-        roles: ["founder", "manager", "agent", "creator", "viewer"] 
-      },
-      { 
-        path: "/penalties", 
-        label: "Pénalités", 
-        icon: <AlertTriangle className="h-5 w-5" />, 
-        id: "penalties",
-        roles: ["founder", "manager"] 
-      },
-      { 
-        path: "/contact", 
-        label: "Contact", 
-        icon: <Contact className="h-5 w-5" />, 
-        id: "contact",
-        roles: ["founder", "manager", "agent", "creator", "viewer"] 
-      },
-      { 
-        path: "/personal-information", 
-        label: "Mes informations", 
-        icon: <ClipboardList className="h-5 w-5" />, 
-        id: "personal-information",
-        roles: ["founder", "manager", "agent", "creator"] 
-      }
-    ];
+  const filteredItems = sidebarItems.filter(
+    (item) => item.roles.includes(role)
+  );
 
-    return links.filter(link => link.roles.includes(role));
-  };
-
-  const handleAction = (action: string, data?: any) => {
+  const handleItemClick = (action: string, data?: any) => {
     if (onAction) {
       onAction(action, data);
+    }
+    
+    // Close mobile menu after navigation
+    if (isMobile && setMobileMenuOpen) {
+      setMobileMenuOpen(false);
+    }
+  };
+
+  const handleToggleSidebar = () => {
+    setCollapsed(!collapsed);
+    if (onAction) {
+      onAction('toggleSidebar');
     }
   };
 
   return (
-    <div className="relative">
-      <Sidebar 
-        className={`hidden md:flex fixed inset-y-0 left-0 z-30 ${collapsed ? 'w-20' : 'w-64'} border-r border-gray-200 dark:border-gray-800 bg-gradient-to-b from-indigo-900 to-purple-900 shadow-xl transition-all duration-300`} 
-      >
-        <div className="flex flex-col h-full p-4">
-          <div className="mb-6 flex justify-center">
-            <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 shadow-md">
-              <Rocket className="h-6 w-6 text-white" />
-            </div>
-          </div>
-
-          <nav className="space-y-1 flex-1 overflow-y-auto">
-            {getNavLinks().map((link) => (
-              <Link key={link.path} to={link.path}>
-                <Button
-                  variant={currentPage === link.id ? "secondary" : "ghost"}
-                  className={`w-full justify-${collapsed ? 'center' : 'start'} mb-1 ${
-                    currentPage === link.id
-                      ? "bg-white/20 text-white dark:bg-white/10 dark:text-white hover:bg-white/30 dark:hover:bg-white/20"
-                      : "text-white/80 dark:text-white/70 hover:bg-white/10 dark:hover:bg-white/10"
-                  }`}
-                >
-                  <span className="mr-3">{link.icon}</span>
-                  {!collapsed && <span>{link.label}</span>}
-                </Button>
-              </Link>
-            ))}
-          </nav>
-
-          <div className="pt-4 border-t border-white/20">
-            {!collapsed && (
-              <div className="px-3 py-2 mb-2 rounded-md bg-white/10 backdrop-blur-sm">
-                <p className="text-sm font-medium text-white">
-                  {username}
-                </p>
-                <p className="text-xs text-white/70 capitalize">
-                  {role}
-                </p>
-              </div>
-            )}
-            <Button
-              variant="outline"
-              className={`${collapsed ? 'w-12 justify-center' : 'w-full'} border-red-300/30 text-white hover:bg-red-500/20 hover:text-white dark:border-red-900/30 dark:text-white`}
-              onClick={onLogout}
-            >
-              {collapsed ? "X" : "Déconnexion"}
-            </Button>
-          </div>
+    <div 
+      className={`h-full flex flex-col bg-slate-800/80 backdrop-blur-sm border-r border-slate-700/50 transition-all duration-300 ${
+        collapsed ? "w-20" : "w-64"
+      } ${isMobile ? "w-full md:w-auto" : ""}`}
+    >
+      {/* Mobile close button */}
+      {isMobile && (
+        <div className="flex justify-end p-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setMobileMenuOpen && setMobileMenuOpen(false)}
+            className="text-slate-300 hover:text-white"
+          >
+            <X className="h-5 w-5" />
+          </Button>
         </div>
-      </Sidebar>
+      )}
       
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={toggleSidebar}
-        className="fixed z-40 top-4 left-[268px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-md md:flex hidden"
-      >
-        {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-      </Button>
+      {/* Sidebar header */}
+      <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"} p-4`}>
+        <SidebarLogo collapsed={collapsed} />
+        
+        {!isMobile && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleToggleSidebar}
+            className="text-slate-300 hover:text-white"
+          >
+            {collapsed ? (
+              <ChevronRight className="h-5 w-5" />
+            ) : (
+              <ChevronLeft className="h-5 w-5" />
+            )}
+          </Button>
+        )}
+      </div>
+      
+      {/* User info */}
+      <div className={`flex items-center ${collapsed ? "flex-col justify-center" : "justify-start"} px-4 py-3 border-b border-slate-700/50`}>
+        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-purple-700/50 flex items-center justify-center">
+          {username.charAt(0).toUpperCase()}
+        </div>
+        {!collapsed && (
+          <div className="ml-3 flex flex-col overflow-hidden">
+            <p className="text-sm font-medium text-white truncate">{username}</p>
+            <p className="text-xs text-slate-400">{role}</p>
+          </div>
+        )}
+      </div>
+      
+      {/* Navigation */}
+      <div className="flex-1 overflow-y-auto py-4">
+        <nav className="space-y-1 px-2">
+          {filteredItems.map((item) => (
+            <Button
+              key={item.label}
+              variant="ghost"
+              className={`w-full flex items-center ${
+                collapsed ? "justify-center" : "justify-start"
+              } px-3 py-2 text-sm rounded-md ${
+                currentPage === item.data
+                  ? "bg-purple-900/50 text-white"
+                  : "text-slate-300 hover:bg-slate-700/50 hover:text-white"
+              }`}
+              onClick={() => handleItemClick(item.action, item.data)}
+            >
+              <item.icon className={`h-5 w-5 ${!collapsed && "mr-3"}`} />
+              {!collapsed && <span>{item.label}</span>}
+            </Button>
+          ))}
+        </nav>
+      </div>
+      
+      {/* Footer / Logout */}
+      <div className="p-4 border-t border-slate-700/50">
+        <Button
+          variant="ghost"
+          className={`w-full flex items-center ${
+            collapsed ? "justify-center" : "justify-start"
+          } px-3 py-2 text-sm rounded-md text-red-400 hover:bg-red-900/20 hover:text-red-300`}
+          onClick={onLogout}
+        >
+          <LogOut className={`h-5 w-5 ${!collapsed && "mr-3"}`} />
+          {!collapsed && <span>Déconnexion</span>}
+        </Button>
+      </div>
     </div>
   );
 };
