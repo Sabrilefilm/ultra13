@@ -119,7 +119,7 @@ export const StatCards = ({
         {stats.map((stat, index) => (
           <div
             key={index}
-            className="bg-[#1e1f2e]/90 backdrop-blur-sm border border-gray-800/50 rounded-xl p-4 flex flex-col items-center justify-center transition-all hover:border-purple-700/30 hover:shadow-lg hover:shadow-purple-900/10 group"
+            className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-purple-900/20 rounded-xl p-4 flex flex-col items-center justify-center transition-all hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-900/10 group"
           >
             <div className="mb-2 text-purple-400/80 group-hover:text-purple-400 transition-colors duration-300">
               {stat.icon}
@@ -142,10 +142,10 @@ export const StatCards = ({
       <div className="flex justify-center mt-4">
         <Button
           onClick={handleOpenMessages}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2"
+          className="bg-indigo-700 hover:bg-indigo-800 text-white flex items-center gap-2 px-6 py-2 rounded-lg transition-all duration-300 shadow-md hover:shadow-indigo-700/20"
         >
           <MessageSquare className="h-5 w-5" />
-          {isMobile ? "Messages" : "Messagerie"}
+          {isMobile ? "Messages" : "Accéder à la messagerie"}
         </Button>
       </div>
     </>

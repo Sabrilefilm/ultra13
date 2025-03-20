@@ -11,7 +11,13 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>
+  // Force dark theme for the whole application
+  React.useEffect(() => {
+    document.documentElement.classList.add("dark");
+    localStorage.setItem("theme", "dark");
+  }, []);
+  
+  return <NextThemesProvider defaultTheme="dark" forcedTheme="dark" {...props}>{children}</NextThemesProvider>
 }
 
 export { useTheme }

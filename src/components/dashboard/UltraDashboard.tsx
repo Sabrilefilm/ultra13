@@ -2,9 +2,9 @@
 import { useState } from "react";
 import { InactivityWarning } from "@/components/InactivityWarning";
 import { UltraSidebar } from "@/components/layout/UltraSidebar";
-import { DashContent } from "@/components/dashboard/DashContent";
 import { CreateMatchPosterDialog } from "@/components/matches/CreateMatchPosterDialog";
 import { ModalManager } from "@/components/layout/ModalManager";
+import { RedesignedDashContent } from "@/components/dashboard/RedesignedDashContent";
 
 interface UltraDashboardProps {
   username: string;
@@ -42,6 +42,7 @@ export const UltraDashboard = ({
   const [isSponsorshipModalOpen, setIsSponsorshipModalOpen] = useState(false);
   const [showSponsorshipList, setShowSponsorshipList] = useState(false);
   const [isCreatePosterModalOpen, setIsCreatePosterModalOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const onAction = (action: string, data?: any) => {
     switch (action) {
@@ -70,13 +71,16 @@ export const UltraDashboard = ({
       case 'navigateTo':
         window.location.href = data === 'dashboard' ? '/' : `/${data}`;
         break;
+      case 'toggleSidebar':
+        setSidebarCollapsed(!sidebarCollapsed);
+        break;
       default:
         break;
     }
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#111827] text-white">
+    <div className="flex h-screen w-full bg-gradient-to-br from-slate-900 to-slate-950 text-white overflow-hidden">
       <UltraSidebar 
         username={username}
         role={role}
@@ -84,10 +88,11 @@ export const UltraDashboard = ({
         onLogout={onLogout}
         onAction={onAction}
         currentPage={currentPage}
+        collapsed={sidebarCollapsed}
       />
       
-      <div className="flex-1 overflow-auto pb-20">
-        <DashContent
+      <div className="flex-1 overflow-auto pb-20 transition-all duration-300">
+        <RedesignedDashContent
           username={username}
           role={role}
           currentPage={currentPage}

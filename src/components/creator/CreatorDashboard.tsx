@@ -1,11 +1,12 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { StatCards } from "@/components/dashboard/StatCards";
 import { LeaveAgencyDialog } from "@/components/agency/LeaveAgencyDialog";
 import { DailyQuote } from "@/components/dashboard/DailyQuote";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, AlertTriangle, LogOut } from "lucide-react";
+import { UserGuide } from "@/components/help/UserGuide";
+import { MessageSquare, AlertTriangle, BarChart4, Calendar, ArrowRight, Clock, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -27,6 +28,7 @@ export const CreatorDashboard = ({
 }: CreatorDashboardProps) => {
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const [showGuide, setShowGuide] = useState(false);
 
   // Récupérer les horaires du créateur connecté
   const { data: liveSchedule, isLoading } = useQuery({
@@ -85,61 +87,145 @@ export const CreatorDashboard = ({
       <DailyQuote />
       
       {/* Résumé */}
-      <Card className="bg-[#1e1f2e]/90 backdrop-blur-sm border border-gray-800/50 rounded-xl shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-xl text-white/90">Tableau de bord</CardTitle>
+      <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-purple-900/20 rounded-xl shadow-md hover:shadow-lg transition-all">
+        <CardHeader className="bg-gradient-to-r from-purple-900/20 to-indigo-900/20 rounded-t-xl border-b border-purple-900/10">
+          <CardTitle className="text-xl text-white/90 flex items-center gap-2">
+            <BarChart4 className="h-5 w-5 text-purple-400" />
+            Tableau de bord
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-gray-300 space-y-2">
-            <p className="text-lg font-medium mb-3">Bienvenue sur votre tableau de bord!</p>
-            
-            <div className="mt-3 p-4 bg-purple-900/20 border border-purple-700/30 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-medium text-purple-300">Vos horaires</h4>
-                  <p className="text-sm text-purple-200/80 mt-1">
-                    {isLoading ? (
-                      <span className="h-4 w-24 bg-purple-800/40 animate-pulse rounded inline-block"></span>
-                    ) : (
-                      `${liveSchedule?.hours || 0} heures par jour × ${liveSchedule?.days || 0} jours par semaine`
-                    )}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className="text-2xl font-bold text-purple-300">
-                    {isLoading ? (
-                      <span className="h-8 w-16 bg-purple-800/40 animate-pulse rounded inline-block"></span>
-                    ) : (
-                      `${weeklyHours}h`
-                    )}
-                  </span>
-                  <p className="text-xs text-purple-200/80">total par semaine</p>
+        <CardContent className="pt-6">
+          <div className="text-gray-300 space-y-6">
+            <div className="flex gap-4 flex-col md:flex-row">
+              <div className="md:w-2/3">
+                <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-amber-400" />
+                  Bienvenue sur votre tableau de bord!
+                </h3>
+                
+                <p className="text-gray-400 mb-4">
+                  Retrouvez ici toutes les informations importantes concernant vos performances, vos objectifs et vos prochains matchs.
+                </p>
+                
+                <div className="flex flex-wrap gap-4 mb-6">
+                  <Button 
+                    onClick={() => navigate('/messages')}
+                    variant="outline" 
+                    className="bg-indigo-900/40 hover:bg-indigo-800/60 text-indigo-300 border-indigo-700/50 hover:border-indigo-600 flex gap-2 items-center"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    Messagerie
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setShowGuide(!showGuide)}
+                    variant="outline"
+                    className="bg-purple-900/40 hover:bg-purple-800/60 text-purple-300 border-purple-700/50 hover:border-purple-600 flex gap-2 items-center"
+                  >
+                    {showGuide ? "Masquer le guide" : "Voir le guide d'utilisation"}
+                  </Button>
                 </div>
               </div>
-              <div className="mt-2 text-sm text-purple-200/70">
-                <p>Objectifs: {targetDays} jours et {targetHours} heures par semaine.</p>
+              
+              <div className="md:w-1/3 md:border-l border-purple-900/30 md:pl-4">
+                <div className="p-4 bg-purple-900/20 border border-purple-700/30 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium text-purple-300 flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      Vos horaires
+                    </h4>
+                    <div className="px-2 py-1 bg-purple-800/30 border border-purple-700/30 rounded-md text-xs text-purple-300">
+                      Planning
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <div className="bg-purple-800/20 border border-purple-700/20 rounded-md p-2 text-center">
+                      <span className="block text-2xl font-bold text-purple-300">
+                        {isLoading ? (
+                          <span className="h-8 w-16 bg-purple-800/40 animate-pulse rounded inline-block"></span>
+                        ) : (
+                          liveSchedule?.hours || 0
+                        )}
+                      </span>
+                      <span className="text-xs text-purple-200/70">heures/jour</span>
+                    </div>
+                    <div className="bg-purple-800/20 border border-purple-700/20 rounded-md p-2 text-center">
+                      <span className="block text-2xl font-bold text-purple-300">
+                        {isLoading ? (
+                          <span className="h-8 w-16 bg-purple-800/40 animate-pulse rounded inline-block"></span>
+                        ) : (
+                          liveSchedule?.days || 0
+                        )}
+                      </span>
+                      <span className="text-xs text-purple-200/70">jours/semaine</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs text-purple-300">Total hebdomadaire:</span>
+                    <span className="text-lg font-semibold text-purple-300">{weeklyHours}h</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs text-purple-300">Objectif:</span>
+                    <span className="text-sm text-purple-300">{targetHours}h ({targetDays}j)</span>
+                  </div>
+                  
+                  <div className="mt-2 pt-2 border-t border-purple-800/30">
+                    <div className="h-2 bg-purple-900/30 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"
+                        style={{ width: `${Math.min(100, (weeklyHours / targetHours) * 100)}%` }}
+                      ></div>
+                    </div>
+                    <div className="text-right text-xs text-purple-400 mt-1">
+                      {Math.round((weeklyHours / targetHours) * 100)}% de l'objectif
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             
-            <p>Prochain match prévu: Demain à 20h00.</p>
+            <div className="mt-4 bg-indigo-900/20 border border-indigo-700/30 rounded-lg p-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-indigo-400" />
+                <div>
+                  <p className="text-indigo-300 font-medium">Prochain match prévu</p>
+                  <p className="text-indigo-400/80 text-sm">Demain à 20h00</p>
+                </div>
+              </div>
+              <Button 
+                variant="ghost" 
+                className="text-indigo-300 hover:text-indigo-100 hover:bg-indigo-700/30"
+                onClick={() => navigate('/matches')}
+              >
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
       
       {/* Statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCards 
-          role={role} 
-          onOpenSponsorshipForm={onOpenSponsorshipForm}
-          onOpenSponsorshipList={onOpenSponsorshipList}
-          onCreatePoster={onCreatePoster}
-        />
-      </div>
+      <StatCards 
+        role={role} 
+        onOpenSponsorshipForm={onOpenSponsorshipForm}
+        onOpenSponsorshipList={onOpenSponsorshipList}
+        onCreatePoster={onCreatePoster}
+      />
+      
+      {/* User Guide */}
+      {showGuide && (
+        <div className="mt-6">
+          <UserGuide />
+        </div>
+      )}
       
       {/* Actions rapides */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Button 
-          className="bg-purple-600 hover:bg-purple-700 text-white h-14"
+          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white h-14 shadow-md hover:shadow-lg transition-all duration-300"
           onClick={() => navigate("/messages")}
         >
           <MessageSquare className="h-5 w-5 mr-2" />
@@ -149,11 +235,10 @@ export const CreatorDashboard = ({
         {/* Bouton quitter l'agence avec avertissement */}
         <Button 
           variant="destructive" 
-          className="h-14 group relative" 
+          className="h-14 group relative transition-all duration-300 bg-gradient-to-r from-red-600/80 to-orange-600/80 hover:from-red-700 hover:to-orange-700" 
         >
           <div className="flex items-center justify-center w-full">
             <AlertTriangle className="h-5 w-5 mr-2 group-hover:animate-pulse" />
-            <LogOut className="h-5 w-5 mr-1" />
             Je souhaite quitter l'agence
           </div>
           <LeaveAgencyDialog />
