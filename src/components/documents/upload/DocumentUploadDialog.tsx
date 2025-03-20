@@ -21,7 +21,7 @@ export const DocumentUploadDialog = ({
   userId,
   existingDocument,
   onSuccess,
-  documentType: initialDocType
+  documentType
 }: DocumentUploadDialogProps) => {
   const {
     frontFile,
@@ -30,19 +30,19 @@ export const DocumentUploadDialog = ({
     backPreview,
     uploading,
     errors,
+    fileError,
     selectedDocType,
     handleFileChange,
     clearFile,
     getDocumentTitle,
     handleSubmit,
-    setSelectedDocType,
-    fileError
+    setSelectedDocType
   } = useDocumentUpload({ 
     userId, 
     existingDocument, 
     onSuccess, 
     onClose,
-    initialDocType
+    initialDocType: documentType
   });
 
   return (

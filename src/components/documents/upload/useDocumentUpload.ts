@@ -9,13 +9,15 @@ interface UseDocumentUploadProps {
   existingDocument?: any;
   onSuccess: () => void;
   onClose: () => void;
+  initialDocType?: 'identity' | 'other';
 }
 
 export const useDocumentUpload = ({ 
   userId, 
   existingDocument, 
   onSuccess, 
-  onClose 
+  onClose,
+  initialDocType = 'identity'
 }: UseDocumentUploadProps) => {
   const { toast: uiToast } = useToast();
   const [frontFile, setFrontFile] = useState<File | null>(null);
@@ -24,10 +26,14 @@ export const useDocumentUpload = ({
   const [backPreview, setBackPreview] = useState<string | null>(existingDocument?.document_back || null);
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<{ front?: string; back?: string }>({});
-  const [selectedDocType, setSelectedDocType] = useState<string>(existingDocument?.document_type || 'identity');
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [selectedDocType, setSelectedDocType] = useState<'identity' | 'other'>(
+    initialDocType || existingDocument?.document_type || 'identity'
+  );
 
   const handleFileChange = (side: 'front' | 'back', file: File | null) => {
     if (!file) return;
+    setFileError(null);
 
     // Validation
     if (!file.type.startsWith('image/')) {
@@ -79,11 +85,10 @@ export const useDocumentUpload = ({
   };
 
   const handleSubmit = async () => {
+    setFileError(null);
+    
     if (!frontFile && !backFile && !existingDocument) {
-      setErrors({
-        front: 'Veuillez sélectionner une image',
-        back: 'Veuillez sélectionner une image'
-      });
+      setFileError('Veuillez sélectionner au moins une image pour continuer');
       return;
     }
 
@@ -162,6 +167,7 @@ export const useDocumentUpload = ({
       onClose();
     } catch (error) {
       console.error('Error uploading document:', error);
+      setFileError('Impossible de télécharger le document. Veuillez réessayer.');
       uiToast({
         title: "Erreur",
         description: "Impossible de télécharger le document. Veuillez réessayer.",
@@ -179,6 +185,7 @@ export const useDocumentUpload = ({
     backPreview,
     uploading,
     errors,
+    fileError,
     selectedDocType,
     handleFileChange,
     clearFile,
