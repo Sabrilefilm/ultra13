@@ -67,7 +67,7 @@ export const ScheduleMatchDialog = ({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-slate-700 dark:text-slate-300">Date du match</Label>
-              <Input type="date" value={matchDate} onChange={e => setMatchDate(e.target.value)} required className="elegant-input bg-gray-700" />
+              <Input type="date" value={matchDate} onChange={e => setMatchDate(e.target.value)} required className="elegant-input bg-slate-700" />
             </div>
             <div className="space-y-2">
               <Label className="text-slate-700 dark:text-slate-300">Heure du match</Label>
