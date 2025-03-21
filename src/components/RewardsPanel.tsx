@@ -50,6 +50,8 @@ export function RewardsPanel({ role, userId }: RewardsPanelProps) {
     navigate('/creator-rewards');
   };
 
+  const canManageRewards = ['founder', 'manager'].includes(role);
+
   return (
     <Card className="bg-white dark:bg-slate-800 shadow-md border-purple-100 dark:border-purple-900/30">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -57,7 +59,7 @@ export function RewardsPanel({ role, userId }: RewardsPanelProps) {
           <Diamond className="w-5 h-5 text-purple-500" />
           Récompenses
         </CardTitle>
-        {role === 'founder' && (
+        {canManageRewards && (
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -94,7 +96,7 @@ export function RewardsPanel({ role, userId }: RewardsPanelProps) {
         )}
       </CardHeader>
       <CardContent>
-        {role === 'founder' && platformSettings && (
+        {canManageRewards && platformSettings && (
           <div className="mb-4 p-4 bg-muted/50 rounded-lg">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -110,7 +112,7 @@ export function RewardsPanel({ role, userId }: RewardsPanelProps) {
         )}
         <RewardsTable rewards={rewards || []} />
       </CardContent>
-      {role === 'founder' && (
+      {canManageRewards && (
         <>
           <CardFooter className="flex justify-end">
             {hasPendingRewards && (

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 export interface Agent {
   id: string;
@@ -21,6 +22,7 @@ export function useTransferRequestForm(
   onSuccess: () => void,
   onClose: () => void
 ) {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [creators, setCreators] = useState<Creator[]>([]);
@@ -103,9 +105,9 @@ export function useTransferRequestForm(
     } catch (error) {
       console.error('Error fetching agents:', error);
       toast({
-        variant: "destructive",
         title: "Erreur",
         description: "Impossible de charger la liste des agents",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -129,9 +131,9 @@ export function useTransferRequestForm(
     } catch (error) {
       console.error('Error fetching creators:', error);
       toast({
-        variant: "destructive",
         title: "Erreur",
         description: "Impossible de charger la liste des créateurs",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -149,9 +151,9 @@ export function useTransferRequestForm(
       if (role === 'agent') {
         if (!selectedCreator) {
           toast({
-            variant: "destructive",
             title: "Erreur",
             description: "Veuillez sélectionner un créateur",
+            variant: "destructive",
           });
           return false;
         }
@@ -163,18 +165,18 @@ export function useTransferRequestForm(
       // Validate required fields
       if (!selectedAgent) {
         toast({
-          variant: "destructive",
           title: "Erreur",
           description: "Veuillez sélectionner un agent",
+          variant: "destructive",
         });
         return false;
       }
       
       if (!reason.trim()) {
         toast({
-          variant: "destructive",
           title: "Erreur",
           description: "Veuillez fournir une raison pour la demande de transfert",
+          variant: "destructive",
         });
         return false;
       }
@@ -183,9 +185,9 @@ export function useTransferRequestForm(
       if (role === 'creator' && !currentAgentId) {
         console.log("Creator has no current agent to transfer from");
         toast({
-          variant: "destructive",
           title: "Erreur",
           description: "Vous n'êtes pas assigné à un agent actuellement",
+          variant: "destructive",
         });
         return false;
       }
@@ -221,6 +223,9 @@ export function useTransferRequestForm(
       onSuccess();
       onClose();
       
+      // Auto-redirect back to homepage
+      navigate('/');
+      
       // Reset form
       setSelectedAgent('');
       setSelectedCreator('');
@@ -230,9 +235,9 @@ export function useTransferRequestForm(
     } catch (error) {
       console.error('Error submitting transfer request:', error);
       toast({
-        variant: "destructive",
         title: "Erreur",
         description: "Une erreur est survenue lors de l'envoi de la demande",
+        variant: "destructive",
       });
       return false;
     } finally {

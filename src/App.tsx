@@ -26,6 +26,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import CreatorRewards from './pages/CreatorRewards';
 import CreatorStats from './pages/CreatorStats';
 import { useDarkMode } from './hooks/use-dark-mode';
+import Ambassador from './pages/Ambassador';
 
 function App() {
   const queryClient = new QueryClient();
@@ -57,6 +58,7 @@ function App() {
               <Route path="/schedule" element={<Schedule />} />
               <Route path="/creator-rewards" element={<CreatorRewards />} />
               <Route path="/creator-stats" element={<CreatorStats />} />
+              <Route path="/ambassador" element={<Ambassador />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>

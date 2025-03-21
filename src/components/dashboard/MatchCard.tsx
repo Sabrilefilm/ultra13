@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import { Download, Trash2, Trophy, X, Clock, Calendar, Edit, Check, Frown, PartyPopper } from "lucide-react";
@@ -101,9 +102,9 @@ export const MatchCard = ({
     return "En attente";
   };
   return <div className={`rounded-xl shadow-sm border transition-all duration-300 hover:shadow-md ${getCardStyle()}`}>
-      <div className="p-4 bg-zinc-100">
+      <div className="p-4 bg-gradient-to-b from-white to-gray-50 dark:from-slate-800 dark:to-slate-900">
         <div className="mb-2 text-center">
-          <h3 className="text-xs font-medium tracking-wide uppercase dark:text-purple-400 badge-status badge-pending">
+          <h3 className="text-xs font-medium tracking-wide uppercase text-purple-600 dark:text-purple-400 badge-status badge-pending">
             {getMatchStatus()}
           </h3>
         </div>
