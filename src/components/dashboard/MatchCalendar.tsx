@@ -43,8 +43,8 @@ export const MatchCalendar = ({
     });
   };
   
-  const renderDay = (day: Date) => {
-    const dayMatches = getMatchesForDate(day);
+  const renderCalendarDay = (date: Date) => {
+    const dayMatches = getMatchesForDate(date);
     const hasMatches = dayMatches && dayMatches.length > 0;
     
     return (
@@ -57,7 +57,7 @@ export const MatchCalendar = ({
             "text-sm", 
             hasMatches && "font-medium text-purple-900 dark:text-purple-300"
           )}>
-            {format(day, "d")}
+            {format(date, "d")}
           </span>
         </div>
         
@@ -101,9 +101,9 @@ export const MatchCalendar = ({
           locale={fr}
           className="rounded-md border-slate-700 text-white"
           components={{
-            Day: ({ day, ...props }) => (
+            Day: ({ date, ...props }) => (
               <button {...props}>
-                {renderDay(day)}
+                {renderCalendarDay(date)}
               </button>
             )
           }}
