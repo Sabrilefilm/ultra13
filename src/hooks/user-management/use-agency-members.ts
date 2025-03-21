@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Account } from "@/types/accounts";
+import { toast } from "sonner";
 
 export const useAgencyMembers = (agentId: string) => {
   const [assignedCreators, setAssignedCreators] = useState<Account[]>([]);
@@ -9,17 +10,44 @@ export const useAgencyMembers = (agentId: string) => {
   const [loading, setLoading] = useState(true);
 
   const fetchAssignedCreators = async () => {
-    if (!agentId) return;
+    if (!agentId) {
+      console.log("No agent ID provided");
+      setLoading(false);
+      return;
+    }
     
     try {
       setLoading(true);
       console.log("Fetching assigned creators for agent ID:", agentId);
       
+      // First try to get the agent's ID if we were passed a username
+      let finalAgentId = agentId;
+      
+      if (agentId && !agentId.includes('-')) {
+        // This might be a username, not an ID, so let's check
+        const { data: agentData, error: agentError } = await supabase
+          .from("user_accounts")
+          .select("id")
+          .eq("username", agentId)
+          .eq("role", "agent")
+          .single();
+          
+        if (agentError) {
+          console.error("Error fetching agent ID:", agentError);
+          throw agentError;
+        }
+        
+        if (agentData && agentData.id) {
+          finalAgentId = agentData.id;
+          console.log("Resolved agent username to ID:", finalAgentId);
+        }
+      }
+      
       const { data, error } = await supabase
         .from("user_accounts")
         .select("*")
         .eq("role", "creator")
-        .eq("agent_id", agentId);
+        .eq("agent_id", finalAgentId);
       
       if (error) {
         console.error("Error fetching assigned creators:", error);
@@ -30,6 +58,7 @@ export const useAgencyMembers = (agentId: string) => {
       setAssignedCreators(data as Account[]);
     } catch (error) {
       console.error("Error in fetchAssignedCreators:", error);
+      toast.error("Erreur lors de la récupération des créateurs assignés");
       setAssignedCreators([]);
     } finally {
       setLoading(false);
@@ -56,6 +85,7 @@ export const useAgencyMembers = (agentId: string) => {
       setUnassignedCreators(data as Account[]);
     } catch (error) {
       console.error("Error in fetchUnassignedCreators:", error);
+      toast.error("Erreur lors de la récupération des créateurs non assignés");
       setUnassignedCreators([]);
     } finally {
       setLoading(false);
@@ -83,6 +113,7 @@ export const useAgencyMembers = (agentId: string) => {
       return true;
     } catch (error) {
       console.error("Error assigning creator to agent:", error);
+      toast.error("Erreur lors de l'assignation du créateur à l'agent");
       return false;
     }
   };
@@ -101,6 +132,7 @@ export const useAgencyMembers = (agentId: string) => {
       return true;
     } catch (error) {
       console.error("Error removing creator from agent:", error);
+      toast.error("Erreur lors de la suppression du créateur de l'agent");
       return false;
     }
   };

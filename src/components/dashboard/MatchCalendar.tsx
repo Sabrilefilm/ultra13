@@ -106,7 +106,7 @@ export const MatchCalendar = ({
           locale={fr}
           className="rounded-md border-slate-700 text-white"
           components={{
-            Day: ({ date, ...props }: { date: Date }) => (
+            Day: ({ date, ...props }: any) => (
               <button {...props}>
                 {renderCalendarDay(date)}
               </button>

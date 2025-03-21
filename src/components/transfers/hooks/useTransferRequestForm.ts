@@ -126,7 +126,7 @@ export function useTransferRequestForm(
             title: "Erreur",
             description: "Veuillez sélectionner un créateur",
           });
-          return;
+          return false;
         }
         
         creatorId = selectedCreator;
@@ -140,7 +140,7 @@ export function useTransferRequestForm(
           title: "Erreur",
           description: "Veuillez sélectionner un agent",
         });
-        return;
+        return false;
       }
       
       if (!reason.trim()) {
@@ -149,8 +149,21 @@ export function useTransferRequestForm(
           title: "Erreur",
           description: "Veuillez fournir une raison pour la demande de transfert",
         });
-        return;
+        return false;
       }
+      
+      // Validate UUID values before submitting to ensure they're not empty
+      if (!creatorId || !currentAgentId || !selectedAgent) {
+        console.error('Invalid UUIDs in transfer request:', { creatorId, currentAgentId, selectedAgent });
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Une ou plusieurs valeurs requises sont manquantes",
+        });
+        return false;
+      }
+      
+      console.log("Submitting transfer request with:", { creatorId, currentAgentId, selectedAgent, reason });
       
       // Create transfer request
       const { error } = await supabase
@@ -180,6 +193,8 @@ export function useTransferRequestForm(
       setSelectedAgent('');
       setSelectedCreator('');
       setReason('');
+      
+      return true;
     } catch (error) {
       console.error('Error submitting transfer request:', error);
       toast({
@@ -187,6 +202,7 @@ export function useTransferRequestForm(
         title: "Erreur",
         description: "Une erreur est survenue lors de l'envoi de la demande",
       });
+      return false;
     } finally {
       setLoading(false);
     }

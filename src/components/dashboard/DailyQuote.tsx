@@ -1,77 +1,122 @@
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Sparkles } from "lucide-react";
+import { QuoteIcon } from "lucide-react";
 
 const quotes = [
   {
-    text: "La vie est un mystère qu'il faut vivre, et non un problème à résoudre.",
-    author: "Gandhi"
+    text: "Le streaming est plus qu'un hobby, c'est une passion qui rapproche des personnes du monde entier.",
+    author: "Ultra Agency",
+    category: "streaming"
   },
   {
-    text: "Le bonheur n'est pas au bout du chemin, il est le chemin.",
-    author: "Bouddha"
+    text: "La musique est la bande-son de notre vie, elle rend nos streams plus vivants et mémorables.",
+    author: "Ultra Team",
+    category: "music"
   },
   {
-    text: "Soyez le changement que vous voulez voir dans le monde.",
-    author: "Gandhi"
+    text: "Les jeux ne sont pas seulement une façon de s'amuser, mais aussi une façon de créer des liens et des communautés.",
+    author: "Phocéen Agency",
+    category: "gaming"
   },
   {
-    text: "Le succès c'est d'aller d'échec en échec sans perdre son enthousiasme.",
-    author: "Winston Churchill"
+    text: "Le contenu original est votre signature unique dans l'océan du contenu en ligne.",
+    author: "Ultra Creator",
+    category: "content"
   },
   {
-    text: "La joie est en tout ; il faut savoir l'extraire.",
-    author: "Confucius"
+    text: "Chaque live est une opportunité de créer quelque chose de spécial pour votre communauté.",
+    author: "Ultra Team",
+    category: "streaming"
   },
   {
-    text: "La vie est vraiment simple, mais nous insistons à la rendre compliquée.",
-    author: "Confucius"
+    text: "Les meilleurs streamers ne sont pas ceux qui ont le plus de vues, mais ceux qui créent les connexions les plus authentiques.",
+    author: "Phocéen Agency",
+    category: "streaming"
   },
   {
-    text: "La plus grande gloire n'est pas de ne jamais tomber, mais de se relever à chaque chute.",
-    author: "Nelson Mandela"
+    text: "Le gaming n'est pas juste un loisir, c'est un langage universel qui traverse les cultures.",
+    author: "Ultra Gaming",
+    category: "gaming"
   },
   {
-    text: "Le bonheur est la seule chose qui se double si on le partage.",
-    author: "Albert Schweitzer"
+    text: "La musique a le pouvoir de transformer l'ambiance de votre stream en quelque chose de magique.",
+    author: "Ultra Music",
+    category: "music"
   },
   {
-    text: "Vis comme si tu devais mourir demain. Apprends comme si tu devais vivre toujours.",
-    author: "Gandhi"
+    text: "Rester authentique est la clé pour bâtir une communauté fidèle et engagée.",
+    author: "Ultra Creator",
+    category: "content"
   },
   {
-    text: "Ce n'est pas parce que les choses sont difficiles que nous n'osons pas, c'est parce que nous n'osons pas qu'elles sont difficiles.",
-    author: "Sénèque"
+    text: "Chaque échec en streaming est une leçon qui vous rapproche du succès.",
+    author: "Ultra Agency",
+    category: "streaming"
+  },
+  {
+    text: "Les jeux compétitifs nous enseignent la persévérance et l'esprit d'équipe.",
+    author: "Phocéen Gaming",
+    category: "gaming"
+  },
+  {
+    text: "La constance est plus importante que la perfection dans votre parcours de créateur.",
+    author: "Ultra Team",
+    category: "content"
   }
 ];
 
 export const DailyQuote = () => {
-  const [quote, setQuote] = useState({ text: "", author: "" });
+  const [currentQuote, setCurrentQuote] = useState(quotes[0]);
+  const [quoteIndex, setQuoteIndex] = useState(0);
   
+  // Change quote every 15 minutes
   useEffect(() => {
-    // Get the current date
-    const today = new Date().toLocaleDateString();
+    // Initial random quote
+    const randomIndex = Math.floor(Math.random() * quotes.length);
+    setQuoteIndex(randomIndex);
+    setCurrentQuote(quotes[randomIndex]);
     
-    // Use the date as a seed to select a quote
-    const hash = today.split("").reduce((acc, char) => {
-      return acc + char.charCodeAt(0);
-    }, 0);
+    // Update quote every 15 minutes (900000 ms)
+    const intervalId = setInterval(() => {
+      const nextIndex = (quoteIndex + 1) % quotes.length;
+      setQuoteIndex(nextIndex);
+      setCurrentQuote(quotes[nextIndex]);
+    }, 900000); // 15 minutes
     
-    const index = hash % quotes.length;
-    setQuote(quotes[index]);
-  }, []);
-
-  if (!quote.text) return null;
-
+    return () => clearInterval(intervalId);
+  }, [quoteIndex]);
+  
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case "streaming":
+        return "from-purple-500 to-indigo-600";
+      case "gaming":
+        return "from-red-500 to-orange-600";
+      case "music":
+        return "from-blue-500 to-cyan-600";
+      case "content":
+        return "from-emerald-500 to-teal-600";
+      default:
+        return "from-purple-500 to-indigo-600";
+    }
+  };
+  
   return (
-    <Card className="bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-200 dark:border-purple-900/50 shadow-md overflow-hidden">
-      <CardContent className="p-4">
-        <div className="flex items-start">
-          <Sparkles className="h-5 w-5 text-yellow-500 dark:text-yellow-400 mr-2 mt-1 flex-shrink-0" />
+    <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-purple-900/20 rounded-xl shadow-md overflow-hidden">
+      <CardContent className="p-6">
+        <div className="flex items-start gap-4">
+          <div className={`p-2 rounded-full bg-gradient-to-r ${getCategoryColor(currentQuote.category)} flex-shrink-0`}>
+            <QuoteIcon className="h-5 w-5 text-white" />
+          </div>
+          
           <div>
-            <p className="italic text-gray-700 dark:text-gray-300">"{quote.text}"</p>
-            <p className="text-right mt-2 text-sm font-medium text-gray-600 dark:text-gray-400">— {quote.author}</p>
+            <blockquote className="text-white/90 italic mb-2 text-lg leading-relaxed">
+              "{currentQuote.text}"
+            </blockquote>
+            <footer className="text-sm text-white/60">
+              — <cite>{currentQuote.author}</cite>
+            </footer>
           </div>
         </div>
       </CardContent>

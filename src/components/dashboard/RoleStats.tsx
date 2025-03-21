@@ -1,11 +1,13 @@
 
-import { Users, Diamond, Clock, Gift, Calendar } from "lucide-react";
+import { Users, Diamond, Clock, Gift, Calendar, AlertTriangle, MessageCircle } from "lucide-react";
 import { StatsCard } from "@/components/StatsCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface RoleStatsProps {
   role: string;
@@ -19,6 +21,22 @@ interface LiveSchedule {
 
 export const RoleStats = ({ role, userId }: RoleStatsProps) => {
   const navigate = useNavigate();
+  const { toast: toastHook } = useToast();
+  const [dayOfMonth, setDayOfMonth] = useState(0);
+  const [daysInMonth, setDaysInMonth] = useState(0);
+  const [monthProgress, setMonthProgress] = useState(0);
+  const [showWarning, setShowWarning] = useState(false);
+
+  // Calculate the day of month and month progress on component mount
+  useEffect(() => {
+    const now = new Date();
+    const currentDay = now.getDate();
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    
+    setDayOfMonth(currentDay);
+    setDaysInMonth(lastDay);
+    setMonthProgress(Math.floor((currentDay / lastDay) * 100));
+  }, []);
 
   // Requête pour récupérer les horaires de live
   const { data: liveSchedule, isError: isLiveScheduleError } = useQuery({
@@ -118,6 +136,35 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
     enabled: role === "creator" && !!userId
   });
 
+  // Show warning notification based on progress
+  useEffect(() => {
+    if (role === 'creator' && liveSchedule) {
+      const monthlyHours = liveSchedule.hours * liveSchedule.days;
+      const requiredHours = 15;
+      const progressPercentage = (monthlyHours / requiredHours) * 100;
+      
+      // If we're in the 2nd half of the month and progress is below 50%, show warning
+      if (monthProgress > 50 && progressPercentage < 50) {
+        setShowWarning(true);
+        toastHook({
+          variant: "destructive",
+          title: "Attention aux objectifs",
+          description: "Vous risquez de ne pas atteindre vos objectifs mensuels, ce qui peut entraîner une exclusion de l'agence ou une perte de récompenses.",
+          action: (
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="border-white/20 text-white hover:bg-red-900/50"
+              onClick={() => navigate('/messages')}
+            >
+              Contacter le fondateur
+            </Button>
+          ),
+        });
+      }
+    }
+  }, [liveSchedule, monthProgress, role, toastHook, navigate]);
+
   if (isLiveScheduleError || isRewardsError) {
     toast.error("Erreur lors de la récupération des statistiques");
   }
@@ -154,23 +201,84 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
     const hoursCompleted = monthlyHours >= requiredHours;
     const daysCompleted = (liveSchedule?.days || 0) >= requiredDays;
     
+    // Déterminez la couleur en fonction de la progression et du moment du mois
+    const getProgressColor = () => {
+      const progressPercentage = (monthlyHours / requiredHours) * 100;
+      
+      if (hoursCompleted) return "text-green-500";
+      
+      // Début du mois (premiers 10 jours) - toujours vert
+      if (monthProgress < 33) return "text-green-500";
+      
+      // Milieu du mois (jours 11-20) - orange si en retard
+      if (monthProgress < 66) {
+        return progressPercentage >= monthProgress ? "text-green-500" : "text-orange-500";
+      }
+      
+      // Fin du mois (jours 21+) - rouge si en retard
+      return progressPercentage >= monthProgress ? "text-green-500" : "text-red-500";
+    };
+    
+    // Déterminez la couleur en fonction de la progression et du moment du mois pour les jours
+    const getDaysProgressColor = () => {
+      const progressPercentage = ((liveSchedule?.days || 0) / requiredDays) * 100;
+      
+      if (daysCompleted) return "text-green-500";
+      
+      // Début du mois (premiers 10 jours) - toujours vert
+      if (monthProgress < 33) return "text-green-500";
+      
+      // Milieu du mois (jours 11-20) - orange si en retard
+      if (monthProgress < 66) {
+        return progressPercentage >= monthProgress ? "text-green-500" : "text-orange-500";
+      }
+      
+      // Fin du mois (jours 21+) - rouge si en retard
+      return progressPercentage >= monthProgress ? "text-green-500" : "text-red-500";
+    };
+    
+    const hoursColor = getProgressColor();
+    const daysColor = getDaysProgressColor();
+    
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatsCard
-          title="Heures de Live / Mois"
-          value={`${monthlyHours}h / ${requiredHours}h`}
-          icon={<Clock className={`w-6 h-6 ${hoursCompleted ? "text-green-500" : "text-primary"}`} />}
-        />
-        <StatsCard
-          title="Jours Streamés / Mois"
-          value={`${liveSchedule?.days || 0}j / ${requiredDays}j`}
-          icon={<Calendar className={`w-6 h-6 ${daysCompleted ? "text-green-500" : "text-primary"}`} />}
-        />
-        <StatsCard
-          title="Diamants Reçus"
-          value={`${rewardsData || 0}`}
-          icon={<Diamond className="w-6 h-6 text-primary" />}
-        />
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StatsCard
+            title="Heures de Live / Mois"
+            value={`${monthlyHours}h / ${requiredHours}h`}
+            icon={<Clock className={`w-6 h-6 ${hoursColor}`} />}
+          />
+          <StatsCard
+            title="Jours Streamés / Mois"
+            value={`${liveSchedule?.days || 0}j / ${requiredDays}j`}
+            icon={<Calendar className={`w-6 h-6 ${daysColor}`} />}
+          />
+          <StatsCard
+            title="Diamants Reçus"
+            value={`${rewardsData || 0}`}
+            icon={<Diamond className="w-6 h-6 text-primary" />}
+          />
+        </div>
+        
+        {showWarning && (
+          <div className="bg-red-900/20 border border-red-700/30 rounded-lg p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-6 w-6 text-red-400 animate-pulse" />
+              <div>
+                <h4 className="font-medium text-red-300">Attention aux objectifs</h4>
+                <p className="text-red-400/80 text-sm">Vous risquez de ne pas atteindre vos objectifs mensuels, ce qui peut entraîner une exclusion de l'agence ou une perte de récompenses.</p>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              className="border-red-700/50 text-red-300 hover:bg-red-800/30"
+              onClick={() => navigate('/messages')}
+            >
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Contacter le fondateur
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
