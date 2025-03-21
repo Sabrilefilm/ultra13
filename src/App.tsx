@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Index from './pages/Index';
@@ -19,8 +20,8 @@ import Transfers from './pages/Transfers';
 import ExternalMatches from './pages/ExternalMatches';
 import Schedule from './pages/Schedule';
 import NotFound from './pages/NotFound';
-import { ThemeProvider } from "@/components/ui/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
+import { ThemeProvider } from "./components/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import CreatorRewards from './pages/CreatorRewards';
 import CreatorStats from './pages/CreatorStats';
@@ -59,7 +60,7 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>
-          <Toaster richColors closeButton position="top-right" />
+          <Toaster />
         </ThemeProvider>
       </QueryClientProvider>
     </div>
