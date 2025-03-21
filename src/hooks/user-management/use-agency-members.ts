@@ -13,17 +13,23 @@ export const useAgencyMembers = (agentId: string) => {
     
     try {
       setLoading(true);
+      console.log("Fetching assigned creators for agent ID:", agentId);
+      
       const { data, error } = await supabase
         .from("user_accounts")
         .select("*")
         .eq("role", "creator")
         .eq("agent_id", agentId);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching assigned creators:", error);
+        throw error;
+      }
       
+      console.log("Assigned creators fetched:", data);
       setAssignedCreators(data as Account[]);
     } catch (error) {
-      console.error("Error fetching assigned creators:", error);
+      console.error("Error in fetchAssignedCreators:", error);
       setAssignedCreators([]);
     } finally {
       setLoading(false);
@@ -33,17 +39,23 @@ export const useAgencyMembers = (agentId: string) => {
   const fetchUnassignedCreators = async () => {
     try {
       setLoading(true);
+      console.log("Fetching unassigned creators");
+      
       const { data, error } = await supabase
         .from("user_accounts")
         .select("*")
         .eq("role", "creator")
         .is("agent_id", null);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching unassigned creators:", error);
+        throw error;
+      }
       
+      console.log("Unassigned creators fetched:", data);
       setUnassignedCreators(data as Account[]);
     } catch (error) {
-      console.error("Error fetching unassigned creators:", error);
+      console.error("Error in fetchUnassignedCreators:", error);
       setUnassignedCreators([]);
     } finally {
       setLoading(false);
@@ -51,6 +63,7 @@ export const useAgencyMembers = (agentId: string) => {
   };
 
   useEffect(() => {
+    console.log("useAgencyMembers hook called with agentId:", agentId);
     fetchAssignedCreators();
     fetchUnassignedCreators();
   }, [agentId]);

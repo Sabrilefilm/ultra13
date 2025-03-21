@@ -34,8 +34,11 @@ export const MatchCalendar = ({
   }
   
   const getMatchesForDate = (date: Date) => {
-    if (!matches) return [];
+    if (!matches || !date) return [];
+    
     return matches.filter(match => {
+      if (!match.match_date) return false;
+      
       const matchDate = new Date(match.match_date);
       return matchDate.getDate() === date.getDate() && 
              matchDate.getMonth() === date.getMonth() && 
@@ -44,6 +47,8 @@ export const MatchCalendar = ({
   };
   
   const renderCalendarDay = (date: Date) => {
+    if (!date) return null;
+    
     const dayMatches = getMatchesForDate(date);
     const hasMatches = dayMatches && dayMatches.length > 0;
     
@@ -101,7 +106,7 @@ export const MatchCalendar = ({
           locale={fr}
           className="rounded-md border-slate-700 text-white"
           components={{
-            Day: ({ date, ...props }) => (
+            Day: ({ date, ...props }: { date: Date }) => (
               <button {...props}>
                 {renderCalendarDay(date)}
               </button>

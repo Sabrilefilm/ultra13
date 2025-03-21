@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/lib/supabase";
 import { Account } from "@/types/accounts";
+import { toast } from "sonner";
+import { UltraSidebar } from "@/components/layout/UltraSidebar";
 
 const CreatorStats = () => {
   const navigate = useNavigate();
@@ -25,6 +27,8 @@ const CreatorStats = () => {
     const fetchCreators = async () => {
       setLoading(true);
       try {
+        console.log("Fetching creators for agent:", username);
+        
         // Step 1: Get the agent's ID
         const { data: agentData, error: agentError } = await supabase
           .from("user_accounts")
@@ -33,10 +37,19 @@ const CreatorStats = () => {
           .eq("role", "agent")
           .single();
 
-        if (agentError || !agentData) {
+        if (agentError) {
           console.error("Error fetching agent:", agentError);
+          toast.error("Erreur lors de la récupération des informations de l'agent");
           return;
         }
+
+        if (!agentData || !agentData.id) {
+          console.error("Agent data not found:", username);
+          toast.error("Données de l'agent introuvables");
+          return;
+        }
+
+        console.log("Agent ID found:", agentData.id);
 
         // Step 2: Get all creators assigned to this agent
         const { data: creatorsData, error: creatorsError } = await supabase
@@ -54,12 +67,15 @@ const CreatorStats = () => {
 
         if (creatorsError) {
           console.error("Error fetching creators:", creatorsError);
+          toast.error("Erreur lors de la récupération des créateurs");
           return;
         }
 
+        console.log("Creators found:", creatorsData);
         setCreators(creatorsData || []);
       } catch (error) {
         console.error("Error:", error);
+        toast.error("Une erreur est survenue");
       } finally {
         setLoading(false);
       }
@@ -91,8 +107,18 @@ const CreatorStats = () => {
   }
 
   return (
-    <div className="min-h-screen p-4">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen p-4 flex">
+      <UltraSidebar 
+        username={username || ''}
+        role={role || ''}
+        onLogout={() => {
+          localStorage.clear();
+          navigate('/');
+        }}
+        currentPage="dashboard"
+      />
+      
+      <div className="flex-1 max-w-6xl mx-auto space-y-6">
         <div className="flex items-center gap-4 mb-6">
           <Button
             variant="ghost"

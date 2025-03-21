@@ -14,7 +14,6 @@ import { Loading } from '@/components/ui/loading';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
 import { 
   Dialog, 
   DialogContent, 
@@ -31,6 +30,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useToast } from '@/hooks/use-toast';
 
 const Messages = () => {
   const navigate = useNavigate();
@@ -38,7 +38,7 @@ const Messages = () => {
   const [role, setRole] = useState<string>('');
   const [username, setUsername] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('messages');
+  const [activeTab, setActiveTab] = useState('contacts');
   const [isNewMessageDialogOpen, setIsNewMessageDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string>('');
   const isMobile = useIsMobile();
@@ -72,15 +72,13 @@ const Messages = () => {
       const storedRole = localStorage.getItem('userRole');
       
       if (!isAuthenticated || !storedUsername || !storedRole) {
-        uiToast({
-          title: "Session expirée",
-          description: "Veuillez vous reconnecter",
-          variant: "destructive",
-          duration: 5000,
-        });
+        console.log("Authentication failed, redirecting to login");
+        toast.error("Session expirée, veuillez vous reconnecter");
         navigate('/');
         return;
       }
+      
+      console.log("Authentication successful, getting user ID");
       
       // Get user id from user_accounts table
       const fetchUserId = async () => {
@@ -91,23 +89,23 @@ const Messages = () => {
             .eq('username', storedUsername)
             .single();
             
-          if (error) throw error;
+          if (error) {
+            console.error("Error fetching user ID:", error);
+            throw error;
+          }
           
           if (data?.id) {
+            console.log("User ID found:", data.id);
             setUserId(data.id);
             setUsername(storedUsername);
             setRole(storedRole);
           } else {
+            console.error("User not found for username:", storedUsername);
             throw new Error('User not found');
           }
         } catch (error) {
           console.error('Error fetching user:', error);
-          uiToast({
-            title: "Erreur",
-            description: "Impossible de récupérer les données utilisateur",
-            variant: "destructive",
-            duration: 5000,
-          });
+          toast.error("Impossible de récupérer les données utilisateur");
           navigate('/');
         } finally {
           setLoading(false);
@@ -118,7 +116,7 @@ const Messages = () => {
     };
     
     checkAuth();
-  }, [navigate, uiToast]);
+  }, [navigate]);
 
   const handleSendMessage = () => {
     if ((newMessage.trim() || attachmentPreview) && activeContact) {
@@ -154,6 +152,14 @@ const Messages = () => {
       archiveConversation();
     }
   };
+
+  console.log("Rendering Messages component with state:", {
+    userId,
+    activeTab,
+    activeContact,
+    conversationsCount: conversations?.length || 0,
+    messagesCount: messages?.length || 0
+  });
 
   if (loading) {
     return <Loading fullScreen size="large" text="Chargement de la messagerie..." />;
@@ -233,6 +239,7 @@ const Messages = () => {
                     contacts={conversations || []}
                     activeContactId={activeContact}
                     onSelectContact={(id) => {
+                      console.log("Selecting contact:", id);
                       setActiveContact(id);
                       if (isMobile) {
                         setActiveTab('messages');
@@ -315,20 +322,20 @@ const Messages = () => {
       
       {/* New Message Dialog */}
       <Dialog open={isNewMessageDialogOpen} onOpenChange={setIsNewMessageDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-slate-900 border-purple-800/30 text-white">
           <DialogHeader>
             <DialogTitle>Nouvelle conversation</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-slate-400">
               Sélectionnez un utilisateur pour commencer une nouvelle conversation.
             </DialogDescription>
           </DialogHeader>
           
           <div className="py-4">
             <Select value={selectedUser} onValueChange={setSelectedUser}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                 <SelectValue placeholder="Sélectionner un utilisateur" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-slate-800 border-slate-700 text-white">
                 {loadingUsers ? (
                   <div className="flex justify-center p-2">
                     <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin border-gray-500"></div>
@@ -337,7 +344,7 @@ const Messages = () => {
                   <div className="p-2 text-sm text-gray-500">Aucun utilisateur disponible</div>
                 ) : (
                   allUsers?.map(user => (
-                    <SelectItem key={user.id} value={user.id}>
+                    <SelectItem key={user.id} value={user.id} className="focus:bg-slate-700">
                       {user.username} ({user.role})
                     </SelectItem>
                   ))
@@ -347,10 +354,10 @@ const Messages = () => {
           </div>
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsNewMessageDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsNewMessageDialogOpen(false)} className="border-gray-700 text-gray-300 hover:bg-gray-800">
               Annuler
             </Button>
-            <Button onClick={handleStartNewConversation}>
+            <Button onClick={handleStartNewConversation} className="bg-purple-600 hover:bg-purple-700 text-white">
               Commencer
             </Button>
           </DialogFooter>

@@ -37,6 +37,8 @@ export const ScheduleMatchDialog = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const matchDateTime = new Date(`${matchDate}T${matchTime}`);
+    console.log("Scheduling match with:", { creator1, creator2, matchDateTime, isBoost, agentName });
+    
     const success = await addMatch(creator1, creator2, matchDateTime, isBoost, agentName);
     
     if (success) {
