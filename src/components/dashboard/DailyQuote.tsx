@@ -63,6 +63,36 @@ const quotes = [
     text: "La constance est plus importante que la perfection dans votre parcours de créateur.",
     author: "Ultra Team",
     category: "content"
+  },
+  {
+    text: "Les défis font partie du voyage d'un créateur, c'est ce qui rend la réussite encore plus douce.",
+    author: "Phocéen Agency",
+    category: "content"
+  },
+  {
+    text: "Votre stream est votre scène, faites-en un spectacle dont vous êtes fier.",
+    author: "Ultra Agency",
+    category: "streaming"
+  },
+  {
+    text: "La musique ne parle pas seulement à l'esprit, elle parle directement au cœur de votre audience.",
+    author: "Phocéen Music",
+    category: "music"
+  },
+  {
+    text: "Un bon stream commence par une bonne préparation, mais c'est votre spontanéité qui le rend exceptionnel.",
+    author: "Ultra Team",
+    category: "streaming"
+  },
+  {
+    text: "Les meilleurs moments en gaming sont ceux partagés avec une communauté qui vous soutient.",
+    author: "Phocéen Gaming",
+    category: "gaming"
+  },
+  {
+    text: "L'innovation distingue un leader d'un suiveur, soyez unique dans votre approche du streaming.",
+    author: "Ultra Creator",
+    category: "content"
   }
 ];
 

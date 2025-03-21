@@ -1,70 +1,68 @@
-
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import UserManagement from "./pages/UserManagement";
-import NotificationManagement from "./pages/NotificationManagement";
-import PersonalInformation from "./pages/PersonalInformation";
-import AgencyMembers from "./pages/AgencyMembers";
-import CreatorStats from "./pages/CreatorStats";
-import AgencyAssignment from "./pages/AgencyAssignment";
-import ExternalMatches from "./pages/ExternalMatches";
-import Contact from "./pages/Contact";
-import Penalties from "./pages/Penalties";
-import Schedule from "./pages/Schedule";
-import TeamManagement from "./pages/TeamManagement";
-import InternalRules from "./pages/InternalRules";
-import Messages from "./pages/Messages";
-import Transfers from "./pages/Transfers";
-import Documents from "./pages/Documents";
-import Matches from "./pages/Matches";
-import CreatorRules from "./pages/CreatorRules";
-import { Loading } from "./components/ui/loading";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Index from './pages/Index';
+import Matches from './pages/Matches';
+import RewardsManagement from './pages/RewardsManagement';
+import Documents from './pages/Documents';
+import UserManagement from './pages/UserManagement';
+import AgencyMembers from './pages/AgencyMembers';
+import AgencyAssignment from './pages/AgencyAssignment';
+import Penalties from './pages/Penalties';
+import NotificationManagement from './pages/NotificationManagement';
+import Messages from './pages/Messages';
+import InternalRules from './pages/InternalRules';
+import CreatorRules from './pages/CreatorRules';
+import TeamManagement from './pages/TeamManagement';
+import PersonalInformation from './pages/PersonalInformation';
+import Contact from './pages/Contact';
+import Transfers from './pages/Transfers';
+import ExternalMatches from './pages/ExternalMatches';
+import Schedule from './pages/Schedule';
+import NotFound from './pages/NotFound';
+import { ThemeProvider } from "@/components/ui/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import CreatorRewards from './pages/CreatorRewards';
+import CreatorStats from './pages/CreatorStats';
+import { useDarkMode } from './hooks/use-dark-mode';
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulate initial app loading
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) {
-    return <Loading fullScreen size="large" text="Ultra se charge..." />;
-  }
+  const queryClient = new QueryClient();
+  const { isDarkMode } = useDarkMode();
 
   return (
-    <Router>
-      <SidebarProvider defaultOpen={true}>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/users" element={<UserManagement />} />
-          <Route path="/notifications" element={<NotificationManagement />} />
-          <Route path="/personal-information" element={<PersonalInformation />} />
-          <Route path="/agency-members/:agentId" element={<AgencyMembers />} />
-          <Route path="/creator-stats" element={<CreatorStats />} />
-          <Route path="/agency-assignment" element={<AgencyAssignment />} />
-          <Route path="/external-matches" element={<ExternalMatches />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/penalties" element={<Penalties />} />
-          <Route path="/schedule" element={<Schedule />} />
-          <Route path="/team" element={<TeamManagement />} />
-          <Route path="/internal-rules" element={<InternalRules />} />
-          <Route path="/creator-rules" element={<CreatorRules />} />
-          <Route path="/messages" element={<Messages />} />
-          <Route path="/transfers" element={<Transfers />} />
-          <Route path="/documents" element={<Documents />} />
-          <Route path="/matches" element={<Matches />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </SidebarProvider>
-    </Router>
+    <div className={isDarkMode ? 'dark' : ''}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+          <Router>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/matches" element={<Matches />} />
+              <Route path="/rewards-management" element={<RewardsManagement />} />
+              <Route path="/documents" element={<Documents />} />
+              <Route path="/user-management" element={<UserManagement />} />
+              <Route path="/agency-members" element={<AgencyMembers />} />
+              <Route path="/agency-assignment" element={<AgencyAssignment />} />
+              <Route path="/penalties" element={<Penalties />} />
+              <Route path="/notifications" element={<NotificationManagement />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/internal-rules" element={<InternalRules />} />
+              <Route path="/creator-rules" element={<CreatorRules />} />
+              <Route path="/team-management" element={<TeamManagement />} />
+              <Route path="/personal-information" element={<PersonalInformation />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/transfers" element={<Transfers />} />
+              <Route path="/external-matches" element={<ExternalMatches />} />
+              <Route path="/schedule" element={<Schedule />} />
+              <Route path="/creator-rewards" element={<CreatorRewards />} />
+              <Route path="/creator-stats" element={<CreatorStats />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Router>
+          <Toaster richColors closeButton position="top-right" />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </div>
   );
 }
 

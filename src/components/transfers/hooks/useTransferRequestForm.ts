@@ -28,13 +28,15 @@ export function useTransferRequestForm(
   const [selectedAgent, setSelectedAgent] = useState<string>('');
   const [selectedCreator, setSelectedCreator] = useState<string>('');
   const [reason, setReason] = useState<string>('');
-  const [currentAgent, setCurrentAgent] = useState<string>('');
+  const [currentAgent, setCurrentAgent] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       fetchAgents();
       if (role === 'agent') {
         fetchCreators();
+      } else if (role === 'creator') {
+        fetchCreatorAgentId();
       }
     } else {
       // Reset form when dialog closes
@@ -42,7 +44,28 @@ export function useTransferRequestForm(
       setSelectedCreator('');
       setReason('');
     }
-  }, [isOpen, role]);
+  }, [isOpen, role, userId]);
+
+  const fetchCreatorAgentId = async () => {
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase
+        .from('user_accounts')
+        .select('agent_id')
+        .eq('id', userId)
+        .single();
+        
+      if (error) throw error;
+      
+      console.log("Creator's current agent_id:", data?.agent_id);
+      setCurrentAgent(data?.agent_id || null);
+    } catch (error) {
+      console.error('Error fetching creator agent_id:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchAgents = async () => {
     try {
@@ -66,10 +89,14 @@ export function useTransferRequestForm(
           
         if (userError) throw userError;
         
-        setCurrentAgent(userData?.agent_id || '');
+        setCurrentAgent(userData?.agent_id || null);
         
         // Filter out current agent from the list
-        setAgents(data.filter(agent => agent.id !== userData?.agent_id) || []);
+        if (userData?.agent_id) {
+          setAgents(data.filter(agent => agent.id !== userData.agent_id) || []);
+        } else {
+          setAgents(data || []);
+        }
       } else {
         setAgents(data || []);
       }
@@ -152,18 +179,23 @@ export function useTransferRequestForm(
         return false;
       }
       
-      // Validate UUID values before submitting to ensure they're not empty
-      if (!creatorId || !currentAgentId || !selectedAgent) {
-        console.error('Invalid UUIDs in transfer request:', { creatorId, currentAgentId, selectedAgent });
+      // For creator role, validate that we have a current agent
+      if (role === 'creator' && !currentAgentId) {
+        console.log("Creator has no current agent to transfer from");
         toast({
           variant: "destructive",
           title: "Erreur",
-          description: "Une ou plusieurs valeurs requises sont manquantes",
+          description: "Vous n'êtes pas assigné à un agent actuellement",
         });
         return false;
       }
       
-      console.log("Submitting transfer request with:", { creatorId, currentAgentId, selectedAgent, reason });
+      console.log("Submitting transfer request with:", { 
+        creatorId, 
+        currentAgentId, 
+        selectedAgent, 
+        reason 
+      });
       
       // Create transfer request
       const { error } = await supabase
