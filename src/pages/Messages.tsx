@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageList } from '@/components/messages/MessageList';
@@ -44,7 +43,7 @@ const Messages = () => {
   const isMobile = useIsMobile();
   const { toast: uiToast } = useToast();
   
-  // Classes pour les animations et couleurs bleus
+  // Classes for animations and blue colors
   const blueButtonClass = "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white";
   const animatedBlueButtonClass = `${blueButtonClass} animate-pulse`;
   
@@ -70,10 +69,11 @@ const Messages = () => {
   } = useMessages(userId);
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
       const storedUsername = localStorage.getItem('username');
       const storedRole = localStorage.getItem('userRole');
+      const storedUserId = localStorage.getItem('userId');
       
       if (!isAuthenticated || !storedUsername || !storedRole) {
         console.log("Authentication failed, redirecting to login");
@@ -82,41 +82,49 @@ const Messages = () => {
         return;
       }
       
-      console.log("Authentication successful, getting user ID");
+      console.log("Authentication successful");
       
-      // Get user id from user_accounts table
-      const fetchUserId = async () => {
-        try {
-          const { data, error } = await supabase
-            .from('user_accounts')
-            .select('id')
-            .eq('username', storedUsername)
-            .single();
-            
-          if (error) {
-            console.error("Error fetching user ID:", error);
-            throw error;
-          }
+      // If we already have the userId in localStorage, use it directly
+      if (storedUserId) {
+        console.log("User ID found in localStorage:", storedUserId);
+        setUserId(storedUserId);
+        setUsername(storedUsername);
+        setRole(storedRole);
+        setLoading(false);
+        return;
+      }
+      
+      // Otherwise, get user id from user_accounts table
+      console.log("User ID not found in localStorage, fetching from database");
+      try {
+        const { data, error } = await supabase
+          .from('user_accounts')
+          .select('id')
+          .ilike('username', storedUsername) // Case-insensitive search
+          .single();
           
-          if (data?.id) {
-            console.log("User ID found:", data.id);
-            setUserId(data.id);
-            setUsername(storedUsername);
-            setRole(storedRole);
-          } else {
-            console.error("User not found for username:", storedUsername);
-            throw new Error('User not found');
-          }
-        } catch (error) {
-          console.error('Error fetching user:', error);
-          toast.error("Impossible de récupérer les données utilisateur");
-          navigate('/');
-        } finally {
-          setLoading(false);
+        if (error) {
+          console.error("Error fetching user ID:", error);
+          throw error;
         }
-      };
-      
-      fetchUserId();
+        
+        if (data?.id) {
+          console.log("User ID found in database:", data.id);
+          setUserId(data.id);
+          localStorage.setItem('userId', data.id); // Save to localStorage for future use
+          setUsername(storedUsername);
+          setRole(storedRole);
+        } else {
+          console.error("User not found for username:", storedUsername);
+          throw new Error('User not found');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        toast.error("Impossible de récupérer les données utilisateur");
+        navigate('/');
+      } finally {
+        setLoading(false);
+      }
     };
     
     checkAuth();
