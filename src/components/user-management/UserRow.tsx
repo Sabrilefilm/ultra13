@@ -91,6 +91,7 @@ export const UserRow: React.FC<UserRowProps> = ({
             <SelectItem value="creator">Créateur</SelectItem>
             <SelectItem value="manager">Manager</SelectItem>
             <SelectItem value="agent">Agent</SelectItem>
+            <SelectItem value="ambassadeur">Ambassadeur</SelectItem>
           </SelectContent>
         </Select>
       </TableCell>

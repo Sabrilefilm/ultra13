@@ -50,7 +50,9 @@ export function RewardsPanel({ role, userId }: RewardsPanelProps) {
     navigate('/creator-rewards');
   };
 
-  const canManageRewards = ['founder', 'manager'].includes(role);
+  // Seul le fondateur peut gérer les récompenses
+  const canManageRewards = role === 'founder';
+  const canViewRewards = ['founder', 'manager'].includes(role);
 
   return (
     <Card className="bg-white dark:bg-slate-800 shadow-md border-purple-100 dark:border-purple-900/30">
@@ -77,12 +79,14 @@ export function RewardsPanel({ role, userId }: RewardsPanelProps) {
               <Diamond className="h-4 w-4 text-purple-500" />
               Ajouter des diamants
             </Button>
-            <Button
-              className="bg-purple-600 hover:bg-purple-700"
-              onClick={handleOpenCreatorRewards}
-            >
-              Programme de récompenses
-            </Button>
+            {canManageRewards && (
+              <Button
+                className="bg-purple-600 hover:bg-purple-700"
+                onClick={handleOpenCreatorRewards}
+              >
+                Programme de récompenses
+              </Button>
+            )}
           </div>
         )}
         {role === 'creator' && (
@@ -96,7 +100,7 @@ export function RewardsPanel({ role, userId }: RewardsPanelProps) {
         )}
       </CardHeader>
       <CardContent>
-        {canManageRewards && platformSettings && (
+        {canViewRewards && platformSettings && (
           <div className="mb-4 p-4 bg-muted/50 rounded-lg">
             <div className="grid grid-cols-2 gap-4">
               <div>

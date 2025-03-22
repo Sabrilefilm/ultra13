@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Home, Users, Calendar, Briefcase, Award, Bookmark, MessageSquare, Settings, LogOut, ChevronRight, ChevronLeft, FileText, Trophy, X } from "lucide-react";
+import { Home, Users, Calendar, Briefcase, Award, Bookmark, MessageSquare, Settings, LogOut, ChevronRight, ChevronLeft, FileText, Trophy, X, Pen } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { SidebarLogo } from "./SidebarLogo";
 interface SidebarItem {
@@ -44,61 +45,67 @@ export const UltraSidebar = ({
     label: "Tableau de bord",
     action: "navigateTo",
     data: "dashboard",
-    roles: ["founder", "manager", "agent", "creator"]
+    roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
   }, {
     icon: Users,
     label: "Utilisateurs",
     action: "navigateTo",
     data: "user-management",
-    roles: ["founder", "manager"]
+    roles: ["founder", "manager", "agent", "ambassadeur"]
   }, {
     icon: Calendar,
     label: "Planning",
     action: "navigateTo",
     data: "schedule",
-    roles: ["founder", "manager", "agent", "creator"]
+    roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
   }, {
     icon: Trophy,
     label: "Matchs",
     action: "navigateTo",
     data: "matches",
-    roles: ["founder", "manager", "agent", "creator"]
+    roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
   }, {
     icon: Briefcase,
     label: "Transferts",
     action: "navigateTo",
     data: "transfers",
-    roles: ["founder", "manager", "creator"]
+    roles: ["founder", "manager", "creator", "ambassadeur"]
   }, {
     icon: Award,
     label: "Récompenses",
     action: "navigateTo",
-    data: "rewards-management",
+    data: role === "creator" ? "creator-rewards" : "rewards-management",
     roles: ["founder", "manager", "creator"]
   }, {
     icon: MessageSquare,
     label: "Messagerie",
     action: "navigateTo",
     data: "messages",
-    roles: ["founder", "manager", "agent", "creator"]
+    roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
   }, {
     icon: FileText,
     label: "Documents",
     action: "navigateTo",
     data: "documents",
-    roles: ["founder", "manager", "agent", "creator"]
+    roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
   }, {
     icon: Bookmark,
     label: "Sanctions",
     action: "navigateTo",
     data: "penalties",
-    roles: ["founder", "manager"]
+    roles: ["founder", "manager", "ambassadeur"]
   }, {
     icon: Settings,
     label: "Règles",
     action: "navigateTo",
     data: role === "creator" ? "creator-rules" : "internal-rules",
-    roles: ["founder", "manager", "agent", "creator"]
+    roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
+  }, {
+    icon: Pen,
+    label: "Mes Créateurs",
+    action: "navigateTo",
+    data: "creator-stats",
+    roles: ["agent", "manager", "founder", "ambassadeur"]
   }];
   const filteredItems = sidebarItems.filter(item => item.roles.includes(role));
   const handleItemClick = (action: string, data?: any) => {

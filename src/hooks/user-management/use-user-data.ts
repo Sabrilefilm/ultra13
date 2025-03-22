@@ -53,6 +53,7 @@ export const useUserData = () => {
     manager: filteredUsers.filter(user => user.role === "manager"),
     creator: filteredUsers.filter(user => user.role === "creator"),
     agent: filteredUsers.filter(user => user.role === "agent"),
+    ambassadeur: filteredUsers.filter(user => user.role === "ambassadeur"),
   };
 
   return {

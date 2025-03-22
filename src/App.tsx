@@ -46,6 +46,7 @@ function App() {
               <Route path="/user-management" element={<UserManagement />} />
               <Route path="/users" element={<UserManagement />} />
               <Route path="/agency-members" element={<AgencyMembers />} />
+              <Route path="/agency-members/:agentId" element={<AgencyMembers />} />
               <Route path="/agency-assignment" element={<AgencyAssignment />} />
               <Route path="/penalties" element={<Penalties />} />
               <Route path="/notifications" element={<NotificationManagement />} />

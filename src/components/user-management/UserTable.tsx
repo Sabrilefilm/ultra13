@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Account } from "@/types/accounts";
-import { Eye, EyeOff, Edit, Check, X, Shield, Trash, UserRound, Users } from "lucide-react";
+import { Eye, EyeOff, Edit, Check, X, Shield, Trash, UserRound, Users, Pen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface UserTableProps {
@@ -45,10 +45,10 @@ export const UserTable: React.FC<UserTableProps> = ({
   // Seul le fondateur peut voir les mots de passe
   const canSeePasswords = isFounder;
   
-  // Les managers ne peuvent attribuer que le rôle d'agent aux créateurs
+  // Les managers ne peuvent attribuer que le rôle d'agent ou ambassadeur aux créateurs
   const canChangeRole = (user: Account, newRole: string) => {
     if (isFounder) return true;
-    if (isManager && user.role === 'creator' && newRole === 'agent') return true;
+    if (isManager && user.role === 'creator' && (newRole === 'agent' || newRole === 'ambassadeur')) return true;
     return false;
   };
 
@@ -128,6 +128,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                         {isFounder && <option value="manager">Manager</option>}
                         <option value="creator">Créateur</option>
                         <option value="agent">Agent</option>
+                        <option value="ambassadeur">Ambassadeur</option>
                       </select>
                     ) : (
                       <span className="bg-secondary/20 rounded px-2 py-1 text-sm">
@@ -159,6 +160,8 @@ export const UserTable: React.FC<UserTableProps> = ({
                       <span>Créateur</span>
                     ) : user.role === 'agent' ? (
                       <span>Agent</span>
+                    ) : user.role === 'ambassadeur' ? (
+                      <span>Ambassadeur</span>
                     ) : (
                       <span>Manager</span>
                     )}
@@ -197,7 +200,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                         </Button>
                       )}
                       
-                      {(isFounder || isManager) && user.role === 'agent' && (
+                      {(isFounder || isManager) && (user.role === 'agent' || user.role === 'ambassadeur') && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -206,6 +209,18 @@ export const UserTable: React.FC<UserTableProps> = ({
                         >
                           <Users className="h-4 w-4 mr-1" />
                           Membres de l'agence
+                        </Button>
+                      )}
+                      
+                      {(isFounder || isManager || userRole === 'agent') && (user.role === 'creator') && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="ml-2"
+                          onClick={() => navigate(`/creator-stats`)}
+                        >
+                          <Pen className="h-4 w-4 mr-1" />
+                          Mes créateurs
                         </Button>
                       )}
                     </div>
