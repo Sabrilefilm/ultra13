@@ -44,6 +44,10 @@ const Messages = () => {
   const isMobile = useIsMobile();
   const { toast: uiToast } = useToast();
   
+  // Classes pour les animations et couleurs bleus
+  const blueButtonClass = "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white";
+  const animatedBlueButtonClass = `${blueButtonClass} animate-pulse`;
+  
   const {
     conversations,
     messages,
@@ -148,7 +152,12 @@ const Messages = () => {
   };
 
   const handleArchive = () => {
-    if (window.confirm('Êtes-vous sûr de vouloir archiver cette conversation ?')) {
+    const isFounder = role === 'founder';
+    const confirmMessage = isFounder 
+      ? 'Êtes-vous sûr de vouloir archiver définitivement cette conversation ?'
+      : 'Êtes-vous sûr de vouloir archiver cette conversation pour 1 mois ?';
+      
+    if (window.confirm(confirmMessage)) {
       archiveConversation();
     }
   };
@@ -185,9 +194,11 @@ const Messages = () => {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-xl font-bold">Messagerie</h1>
+            <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600 animate-pulse">
+              Messagerie
+            </h1>
             {unreadCount > 0 && (
-              <Badge variant="destructive" className="ml-2">
+              <Badge variant="destructive" className="ml-2 animate-pulse">
                 {unreadCount} non lu{unreadCount > 1 ? 's' : ''}
               </Badge>
             )}
@@ -195,13 +206,12 @@ const Messages = () => {
           
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
-              size="sm"
+              className={`hidden md:flex items-center gap-1 ${animatedBlueButtonClass}`}
               onClick={() => setIsNewMessageDialogOpen(true)}
-              className="hidden md:flex items-center gap-1"
+              size="sm"
             >
               <Plus className="h-4 w-4" />
-              Nouvelle conversation
+              Nouveau message
             </Button>
             
             <div className="md:hidden">
@@ -220,17 +230,20 @@ const Messages = () => {
         </div>
         
         <div className="flex-1 p-4 overflow-hidden">
-          <Card className="h-full overflow-hidden">
+          <Card className="h-full overflow-hidden shadow-lg border-blue-100 dark:border-blue-900/30">
             <CardContent className="p-0 h-full">
               <div className="md:flex h-full">
                 <div className={`w-full md:w-1/3 md:border-r border-gray-200 dark:border-gray-800 h-full ${activeTab !== 'contacts' ? 'hidden md:block' : ''}`}>
-                  <div className="flex justify-between items-center p-3 border-b border-gray-200 dark:border-gray-800">
-                    <h2 className="font-medium">Contacts</h2>
+                  <div className="flex justify-between items-center p-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+                    <h2 className="font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                      <Users className="h-4 w-4 mr-2 text-blue-500" />
+                      Contacts
+                    </h2>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setIsNewMessageDialogOpen(true)}
-                      className="md:hidden"
+                      className="md:hidden text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
@@ -255,7 +268,7 @@ const Messages = () => {
                     <>
                       <div className="bg-white dark:bg-slate-900 p-3 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
                         <div className="flex items-center">
-                          <span className="font-medium">
+                          <span className="font-medium text-blue-600 dark:text-blue-400">
                             {conversations?.find(c => c.id === activeContact)?.username || allUsers?.find(u => u.id === activeContact)?.username || 'Conversation'}
                           </span>
                           <span className="ml-2 text-sm text-gray-500">
@@ -263,21 +276,19 @@ const Messages = () => {
                           </span>
                         </div>
                         
-                        {role === 'founder' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleArchive}
-                            disabled={archiving}
-                            className="text-gray-500"
-                          >
-                            <Archive className="h-4 w-4 mr-1" />
-                            {isMobile ? '' : 'Archiver'}
-                          </Button>
-                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleArchive}
+                          disabled={archiving}
+                          className="text-gray-500 hover:text-red-500"
+                        >
+                          <Archive className="h-4 w-4 mr-1" />
+                          {isMobile ? '' : 'Archiver'}
+                        </Button>
                       </div>
                       
-                      <div className="flex-1 overflow-hidden">
+                      <div className="flex-1 overflow-hidden bg-gray-50 dark:bg-gray-900/30">
                         <MessageList
                           messages={messages || []}
                           currentUserId={userId}
@@ -297,19 +308,18 @@ const Messages = () => {
                     </>
                   ) : (
                     <div className="flex flex-col h-full items-center justify-center p-6 text-center">
-                      <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mb-4">
-                        <MessageSquare className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                      <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4 animate-pulse">
+                        <MessageSquare className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                       </div>
                       <p className="text-gray-600 dark:text-gray-300 mb-2">Sélectionnez une conversation</p>
                       <p className="text-gray-400 dark:text-gray-500 text-sm">Choisissez un contact pour commencer à discuter</p>
                       
                       <Button
-                        variant="outline"
-                        className="mt-4"
+                        className={`mt-4 ${blueButtonClass}`}
                         onClick={() => setIsNewMessageDialogOpen(true)}
                       >
                         <Plus className="h-4 w-4 mr-2" />
-                        Nouvelle conversation
+                        Nouveau message
                       </Button>
                     </div>
                   )}
@@ -322,29 +332,29 @@ const Messages = () => {
       
       {/* New Message Dialog */}
       <Dialog open={isNewMessageDialogOpen} onOpenChange={setIsNewMessageDialogOpen}>
-        <DialogContent className="sm:max-w-md bg-slate-900 border-purple-800/30 text-white">
+        <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 border-blue-200 dark:border-blue-800/30">
           <DialogHeader>
-            <DialogTitle>Nouvelle conversation</DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogTitle className="text-blue-600 dark:text-blue-400">Nouveau message</DialogTitle>
+            <DialogDescription className="text-gray-500 dark:text-gray-400">
               Sélectionnez un utilisateur pour commencer une nouvelle conversation.
             </DialogDescription>
           </DialogHeader>
           
           <div className="py-4">
             <Select value={selectedUser} onValueChange={setSelectedUser}>
-              <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+              <SelectTrigger className="border-blue-200 dark:border-blue-700">
                 <SelectValue placeholder="Sélectionner un utilisateur" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700 text-white">
+              <SelectContent>
                 {loadingUsers ? (
                   <div className="flex justify-center p-2">
-                    <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin border-gray-500"></div>
+                    <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin border-blue-500"></div>
                   </div>
                 ) : allUsers?.length === 0 ? (
                   <div className="p-2 text-sm text-gray-500">Aucun utilisateur disponible</div>
                 ) : (
                   allUsers?.map(user => (
-                    <SelectItem key={user.id} value={user.id} className="focus:bg-slate-700">
+                    <SelectItem key={user.id} value={user.id}>
                       {user.username} ({user.role})
                     </SelectItem>
                   ))
@@ -354,10 +364,13 @@ const Messages = () => {
           </div>
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsNewMessageDialogOpen(false)} className="border-gray-700 text-gray-300 hover:bg-gray-800">
+            <Button variant="outline" onClick={() => setIsNewMessageDialogOpen(false)}>
               Annuler
             </Button>
-            <Button onClick={handleStartNewConversation} className="bg-purple-600 hover:bg-purple-700 text-white">
+            <Button 
+              onClick={handleStartNewConversation}
+              className={blueButtonClass}
+            >
               Commencer
             </Button>
           </DialogFooter>

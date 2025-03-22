@@ -66,9 +66,12 @@ export const useIndexAuth = () => {
     setIsLoading(true);
 
     try {
-      if (username === "Sabri" && password === "Marseille@13011") {
+      // Accepter la connexion quelle que soit la casse
+      const usernameNormalized = username.toLowerCase();
+      
+      if (usernameNormalized === "sabri" && password === "Marseille@13011") {
         setRole('founder');
-        setUsername(username);
+        setUsername("Sabri"); // Garder l'original pour l'affichage
         setUserId("founder-special-id"); // Special ID for founder
         setIsAuthenticated(true);
         playNotificationSound();
@@ -80,8 +83,8 @@ export const useIndexAuth = () => {
       } else {
         const { data, error } = await supabase
           .from('user_accounts')
-          .select('id, role, password')
-          .eq('username', username)
+          .select('id, role, password, username')
+          .ilike('username', username) // Recherche insensible à la casse
           .single();
 
         if (error || !data) {
@@ -90,7 +93,7 @@ export const useIndexAuth = () => {
 
         if (data.password === password) {
           setRole(data.role as Role);
-          setUsername(username);
+          setUsername(data.username); // Utiliser le nom d'utilisateur tel qu'il est stocké en BDD
           setUserId(data.id);
           setIsAuthenticated(true);
           

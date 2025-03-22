@@ -64,6 +64,8 @@ export const ContactList = ({
         return 'bg-emerald-500';
       case 'creator':
         return 'bg-blue-500';
+      case 'ambassadeur':
+        return 'bg-purple-500';
       default:
         return 'bg-gray-500';
     }
@@ -79,6 +81,8 @@ export const ContactList = ({
         return 'Agent';
       case 'creator':
         return 'Créateur';
+      case 'ambassadeur':
+        return 'Ambassadeur';
       default:
         return role;
     }
@@ -107,7 +111,7 @@ export const ContactList = ({
   if (isLoading) {
     return (
       <div className="flex flex-col h-full items-center justify-center p-6">
-        <div className="w-8 h-8 border-4 border-t-transparent border-purple-600 rounded-full animate-spin mb-3"></div>
+        <div className="w-8 h-8 border-4 border-t-transparent border-blue-600 rounded-full animate-spin mb-3"></div>
         <p className="text-gray-500 dark:text-gray-400">Chargement des contacts...</p>
       </div>
     );
@@ -120,7 +124,7 @@ export const ContactList = ({
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
           <Input
             placeholder="Rechercher un contact..."
-            className="pl-10 bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-gray-700"
+            className="pl-10 bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -135,20 +139,20 @@ export const ContactList = ({
                 key={contact.id}
                 className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
                   activeContactId === contact.id
-                    ? 'bg-purple-100 dark:bg-purple-900/30'
+                    ? 'bg-blue-100 dark:bg-blue-900/30'
                     : 'hover:bg-gray-100 dark:hover:bg-slate-800'
                 }`}
                 onClick={() => onSelectContact(contact.id)}
               >
                 <div className="relative">
-                  <Avatar className="h-12 w-12">
+                  <Avatar className="h-12 w-12 border-2 border-transparent transition-all">
                     <AvatarFallback className={`${getRoleColor(contact.role)} text-white`}>
                       {contact.username.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   {(contact.unreadCount || 0) > 0 && (
                     <div className="absolute -top-1 -right-1">
-                      <Badge variant="destructive" className="h-5 min-w-5 flex items-center justify-center rounded-full px-1.5 text-xs">
+                      <Badge variant="destructive" className="h-5 min-w-5 flex items-center justify-center rounded-full px-1.5 text-xs animate-pulse">
                         {contact.unreadCount}
                       </Badge>
                     </div>
@@ -181,7 +185,7 @@ export const ContactList = ({
             ))
           ) : (
             <div className="flex flex-col items-center justify-center p-6 text-center">
-              <MessageCircle className="h-10 w-10 text-gray-400 mb-2" />
+              <MessageCircle className="h-10 w-10 text-blue-400 mb-2" />
               <p className="text-gray-500 dark:text-gray-400">Aucun contact trouvé</p>
             </div>
           )}

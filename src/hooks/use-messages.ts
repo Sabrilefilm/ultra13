@@ -246,15 +246,27 @@ export const useMessages = (userId: string) => {
     mutationFn: async () => {
       if (!activeContact || !userId) return;
       
+      // Calculate archive date (1 month from now for normal users, never for founder)
+      const isFounder = localStorage.getItem('userRole') === 'founder';
+      const archiveDate = isFounder ? null : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      
       const { error } = await supabase
         .from('chats')
-        .update({ archived: true })
+        .update({ 
+          archived: true,
+          archive_date: archiveDate 
+        })
         .or(`and(sender_id.eq.${userId},receiver_id.eq.${activeContact}),and(sender_id.eq.${activeContact},receiver_id.eq.${userId})`);
       
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success('Conversation archivée avec succès');
+      const isFounder = localStorage.getItem('userRole') === 'founder';
+      const message = isFounder 
+        ? 'Conversation archivée définitivement'
+        : 'Conversation archivée pour 1 mois';
+        
+      toast.success(message);
       setActiveContact(null);
       queryClient.invalidateQueries({ queryKey: ['messages'] });
       queryClient.invalidateQueries({ queryKey: ['conversations'] });

@@ -63,7 +63,7 @@ export const MessageList = ({ messages, currentUserId, isLoading }: MessageListP
   if (isLoading) {
     return (
       <div className="flex flex-col h-full items-center justify-center p-6">
-        <div className="w-8 h-8 border-4 border-t-transparent border-purple-600 rounded-full animate-spin mb-3"></div>
+        <div className="w-8 h-8 border-4 border-t-transparent border-blue-600 rounded-full animate-spin mb-3"></div>
         <p className="text-gray-500 dark:text-gray-400">Chargement des messages...</p>
       </div>
     );
@@ -72,8 +72,8 @@ export const MessageList = ({ messages, currentUserId, isLoading }: MessageListP
   if (!messages || messages.length === 0) {
     return (
       <div className="flex flex-col h-full items-center justify-center p-6 text-center">
-        <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mb-4">
-          <span className="text-purple-600 dark:text-purple-400 text-2xl">💬</span>
+        <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4">
+          <span className="text-blue-600 dark:text-blue-400 text-2xl">💬</span>
         </div>
         <p className="text-gray-600 dark:text-gray-300 mb-2">Aucun message</p>
         <p className="text-gray-400 dark:text-gray-500 text-sm">Commencez la conversation en envoyant un message</p>
@@ -87,7 +87,7 @@ export const MessageList = ({ messages, currentUserId, isLoading }: MessageListP
         {Object.keys(groupedMessages).map(date => (
           <div key={date} className="space-y-4">
             <div className="flex justify-center">
-              <div className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs px-3 py-1 rounded-full">
+              <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs px-3 py-1 rounded-full">
                 {formatMessageDate(groupedMessages[date][0].created_at)}
               </div>
             </div>
@@ -104,7 +104,7 @@ export const MessageList = ({ messages, currentUserId, isLoading }: MessageListP
                   <div className={`flex ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'} items-end gap-2 max-w-[80%]`}>
                     {!isOwnMessage && (
                       <Avatar className="w-8 h-8">
-                        <AvatarFallback className="bg-purple-200 text-purple-700 text-xs">
+                        <AvatarFallback className="bg-blue-200 text-blue-700 text-xs">
                           {message.sender_id.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -114,7 +114,7 @@ export const MessageList = ({ messages, currentUserId, isLoading }: MessageListP
                       <div 
                         className={`px-4 py-2 rounded-2xl ${
                           isOwnMessage 
-                            ? 'bg-purple-600 text-white rounded-tr-none' 
+                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-tr-none' 
                             : 'bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-gray-200 rounded-tl-none'
                         }`}
                       >
@@ -149,7 +149,7 @@ export const MessageList = ({ messages, currentUserId, isLoading }: MessageListP
                     
                     {isOwnMessage && (
                       <Avatar className="w-8 h-8">
-                        <AvatarFallback className="bg-indigo-200 text-indigo-700 text-xs">
+                        <AvatarFallback className="bg-blue-200 text-blue-700 text-xs">
                           {currentUserId.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>

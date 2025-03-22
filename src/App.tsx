@@ -42,7 +42,6 @@ function App() {
               <Route path="/matches" element={<Matches />} />
               <Route path="/rewards-management" element={<RewardsManagement />} />
               <Route path="/documents" element={<Documents />} />
-              {/* Fix the user-management route */}
               <Route path="/user-management" element={<UserManagement />} />
               <Route path="/users" element={<UserManagement />} />
               <Route path="/agency-members" element={<AgencyMembers />} />

@@ -68,7 +68,7 @@ export const MessageComposer = ({
     <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900">
       {/* File preview */}
       {attachmentPreview && (
-        <div className="mb-2 relative rounded overflow-hidden border border-gray-200 dark:border-gray-700 inline-block">
+        <div className="mb-2 relative rounded overflow-hidden border border-blue-200 dark:border-blue-800 inline-block">
           <img 
             src={attachmentPreview} 
             alt="Attachment" 
@@ -84,14 +84,14 @@ export const MessageComposer = ({
       )}
       
       <div 
-        className={`flex items-end gap-2 ${isDragging ? 'border-2 border-dashed border-purple-500 rounded-lg p-2' : ''}`}
+        className={`flex items-end gap-2 ${isDragging ? 'border-2 border-dashed border-blue-500 rounded-lg p-2' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         <Textarea
           placeholder="Tapez un message..."
-          className="resize-none py-3 min-h-[80px] bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-gray-700"
+          className="resize-none py-3 min-h-[80px] bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500"
           value={message}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -114,7 +114,7 @@ export const MessageComposer = ({
                   type="button"
                   variant="outline"
                   size="icon"
-                  className="h-10 w-10 cursor-pointer"
+                  className="h-10 w-10 cursor-pointer border-blue-200 dark:border-blue-800 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                   disabled={disabled || isSending}
                 >
                   <Paperclip className="h-4 w-4" />
@@ -126,7 +126,7 @@ export const MessageComposer = ({
           <Button 
             onClick={onSend}
             disabled={(!message.trim() && !attachmentPreview) || isSending || disabled}
-            className="h-10 bg-purple-600 hover:bg-purple-700 text-white"
+            className="h-10 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white"
           >
             {isSending ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
