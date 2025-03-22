@@ -10,22 +10,31 @@ export const useUserData = () => {
   const { data: users, isLoading, refetch } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("user_accounts")
-        .select(`
-          *,
-          live_schedules (
-            hours,
-            days
-          )
-        `)
-        .order("role", { ascending: true });
+      try {
+        const { data, error } = await supabase
+          .from("user_accounts")
+          .select(`
+            *,
+            live_schedules (
+              hours,
+              days
+            )
+          `)
+          .order("role", { ascending: true });
 
-      if (error) throw error;
-      return data as (Account & { 
-        live_schedules: { hours: number; days: number }[],
-        agent_id?: string 
-      })[];
+        if (error) throw error;
+        
+        // Make sure data is properly returned
+        console.log("Fetched users:", data?.length || 0);
+        
+        return data as (Account & { 
+          live_schedules: { hours: number; days: number }[],
+          agent_id?: string 
+        })[];
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        throw error;
+      }
     },
   });
 

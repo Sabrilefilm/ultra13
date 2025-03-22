@@ -54,17 +54,64 @@ const UserManagement = () => {
       return;
     }
     
-    if (role !== 'founder' && role !== 'manager') {
+    // Fix: Allow both founder and manager roles to access user management
+    if (role !== 'founder' && role !== 'manager' && role !== 'agent') {
       navigate('/');
     }
   }, [role, navigate, isAuthenticated]);
 
-  if (!isAuthenticated || (role !== 'founder' && role !== 'manager')) {
+  // Only show loading or null if user isn't authenticated yet
+  if (!isAuthenticated) {
     return null;
   }
 
-  // Agents ne peuvent pas voir cette page
+  // Define privileges based on role
   const isFounder = role === 'founder';
+  const isManager = role === 'manager';
+  const isAgent = role === 'agent';
+  
+  // Only founder and manager can fully access this page
+  const hasFullAccess = isFounder || isManager;
+  
+  // Agents have limited access
+  if (isAgent && !hasFullAccess) {
+    return (
+      <SidebarProvider defaultOpen={true}>
+        <div className="min-h-screen flex">
+          <UltraSidebar 
+            username={username || ''}
+            role={role || ''}
+            onLogout={handleLogout}
+            currentPage="users"
+          />
+          
+          <div className="flex-1 p-4">
+            <div className="max-w-6xl mx-auto space-y-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigate("/")}
+                    className="h-10 w-10"
+                  >
+                    <ArrowLeft className="h-5 w-5" />
+                  </Button>
+                  <h1 className="text-2xl font-bold">Gestion des Utilisateurs</h1>
+                </div>
+              </div>
+
+              <div className="bg-card p-8 rounded-lg border shadow text-center">
+                <h2 className="text-xl font-semibold mb-4">Accès limité</h2>
+                <p className="text-muted-foreground mb-6">En tant qu'agent, vous avez un accès limité à cette page.</p>
+                <Button onClick={() => navigate("/")}>Retourner au tableau de bord</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </SidebarProvider>
+    );
+  }
 
   return (
     <SidebarProvider defaultOpen={true}>
