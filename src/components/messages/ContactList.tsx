@@ -1,9 +1,8 @@
-
 import { useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Search, MessageCircle, Circle } from 'lucide-react';
+import { Search, MessageCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format, isToday, isYesterday } from 'date-fns';
 import { fr } from 'date-fns/locale';

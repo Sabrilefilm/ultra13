@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';

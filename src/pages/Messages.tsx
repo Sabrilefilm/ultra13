@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMessages } from '@/hooks/use-messages';
@@ -8,7 +7,6 @@ import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useToast } from '@/hooks/use-toast';
-import { MessageHeader } from '@/components/messages/MessageHeader';
 import { MessageContainer } from '@/components/messages/MessageContainer';
 import { NewMessageDialog } from '@/components/messages/NewMessageDialog';
 
@@ -18,7 +16,6 @@ const Messages = () => {
   const [role, setRole] = useState<string>('');
   const [username, setUsername] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('contacts');
   const [isNewMessageDialogOpen, setIsNewMessageDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string>('');
   const isMobile = useIsMobile();
@@ -165,45 +162,10 @@ const Messages = () => {
       />
       
       <div className="flex-1 flex flex-col">
-        <MessageHeader 
-          username={username}
-          unreadCount={unreadCount || 0}
-          onNewMessage={() => setIsNewMessageDialogOpen(true)}
-          isMobile={isMobile}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          role={role}
-        />
-        
         <MessageContainer 
-          conversations={conversations}
-          messages={messages}
-          activeContact={activeContact}
-          userId={userId}
-          activeTab={activeTab}
-          isMobile={isMobile}
-          onSelectContact={(id) => {
-            console.log("Selecting contact:", id);
-            setActiveContact(id);
-            if (isMobile) {
-              setActiveTab('messages');
-            }
-          }}
-          onNewMessage={() => setIsNewMessageDialogOpen(true)}
-          onArchive={handleArchive}
-          archiving={archiving}
-          loadingConversations={loadingConversations}
-          loadingMessages={loadingMessages}
-          unreadCount={unreadCount || 0}
-          newMessage={newMessage}
-          setNewMessage={setNewMessage}
-          handleSendMessage={handleSendMessage}
-          sendingMessage={sendingMessage}
-          handleAttachment={handleAttachment}
-          attachmentPreview={attachmentPreview}
-          clearAttachment={clearAttachment}
-          allUsers={allUsers}
+          username={username}
           role={role}
+          userId={userId}
         />
       </div>
       
@@ -215,6 +177,8 @@ const Messages = () => {
         onStartConversation={handleStartNewConversation}
         allUsers={allUsers}
         loadingUsers={loadingUsers}
+        currentUserRole={role}
+        currentUserId={userId}
       />
     </div>
   );
