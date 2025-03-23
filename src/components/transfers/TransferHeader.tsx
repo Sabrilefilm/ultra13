@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Plus, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface TransferHeaderProps {
   role: string;
@@ -16,6 +17,7 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
   onExportData 
 }) => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const getRoleButtonClass = () => {
     switch(role) {
@@ -40,7 +42,7 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600">
-          Gestion des Transferts
+          {isMobile ? "Transferts" : "Gestion des Transferts"}
         </h1>
       </div>
       
@@ -48,10 +50,10 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
         {(role === 'creator' || role === 'agent') && (
           <Button
             onClick={onOpenTransferDialog}
-            className={`${getRoleButtonClass()} shadow-md`}
+            className={`${getRoleButtonClass()} shadow-md transition-all duration-200`}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Demande de transfert
+            {isMobile ? "Demande" : "Demande de transfert"}
           </Button>
         )}
         
@@ -62,7 +64,7 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
             className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-950/50"
           >
             <Download className="mr-2 h-4 w-4" />
-            Exporter
+            {isMobile ? "Exporter" : "Exporter les données"}
           </Button>
         )}
       </div>

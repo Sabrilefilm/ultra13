@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Home, Users, Calendar, Briefcase, Award, Bookmark, MessageSquare, Settings, LogOut, ChevronRight, ChevronLeft, FileText, Trophy, X, Pen } from "lucide-react";
+import { Home, Users, Calendar, Briefcase, Award, Bookmark, MessageSquare, Settings, LogOut, ChevronRight, ChevronLeft, FileText, Trophy, X, Pen, BookOpen } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { SidebarLogo } from "./SidebarLogo";
 
@@ -45,7 +44,7 @@ export const UltraSidebar = ({
     }
   }, [isMobile]);
 
-  const sidebarItems: SidebarItem[] = [
+  const navigationItems: SidebarItem[] = [
     {
       icon: Home,
       label: "Tableau de bord",
@@ -124,12 +123,18 @@ export const UltraSidebar = ({
       action: "navigateTo",
       data: "creator-stats",
       roles: ["agent", "manager", "founder", "ambassadeur"]
+    },
+    {
+      label: "Nos Formations",
+      icon: <BookOpen className="h-5 w-5" />,
+      href: "/training",
+      roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
     }
   ];
 
   // Ajoutez un élément spécifique pour les ambassadeurs
   if (role === 'ambassadeur') {
-    sidebarItems.push({
+    navigationItems.push({
       icon: Users,
       label: "Espace Ambassadeur",
       action: "navigateTo",
@@ -139,7 +144,7 @@ export const UltraSidebar = ({
     });
   }
 
-  const filteredItems = sidebarItems.filter(item => item.roles.includes(role));
+  const filteredItems = navigationItems.filter(item => item.roles.includes(role));
 
   const handleItemClick = (action: string, data?: any) => {
     if (onAction) {

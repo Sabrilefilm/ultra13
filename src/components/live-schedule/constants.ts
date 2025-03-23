@@ -26,3 +26,18 @@ export const USER_ROLES = {
   creator: "Créateur",
   ambassador: "Ambassadeur"
 };
+
+// Mois pour affichage des diamants
+export const MONTHS = [
+  "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+  "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+];
+
+// Types de formations
+export const TRAINING_TYPES = {
+  app: "Utilisation de l'application",
+  live: "Techniques de live",
+  content: "Création de contenu",
+  growth: "Croissance de l'audience",
+  monetization: "Monétisation"
+};
