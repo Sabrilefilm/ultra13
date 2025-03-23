@@ -124,9 +124,6 @@ const Messages = () => {
     setActiveContact(selectedUser);
     setIsNewMessageDialogOpen(false);
     setSelectedUser('');
-    if (isMobile) {
-      setActiveTab('messages');
-    }
   };
 
   const handleArchive = () => {
@@ -142,7 +139,6 @@ const Messages = () => {
 
   console.log("Rendering Messages component with state:", {
     userId,
-    activeTab,
     activeContact,
     conversationsCount: conversations?.length || 0,
     messagesCount: messages?.length || 0

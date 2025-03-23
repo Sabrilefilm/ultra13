@@ -431,6 +431,39 @@ export type Database = {
         }
         Relationships: []
       }
+      trainings: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          order_index: number | null
+          title: string
+          type: string
+          updated_at: string | null
+          video_url: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          order_index?: number | null
+          title: string
+          type: string
+          updated_at?: string | null
+          video_url: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          order_index?: number | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+          video_url?: string
+        }
+        Relationships: []
+      }
       transfer_requests: {
         Row: {
           created_at: string | null
@@ -556,7 +589,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_transfer_request: {
+        Args: {
+          creator_id_param: string
+          requested_agent_id_param: string
+          current_agent_id_param: string
+          reason_param: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       user_role: "creator" | "manager" | "founder"

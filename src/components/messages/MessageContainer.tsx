@@ -7,6 +7,8 @@ import { MessageHeader } from './MessageHeader';
 import { NewMessageDialog } from './NewMessageDialog';
 import { useMediaQuery } from '../../hooks/use-media-query';
 import { toast } from 'sonner';
+import { Users } from 'lucide-react';
+import { useMessages } from '@/hooks/use-messages';
 
 interface MessageContainerProps {
   username: string;
@@ -16,36 +18,55 @@ interface MessageContainerProps {
 
 export const MessageContainer = ({ username, role, userId }: MessageContainerProps) => {
   const [activeTab, setActiveTab] = useState('contacts');
-  const [selectedContact, setSelectedContact] = useState<string | null>(null);
   const [isNewMessageOpen, setIsNewMessageOpen] = useState(false);
   const [selectedUserForNewMessage, setSelectedUserForNewMessage] = useState('');
   const [newMessage, setNewMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   
   const isMobile = !useMediaQuery('(min-width: 768px)');
   
-  // These would typically come from your hook, we'll use dummy data for now
-  const contacts = [];
-  const messages = {};
-  const unreadCounts = {};
-  const allUsers = [];
-  const loadingUsers = false;
-  const error = null;
+  const {
+    conversations,
+    messages,
+    activeContact,
+    setActiveContact,
+    newMessage: messageText,
+    setNewMessage: setMessageText,
+    sendMessage,
+    sendingMessage,
+    loadingConversations,
+    loadingMessages,
+    unreadCount,
+    allUsers,
+    loadingUsers,
+    archiveConversation,
+    archiving,
+    handleAttachment,
+    attachmentPreview,
+    clearAttachment
+  } = useMessages(userId);
   
   useEffect(() => {
-    if (error) {
-      toast.error("Erreur lors du chargement des messages: " + error);
+    // If active contact is selected, switch to messages tab on mobile
+    if (activeContact && isMobile) {
+      setActiveTab('messages');
     }
-  }, [error]);
-  
-  const totalUnreadCount = Object.values(unreadCounts).reduce((a, b) => (a as number) + (b as number), 0);
+  }, [activeContact, isMobile]);
   
   const handleContactSelect = (contactId: string) => {
-    setSelectedContact(contactId);
+    setActiveContact(contactId);
     if (isMobile) {
       setActiveTab('messages');
     }
-    // Mark as read would be implemented in your hook
+  };
+  
+  const handleSendMessage = () => {
+    if ((messageText.trim() || attachmentPreview) && activeContact) {
+      sendMessage();
+    }
+  };
+  
+  const handleNewMessageClick = () => {
+    setIsNewMessageOpen(true);
   };
   
   const handleStartNewConversation = () => {
@@ -73,16 +94,15 @@ export const MessageContainer = ({ username, role, userId }: MessageContainerPro
       }
       
       // If this is an existing contact, select it
-      const existingContact = contacts.find(contact => contact.id === selectedUserForNewMessage);
+      const existingContact = conversations.find(contact => contact.id === selectedUserForNewMessage);
       if (existingContact) {
-        setSelectedContact(existingContact.id);
+        setActiveContact(existingContact.id);
         if (isMobile) {
           setActiveTab('messages');
         }
       } else {
-        // Initialize conversation with a first message
-        handleSendMessage("Bonjour, j'aimerais discuter avec vous.");
-        setSelectedContact(selectedUserForNewMessage);
+        // Initialize conversation
+        setActiveContact(selectedUserForNewMessage);
         if (isMobile) {
           setActiveTab('messages');
         }
@@ -90,23 +110,12 @@ export const MessageContainer = ({ username, role, userId }: MessageContainerPro
       setIsNewMessageOpen(false);
     }
   };
-  
-  const handleSendMessage = (message: string) => {
-    if (selectedContact) {
-      // Send message would be implemented in your hook
-      console.log("Sending message to", selectedContact, ":", message);
-    }
-  };
-  
-  const handleNewMessageClick = () => {
-    setIsNewMessageOpen(true);
-  };
 
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-slate-950">
       <MessageHeader 
         username={username}
-        unreadCount={totalUnreadCount as number}
+        unreadCount={unreadCount}
         onNewMessage={handleNewMessageClick}
         isMobile={isMobile}
         activeTab={activeTab}
@@ -118,29 +127,32 @@ export const MessageContainer = ({ username, role, userId }: MessageContainerPro
         {(!isMobile || activeTab === 'contacts') && (
           <div className={`${isMobile ? 'w-full' : 'w-1/3 border-r'} border-gray-200 dark:border-gray-800`}>
             <ContactList 
-              contacts={contacts} 
-              activeContactId={selectedContact} 
+              contacts={conversations}
+              activeContactId={activeContact} 
               onSelectContact={handleContactSelect} 
-              isLoading={isLoading}
-              unreadMessages={totalUnreadCount as number}
+              isLoading={loadingConversations}
+              unreadCounts={unreadCount}
             />
           </div>
         )}
         
         {(!isMobile || activeTab === 'messages') && (
           <div className={`${isMobile ? 'w-full' : 'w-2/3'} flex flex-col h-full`}>
-            {selectedContact ? (
+            {activeContact ? (
               <>
                 <MessageList 
-                  messages={messages[selectedContact] || []} 
+                  messages={messages} 
                   currentUserId={userId}
-                  isLoading={isLoading}
+                  isLoading={loadingMessages}
                 />
                 <MessageComposer 
-                  message={newMessage}
-                  onChange={setNewMessage}
-                  onSend={() => handleSendMessage(newMessage)}
-                  isSending={false}
+                  message={messageText}
+                  onChange={setMessageText}
+                  onSend={handleSendMessage}
+                  isSending={sendingMessage}
+                  onAttachFile={handleAttachment}
+                  attachmentPreview={attachmentPreview}
+                  onClearAttachment={clearAttachment}
                 />
               </>
             ) : (

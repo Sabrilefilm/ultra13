@@ -124,9 +124,10 @@ export const UltraSidebar = ({
       roles: ["agent", "manager", "founder", "ambassadeur"]
     },
     {
+      icon: BookOpen,
       label: "Nos Formations",
-      icon: <BookOpen className="h-5 w-5" />,
-      href: "/training",
+      action: "navigateTo",
+      data: "training",
       roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
     }
   ];
