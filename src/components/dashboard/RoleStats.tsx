@@ -1,4 +1,3 @@
-
 import { Users, Diamond, Clock, Gift, Calendar, AlertTriangle, MessageCircle } from "lucide-react";
 import { StatsCard } from "@/components/StatsCard";
 import { useQuery } from "@tanstack/react-query";
@@ -27,7 +26,6 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
   const [monthProgress, setMonthProgress] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
 
-  // Calculate the day of month and month progress on component mount
   useEffect(() => {
     const now = new Date();
     const currentDay = now.getDate();
@@ -38,7 +36,6 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
     setMonthProgress(Math.floor((currentDay / lastDay) * 100));
   }, []);
 
-  // Requête pour récupérer les horaires de live
   const { data: liveSchedule, isError: isLiveScheduleError } = useQuery({
     queryKey: ["live-schedule", userId],
     queryFn: async () => {
@@ -105,7 +102,6 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
     enabled: role === "creator" && !!userId
   });
 
-  // Nouvelle requête pour récupérer les diamants reçus
   const { data: rewardsData, isError: isRewardsError } = useQuery({
     queryKey: ["creator-rewards", userId],
     queryFn: async () => {
@@ -124,7 +120,6 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
 
         console.log("Rewards found:", rewards);
         
-        // Calculer le total des diamants reçus
         const totalDiamonds = rewards?.reduce((sum, reward) => sum + reward.diamonds_count, 0) || 0;
         return totalDiamonds;
       } catch (error) {
@@ -136,14 +131,12 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
     enabled: role === "creator" && !!userId
   });
 
-  // Show warning notification based on progress
   useEffect(() => {
     if (role === 'creator' && liveSchedule) {
       const monthlyHours = liveSchedule.hours * liveSchedule.days;
       const requiredHours = 15;
       const progressPercentage = (monthlyHours / requiredHours) * 100;
       
-      // If we're in the 2nd half of the month and progress is below 50%, show warning
       if (monthProgress > 50 && progressPercentage < 50) {
         setShowWarning(true);
         toastHook({
@@ -192,48 +185,38 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
   }
 
   if (role === 'creator') {
-    // Calculer le nombre total d'heures de live par mois
     const monthlyHours = liveSchedule ? (liveSchedule.hours * liveSchedule.days) : 0;
-    const requiredHours = 15; // Objectif mensuel requis
-    const requiredDays = 7; // Jours requis par mois
+    const requiredHours = 15;
+    const requiredDays = 7;
     
-    // Déterminer si l'objectif est atteint
     const hoursCompleted = monthlyHours >= requiredHours;
     const daysCompleted = (liveSchedule?.days || 0) >= requiredDays;
     
-    // Déterminez la couleur en fonction de la progression et du moment du mois
     const getProgressColor = () => {
       const progressPercentage = (monthlyHours / requiredHours) * 100;
       
       if (hoursCompleted) return "text-green-500";
       
-      // Début du mois (premiers 10 jours) - toujours vert
       if (monthProgress < 33) return "text-green-500";
       
-      // Milieu du mois (jours 11-20) - orange si en retard
       if (monthProgress < 66) {
         return progressPercentage >= monthProgress ? "text-green-500" : "text-orange-500";
       }
       
-      // Fin du mois (jours 21+) - rouge si en retard
       return progressPercentage >= monthProgress ? "text-green-500" : "text-red-500";
     };
     
-    // Déterminez la couleur en fonction de la progression et du moment du mois pour les jours
     const getDaysProgressColor = () => {
       const progressPercentage = ((liveSchedule?.days || 0) / requiredDays) * 100;
       
       if (daysCompleted) return "text-green-500";
       
-      // Début du mois (premiers 10 jours) - toujours vert
       if (monthProgress < 33) return "text-green-500";
       
-      // Milieu du mois (jours 11-20) - orange si en retard
       if (monthProgress < 66) {
         return progressPercentage >= monthProgress ? "text-green-500" : "text-orange-500";
       }
       
-      // Fin du mois (jours 21+) - rouge si en retard
       return progressPercentage >= monthProgress ? "text-green-500" : "text-red-500";
     };
     
@@ -258,6 +241,14 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
             value={`${rewardsData || 0}`}
             icon={<Diamond className="w-6 h-6 text-primary" />}
           />
+        </div>
+        
+        <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4 flex items-center gap-3">
+          <Clock className="h-6 w-6 text-blue-400 animate-pulse" />
+          <p className="text-blue-400/80 text-sm">
+            Les horaires et jours de live sont mis à jour toutes les 24-48 heures. 
+            Seul le fondateur peut modifier ces valeurs.
+          </p>
         </div>
         
         {showWarning && (

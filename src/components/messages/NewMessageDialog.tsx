@@ -15,6 +15,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 interface User {
   id: string;
@@ -48,7 +49,7 @@ export const NewMessageDialog = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 border-blue-200 dark:border-blue-800/30">
         <DialogHeader>
-          <DialogTitle className="text-blue-600 dark:text-blue-400">Nouveau message</DialogTitle>
+          <DialogTitle className="text-blue-600 dark:text-blue-400 animate-pulse">Nouveau message</DialogTitle>
           <DialogDescription className="text-gray-500 dark:text-gray-400">
             Sélectionnez un utilisateur pour commencer une nouvelle conversation.
           </DialogDescription>
@@ -59,16 +60,16 @@ export const NewMessageDialog = ({
             <SelectTrigger className="border-blue-200 dark:border-blue-700">
               <SelectValue placeholder="Sélectionner un utilisateur" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-60">
               {loadingUsers ? (
                 <div className="flex justify-center p-2">
-                  <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin border-blue-500"></div>
+                  <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
                 </div>
-              ) : allUsers?.length === 0 ? (
+              ) : !allUsers || allUsers.length === 0 ? (
                 <div className="p-2 text-sm text-gray-500">Aucun utilisateur disponible</div>
               ) : (
-                allUsers?.map(user => (
-                  <SelectItem key={user.id} value={user.id}>
+                allUsers.map(user => (
+                  <SelectItem key={user.id} value={user.id} className="py-2">
                     {user.username} ({user.role})
                   </SelectItem>
                 ))
@@ -83,7 +84,8 @@ export const NewMessageDialog = ({
           </Button>
           <Button 
             onClick={onStartConversation}
-            className={blueButtonClass}
+            disabled={!selectedUser}
+            className={blueButtonClass + " animate-pulse"}
           >
             Commencer
           </Button>

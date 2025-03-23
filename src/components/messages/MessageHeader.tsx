@@ -1,8 +1,9 @@
 
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Plus } from 'lucide-react';
+import { ArrowLeft, Plus, Users, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface MessageHeaderProps {
   username: string;
@@ -75,7 +76,3 @@ export const MessageHeader = ({
     </div>
   );
 };
-
-// Import missing components
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, MessageSquare } from 'lucide-react';
