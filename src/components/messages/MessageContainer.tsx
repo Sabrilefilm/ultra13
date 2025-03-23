@@ -1,10 +1,9 @@
-
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageList } from '@/components/messages/MessageList';
 import { ContactList } from '@/components/messages/ContactList';
 import { MessageComposer } from '@/components/messages/MessageComposer';
-import { Plus, Archive, MessageSquare } from 'lucide-react';
+import { Plus, Archive, MessageSquare, Users } from 'lucide-react';
 
 interface Contact {
   id: string;
@@ -72,10 +71,8 @@ export const MessageContainer = ({
   clearAttachment,
   allUsers
 }: MessageContainerProps) => {
-  // Classes for animations and blue colors
   const blueButtonClass = "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white";
   
-  // Helper to find user details
   const getUserById = (id: string) => {
     return allUsers?.find(user => user.id === id);
   };
