@@ -1,198 +1,167 @@
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { MessageList } from '@/components/messages/MessageList';
-import { ContactList } from '@/components/messages/ContactList';
-import { MessageComposer } from '@/components/messages/MessageComposer';
-import { Plus, Archive, MessageSquare, Users } from 'lucide-react';
-
-interface Contact {
-  id: string;
-  username: string;
-  role: string;
-  unreadCount?: number;
-  lastMessage?: string;
-  lastMessageTime?: string;
-}
-
-interface Message {
-  id: string;
-  sender_id: string;
-  receiver_id: string;
-  message: string;
-  created_at: string;
-  read: boolean;
-  attachment_url?: string;
-}
+import React, { useState, useEffect } from 'react';
+import { ContactList } from './ContactList';
+import { MessageList } from './MessageList';
+import { MessageComposer } from './MessageComposer';
+import { MessageHeader } from './MessageHeader';
+import { NewMessageDialog } from './NewMessageDialog';
+import { useMediaQuery } from '../../hooks/use-media-query';
+import { useMessages } from '../../hooks/use-messages';
+import { Users } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface MessageContainerProps {
-  conversations: Contact[] | null;
-  messages: Message[] | null;
-  activeContact: string | null;
-  userId: string;
-  activeTab: string;
-  isMobile: boolean;
-  onSelectContact: (id: string) => void;
-  onNewMessage: () => void;
-  onArchive: () => void;
-  archiving: boolean;
-  loadingConversations: boolean;
-  loadingMessages: boolean;
-  unreadCount: number;
-  newMessage: string;
-  setNewMessage: (message: string) => void;
-  handleSendMessage: () => void;
-  sendingMessage: boolean;
-  handleAttachment: (file: File) => void;
-  attachmentPreview: string | null;
-  clearAttachment: () => void;
-  allUsers?: any[];
+  username: string;
   role: string;
+  userId: string;
 }
 
-export const MessageContainer = ({
-  conversations,
-  messages,
-  activeContact,
-  userId,
-  activeTab,
-  isMobile,
-  onSelectContact,
-  onNewMessage,
-  onArchive,
-  archiving,
-  loadingConversations,
-  loadingMessages,
-  unreadCount,
-  newMessage,
-  setNewMessage,
-  handleSendMessage,
-  sendingMessage,
-  handleAttachment,
-  attachmentPreview,
-  clearAttachment,
-  allUsers,
-  role
-}: MessageContainerProps) => {
-  const blueButtonClass = "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white";
+export const MessageContainer = ({ username, role, userId }: MessageContainerProps) => {
+  const [activeTab, setActiveTab] = useState('contacts');
+  const [selectedContact, setSelectedContact] = useState<string | null>(null);
+  const [isNewMessageOpen, setIsNewMessageOpen] = useState(false);
+  const [selectedUserForNewMessage, setSelectedUserForNewMessage] = useState('');
   
-  const getUserById = (id: string) => {
-    return allUsers?.find(user => user.id === id);
-  };
+  const isMobile = !useMediaQuery('(min-width: 768px)');
+  
+  const { 
+    contacts, 
+    messages, 
+    sendMessage, 
+    markAsRead, 
+    unreadCounts,
+    allUsers,
+    loadingUsers,
+    error
+  } = useMessages(userId);
 
-  // Vérifie si l'utilisateur est le fondateur ou a le droit d'envoyer un message à ce contact
-  const canSendToContact = (contactId: string) => {
-    if (role === 'founder') return true; // Le fondateur peut envoyer à tout le monde
-    
-    // Un agent peut envoyer à ses créateurs ou au fondateur
-    if (role === 'agent') {
-      const contact = getUserById(contactId);
-      return contact?.role === 'creator' || contact?.role === 'founder';
+  useEffect(() => {
+    if (error) {
+      toast.error("Erreur lors du chargement des messages: " + error);
+    }
+  }, [error]);
+  
+  const totalUnreadCount = Object.values(unreadCounts).reduce((acc, count) => acc + count, 0);
+  
+  const handleContactSelect = (contactId: string) => {
+    setSelectedContact(contactId);
+    if (isMobile) {
+      setActiveTab('messages');
+    }
+    markAsRead(contactId);
+  };
+  
+  const handleStartNewConversation = () => {
+    if (!selectedUserForNewMessage) {
+      toast.error("Veuillez sélectionner un utilisateur.");
+      return;
     }
     
-    // Un créateur peut envoyer à son agent ou au fondateur
-    if (role === 'creator') {
-      const contact = getUserById(contactId);
-      return contact?.role === 'agent' || contact?.role === 'founder';
-    }
+    // Vérifier les autorisations basées sur le rôle
+    const selectedUser = allUsers?.find(user => user.id === selectedUserForNewMessage);
     
-    return false;
+    if (selectedUser) {
+      if (role === 'creator') {
+        // Le créateur ne peut contacter que le fondateur ou son agent assigné
+        if (selectedUser.role !== 'founder' && selectedUser.role !== 'agent') {
+          toast.error("En tant que créateur, vous ne pouvez contacter que le fondateur ou votre agent.");
+          return;
+        }
+      } else if (role === 'agent') {
+        // L'agent ne peut contacter que les créateurs, managers ou fondateurs
+        if (!['creator', 'manager', 'founder'].includes(selectedUser.role)) {
+          toast.error("En tant qu'agent, vous ne pouvez contacter que les créateurs, managers ou fondateurs.");
+          return;
+        }
+      }
+      
+      // Si c'est un contact existant, sélectionner le contact
+      const existingContact = contacts.find(contact => contact.id === selectedUserForNewMessage);
+      if (existingContact) {
+        setSelectedContact(existingContact.id);
+        if (isMobile) {
+          setActiveTab('messages');
+        }
+      } else {
+        // Initialiser la conversation en envoyant un premier message
+        sendMessage(selectedUserForNewMessage, "Bonjour, j'aimerais discuter avec vous.");
+        setSelectedContact(selectedUserForNewMessage);
+        if (isMobile) {
+          setActiveTab('messages');
+        }
+      }
+      setIsNewMessageOpen(false);
+    }
+  };
+  
+  const handleSendMessage = (message: string) => {
+    if (selectedContact) {
+      sendMessage(selectedContact, message);
+    }
+  };
+  
+  const handleNewMessageClick = () => {
+    setIsNewMessageOpen(true);
   };
 
   return (
-    <div className="flex-1 p-4 overflow-hidden">
-      <Card className="h-full overflow-hidden shadow-lg border-blue-100 dark:border-blue-900/30">
-        <CardContent className="p-0 h-full">
-          <div className="md:flex h-full">
-            <div className={`w-full md:w-1/3 md:border-r border-gray-200 dark:border-gray-800 h-full ${activeTab !== 'contacts' ? 'hidden md:block' : ''}`}>
-              <div className="flex justify-between items-center p-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-                <h2 className="font-medium text-gray-900 dark:text-gray-100 flex items-center">
-                  <Users className="h-4 w-4 mr-2 text-blue-500" />
-                  Contacts
-                </h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onNewMessage}
-                  className="md:hidden text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              <ContactList
-                contacts={conversations || []}
-                activeContactId={activeContact}
-                onSelectContact={onSelectContact}
-                isLoading={loadingConversations}
-                unreadMessages={unreadCount}
-              />
-            </div>
-            
-            <div className={`flex flex-col w-full md:w-2/3 h-full ${activeTab !== 'messages' ? 'hidden md:block' : ''}`}>
-              {activeContact ? (
-                <>
-                  <div className="bg-white dark:bg-slate-900 p-3 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
-                    <div className="flex items-center">
-                      <span className="font-medium text-blue-600 dark:text-blue-400">
-                        {conversations?.find(c => c.id === activeContact)?.username || allUsers?.find(u => u.id === activeContact)?.username || 'Conversation'}
-                      </span>
-                      <span className="ml-2 text-sm text-gray-500">
-                        ({conversations?.find(c => c.id === activeContact)?.role || allUsers?.find(u => u.id === activeContact)?.role || ''})
-                      </span>
-                    </div>
-                    
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={onArchive}
-                      disabled={archiving}
-                      className="text-gray-500 hover:text-red-500"
-                    >
-                      <Archive className="h-4 w-4 mr-1" />
-                      {isMobile ? '' : 'Archiver'}
-                    </Button>
-                  </div>
-                  
-                  <div className="flex-1 overflow-hidden bg-gray-50 dark:bg-gray-900/30">
-                    <MessageList
-                      messages={messages || []}
-                      currentUserId={userId}
-                      isLoading={loadingMessages}
-                    />
-                  </div>
-                  
-                  <MessageComposer
-                    message={newMessage}
-                    onChange={setNewMessage}
-                    onSend={handleSendMessage}
-                    isSending={sendingMessage}
-                    onAttachFile={handleAttachment}
-                    attachmentPreview={attachmentPreview}
-                    onClearAttachment={clearAttachment}
-                    disabled={!canSendToContact(activeContact)}
-                  />
-                </>
-              ) : (
-                <div className="flex flex-col h-full items-center justify-center p-6 text-center">
-                  <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4 animate-pulse">
-                    <MessageSquare className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-300 mb-2">Sélectionnez une conversation</p>
-                  <p className="text-gray-400 dark:text-gray-500 text-sm">Choisissez un contact pour commencer à discuter</p>
-                  
-                  <Button
-                    className={`mt-4 ${blueButtonClass}`}
-                    onClick={onNewMessage}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nouveau message
-                  </Button>
-                </div>
-              )}
-            </div>
+    <div className="h-screen flex flex-col bg-white dark:bg-slate-950">
+      <MessageHeader 
+        username={username}
+        unreadCount={totalUnreadCount}
+        onNewMessage={handleNewMessageClick}
+        isMobile={isMobile}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        role={role}
+      />
+      
+      <div className="flex flex-1 h-[calc(100vh-64px)] overflow-hidden">
+        {(!isMobile || activeTab === 'contacts') && (
+          <div className={`${isMobile ? 'w-full' : 'w-1/3 border-r'} border-gray-200 dark:border-gray-800`}>
+            <ContactList 
+              contacts={contacts} 
+              selectedContactId={selectedContact} 
+              onContactSelect={handleContactSelect} 
+              unreadCounts={unreadCounts}
+            />
           </div>
-        </CardContent>
-      </Card>
+        )}
+        
+        {(!isMobile || activeTab === 'messages') && (
+          <div className={`${isMobile ? 'w-full' : 'w-2/3'} flex flex-col h-full`}>
+            {selectedContact ? (
+              <>
+                <MessageList 
+                  messages={messages[selectedContact] || []} 
+                  currentUserId={userId}
+                />
+                <MessageComposer onSendMessage={handleSendMessage} />
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full p-4 text-center text-gray-500 dark:text-gray-400">
+                <Users className="h-16 w-16 mb-4 text-gray-300 dark:text-gray-600" />
+                <h3 className="text-xl font-semibold mb-2">Aucune conversation sélectionnée</h3>
+                <p className="max-w-md">
+                  Sélectionnez une conversation existante dans la liste ou créez une nouvelle conversation.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      
+      <NewMessageDialog 
+        isOpen={isNewMessageOpen}
+        onOpenChange={setIsNewMessageOpen}
+        selectedUser={selectedUserForNewMessage}
+        onUserChange={setSelectedUserForNewMessage}
+        onStartConversation={handleStartNewConversation}
+        allUsers={allUsers}
+        loadingUsers={loadingUsers}
+        currentUserRole={role}
+        currentUserId={userId}
+      />
     </div>
   );
 };

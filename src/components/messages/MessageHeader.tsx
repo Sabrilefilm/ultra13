@@ -26,11 +26,24 @@ export const MessageHeader = ({
 }: MessageHeaderProps) => {
   const navigate = useNavigate();
   
-  // Classes pour les animations et les couleurs bleues
-  const animatedBlueButtonClass = "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white";
+  // Classes pour les animations et les couleurs selon le rôle
+  const getRoleButtonClass = () => {
+    switch(role) {
+      case 'founder':
+        return "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white";
+      case 'manager':
+        return "bg-gradient-to-r from-amber-500 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white";
+      case 'agent':
+        return "bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 text-white";
+      case 'creator':
+        return "bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white";
+      default:
+        return "bg-gray-500 hover:bg-gray-600 text-white";
+    }
+  };
   
   return (
-    <div className="bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-gray-800 p-4 flex items-center justify-between shadow-sm">
+    <div className="bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-gray-800 p-4 flex items-center justify-between shadow-md">
       <div className="flex items-center space-x-2">
         <Button
           variant="ghost"
@@ -51,23 +64,25 @@ export const MessageHeader = ({
       </div>
       
       <div className="flex items-center gap-2">
-        <Button
-          className={`hidden md:flex items-center gap-1 ${role === 'founder' ? animatedBlueButtonClass : ''}`}
-          onClick={onNewMessage}
-          size="sm"
-        >
-          <Plus className="h-4 w-4" />
-          Nouveau message
-        </Button>
+        {(role === 'founder' || role === 'manager' || role === 'agent') && (
+          <Button
+            className={`hidden md:flex items-center gap-1 ${getRoleButtonClass()}`}
+            onClick={onNewMessage}
+            size="sm"
+          >
+            <Plus className="h-4 w-4" />
+            Nouveau message
+          </Button>
+        )}
         
         {isMobile && (
           <div className="md:hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList>
-                <TabsTrigger value="contacts">
+              <TabsList className="bg-gray-100 dark:bg-gray-800">
+                <TabsTrigger value="contacts" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white">
                   <Users className="h-5 w-5" />
                 </TabsTrigger>
-                <TabsTrigger value="messages">
+                <TabsTrigger value="messages" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white">
                   <MessageSquare className="h-5 w-5" />
                 </TabsTrigger>
               </TabsList>
