@@ -12,6 +12,7 @@ interface MessageHeaderProps {
   isMobile: boolean;
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  role: string;
 }
 
 export const MessageHeader = ({
@@ -20,12 +21,13 @@ export const MessageHeader = ({
   onNewMessage,
   isMobile,
   activeTab,
-  setActiveTab
+  setActiveTab,
+  role
 }: MessageHeaderProps) => {
   const navigate = useNavigate();
   
-  // Classes for animations and blue colors
-  const animatedBlueButtonClass = "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white animate-pulse";
+  // Classes pour les animations et les couleurs bleues
+  const animatedBlueButtonClass = "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white";
   
   return (
     <div className="bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-gray-800 p-4 flex items-center justify-between shadow-sm">
@@ -38,7 +40,7 @@ export const MessageHeader = ({
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600 animate-pulse">
+        <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">
           Messagerie
         </h1>
         {unreadCount > 0 && (
@@ -50,7 +52,7 @@ export const MessageHeader = ({
       
       <div className="flex items-center gap-2">
         <Button
-          className={`hidden md:flex items-center gap-1 ${animatedBlueButtonClass}`}
+          className={`hidden md:flex items-center gap-1 ${role === 'founder' ? animatedBlueButtonClass : ''}`}
           onClick={onNewMessage}
           size="sm"
         >

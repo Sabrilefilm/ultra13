@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMessages } from '@/hooks/use-messages';
@@ -171,6 +172,7 @@ const Messages = () => {
           isMobile={isMobile}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          role={role}
         />
         
         <MessageContainer 
@@ -201,6 +203,7 @@ const Messages = () => {
           attachmentPreview={attachmentPreview}
           clearAttachment={clearAttachment}
           allUsers={allUsers}
+          role={role}
         />
       </div>
       

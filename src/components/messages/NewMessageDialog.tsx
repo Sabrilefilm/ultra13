@@ -1,21 +1,25 @@
 
+import { useState, useMemo } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription,
-  DialogFooter
-} from '@/components/ui/dialog';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, MessageSquare } from 'lucide-react';
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface User {
   id: string;
@@ -40,42 +44,136 @@ export const NewMessageDialog = ({
   onUserChange,
   onStartConversation,
   allUsers,
-  loadingUsers
+  loadingUsers,
 }: NewMessageDialogProps) => {
-  // Classes for animations and blue colors
-  const blueButtonClass = "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white";
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterRole, setFilterRole] = useState<string>('');
   
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'founder':
+        return 'bg-red-500';
+      case 'manager':
+        return 'bg-amber-500';
+      case 'agent':
+        return 'bg-emerald-500';
+      case 'creator':
+        return 'bg-blue-500';
+      case 'ambassadeur':
+        return 'bg-purple-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+
+  const getRoleName = (role: string) => {
+    switch (role) {
+      case 'founder':
+        return 'Fondateur';
+      case 'manager':
+        return 'Manager';
+      case 'agent':
+        return 'Agent';
+      case 'creator':
+        return 'Créateur';
+      case 'ambassadeur':
+        return 'Ambassadeur';
+      default:
+        return role;
+    }
+  };
+
+  const filteredUsers = useMemo(() => {
+    if (!allUsers) return [];
+    
+    return allUsers.filter(user => {
+      const matchesSearch = user.username.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesRole = !filterRole || user.role === filterRole;
+      return matchesSearch && matchesRole;
+    });
+  }, [allUsers, searchQuery, filterRole]);
+
+  const availableRoles = useMemo(() => {
+    if (!allUsers) return [];
+    
+    const roles = new Set<string>();
+    allUsers.forEach(user => roles.add(user.role));
+    return Array.from(roles);
+  }, [allUsers]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 border-blue-200 dark:border-blue-800/30">
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-blue-600 dark:text-blue-400 animate-pulse">Nouveau message</DialogTitle>
-          <DialogDescription className="text-gray-500 dark:text-gray-400">
-            Sélectionnez un utilisateur pour commencer une nouvelle conversation.
-          </DialogDescription>
+          <DialogTitle>Nouveau message</DialogTitle>
         </DialogHeader>
         
-        <div className="py-4">
-          <Select value={selectedUser} onValueChange={onUserChange}>
-            <SelectTrigger className="border-blue-200 dark:border-blue-700">
-              <SelectValue placeholder="Sélectionner un utilisateur" />
-            </SelectTrigger>
-            <SelectContent className="max-h-60">
-              {loadingUsers ? (
-                <div className="flex justify-center p-2">
-                  <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
-                </div>
-              ) : !allUsers || allUsers.length === 0 ? (
-                <div className="p-2 text-sm text-gray-500">Aucun utilisateur disponible</div>
-              ) : (
-                allUsers.map(user => (
-                  <SelectItem key={user.id} value={user.id} className="py-2">
-                    {user.username} ({user.role})
+        <div className="space-y-4 py-2">
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+                <Input
+                  placeholder="Rechercher un utilisateur..."
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+            
+            <Select value={filterRole} onValueChange={setFilterRole}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Tous les rôles" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Tous les rôles</SelectItem>
+                {availableRoles.map(role => (
+                  <SelectItem key={role} value={role}>
+                    {getRoleName(role)}
                   </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {loadingUsers ? (
+            <div className="flex justify-center py-8">
+              <div className="w-8 h-8 border-4 border-t-transparent border-blue-600 rounded-full animate-spin"></div>
+            </div>
+          ) : filteredUsers.length > 0 ? (
+            <ScrollArea className="h-[300px] border rounded-md p-2">
+              {filteredUsers.map(user => (
+                <div
+                  key={user.id}
+                  className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                    selectedUser === user.id
+                      ? 'bg-blue-100 dark:bg-blue-900/30'
+                      : 'hover:bg-gray-100 dark:hover:bg-slate-800'
+                  }`}
+                  onClick={() => onUserChange(user.id)}
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback className={`${getRoleColor(user.role)} text-white`}>
+                      {user.username.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div>
+                    <p className="font-medium">{user.username}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {getRoleName(user.role)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </ScrollArea>
+          ) : (
+            <div className="flex flex-col items-center justify-center p-6 text-center h-[300px] border rounded-md">
+              <MessageSquare className="h-10 w-10 text-blue-400 mb-2" />
+              <p className="text-gray-500 dark:text-gray-400">Aucun utilisateur trouvé</p>
+            </div>
+          )}
         </div>
         
         <DialogFooter>
@@ -83,11 +181,11 @@ export const NewMessageDialog = ({
             Annuler
           </Button>
           <Button 
-            onClick={onStartConversation}
-            disabled={!selectedUser}
-            className={blueButtonClass + " animate-pulse"}
+            onClick={onStartConversation} 
+            disabled={!selectedUser || loadingUsers}
+            className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800"
           >
-            Commencer
+            Démarrer la conversation
           </Button>
         </DialogFooter>
       </DialogContent>

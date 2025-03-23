@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageList } from '@/components/messages/MessageList';
@@ -46,6 +47,7 @@ interface MessageContainerProps {
   attachmentPreview: string | null;
   clearAttachment: () => void;
   allUsers?: any[];
+  role: string;
 }
 
 export const MessageContainer = ({
@@ -69,12 +71,32 @@ export const MessageContainer = ({
   handleAttachment,
   attachmentPreview,
   clearAttachment,
-  allUsers
+  allUsers,
+  role
 }: MessageContainerProps) => {
   const blueButtonClass = "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white";
   
   const getUserById = (id: string) => {
     return allUsers?.find(user => user.id === id);
+  };
+
+  // Vérifie si l'utilisateur est le fondateur ou a le droit d'envoyer un message à ce contact
+  const canSendToContact = (contactId: string) => {
+    if (role === 'founder') return true; // Le fondateur peut envoyer à tout le monde
+    
+    // Un agent peut envoyer à ses créateurs ou au fondateur
+    if (role === 'agent') {
+      const contact = getUserById(contactId);
+      return contact?.role === 'creator' || contact?.role === 'founder';
+    }
+    
+    // Un créateur peut envoyer à son agent ou au fondateur
+    if (role === 'creator') {
+      const contact = getUserById(contactId);
+      return contact?.role === 'agent' || contact?.role === 'founder';
+    }
+    
+    return false;
   };
 
   return (
@@ -147,6 +169,7 @@ export const MessageContainer = ({
                     onAttachFile={handleAttachment}
                     attachmentPreview={attachmentPreview}
                     onClearAttachment={clearAttachment}
+                    disabled={!canSendToContact(activeContact)}
                   />
                 </>
               ) : (
