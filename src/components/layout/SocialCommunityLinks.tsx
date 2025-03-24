@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
@@ -71,8 +72,8 @@ export const SocialCommunityLinks = ({ className = "" }: SocialCommunityProps) =
     }
   };
 
-  // Hover animation variants - fixed the type error by specifying "loop" as the repeatType
-  const emojiVariants = {
+  // Hover animation variants - Fixed the type error by explicitly typing repeatType
+  const emojiVariants: Variants = {
     idle: { scale: 1, rotate: 0 },
     hover: { 
       scale: 1.3, 
@@ -80,7 +81,7 @@ export const SocialCommunityLinks = ({ className = "" }: SocialCommunityProps) =
       transition: { 
         duration: 0.5, 
         repeat: Infinity, 
-        repeatType: "loop" 
+        repeatType: "loop" as const
       } 
     }
   };
