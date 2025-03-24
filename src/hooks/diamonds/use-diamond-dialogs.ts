@@ -32,12 +32,44 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
     try {
       setIsEditing(true);
       
-      const { error } = await supabase
+      // Vérifiez d'abord si le profil existe
+      const { data: profileExists, error: checkError } = await supabase
         .from('profiles')
-        .update({ diamonds_goal: newDiamondGoal })
-        .eq('id', selectedCreator.id);
+        .select('id')
+        .eq('id', selectedCreator.id)
+        .maybeSingle();
         
-      if (error) throw error;
+      if (checkError) {
+        throw checkError;
+      }
+      
+      if (profileExists) {
+        // Si le profil existe, mise à jour
+        const { error } = await supabase
+          .from('profiles')
+          .update({ 
+            diamonds_goal: newDiamondGoal,
+            updated_at: new Date()
+          })
+          .eq('id', selectedCreator.id);
+          
+        if (error) throw error;
+      } else {
+        // Si le profil n'existe pas, création
+        const { error } = await supabase
+          .from('profiles')
+          .insert([{ 
+            id: selectedCreator.id,
+            username: selectedCreator.username,
+            role: selectedCreator.role,
+            diamonds_goal: newDiamondGoal,
+            total_diamonds: 0,
+            created_at: new Date(),
+            updated_at: new Date()
+          }]);
+          
+        if (error) throw error;
+      }
       
       toast.success(`Objectif diamants mis à jour pour ${selectedCreator.username}`);
       await fetchUsers();
@@ -56,20 +88,54 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
     try {
       setIsEditing(true);
       
-      console.log("Calling manage_diamonds RPC with:", {
-        target_user_id: selectedCreator.id,
-        diamonds_value: diamondAmount,
-        operation: operationType
-      });
+      // Vérifiez d'abord si le profil existe
+      const { data: profileExists, error: checkError } = await supabase
+        .from('profiles')
+        .select('id, total_diamonds')
+        .eq('id', selectedCreator.id)
+        .maybeSingle();
+        
+      if (checkError) {
+        throw checkError;
+      }
       
-      // Use the RPC function to update diamonds
-      const { data, error } = await supabase.rpc('manage_diamonds', {
-        target_user_id: selectedCreator.id,
-        diamonds_value: diamondAmount,
-        operation: operationType
-      });
+      let newDiamondValue;
       
-      if (error) throw error;
+      if (profileExists) {
+        // Si le profil existe, calculer la nouvelle valeur
+        const currentDiamonds = profileExists.total_diamonds || 0;
+        newDiamondValue = operationType === 'add' 
+          ? currentDiamonds + diamondAmount 
+          : Math.max(0, currentDiamonds - diamondAmount);
+        
+        // Mise à jour
+        const { error } = await supabase
+          .from('profiles')
+          .update({ 
+            total_diamonds: newDiamondValue,
+            updated_at: new Date()
+          })
+          .eq('id', selectedCreator.id);
+          
+        if (error) throw error;
+      } else {
+        // Si le profil n'existe pas, création avec la valeur initiale
+        newDiamondValue = operationType === 'add' ? diamondAmount : 0;
+        
+        const { error } = await supabase
+          .from('profiles')
+          .insert([{ 
+            id: selectedCreator.id,
+            username: selectedCreator.username,
+            role: selectedCreator.role,
+            total_diamonds: newDiamondValue,
+            diamonds_goal: 0,
+            created_at: new Date(),
+            updated_at: new Date()
+          }]);
+          
+        if (error) throw error;
+      }
       
       const actionText = operationType === 'add' ? 'ajoutés à' : 'retirés de';
       toast.success(`${diamondAmount} diamants ${actionText} ${selectedCreator.username}`);
@@ -96,7 +162,12 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
         // Si le profil n'existe pas, le créer
         const { error: insertError } = await supabase
           .from('profiles')
-          .insert({ role: 'agency', diamonds_goal: agencyGoal });
+          .insert({ 
+            role: 'agency', 
+            diamonds_goal: agencyGoal,
+            username: 'Agency', // Ajout du username obligatoire
+            id: crypto.randomUUID() // Générer un UUID pour le profil agency
+          });
           
         if (insertError) throw insertError;
       }

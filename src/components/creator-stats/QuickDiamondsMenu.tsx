@@ -32,22 +32,66 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
     try {
       setIsSubmitting(true);
       
-      console.log("Calling manage_diamonds RPC with:", {
-        target_user_id: creatorId,
-        diamonds_value: diamondAmount,
-        operation: operationType
-      });
+      // Vérifier si le profil existe
+      const { data: profileExists, error: checkError } = await supabase
+        .from('profiles')
+        .select('id, total_diamonds')
+        .eq('id', creatorId)
+        .maybeSingle();
+        
+      if (checkError) {
+        throw checkError;
+      }
       
-      const { data, error } = await supabase.rpc('manage_diamonds', {
-        target_user_id: creatorId,
-        diamonds_value: diamondAmount,
-        operation: operationType
-      });
-      
-      if (error) {
-        console.error("Erreur lors de la mise à jour des diamants:", error);
-        toast.error("Une erreur est survenue lors de la mise à jour des diamants");
-        return;
+      if (profileExists) {
+        // Si le profil existe, calculer la nouvelle valeur
+        let newDiamondValue;
+        
+        if (operationType === 'set') {
+          newDiamondValue = diamondAmount;
+        } else if (operationType === 'add') {
+          newDiamondValue = (profileExists.total_diamonds || 0) + diamondAmount;
+        } else { // subtract
+          newDiamondValue = Math.max(0, (profileExists.total_diamonds || 0) - diamondAmount);
+        }
+        
+        // Mise à jour
+        const { error } = await supabase
+          .from('profiles')
+          .update({ 
+            total_diamonds: newDiamondValue,
+            updated_at: new Date()
+          })
+          .eq('id', creatorId);
+          
+        if (error) throw error;
+      } else {
+        // Si le profil n'existe pas, création avec la valeur initiale
+        const newDiamondValue = operationType === 'set' ? diamondAmount : 
+                              operationType === 'add' ? diamondAmount : 0;
+        
+        // Obtenir le nom d'utilisateur et le rôle de user_accounts
+        const { data: userData, error: userError } = await supabase
+          .from('user_accounts')
+          .select('username, role')
+          .eq('id', creatorId)
+          .single();
+          
+        if (userError) throw userError;
+        
+        const { error } = await supabase
+          .from('profiles')
+          .insert([{ 
+            id: creatorId,
+            username: userData.username,
+            role: userData.role,
+            total_diamonds: newDiamondValue,
+            diamonds_goal: 0,
+            created_at: new Date(),
+            updated_at: new Date()
+          }]);
+          
+        if (error) throw error;
       }
       
       // Message de confirmation en fonction de l'opération
@@ -80,13 +124,13 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4 space-y-4">
+    <div className="bg-slate-900 border border-slate-800 shadow-md rounded-lg p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-medium flex items-center gap-2">
+        <h3 className="font-medium flex items-center gap-2 text-white">
           <Diamond className="h-4 w-4 text-purple-500" />
           Modifier les diamants pour {creatorUsername}
         </h3>
-        <span className="text-sm text-gray-500">Total actuel: {currentDiamonds} 💎</span>
+        <span className="text-sm text-gray-400">Total actuel: {currentDiamonds} 💎</span>
       </div>
       
       <div className="flex flex-col sm:flex-row gap-2">
@@ -97,6 +141,7 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
             value={diamondAmount}
             onChange={(e) => setDiamondAmount(parseInt(e.target.value) || 0)}
             placeholder="Quantité de diamants"
+            className="bg-slate-800 border-slate-700 text-white"
           />
         </div>
         
@@ -105,7 +150,7 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
             type="button"
             variant={operationType === 'add' ? 'default' : 'outline'}
             onClick={() => setOperationType('add')}
-            className="flex-1"
+            className={`flex-1 ${operationType === 'add' ? 'bg-purple-700 hover:bg-purple-800' : 'bg-transparent border-slate-700 text-white hover:bg-slate-800'}`}
           >
             <Plus className="h-4 w-4 mr-1" />
             Ajouter
@@ -114,7 +159,7 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
             type="button"
             variant={operationType === 'subtract' ? 'default' : 'outline'}
             onClick={() => setOperationType('subtract')}
-            className="flex-1"
+            className={`flex-1 ${operationType === 'subtract' ? 'bg-purple-700 hover:bg-purple-800' : 'bg-transparent border-slate-700 text-white hover:bg-slate-800'}`}
           >
             <Minus className="h-4 w-4 mr-1" />
             Déduire
@@ -123,7 +168,7 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
             type="button"
             variant={operationType === 'set' ? 'default' : 'outline'}
             onClick={() => setOperationType('set')}
-            className="flex-1"
+            className={`flex-1 ${operationType === 'set' ? 'bg-purple-700 hover:bg-purple-800' : 'bg-transparent border-slate-700 text-white hover:bg-slate-800'}`}
           >
             <Diamond className="h-4 w-4 mr-1" />
             Définir
@@ -132,13 +177,13 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
       </div>
       
       <div className="flex justify-between items-center">
-        <div className="text-sm">
-          Nouvelle valeur: <span className="font-bold">{calculateNewTotal()} 💎</span>
+        <div className="text-sm text-gray-300">
+          Nouvelle valeur: <span className="font-bold text-white">{calculateNewTotal()} 💎</span>
         </div>
         <Button 
           onClick={handleSubmit}
           disabled={isSubmitting || diamondAmount <= 0}
-          className="bg-green-600 hover:bg-green-700"
+          className="bg-green-600 hover:bg-green-700 text-white"
         >
           {isSubmitting ? (
             <>
