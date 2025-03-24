@@ -9,6 +9,7 @@ import { Footer } from "@/components/layout/Footer";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UltraSidebar } from "@/components/layout/UltraSidebar";
 import { UsernameWatermark } from "@/components/layout/UsernameWatermark";
+import { SocialCommunityLinks } from "@/components/layout/SocialCommunityLinks";
 
 const CreatorRankings = () => {
   const navigate = useNavigate();
@@ -42,17 +43,35 @@ const CreatorRankings = () => {
                 <h1 className="text-2xl font-bold">Classement des Créateurs 🏆</h1>
               </div>
               
-              <Button
-                variant="outline"
-                onClick={() => navigate("/")}
-                className="flex items-center gap-2"
-              >
-                <HomeIcon className="h-4 w-4" />
-                Retour au tableau de bord
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/messages")}
+                  className="flex items-center gap-2"
+                >
+                  <span>Messagerie</span>
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/")}
+                  className="flex items-center gap-2"
+                >
+                  <HomeIcon className="h-4 w-4" />
+                  Retour au tableau de bord
+                </Button>
+              </div>
             </div>
             
-            <CreatorPerformanceRanking role={role || ''} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="md:col-span-2">
+                <CreatorPerformanceRanking role={role || ''} />
+              </div>
+              
+              <div className="flex flex-col gap-4">
+                <SocialCommunityLinks className="animate-fade-in" />
+              </div>
+            </div>
             
             <Footer role={role} />
           </div>

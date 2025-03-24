@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -9,11 +8,11 @@ import { Clock, Calendar, Diamond, Award } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { CreatorPerformanceRankingProps, Creator } from "@/components/training/catalog/types";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 export function CreatorPerformanceRanking({ role }: CreatorPerformanceRankingProps) {
   const [creators, setCreators] = useState<Creator[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("hours");
 
   useEffect(() => {
     fetchCreators();
@@ -80,87 +79,42 @@ export function CreatorPerformanceRanking({ role }: CreatorPerformanceRankingPro
     }
   };
 
-  const getSortedCreators = () => {
-    switch (activeTab) {
-      case "hours":
-        return [...creators].sort((a, b) => (b.total_hours || 0) - (a.total_hours || 0));
-      case "days":
-        return [...creators].sort((a, b) => (b.total_days || 0) - (a.total_days || 0));
-      case "diamonds":
-        return [...creators].sort((a, b) => (b.total_diamonds || 0) - (a.total_diamonds || 0));
-      case "sponsorships":
-        return [...creators].sort((a, b) => (b.total_sponsorships || 0) - (a.total_sponsorships || 0));
-      default:
-        return creators;
-    }
-  };
+  // Sort creators by each metric
+  const getCreatorsByHours = () => [...creators].sort((a, b) => (b.total_hours || 0) - (a.total_hours || 0));
+  const getCreatorsByDays = () => [...creators].sort((a, b) => (b.total_days || 0) - (a.total_days || 0));
+  const getCreatorsByDiamonds = () => [...creators].sort((a, b) => (b.total_diamonds || 0) - (a.total_diamonds || 0));
+  const getCreatorsBySponsorships = () => [...creators].sort((a, b) => (b.total_sponsorships || 0) - (a.total_sponsorships || 0));
 
   const getInitials = (username: string) => {
     return username.substring(0, 2).toUpperCase();
   };
 
-  // Get the top 3 creators for the active category
-  const getTopPerformers = () => {
-    return getSortedCreators().slice(0, 3);
-  };
+  // Get the top 3 creators for each category
+  const topHours = getCreatorsByHours().slice(0, 3);
+  const topDays = getCreatorsByDays().slice(0, 3);
+  const topDiamonds = getCreatorsByDiamonds().slice(0, 3);
+  const topSponsorships = getCreatorsBySponsorships().slice(0, 3);
 
-  const renderIcon = () => {
-    switch (activeTab) {
-      case "hours":
-        return <Clock className="h-5 w-5 text-blue-500" />;
-      case "days":
-        return <Calendar className="h-5 w-5 text-green-500" />;
-      case "diamonds":
-        return <Diamond className="h-5 w-5 text-purple-500" />;
-      case "sponsorships":
-        return <Award className="h-5 w-5 text-amber-500" />;
-      default:
-        return null;
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1
+      }
     }
   };
 
-  const getCardTitle = () => {
-    switch (activeTab) {
-      case "hours":
-        return "Classement par Heures de Live";
-      case "days":
-        return "Classement par Jours de Streaming";
-      case "diamonds":
-        return "Classement par Diamants";
-      case "sponsorships":
-        return "Classement par Parrainages";
-      default:
-        return "Classement des Créateurs";
-    }
-  };
-
-  const getValueLabel = () => {
-    switch (activeTab) {
-      case "hours":
-        return "Heures";
-      case "days":
-        return "Jours";
-      case "diamonds":
-        return "Diamants";
-      case "sponsorships":
-        return "Parrainages";
-      default:
-        return "Valeur";
-    }
-  };
-
-  const getValueForCreator = (creator: Creator) => {
-    switch (activeTab) {
-      case "hours":
-        return `${creator.total_hours} h`;
-      case "days":
-        return `${creator.total_days} j`;
-      case "diamonds":
-        return creator.total_diamonds?.toLocaleString() || "0";
-      case "sponsorships":
-        return `${creator.total_sponsorships}`;
-      default:
-        return "0";
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 12
+      }
     }
   };
 
@@ -178,119 +132,225 @@ export function CreatorPerformanceRanking({ role }: CreatorPerformanceRankingPro
   };
 
   return (
-    <Card className="border-blue-200 dark:border-blue-900/30 overflow-hidden max-w-5xl mx-auto">
+    <Card className="border-blue-200 dark:border-blue-900/30 overflow-hidden rounded-xl shadow-lg">
       <CardHeader className="bg-gradient-to-r from-blue-50 to-white dark:from-blue-950/30 dark:to-slate-950">
-        <CardTitle className="flex items-center gap-2">
-          {renderIcon()}
+        <CardTitle className="flex items-center gap-2 text-xl">
+          <span className="text-2xl">🏆</span>
           <span>Classement des Créateurs Performants</span>
         </CardTitle>
         <CardDescription>
-          Retrouvez les meilleurs créateurs classés selon différents critères
+          Les meilleurs créateurs dans différentes catégories
         </CardDescription>
       </CardHeader>
       
       <CardContent className="p-4">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="hours" className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              <span className="hidden sm:inline">Heures</span>
-            </TabsTrigger>
-            <TabsTrigger value="days" className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline">Jours</span>
-            </TabsTrigger>
-            <TabsTrigger value="diamonds" className="flex items-center gap-1">
-              <Diamond className="h-4 w-4" />
-              <span className="hidden sm:inline">Diamants</span>
-            </TabsTrigger>
-            <TabsTrigger value="sponsorships" className="flex items-center gap-1">
-              <Award className="h-4 w-4" />
-              <span className="hidden sm:inline">Parrainages</span>
-            </TabsTrigger>
-          </TabsList>
-          
-          {/* All tabs share the same content structure */}
-          {["hours", "days", "diamonds", "sponsorships"].map((tab) => (
-            <TabsContent key={tab} value={tab} className="mt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">{getCardTitle()}</CardTitle>
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+          </div>
+        ) : creators.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            Aucun créateur trouvé
+          </div>
+        ) : (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-8"
+          >
+            {/* Top Performers Grid */}
+            <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Hours Section */}
+              <Card className="border-blue-200 dark:border-blue-800/30 overflow-hidden">
+                <CardHeader className="bg-blue-50 dark:bg-blue-900/20 p-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-blue-500" />
+                    <span>Heures de Live</span>
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <div className="flex justify-center py-8">
-                      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-                    </div>
-                  ) : creators.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Aucun créateur trouvé
-                    </div>
-                  ) : (
-                    <>
-                      {/* Top 3 Performers */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        {getTopPerformers().map((creator, index) => (
-                          <div key={creator.id} className="flex items-center p-4 border rounded-lg">
-                            <div className="relative mr-4">
-                              <Avatar className="h-12 w-12 border-2 border-primary">
-                                <AvatarFallback>{getInitials(creator.username)}</AvatarFallback>
-                              </Avatar>
-                              <Badge 
-                                className={`absolute -top-2 -right-2 ${getBadgeColor(index)}`}
-                              >
-                                #{index + 1}
-                              </Badge>
-                            </div>
-                            <div>
-                              <p className="font-bold">{creator.username}</p>
-                              <p className="text-sm text-muted-foreground">{getValueForCreator(creator)}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      
-                      {/* Full Ranking Table */}
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Rang</TableHead>
-                            <TableHead>Créateur</TableHead>
-                            <TableHead className="text-right">{getValueLabel()}</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {getSortedCreators().map((creator, index) => (
-                            <TableRow key={creator.id}>
-                              <TableCell className="font-medium">
-                                <div className="flex items-center">
-                                  <Badge className={`mr-2 ${getBadgeColor(index)}`}>
-                                    {index + 1}
-                                  </Badge>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center">
-                                  <Avatar className="h-8 w-8 mr-2">
-                                    <AvatarFallback>{getInitials(creator.username)}</AvatarFallback>
-                                  </Avatar>
-                                  {creator.username}
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-right font-bold">
-                                {getValueForCreator(creator)}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </>
-                  )}
+                <CardContent className="p-3">
+                  <div className="space-y-2">
+                    {topHours.map((creator, index) => (
+                      <motion.div 
+                        key={`hours-${creator.id}`}
+                        className="flex items-center p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors"
+                        whileHover={{ x: 5 }}
+                      >
+                        <Badge className={`mr-2 ${getBadgeColor(index)}`}>
+                          {index + 1}
+                        </Badge>
+                        <Avatar className="h-8 w-8 mr-2">
+                          <AvatarFallback>{getInitials(creator.username)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{creator.username}</p>
+                        </div>
+                        <p className="font-bold text-blue-600 dark:text-blue-400">{creator.total_hours} h</p>
+                      </motion.div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
-            </TabsContent>
-          ))}
-        </Tabs>
+
+              {/* Days Section */}
+              <Card className="border-green-200 dark:border-green-800/30 overflow-hidden">
+                <CardHeader className="bg-green-50 dark:bg-green-900/20 p-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-green-500" />
+                    <span>Jours de Streaming</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3">
+                  <div className="space-y-2">
+                    {topDays.map((creator, index) => (
+                      <motion.div 
+                        key={`days-${creator.id}`}
+                        className="flex items-center p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/10 transition-colors"
+                        whileHover={{ x: 5 }}
+                      >
+                        <Badge className={`mr-2 ${getBadgeColor(index)}`}>
+                          {index + 1}
+                        </Badge>
+                        <Avatar className="h-8 w-8 mr-2">
+                          <AvatarFallback>{getInitials(creator.username)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{creator.username}</p>
+                        </div>
+                        <p className="font-bold text-green-600 dark:text-green-400">{creator.total_days} j</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Diamonds Section */}
+              <Card className="border-purple-200 dark:border-purple-800/30 overflow-hidden">
+                <CardHeader className="bg-purple-50 dark:bg-purple-900/20 p-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Diamond className="h-4 w-4 text-purple-500" />
+                    <span>Diamants</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3">
+                  <div className="space-y-2">
+                    {topDiamonds.map((creator, index) => (
+                      <motion.div 
+                        key={`diamonds-${creator.id}`}
+                        className="flex items-center p-2 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors"
+                        whileHover={{ x: 5 }}
+                      >
+                        <Badge className={`mr-2 ${getBadgeColor(index)}`}>
+                          {index + 1}
+                        </Badge>
+                        <Avatar className="h-8 w-8 mr-2">
+                          <AvatarFallback>{getInitials(creator.username)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{creator.username}</p>
+                        </div>
+                        <p className="font-bold text-purple-600 dark:text-purple-400">{creator.total_diamonds?.toLocaleString() || "0"}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Sponsorships Section */}
+              <Card className="border-amber-200 dark:border-amber-800/30 overflow-hidden">
+                <CardHeader className="bg-amber-50 dark:bg-amber-900/20 p-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Award className="h-4 w-4 text-amber-500" />
+                    <span>Parrainages</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3">
+                  <div className="space-y-2">
+                    {topSponsorships.map((creator, index) => (
+                      <motion.div 
+                        key={`sponsorships-${creator.id}`}
+                        className="flex items-center p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors"
+                        whileHover={{ x: 5 }}
+                      >
+                        <Badge className={`mr-2 ${getBadgeColor(index)}`}>
+                          {index + 1}
+                        </Badge>
+                        <Avatar className="h-8 w-8 mr-2">
+                          <AvatarFallback>{getInitials(creator.username)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{creator.username}</p>
+                        </div>
+                        <p className="font-bold text-amber-600 dark:text-amber-400">{creator.total_sponsorships}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Full Ranking Table */}
+            <motion.div variants={itemVariants}>
+              <Card className="border-blue-200 dark:border-blue-900/30 overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-white dark:from-blue-950/30 dark:to-slate-950 p-3">
+                  <CardTitle className="text-base">Classement Complet des Créateurs</CardTitle>
+                </CardHeader>
+                <CardContent className="p-3">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Créateur</TableHead>
+                        <TableHead className="text-center">
+                          <Clock className="h-4 w-4 text-blue-500 inline mr-1" /> 
+                          Heures
+                        </TableHead>
+                        <TableHead className="text-center">
+                          <Calendar className="h-4 w-4 text-green-500 inline mr-1" /> 
+                          Jours
+                        </TableHead>
+                        <TableHead className="text-center">
+                          <Diamond className="h-4 w-4 text-purple-500 inline mr-1" /> 
+                          Diamants
+                        </TableHead>
+                        <TableHead className="text-center">
+                          <Award className="h-4 w-4 text-amber-500 inline mr-1" /> 
+                          Parrainages
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {creators.map((creator) => (
+                        <TableRow key={creator.id}>
+                          <TableCell>
+                            <div className="flex items-center">
+                              <Avatar className="h-8 w-8 mr-2">
+                                <AvatarFallback>{getInitials(creator.username)}</AvatarFallback>
+                              </Avatar>
+                              {creator.username}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center font-medium text-blue-600 dark:text-blue-400">
+                            {creator.total_hours} h
+                          </TableCell>
+                          <TableCell className="text-center font-medium text-green-600 dark:text-green-400">
+                            {creator.total_days} j
+                          </TableCell>
+                          <TableCell className="text-center font-medium text-purple-600 dark:text-purple-400">
+                            {creator.total_diamonds?.toLocaleString() || "0"}
+                          </TableCell>
+                          <TableCell className="text-center font-medium text-amber-600 dark:text-amber-400">
+                            {creator.total_sponsorships}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </motion.div>
+        )}
       </CardContent>
     </Card>
   );
