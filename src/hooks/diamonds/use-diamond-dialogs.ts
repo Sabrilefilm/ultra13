@@ -39,8 +39,11 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
         .eq('id', selectedCreator.id)
         .maybeSingle();
         
-      if (checkError && checkError.code !== 'PGRST204') {
-        throw checkError;
+      if (checkError) {
+        console.error("Error checking profile:", checkError);
+        if (checkError.code !== 'PGRST204') {
+          throw checkError;
+        }
       }
       
       if (profileExists) {
@@ -48,12 +51,15 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
         const { error } = await supabase
           .from('profiles')
           .update({ 
-            diamonds_goal: newDiamondGoal,
+            total_diamonds: selectedCreator.profiles?.[0]?.total_diamonds || 0, // Preserve current total_diamonds
             updated_at: new Date()
           })
           .eq('id', selectedCreator.id);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Error updating profile:", error);
+          throw error;
+        }
       } else {
         // Si le profil n'existe pas, création
         const { error } = await supabase
@@ -62,21 +68,23 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
             id: selectedCreator.id,
             username: selectedCreator.username,
             role: selectedCreator.role,
-            diamonds_goal: newDiamondGoal,
             total_diamonds: 0,
             created_at: new Date(),
             updated_at: new Date()
           }]);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Error creating profile:", error);
+          throw error;
+        }
       }
       
-      toast.success(`Objectif diamants mis à jour pour ${selectedCreator.username}`);
+      toast.success(`Paramètres mis à jour pour ${selectedCreator.username}`);
       await fetchUsers();
       setIsDialogOpen(false);
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error);
-      toast.error('Erreur lors de la mise à jour de l\'objectif');
+      toast.error('Erreur lors de la mise à jour des paramètres');
     } finally {
       setIsEditing(false);
     }
@@ -95,8 +103,11 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
         .eq('id', selectedCreator.id)
         .maybeSingle();
         
-      if (checkError && checkError.code !== 'PGRST204') {
-        throw checkError;
+      if (checkError) {
+        console.error("Error checking profile:", checkError);
+        if (checkError.code !== 'PGRST204') {
+          throw checkError;
+        }
       }
       
       let newDiamondValue;
@@ -117,7 +128,10 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
           })
           .eq('id', selectedCreator.id);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Error updating profile diamonds:", error);
+          throw error;
+        }
       } else {
         // Si le profil n'existe pas, création avec la valeur initiale
         newDiamondValue = operationType === 'add' ? diamondAmount : 0;
@@ -129,16 +143,26 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
             username: selectedCreator.username,
             role: selectedCreator.role,
             total_diamonds: newDiamondValue,
-            diamonds_goal: 0,
             created_at: new Date(),
             updated_at: new Date()
           }]);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Error creating profile with diamonds:", error);
+          throw error;
+        }
       }
       
       const actionText = operationType === 'add' ? 'ajoutés à' : 'retirés de';
       toast.success(`${diamondAmount} diamants ${actionText} ${selectedCreator.username}`);
+      
+      // Forcer la mise à jour immédiate de l'état local pour l'utilisateur sélectionné
+      if (selectedCreator && selectedCreator.profiles && selectedCreator.profiles.length > 0) {
+        selectedCreator.profiles[0].total_diamonds = newDiamondValue;
+      } else if (selectedCreator) {
+        selectedCreator.profiles = [{ total_diamonds: newDiamondValue }];
+      }
+      
       await fetchUsers();
       setIsDiamondModalOpen(false);
     } catch (error) {
@@ -160,6 +184,7 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
         .maybeSingle();
         
       if (checkError && checkError.code !== 'PGRST204') {
+        console.error("Error checking agency profile:", checkError);
         throw checkError;
       }
       
@@ -168,12 +193,14 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
         const { error } = await supabase
           .from('profiles')
           .update({ 
-            diamonds_goal: agencyGoal,
             updated_at: new Date()
           })
           .eq('id', agencyProfile.id);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Error updating agency profile:", error);
+          throw error;
+        }
       } else {
         // Si le profil n'existe pas, le créer
         const { error } = await supabase
@@ -181,21 +208,23 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
           .insert({ 
             id: crypto.randomUUID(),
             role: 'agency', 
-            diamonds_goal: agencyGoal,
             username: 'Agency', // Ajout du username obligatoire
             total_diamonds: 0,
             created_at: new Date(),
             updated_at: new Date()
           });
           
-        if (error) throw error;
+        if (error) {
+          console.error("Error creating agency profile:", error);
+          throw error;
+        }
       }
       
-      toast.success('Objectif diamants de l\'agence mis à jour');
+      toast.success('Paramètres de l\'agence mis à jour');
       await fetchUsers();
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error);
-      toast.error('Erreur lors de la mise à jour de l\'objectif de l\'agence');
+      toast.error('Erreur lors de la mise à jour des paramètres de l\'agence');
     } finally {
       setIsEditing(false);
     }

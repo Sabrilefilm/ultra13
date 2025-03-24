@@ -28,20 +28,24 @@ export function DiamondManagementModal({
   const [diamondAmount, setDiamondAmount] = useState<number>(0);
   const [userId, setUserId] = useState<string>(selectedUser?.id || "");
   const [isLoading, setIsLoading] = useState(false);
-  const [updatedDiamonds, setUpdatedDiamonds] = useState<number | null>(null);
+  const [displayedDiamonds, setDisplayedDiamonds] = useState<number | null>(null);
 
   // Mettre à jour l'identifiant de l'utilisateur sélectionné quand il change
   useEffect(() => {
     if (selectedUser?.id) {
       setUserId(selectedUser.id);
-      setUpdatedDiamonds(null); // Reset updated diamonds when user changes
+      setDisplayedDiamonds(null); // Reset displayed diamonds when user changes
     }
   }, [selectedUser]);
 
-  // Reset updated diamonds when diamond amount or operation type changes
+  // Reset displayed diamonds when diamond amount or operation type changes
   useEffect(() => {
-    setUpdatedDiamonds(null);
+    setDisplayedDiamonds(null);
   }, [diamondAmount, operationType]);
+
+  // Récupérer l'utilisateur sélectionné avec ses diamants
+  const selectedUserData = users.find(u => u.id === userId);
+  const currentDiamonds = selectedUserData?.profiles?.[0]?.total_diamonds || 0;
 
   const handleUpdateDiamonds = async () => {
     if (!userId || diamondAmount <= 0) {
@@ -51,6 +55,9 @@ export function DiamondManagementModal({
     
     try {
       setIsLoading(true);
+      
+      // Calculer la nouvelle valeur des diamants avant l'appel à l'API
+      const newDiamondValue = calculateNewTotal();
       
       // Récupérer les informations de l'utilisateur sélectionné
       const selectedUserInfo = users.find(user => user.id === userId);
@@ -66,12 +73,13 @@ export function DiamondManagementModal({
         .eq('id', userId)
         .maybeSingle();
       
-      let newDiamondValue;
+      if (fetchError && fetchError.code !== 'PGRST204') {
+        console.error("Error checking profile:", fetchError);
+        throw fetchError;
+      }
       
       if (!profileData) {
         // Si le profil n'existe pas, le créer
-        newDiamondValue = operationType === 'add' ? diamondAmount : 0;
-        
         const { error: insertError } = await supabase
           .from('profiles')
           .insert([{ 
@@ -79,19 +87,16 @@ export function DiamondManagementModal({
             username: selectedUserInfo.username,
             role: selectedUserInfo.role,
             total_diamonds: newDiamondValue,
-            diamonds_goal: 0,
             created_at: new Date(),
             updated_at: new Date()
           }]);
           
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error("Error creating profile:", insertError);
+          throw insertError;
+        }
       } else {
         // Si le profil existe, mettre à jour la valeur des diamants
-        const currentDiamonds = profileData.total_diamonds || 0;
-        newDiamondValue = operationType === 'add' 
-          ? currentDiamonds + diamondAmount 
-          : Math.max(0, currentDiamonds - diamondAmount);
-        
         const { error } = await supabase
           .from('profiles')
           .update({ 
@@ -100,16 +105,33 @@ export function DiamondManagementModal({
           })
           .eq('id', userId);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Error updating profile:", error);
+          throw error;
+        }
       }
       
       // Mettre à jour l'état local immédiatement
-      setUpdatedDiamonds(newDiamondValue);
+      setDisplayedDiamonds(newDiamondValue);
       
       const actionText = operationType === 'add' ? 'ajoutés' : 'retirés';
       const username = users.find(user => user.id === userId)?.username || userId;
       toast.success(`${diamondAmount} diamants ${actionText} pour ${username}`);
       
+      // Mettre à jour l'état global
+      // Trouver et mettre à jour l'utilisateur dans le tableau des utilisateurs
+      const updatedUsers = users.map(user => {
+        if (user.id === userId) {
+          // Mettre à jour ou créer le profil avec les nouveaux diamants
+          if (!user.profiles || user.profiles.length === 0) {
+            user.profiles = [{ total_diamonds: newDiamondValue }];
+          } else {
+            user.profiles[0].total_diamonds = newDiamondValue;
+          }
+        }
+        return user;
+      });
+
       // Réinitialiser le formulaire
       setDiamondAmount(0);
       
@@ -122,15 +144,11 @@ export function DiamondManagementModal({
       setIsLoading(false);
     }
   };
-
-  // Récupérer l'utilisateur sélectionné avec ses diamants
-  const selectedUserData = users.find(u => u.id === userId);
-  const currentDiamonds = selectedUserData?.profiles?.[0]?.total_diamonds || 0;
   
   // Calculer le nouveau total prévu
   const calculateNewTotal = () => {
-    if (updatedDiamonds !== null) {
-      return updatedDiamonds;
+    if (displayedDiamonds !== null) {
+      return displayedDiamonds;
     }
     
     const diamondBase = currentDiamonds;
@@ -161,7 +179,7 @@ export function DiamondManagementModal({
               value={userId} 
               onValueChange={(value) => {
                 setUserId(value);
-                setUpdatedDiamonds(null);
+                setDisplayedDiamonds(null);
               }}
             >
               <SelectTrigger className="bg-slate-800 border-slate-700 text-white">

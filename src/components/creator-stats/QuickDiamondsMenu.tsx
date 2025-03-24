@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Diamond, Plus, Minus, Save } from "lucide-react";
@@ -22,7 +22,12 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
   const [diamondAmount, setDiamondAmount] = useState<number>(0);
   const [operationType, setOperationType] = useState<'set' | 'add' | 'subtract'>('add');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [updatedDiamonds, setUpdatedDiamonds] = useState<number | null>(null);
+  const [displayedDiamonds, setDisplayedDiamonds] = useState<number>(currentDiamonds);
+
+  // Update displayed diamonds when prop changes
+  useEffect(() => {
+    setDisplayedDiamonds(currentDiamonds);
+  }, [currentDiamonds]);
 
   const handleSubmit = async () => {
     if (diamondAmount < 0) {
@@ -33,6 +38,9 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
     try {
       setIsSubmitting(true);
       
+      // Calculer la nouvelle valeur avant l'appel à l'API
+      const newDiamondValue = calculateNewTotal();
+      
       // Vérifier si le profil existe
       const { data: profileExists, error: checkError } = await supabase
         .from('profiles')
@@ -40,23 +48,13 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
         .eq('id', creatorId)
         .maybeSingle();
         
-      if (checkError) {
+      if (checkError && checkError.code !== 'PGRST204') {
+        console.error("Error checking profile:", checkError);
         throw checkError;
       }
       
-      let newDiamondValue;
-      
       if (profileExists) {
-        // Si le profil existe, calculer la nouvelle valeur
-        if (operationType === 'set') {
-          newDiamondValue = diamondAmount;
-        } else if (operationType === 'add') {
-          newDiamondValue = (profileExists.total_diamonds || 0) + diamondAmount;
-        } else { // subtract
-          newDiamondValue = Math.max(0, (profileExists.total_diamonds || 0) - diamondAmount);
-        }
-        
-        // Mise à jour
+        // Si le profil existe, mise à jour
         const { error } = await supabase
           .from('profiles')
           .update({ 
@@ -65,12 +63,12 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
           })
           .eq('id', creatorId);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Error updating profile:", error);
+          throw error;
+        }
       } else {
         // Si le profil n'existe pas, création avec la valeur initiale
-        newDiamondValue = operationType === 'set' ? diamondAmount : 
-                        operationType === 'add' ? diamondAmount : 0;
-        
         // Obtenir le nom d'utilisateur et le rôle de user_accounts
         const { data: userData, error: userError } = await supabase
           .from('user_accounts')
@@ -78,7 +76,10 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
           .eq('id', creatorId)
           .single();
           
-        if (userError) throw userError;
+        if (userError) {
+          console.error("Error fetching user data:", userError);
+          throw userError;
+        }
         
         const { error } = await supabase
           .from('profiles')
@@ -87,16 +88,18 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
             username: userData.username,
             role: userData.role,
             total_diamonds: newDiamondValue,
-            diamonds_goal: 0,
             created_at: new Date(),
             updated_at: new Date()
           }]);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Error creating profile:", error);
+          throw error;
+        }
       }
       
       // Mettre à jour l'état local immédiatement
-      setUpdatedDiamonds(newDiamondValue);
+      setDisplayedDiamonds(newDiamondValue);
       
       // Message de confirmation en fonction de l'opération
       const actionText = operationType === 'set' ? 'définis à' : operationType === 'add' ? 'augmentés de' : 'réduits de';
@@ -126,9 +129,6 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
         return diamondAmount;
     }
   };
-
-  // Afficher soit le total mis à jour si disponible, soit le total actuel
-  const displayedDiamonds = updatedDiamonds !== null ? updatedDiamonds : currentDiamonds;
 
   return (
     <div className="bg-slate-900 border border-slate-800 shadow-md rounded-lg p-4 space-y-4">
