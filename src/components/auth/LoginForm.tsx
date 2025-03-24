@@ -48,9 +48,21 @@ export const LoginForm = ({
     }
   };
 
+  // Créer le filigrane avec le nom d'utilisateur
+  const logoWatermark = (
+    <div className="fixed inset-0 flex items-center justify-center pointer-events-none select-none z-0">
+      <p className="text-slate-200/5 text-[15vw] font-bold rotate-[-30deg] transform">
+        ULTRA
+      </p>
+    </div>
+  );
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 to-slate-950 text-white p-4">
-      <div className="w-full max-w-[450px] mx-auto space-y-8">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 to-slate-950 text-white p-4 relative overflow-hidden">
+      {/* Watermark */}
+      {logoWatermark}
+      
+      <div className="w-full max-w-md mx-auto space-y-8">
         <div className="text-center space-y-6">
           <div className="flex flex-col items-center justify-center space-y-2">
             <div className="flex items-center gap-2">
@@ -109,7 +121,7 @@ export const LoginForm = ({
                 </div>
               </div>
             </div>
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
               <Button variant="link" className="text-sm text-white/60 hover:text-purple-400 p-0" onClick={onForgotPassword} type="button" disabled={isLoading}>
                 Mot de passe oublié ?
               </Button>

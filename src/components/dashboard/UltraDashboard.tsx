@@ -88,12 +88,14 @@ export const UltraDashboard = ({
     }
   };
 
-  // Créer le filigrane avec le nom d'utilisateur
+  // Créer le filigrane avec le nom d'utilisateur - repositionné et plus transparent
   const usernameWatermark = (
-    <div className="fixed inset-0 flex items-center justify-center pointer-events-none select-none z-0">
-      <p className="text-slate-200/5 text-[8vw] font-bold rotate-[-30deg] transform">
-        {username.toUpperCase()}
-      </p>
+    <div className="fixed inset-0 pointer-events-none select-none z-0 flex items-center justify-center">
+      <div className="w-full h-full flex items-center justify-center rotate-[-30deg]">
+        <p className="text-slate-200/30 text-[6vw] font-bold whitespace-nowrap">
+          {username.toUpperCase()}
+        </p>
+      </div>
     </div>
   );
 

@@ -5,10 +5,10 @@ import { UltraSidebar } from '@/components/layout/UltraSidebar';
 import { Loading } from '@/components/ui/loading';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useToast } from '@/hooks/use-toast';
 import { MessageContainer } from '@/components/messages/MessageContainer';
 import { NewMessageDialog } from '@/components/messages/NewMessageDialog';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 const Messages = () => {
   const navigate = useNavigate();
@@ -18,30 +18,7 @@ const Messages = () => {
   const [loading, setLoading] = useState(true);
   const [isNewMessageDialogOpen, setIsNewMessageDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string>('');
-  const isMobile = useIsMobile();
-  const { toast: uiToast } = useToast();
   
-  const {
-    conversations,
-    messages,
-    activeContact,
-    setActiveContact,
-    newMessage,
-    setNewMessage,
-    sendMessage,
-    sendingMessage,
-    loadingConversations,
-    loadingMessages,
-    unreadCount,
-    allUsers,
-    loadingUsers,
-    archiveConversation,
-    archiving,
-    handleAttachment,
-    attachmentPreview,
-    clearAttachment
-  } = useMessages(userId);
-
   useEffect(() => {
     const checkAuth = async () => {
       const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
@@ -104,12 +81,6 @@ const Messages = () => {
     checkAuth();
   }, [navigate]);
 
-  const handleSendMessage = () => {
-    if ((newMessage.trim() || attachmentPreview) && activeContact) {
-      sendMessage();
-    }
-  };
-
   const handleLogout = () => {
     localStorage.clear();
     navigate('/');
@@ -121,43 +92,49 @@ const Messages = () => {
       return;
     }
     
-    setActiveContact(selectedUser);
     setIsNewMessageDialogOpen(false);
     setSelectedUser('');
   };
 
-  const handleArchive = () => {
-    const isFounder = role === 'founder';
-    const confirmMessage = isFounder 
-      ? 'Êtes-vous sûr de vouloir archiver définitivement cette conversation ?'
-      : 'Êtes-vous sûr de vouloir archiver cette conversation pour 1 mois ?';
-      
-    if (window.confirm(confirmMessage)) {
-      archiveConversation();
-    }
-  };
-
-  console.log("Rendering Messages component with state:", {
-    userId,
-    activeContact,
-    conversationsCount: conversations?.length || 0,
-    messagesCount: messages?.length || 0
-  });
+  // Username watermark
+  const usernameWatermark = (
+    <div className="fixed inset-0 pointer-events-none select-none z-0 flex items-center justify-center">
+      <div className="w-full h-full flex items-center justify-center rotate-[-30deg]">
+        <p className="text-slate-200/30 text-[6vw] font-bold whitespace-nowrap">
+          {username.toUpperCase()}
+        </p>
+      </div>
+    </div>
+  );
 
   if (loading) {
     return <Loading fullScreen size="large" text="Chargement de la messagerie..." />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex relative overflow-hidden">
+      {/* Watermark */}
+      {usernameWatermark}
+      
       <UltraSidebar 
         username={username}
         role={role}
+        userId={userId}
         onLogout={handleLogout}
         currentPage="messages"
       />
       
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col relative">
+        <div className="absolute top-4 right-4 z-10">
+          <Button 
+            onClick={() => setIsNewMessageDialogOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Nouveau message
+          </Button>
+        </div>
+        
         <MessageContainer 
           username={username}
           role={role}
@@ -171,8 +148,6 @@ const Messages = () => {
         selectedUser={selectedUser}
         onUserChange={setSelectedUser}
         onStartConversation={handleStartNewConversation}
-        allUsers={allUsers}
-        loadingUsers={loadingUsers}
         currentUserRole={role}
         currentUserId={userId}
       />
