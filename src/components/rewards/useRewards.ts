@@ -27,7 +27,8 @@ export function useRewards(role: string, userId: string) {
           console.error("Erreur lors de la récupération des paramètres:", settingsError);
         }
         
-        const diamondValue = settingsData?.diamond_value || (10/36000); // Valeur par défaut: 10€ pour 36000 diamants
+        // Valeur par défaut: 10€ pour 36000 diamants (soit environ 0.000277€ par diamant)
+        const diamondValue = settingsData?.diamond_value || (10/36000);
         
         // Requête principale pour les récompenses
         const query = supabase

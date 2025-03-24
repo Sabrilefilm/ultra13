@@ -1,3 +1,4 @@
+
 import { Users, Diamond, Clock, Gift, Calendar, AlertTriangle, MessageCircle } from "lucide-react";
 import { StatsCard } from "@/components/StatsCard";
 import { useQuery } from "@tanstack/react-query";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { usePlatformSettings } from "@/hooks/use-platform-settings";
 
 interface RoleStatsProps {
   role: string;
@@ -25,6 +27,7 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
   const [daysInMonth, setDaysInMonth] = useState(0);
   const [monthProgress, setMonthProgress] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
+  const { platformSettings } = usePlatformSettings(role || null);
 
   useEffect(() => {
     const now = new Date();
@@ -223,7 +226,7 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
     const hoursColor = getProgressColor();
     const daysColor = getDaysProgressColor();
     
-    const diamondValue = platformSettings?.diamondValue || 10/36000; // Valeur par défaut si les paramètres ne sont pas chargés
+    const diamondValue = platformSettings?.diamondValue || (10/36000); // Valeur par défaut: 10€ pour 36000 diamants
     const diamondsText = rewardsData ? `${rewardsData}` : "0";
     const diamondValueText = rewardsData ? 
       `(${((rewardsData * diamondValue) || 0).toFixed(2)}€)` : 
