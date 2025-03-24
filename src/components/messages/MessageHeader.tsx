@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from "sonner";
 
 interface Contact {
   id: string;
@@ -45,7 +46,13 @@ export const MessageHeader = ({
 
   const handleArchive = () => {
     if (confirm('Êtes-vous sûr de vouloir archiver cette conversation?')) {
-      archiveConversation();
+      try {
+        archiveConversation();
+        toast.success("Conversation archivée avec succès");
+      } catch (error) {
+        console.error("Erreur lors de l'archivage:", error);
+        toast.error("Erreur lors de l'archivage de la conversation");
+      }
     }
   };
 
@@ -137,7 +144,7 @@ export const MessageHeader = ({
             <MoreVertical className="h-5 w-5" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem disabled>

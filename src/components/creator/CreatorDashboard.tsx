@@ -6,6 +6,7 @@ import { DailyQuote } from "@/components/dashboard/DailyQuote";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UserGuide } from "@/components/help/UserGuide";
+import { SocialCommunityLinks } from "@/components/layout/SocialCommunityLinks";
 import { MessageSquare, AlertTriangle, BarChart4, Calendar, ArrowRight, Clock, Trophy, Diamond } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -31,6 +32,7 @@ export const CreatorDashboard = ({
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [showGuide, setShowGuide] = useState(false);
   const [totalDiamonds, setTotalDiamonds] = useState(0);
+  const username = localStorage.getItem('username') || 'Créateur';
 
   // Récupérer les horaires et les diamants du créateur connecté
   const { data: creatorData, isLoading } = useQuery({
@@ -70,16 +72,33 @@ export const CreatorDashboard = ({
           console.error("Error fetching profile:", profileError);
         }
 
+        // Récupérer le prochain match
+        const now = new Date();
+        const { data: matchData, error: matchError } = await supabase
+          .from('matches')
+          .select('*')
+          .eq('creator_id', username)
+          .gt('match_date', now.toISOString())
+          .order('match_date', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+
+        if (matchError) {
+          console.error("Error fetching match:", matchError);
+        }
+
         return {
           schedule: scheduleData || { hours: 0, days: 0 },
-          diamonds: profileData?.total_diamonds || 0
+          diamonds: profileData?.total_diamonds || 0,
+          nextMatch: matchData || null
         };
       } catch (error) {
         console.error("Erreur lors de la récupération des données:", error);
         toast.error("Impossible de récupérer vos données");
         return { 
           schedule: { hours: 0, days: 0 },
-          diamonds: 0
+          diamonds: 0,
+          nextMatch: null
         };
       }
     }
@@ -97,6 +116,19 @@ export const CreatorDashboard = ({
   // Objectifs à atteindre
   const targetHours = 15;
   const targetDays = 7;
+
+  // Formater la date du prochain match
+  const formatMatchDate = (dateString: string) => {
+    if (!dateString) return "Non planifié";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', { 
+      weekday: 'long', 
+      day: 'numeric', 
+      month: 'long',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -117,7 +149,7 @@ export const CreatorDashboard = ({
               <div className="md:w-2/3">
                 <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
                   <Trophy className="h-5 w-5 text-amber-400" />
-                  Bienvenue sur votre tableau de bord! ✨
+                  Bienvenue {username} sur votre tableau de bord! ✨
                 </h3>
                 
                 <p className="text-gray-400 mb-4">
@@ -240,20 +272,31 @@ export const CreatorDashboard = ({
               </div>
             </div>
             
-            <div className="mt-4 bg-indigo-900/20 border border-indigo-700/30 rounded-lg p-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
+            <div className="mt-4 bg-indigo-900/20 border border-indigo-700/30 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
                 <Calendar className="h-5 w-5 text-indigo-400" />
                 <div>
                   <p className="text-indigo-300 font-medium">Prochain match prévu 🎮</p>
-                  <p className="text-indigo-400/80 text-sm">Demain à 20h00</p>
+                  {creatorData?.nextMatch ? (
+                    <>
+                      <p className="text-indigo-400/80 text-sm">{formatMatchDate(creatorData.nextMatch.match_date)}</p>
+                      <p className="text-indigo-300 mt-1">
+                        <span className="font-medium">{username}</span>
+                        <span className="text-indigo-400 mx-2">vs</span>
+                        <span className="font-medium">{creatorData.nextMatch.opponent_id}</span>
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-indigo-400/80 text-sm">Aucun match programmé pour le moment</p>
+                  )}
                 </div>
               </div>
               <Button 
                 variant="ghost" 
-                className="text-indigo-300 hover:text-indigo-100 hover:bg-indigo-700/30"
+                className="w-full mt-2 text-indigo-300 hover:text-indigo-100 hover:bg-indigo-700/30"
                 onClick={() => navigate('/matches')}
               >
-                <ArrowRight className="h-4 w-4" />
+                Voir tous mes matchs <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </div>
           </div>
@@ -267,6 +310,9 @@ export const CreatorDashboard = ({
         onOpenSponsorshipList={onOpenSponsorshipList}
         onCreatePoster={onCreatePoster}
       />
+      
+      {/* Social Community Links */}
+      <SocialCommunityLinks />
       
       {/* User Guide */}
       {showGuide && (
@@ -297,8 +343,6 @@ export const CreatorDashboard = ({
           <LeaveAgencyDialog />
         </Button>
       </div>
-      
-      <Footer role={role} />
     </div>
   );
 };

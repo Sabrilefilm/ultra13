@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HelpCircle, BookOpen, Shield, BarChart4 } from "lucide-react";
 import { RoleStats } from "@/components/dashboard/RoleStats";
+import { SocialCommunityLinks } from "@/components/layout/SocialCommunityLinks";
 
 interface StandardDashboardContentProps {
   username: string;
@@ -87,6 +88,9 @@ export const StandardDashboardContent: React.FC<StandardDashboardContentProps> =
           </div>
         </CardContent>
       </Card>
+      
+      {/* Social Community Links */}
+      <SocialCommunityLinks />
       
       {showGuide && (
         <div className="mt-6">

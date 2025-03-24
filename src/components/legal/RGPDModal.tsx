@@ -15,7 +15,7 @@ export function RGPDModal() {
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="link" className="text-sm text-muted-foreground hover:text-primary">
-          RGPD
+          RGPD TOUS
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-3xl max-h-[80vh]">
