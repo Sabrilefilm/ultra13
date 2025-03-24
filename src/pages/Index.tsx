@@ -1,4 +1,3 @@
-
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AuthView } from "@/components/auth/AuthView";
 import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
@@ -9,6 +8,7 @@ import { usePersonalInfoCheck } from "@/hooks/use-personal-info-check";
 import { useToast } from "@/hooks/use-toast";
 import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
 import { Loader2 } from "lucide-react";
+import { SocialCommunityLinks } from "@/components/layout/SocialCommunityLinks";
 
 const Index = () => {
   const { toast } = useToast();
@@ -56,7 +56,16 @@ const Index = () => {
   }
 
   if (!isAuthenticated) {
-    return <AuthView onLogin={handleLogin} />;
+    return (
+      <div className="min-h-screen bg-[#111827] flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <AuthView onLogin={handleLogin} />
+          <div className="mt-8">
+            <SocialCommunityLinks />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

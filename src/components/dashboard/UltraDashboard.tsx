@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { InactivityWarning } from "@/components/InactivityWarning";
 import { UltraSidebar } from "@/components/layout/UltraSidebar";
@@ -9,6 +8,7 @@ import { MenuIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Footer } from "@/components/layout/Footer";
+import { SocialCommunityLinks } from "@/components/layout/SocialCommunityLinks";
 
 interface UltraDashboardProps {
   username: string;
@@ -22,7 +22,7 @@ interface UltraDashboardProps {
   dismissWarning: () => void;
   formattedTime: string;
   currentPage?: string;
-  children?: React.ReactNode; // Add children prop
+  children?: React.ReactNode;
 }
 
 export const UltraDashboard = ({
@@ -37,9 +37,8 @@ export const UltraDashboard = ({
   dismissWarning,
   formattedTime,
   currentPage = 'dashboard',
-  children // Destructure children from props
+  children
 }: UltraDashboardProps) => {
-  // Modal states
   const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
   const [isRewardSettingsModalOpen, setIsRewardSettingsModalOpen] = useState(false);
   const [isLiveScheduleModalOpen, setIsLiveScheduleModalOpen] = useState(false);
@@ -91,7 +90,6 @@ export const UltraDashboard = ({
     }
   };
 
-  // Create username watermark - repositioned and with updated styling
   const usernameWatermark = (
     <div className="fixed inset-0 pointer-events-none select-none z-0 overflow-hidden">
       {Array.from({ length: 500 }).map((_, index) => (
@@ -112,10 +110,8 @@ export const UltraDashboard = ({
 
   return (
     <div className="flex flex-col h-screen w-full bg-gradient-to-br from-slate-900 to-slate-950 text-white overflow-hidden">
-      {/* Filigrame du nom d'utilisateur */}
       {usernameWatermark}
       
-      {/* Mobile menu button */}
       <div className="md:hidden fixed top-4 left-4 z-50">
         <Button 
           variant="outline" 
@@ -128,7 +124,6 @@ export const UltraDashboard = ({
       </div>
       
       <div className="flex h-full">
-        {/* Sidebar - hidden on mobile unless toggled */}
         <div className={`${mobileMenuOpen ? 'fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden' : 'hidden md:block'}`}>
           <div className={`${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} 
                           transition-transform duration-300 h-full w-64 md:w-auto z-50`}>
@@ -146,17 +141,24 @@ export const UltraDashboard = ({
         </div>
         
         <div className="flex-1 overflow-auto pb-20 transition-all duration-300 flex flex-col">
-          {/* Render children if provided, otherwise use RedesignedDashContent */}
-          {children ? (
-            children
-          ) : (
-            <RedesignedDashContent
-              username={username}
-              role={role}
-              currentPage={currentPage}
-              onAction={onAction}
-            />
-          )}
+          <div className="flex-1 flex flex-col md:flex-row">
+            <div className="flex-1 overflow-auto">
+              {children ? (
+                children
+              ) : (
+                <RedesignedDashContent
+                  username={username}
+                  role={role}
+                  currentPage={currentPage}
+                  onAction={onAction}
+                />
+              )}
+            </div>
+            
+            <div className="w-full md:w-80 p-4">
+              <SocialCommunityLinks onLogout={onLogout} className="sticky top-4" />
+            </div>
+          </div>
           
           <ModalManager
             isCreateAccountModalOpen={isCreateAccountModalOpen}

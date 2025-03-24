@@ -4,12 +4,14 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AnimatedTitle } from "./community/AnimatedTitle";
 import { CommunityLinks } from "./community/CommunityLinks";
+import { LogOutButton } from "./community/LogOutButton";
 
 interface SocialCommunityProps {
   className?: string;
+  onLogout?: () => void;
 }
 
-export const SocialCommunityLinks = ({ className = "" }: SocialCommunityProps) => {
+export const SocialCommunityLinks = ({ className = "", onLogout }: SocialCommunityProps) => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -56,6 +58,17 @@ export const SocialCommunityLinks = ({ className = "" }: SocialCommunityProps) =
           >
             Rejoignez-nous sur nos réseaux pour ne manquer aucune information importante et participer à notre communauté !
           </motion.p>
+          
+          {onLogout && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
+              transition={{ delay: 1.5 }}
+              className="flex justify-center mt-8"
+            >
+              <LogOutButton onLogout={onLogout} />
+            </motion.div>
+          )}
         </motion.div>
       </CardContent>
     </Card>
