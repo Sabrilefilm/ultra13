@@ -25,17 +25,15 @@ const Index = () => {
   const { platformSettings, handleUpdateSettings } = usePlatformSettings(role);
   const { handleCreateAccount } = useAccountManagement();
   
-  // Check personal info for creators
   usePersonalInfoCheck(isAuthenticated, role);
   
-  // Inactivity timer for automatic logout
   const { showWarning, dismissWarning, formattedTime } = useInactivityTimer({
     timeout: 120000, // 2 minutes
     onTimeout: () => {
       handleLogout();
       toast({
         title: "Déconnexion automatique",
-        description: "Vous avez été déconnecté en raison d'inactivité.",
+        description: "Vous avez été déconnecté en raison d'inactivity.",
       });
     },
     warningTime: 30000, // Afficher l'avertissement 30 secondes avant
