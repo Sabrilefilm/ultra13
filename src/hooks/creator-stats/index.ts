@@ -14,7 +14,6 @@ export const useCreatorStats = (role: string | null, username: string | null) =>
   
   const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
   
-  // Correction: Passer les bons arguments à useScheduleEditing
   const { 
     isEditingSchedule, 
     setIsEditingSchedule, 
@@ -26,7 +25,6 @@ export const useCreatorStats = (role: string | null, username: string | null) =>
     handleSaveSchedule 
   } = useScheduleEditing(creators, setCreators, selectedCreator, setSelectedCreator, fetchCreators);
   
-  // Correction: Passer les bons arguments à useDiamondsEditing
   const { 
     isEditingDiamonds, 
     setIsEditingDiamonds, 
@@ -39,7 +37,6 @@ export const useCreatorStats = (role: string | null, username: string | null) =>
     handleSaveDiamonds 
   } = useDiamondsEditing(creators, setCreators, selectedCreator, setSelectedCreator, fetchCreators);
   
-  // Correction: Passer les bons arguments à useCreatorRemoval
   const { 
     removeDialogOpen, 
     setRemoveDialogOpen, 

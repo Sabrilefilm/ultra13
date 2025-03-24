@@ -1,7 +1,7 @@
 
 import { Creator } from "./types";
 
-export const useStatistics = (creators: Creator[]) => {
+export const useStatistics = (creators: Creator[], rewardThreshold: number) => {
   const getTotalHours = () => {
     return creators.reduce((total, creator) => {
       const hours = creator.live_schedules?.[0]?.hours || 0;
@@ -23,7 +23,7 @@ export const useStatistics = (creators: Creator[]) => {
     }, 0);
   };
 
-  const getCreatorsWithRewards = (rewardThreshold: number) => {
+  const getCreatorsWithRewards = () => {
     return creators.filter(creator => 
       (creator.profiles?.[0]?.total_diamonds || 0) >= rewardThreshold
     ).length;

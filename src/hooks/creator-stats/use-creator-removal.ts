@@ -8,7 +8,8 @@ export const useCreatorRemoval = (
   creators: Creator[], 
   setCreators: (creators: Creator[]) => void,
   selectedCreator: Creator | null,
-  setSelectedCreator: (creator: Creator | null) => void
+  setSelectedCreator: (creator: Creator | null) => void,
+  fetchCreators: () => Promise<void>
 ) => {
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
 
