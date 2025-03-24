@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useIndexAuth } from "@/hooks/use-index-auth";
@@ -6,9 +5,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { UltraSidebar } from "@/components/layout/UltraSidebar";
 import { UsernameWatermark } from "@/components/layout/UsernameWatermark";
 import { Footer } from "@/components/layout/Footer";
-import { useCreatorStats } from "@/hooks/creator-stats"; // Updated import path
+import { useCreatorStats } from "@/hooks/creator-stats";
 
-// Import our components
 import { StatsHeader } from "@/components/creator-stats/StatsHeader";
 import { StatsSummaryCards } from "@/components/creator-stats/StatsSummaryCards";
 import { RewardsNotification } from "@/components/creator-stats/RewardsNotification";
@@ -36,6 +34,7 @@ const CreatorStats = () => {
     setDiamondAmount,
     operationType,
     setOperationType,
+    isSaving,
     removeDialogOpen,
     setRemoveDialogOpen,
     rewardThreshold,
@@ -125,6 +124,7 @@ const CreatorStats = () => {
           operationType={operationType}
           setOperationType={setOperationType}
           onSave={handleSaveDiamonds}
+          isSaving={isSaving}
         />
 
         <RemoveCreatorDialog 

@@ -592,6 +592,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_or_update_profile: {
+        Args: {
+          user_id: string
+          user_username: string
+          diamonds_value: number
+        }
+        Returns: boolean
+      }
       create_transfer_request: {
         Args: {
           creator_id_param: string

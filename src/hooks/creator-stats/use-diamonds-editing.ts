@@ -14,6 +14,7 @@ export const useDiamondsEditing = (
   const [isEditingDiamonds, setIsEditingDiamonds] = useState(false);
   const [diamondAmount, setDiamondAmount] = useState(0);
   const [operationType, setOperationType] = useState<'set' | 'add' | 'subtract'>('set');
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleEditDiamonds = (creator: Creator) => {
     setSelectedCreator(creator);
@@ -26,6 +27,7 @@ export const useDiamondsEditing = (
     if (!selectedCreator) return;
     
     try {
+      setIsSaving(true);
       let newDiamondValue = 0;
       const currentDiamonds = selectedCreator.profiles?.[0]?.total_diamonds || 0;
       
@@ -43,12 +45,15 @@ export const useDiamondsEditing = (
       
       await creatorStatsService.updateDiamonds(selectedCreator, newDiamondValue);
       
-      // Mise à jour de l'état local pour refléter le changement
+      // Mise à jour de l'état local pour refléter le changement immédiatement
       setCreators(creators.map(c => {
         if (c.id === selectedCreator.id) {
           return {
             ...c,
-            profiles: [{ total_diamonds: newDiamondValue }]
+            profiles: [{ 
+              ...c.profiles?.[0],
+              total_diamonds: newDiamondValue 
+            }]
           };
         }
         return c;
@@ -64,6 +69,8 @@ export const useDiamondsEditing = (
     } catch (error) {
       console.error("Erreur lors de la mise à jour des diamants:", error);
       toast.error("Erreur lors de la mise à jour des diamants. Veuillez réessayer.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -74,6 +81,7 @@ export const useDiamondsEditing = (
     setDiamondAmount,
     operationType,
     setOperationType,
+    isSaving,
     handleEditDiamonds,
     handleSaveDiamonds
   };

@@ -97,57 +97,19 @@ export const creatorStatsService = {
     try {
       console.log(`Updating diamonds for creator ${creator.id} to ${newValue}`);
       
-      // On vérifie d'abord si le profil existe déjà en utilisant user_accounts comme point de vérification
-      const { data: userData, error: userError } = await supabase
-        .from('user_accounts')
-        .select('id, username')
-        .eq('id', creator.id)
-        .single();
+      // Utilisation de la fonction RPC pour gérer la création ou mise à jour du profil
+      const { data, error } = await supabase.rpc('create_or_update_profile', { 
+        user_id: creator.id,
+        user_username: creator.username,
+        diamonds_value: newValue
+      });
       
-      if (userError) {
-        console.error("Error fetching user:", userError);
-        throw userError;
+      if (error) {
+        console.error("Error using RPC:", error);
+        throw error;
       }
       
-      // Ensuite, vérifiez si un profil existe déjà
-      const { data: existingProfile, error: checkError } = await supabase
-        .from('profiles')
-        .select('id, total_diamonds')
-        .eq('id', creator.id)
-        .maybeSingle();
-      
-      if (checkError) {
-        console.error("Error checking profile:", checkError);
-        throw checkError;
-      }
-      
-      if (existingProfile) {
-        // Mettre à jour le profil existant
-        console.log("Updating existing profile");
-        const { error } = await supabase
-          .from('profiles')
-          .update({ total_diamonds: newValue })
-          .eq('id', creator.id);
-          
-        if (error) {
-          console.error("Error updating profile:", error);
-          throw error;
-        }
-      } else {
-        // Créer un nouveau profil avec RPC pour éviter les problèmes de RLS
-        console.log("Creating new profile");
-        const { error } = await supabase.rpc('create_or_update_profile', { 
-          user_id: creator.id,
-          user_username: userData.username,
-          diamonds_value: newValue
-        });
-        
-        if (error) {
-          console.error("Error creating profile with RPC:", error);
-          throw error;
-        }
-      }
-      
+      console.log("RPC response:", data);
       return true;
     } catch (error) {
       console.error("Error updating diamonds:", error);

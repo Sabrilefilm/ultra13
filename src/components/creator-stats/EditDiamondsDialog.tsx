@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ interface EditDiamondsDialogProps {
   operationType: 'set' | 'add' | 'subtract';
   setOperationType: (type: 'set' | 'add' | 'subtract') => void;
   onSave: () => Promise<void>;
+  isSaving?: boolean;
 }
 
 export const EditDiamondsDialog: React.FC<EditDiamondsDialogProps> = ({
@@ -27,9 +28,8 @@ export const EditDiamondsDialog: React.FC<EditDiamondsDialogProps> = ({
   operationType,
   setOperationType,
   onSave,
+  isSaving = false,
 }) => {
-  const [isSaving, setIsSaving] = useState(false);
-
   const calculateNewTotal = () => {
     switch (operationType) {
       case 'add':
@@ -39,17 +39,6 @@ export const EditDiamondsDialog: React.FC<EditDiamondsDialogProps> = ({
       case 'set':
       default:
         return diamondAmount;
-    }
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      await onSave();
-    } catch (error) {
-      console.error("Erreur lors de la sauvegarde:", error);
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -127,7 +116,7 @@ export const EditDiamondsDialog: React.FC<EditDiamondsDialogProps> = ({
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>Annuler</Button>
           <Button 
             type="submit" 
-            onClick={handleSave}
+            onClick={onSave}
             disabled={isSaving}
             className="relative"
           >
