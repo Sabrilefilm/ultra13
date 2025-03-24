@@ -14,14 +14,12 @@ import { toast } from "sonner";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
-
 interface CreatorDashboardProps {
   onOpenSponsorshipForm: () => void;
   onOpenSponsorshipList: () => void;
   onCreatePoster: () => void;
   role: string;
 }
-
 export const CreatorDashboard = ({
   onOpenSponsorshipForm,
   onOpenSponsorshipList,
@@ -33,7 +31,6 @@ export const CreatorDashboard = ({
   const [showGuide, setShowGuide] = useState(false);
   const [totalDiamonds, setTotalDiamonds] = useState(0);
   const username = localStorage.getItem('username') || 'Créateur';
-
   const fadeIn = {
     hidden: {
       opacity: 0,
@@ -48,7 +45,6 @@ export const CreatorDashboard = ({
       }
     }
   };
-
   const {
     data: creatorData,
     isLoading
@@ -67,7 +63,6 @@ export const CreatorDashboard = ({
             diamonds: 0
           };
         }
-
         const {
           data: scheduleData,
           error: scheduleError
@@ -75,7 +70,6 @@ export const CreatorDashboard = ({
         if (scheduleError) {
           console.error("Error fetching schedule:", scheduleError);
         }
-
         const {
           data: profileData,
           error: profileError
@@ -83,7 +77,6 @@ export const CreatorDashboard = ({
         if (profileError) {
           console.error("Error fetching profile:", profileError);
         }
-
         const now = new Date();
         const {
           data: matchData,
@@ -116,18 +109,14 @@ export const CreatorDashboard = ({
       }
     }
   });
-
   useEffect(() => {
     if (creatorData?.diamonds) {
       setTotalDiamonds(creatorData.diamonds);
     }
   }, [creatorData]);
-
   const weeklyHours = creatorData?.schedule ? creatorData.schedule.hours * creatorData.schedule.days : 0;
-
   const targetHours = 15;
   const targetDays = 7;
-
   const formatMatchDate = (dateString: string) => {
     if (!dateString) return "Non planifié";
     const date = new Date(dateString);
@@ -139,7 +128,6 @@ export const CreatorDashboard = ({
       minute: '2-digit'
     });
   };
-
   return <div className="space-y-6">
       <DailyQuote />
       
@@ -342,9 +330,7 @@ export const CreatorDashboard = ({
           <UserGuide />
         </div>}
       
-      <div className="mt-12 pt-6 border-t border-gray-800/30">
-        <Footer role={role} />
-      </div>
+      
       
       <div className="flex justify-center mt-4">
         <Button variant="ghost" className="text-xs text-gray-500 hover:text-red-400 hover:bg-red-900/10 relative h-8 px-3 group">
