@@ -1,13 +1,16 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChevronRight, Rocket, Mail, Shield, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import { useState, FormEvent } from "react";
 import { Link } from "react-router-dom";
+
 interface LoginFormProps {
   onLogin: (username: string, password: string) => void;
   onForgotPassword: () => void;
 }
+
 export const LoginForm = ({
   onLogin,
   onForgotPassword
@@ -17,6 +20,7 @@ export const LoginForm = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+
   const handleSubmit = async (e?: FormEvent) => {
     if (e) e.preventDefault();
     if (!username.trim()) {
@@ -37,12 +41,15 @@ export const LoginForm = ({
       setIsLoading(false);
     }
   };
+
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSubmit();
     }
   };
-  return <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 to-slate-950 text-white p-4">
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 to-slate-950 text-white p-4">
       <div className="w-full max-w-[450px] mx-auto space-y-8">
         <div className="text-center space-y-6">
           <div className="flex flex-col items-center justify-center space-y-2">
@@ -70,7 +77,7 @@ export const LoginForm = ({
           <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/10 rounded-full -ml-16 -mb-16 blur-2xl"></div>
           
-          <div className="space-y-4 relative">
+          <form onSubmit={handleSubmit} className="space-y-4 relative">
             {error && <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
                 {error}
               </div>}
@@ -110,15 +117,16 @@ export const LoginForm = ({
                 Contacter le support
               </Button>
             </div>
-          </div>
 
-          <div className="space-y-4">
-            <Button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-6 flex items-center justify-center group transition-all" onClick={() => handleSubmit()} disabled={isLoading} type="submit">
+            <Button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-6 flex items-center justify-center group transition-all" disabled={isLoading} type="submit">
               {isLoading ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <>
                   <span>Se connecter</span>
                   <ChevronRight className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
                 </>}
             </Button>
+          </form>
+
+          <div className="space-y-4">
             <div className="flex items-center justify-center">
               <Link to="/external-matches" className="text-sm text-center text-white/60 hover:text-purple-400 flex items-center gap-1">
                 <span>Accéder aux matchs externes</span>
@@ -134,5 +142,6 @@ export const LoginForm = ({
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };

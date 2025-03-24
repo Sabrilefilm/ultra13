@@ -7,6 +7,7 @@ import { ModalManager } from "@/components/layout/ModalManager";
 import { RedesignedDashContent } from "@/components/dashboard/RedesignedDashContent";
 import { MenuIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface UltraDashboardProps {
   username: string;
@@ -46,6 +47,8 @@ export const UltraDashboard = ({
   const [isCreatePosterModalOpen, setIsCreatePosterModalOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  const navigate = useNavigate();
 
   const onAction = (action: string, data?: any) => {
     switch (action) {
@@ -72,7 +75,7 @@ export const UltraDashboard = ({
         setIsCreatePosterModalOpen(true);
         break;
       case 'navigateTo':
-        window.location.href = data === 'dashboard' ? '/' : `/${data}`;
+        navigate(data === 'dashboard' ? '/' : `/${data}`);
         break;
       case 'toggleSidebar':
         setSidebarCollapsed(!sidebarCollapsed);
@@ -85,8 +88,20 @@ export const UltraDashboard = ({
     }
   };
 
+  // Créer le filigrane avec le nom d'utilisateur
+  const usernameWatermark = (
+    <div className="fixed inset-0 flex items-center justify-center pointer-events-none select-none z-0">
+      <p className="text-slate-200/5 text-[8vw] font-bold rotate-[-30deg] transform">
+        {username.toUpperCase()}
+      </p>
+    </div>
+  );
+
   return (
-    <div className="flex h-screen w-full bg-gradient-to-br from-slate-900 to-slate-950 text-white overflow-hidden">
+    <div className="flex flex-col h-screen w-full bg-gradient-to-br from-slate-900 to-slate-950 text-white overflow-hidden">
+      {/* Filigrane du nom d'utilisateur */}
+      {usernameWatermark}
+      
       {/* Mobile menu button */}
       <div className="md:hidden fixed top-4 left-4 z-50">
         <Button 
@@ -99,65 +114,67 @@ export const UltraDashboard = ({
         </Button>
       </div>
       
-      {/* Sidebar - hidden on mobile unless toggled */}
-      <div className={`${mobileMenuOpen ? 'fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden' : 'hidden md:block'}`}>
-        <div className={`${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} 
-                         transition-transform duration-300 h-full w-64 md:w-auto z-50`}>
-          <UltraSidebar 
+      <div className="flex h-full">
+        {/* Sidebar - hidden on mobile unless toggled */}
+        <div className={`${mobileMenuOpen ? 'fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden' : 'hidden md:block'}`}>
+          <div className={`${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} 
+                          transition-transform duration-300 h-full w-64 md:w-auto z-50`}>
+            <UltraSidebar 
+              username={username}
+              role={role}
+              userId={userId}
+              onLogout={onLogout}
+              onAction={onAction}
+              currentPage={currentPage}
+              isMobileOpen={mobileMenuOpen}
+              setMobileMenuOpen={setMobileMenuOpen}
+            />
+          </div>
+        </div>
+        
+        <div className="flex-1 overflow-auto pb-20 transition-all duration-300">
+          <RedesignedDashContent
             username={username}
             role={role}
-            userId={userId}
-            onLogout={onLogout}
-            onAction={onAction}
             currentPage={currentPage}
-            isMobileOpen={mobileMenuOpen}
-            setMobileMenuOpen={setMobileMenuOpen}
+            onAction={onAction}
+          />
+          
+          <ModalManager
+            isCreateAccountModalOpen={isCreateAccountModalOpen}
+            setIsCreateAccountModalOpen={setIsCreateAccountModalOpen}
+            isRewardSettingsModalOpen={isRewardSettingsModalOpen}
+            setIsRewardSettingsModalOpen={setIsRewardSettingsModalOpen}
+            isLiveScheduleModalOpen={isLiveScheduleModalOpen}
+            setIsLiveScheduleModalOpen={setIsLiveScheduleModalOpen}
+            isSponsorshipModalOpen={isSponsorshipModalOpen}
+            setIsSponsorshipModalOpen={setIsSponsorshipModalOpen}
+            showSponsorshipList={showSponsorshipList}
+            setShowSponsorshipList={setShowSponsorshipList}
+            selectedCreatorId={selectedCreatorId}
+            platformSettings={platformSettings}
+            handleCreateAccount={handleCreateAccount}
+            handleUpdateSettings={handleUpdateSettings}
+            username={username}
+            role={role}
+            isScheduleMatchModalOpen={isScheduleMatchModalOpen}
+            setIsScheduleMatchModalOpen={setIsScheduleMatchModalOpen}
+          />
+
+          {(['founder', 'manager', 'agent'].includes(role)) && (
+            <CreateMatchPosterDialog
+              isOpen={isCreatePosterModalOpen}
+              onClose={() => setIsCreatePosterModalOpen(false)}
+            />
+          )}
+          
+          <InactivityWarning
+            open={showWarning}
+            onStay={dismissWarning}
+            onLogout={onLogout}
+            remainingTime={formattedTime}
           />
         </div>
-      </div>
-      
-      <div className="flex-1 overflow-auto pb-20 transition-all duration-300">
-        <RedesignedDashContent
-          username={username}
-          role={role}
-          currentPage={currentPage}
-          onAction={onAction}
-        />
-        
-        <ModalManager
-          isCreateAccountModalOpen={isCreateAccountModalOpen}
-          setIsCreateAccountModalOpen={setIsCreateAccountModalOpen}
-          isRewardSettingsModalOpen={isRewardSettingsModalOpen}
-          setIsRewardSettingsModalOpen={setIsRewardSettingsModalOpen}
-          isLiveScheduleModalOpen={isLiveScheduleModalOpen}
-          setIsLiveScheduleModalOpen={setIsLiveScheduleModalOpen}
-          isSponsorshipModalOpen={isSponsorshipModalOpen}
-          setIsSponsorshipModalOpen={setIsSponsorshipModalOpen}
-          showSponsorshipList={showSponsorshipList}
-          setShowSponsorshipList={setShowSponsorshipList}
-          selectedCreatorId={selectedCreatorId}
-          platformSettings={platformSettings}
-          handleCreateAccount={handleCreateAccount}
-          handleUpdateSettings={handleUpdateSettings}
-          username={username}
-          role={role}
-          isScheduleMatchModalOpen={isScheduleMatchModalOpen}
-          setIsScheduleMatchModalOpen={setIsScheduleMatchModalOpen}
-        />
-
-        {(['founder', 'manager', 'agent'].includes(role)) && (
-          <CreateMatchPosterDialog
-            isOpen={isCreatePosterModalOpen}
-            onClose={() => setIsCreatePosterModalOpen(false)}
-          />
-        )}
-        
-        <InactivityWarning
-          open={showWarning}
-          onStay={dismissWarning}
-          onLogout={onLogout}
-          remainingTime={formattedTime}
-        />
       </div>
     </div>
   );
