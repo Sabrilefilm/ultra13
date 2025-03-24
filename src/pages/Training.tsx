@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -7,7 +8,7 @@ import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { useAccountManagement } from "@/hooks/use-account-management";
 import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,7 @@ import {
   Play, Youtube, Book, Lightbulb, CheckCircle, VideoIcon, 
   ListChecks, PlusCircle, X, Pencil, Save, BookOpen, ArrowLeft
 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
@@ -27,6 +28,7 @@ import { Footer } from "@/components/layout/Footer";
 import { getYoutubeVideoId } from "@/utils/videoHelpers";
 import { SocialCommunityLinks } from "@/components/layout/SocialCommunityLinks";
 import { motion } from "framer-motion";
+import { YoutubePlayer } from "@/components/ui/youtube-player";
 
 interface Training {
   id: string;
@@ -63,6 +65,7 @@ const Training = () => {
   const [watchedVideos, setWatchedVideos] = useState<WatchedVideo[]>([]);
   const [isWatching, setIsWatching] = useState(false);
   const [currentVideo, setCurrentVideo] = useState<Training | null>(null);
+  const [featuredVideo, setFeaturedVideo] = useState<Training | null>(null);
   
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -117,6 +120,18 @@ const Training = () => {
       fetchWatchedVideos();
     }
   }, [isAuthenticated, selectedType, userId]);
+  
+  useEffect(() => {
+    // Set a featured video for the header section
+    if (trainings.length > 0 && !featuredVideo) {
+      // Get the first unwatched video, or the first video if all are watched
+      const unwatchedVideos = trainings.filter(
+        training => !watchedVideos.some(wv => wv.training_id === training.id && wv.progress === 100)
+      );
+      
+      setFeaturedVideo(unwatchedVideos.length > 0 ? unwatchedVideos[0] : trainings[0]);
+    }
+  }, [trainings, watchedVideos, featuredVideo]);
   
   const fetchTrainings = async () => {
     try {
@@ -426,7 +441,7 @@ const Training = () => {
         {generateWatermarkGrid()}
       </div>
       
-      <div className="p-4 md:p-6 md:ml-64 space-y-6 max-w-7xl mx-auto">
+      <div className="p-4 md:p-6 md:ml-64 max-w-7xl mx-auto">
         <motion.div 
           variants={fadeIn}
           initial="hidden"
@@ -478,65 +493,107 @@ const Training = () => {
           </div>
         </motion.div>
         
+        {/* Featured Video Section */}
         <motion.div
           variants={fadeIn}
           initial="hidden"
           animate="visible"
           transition={{ delay: 0.1 }}
+          className="mb-8"
         >
-          <Card className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 border-purple-100 dark:border-purple-900/30">
-            <CardHeader className="pb-2">
-              <CardTitle>Votre progression</CardTitle>
-              <CardDescription>
-                Suivez votre progression dans les différents catalogues de formation
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <motion.div 
-                variants={staggerContainer}
-                initial="hidden"
-                animate="visible"
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4"
-              >
-                {Object.entries(TRAINING_TYPES).map(([type, label], index) => (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              {featuredVideo ? (
+                <YoutubePlayer 
+                  videoUrl={featuredVideo.video_url} 
+                  title={featuredVideo.title}
+                  description={featuredVideo.description}
+                  onComplete={() => markVideoAsWatched(featuredVideo.id)}
+                />
+              ) : (
+                <Card className="aspect-video flex items-center justify-center">
+                  <CardContent className="p-6 text-center">
+                    <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400">
+                      Aucune formation disponible
+                    </h3>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+            
+            <div>
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    Votre progression
+                  </CardTitle>
+                  <CardDescription>
+                    Suivez votre progression dans les différents catalogues
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
                   <motion.div 
-                    key={type} 
-                    variants={fadeIn}
-                    custom={index}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.98 }}
+                    variants={staggerContainer}
+                    initial="hidden"
+                    animate="visible"
+                    className="space-y-4"
                   >
-                    <Card className="bg-white/50 dark:bg-gray-800/50 hover:shadow-md transition-all">
-                      <CardContent className="p-4">
-                        <div className="flex flex-col items-center">
-                          <p className="font-medium mb-2">{label}</p>
-                          <div className="w-20 h-20 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700 mb-2 relative overflow-hidden">
-                            <div
-                              className="absolute bottom-0 left-0 right-0 bg-purple-500"
-                              style={{ height: `${calculateCategoryProgress(type)}%` }}
-                            />
-                            <span className="text-xl font-bold relative z-10">
-                              {calculateCategoryProgress(type)}%
-                            </span>
-                          </div>
-                          <Progress value={calculateCategoryProgress(type)} className="w-full h-2 mt-2" />
+                    {Object.entries(TRAINING_TYPES).map(([type, label], index) => (
+                      <motion.div 
+                        key={type} 
+                        variants={fadeIn}
+                        custom={index}
+                        className="space-y-2"
+                      >
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium">{label}</span>
+                          <span className="text-sm font-bold">{calculateCategoryProgress(type)}%</span>
                         </div>
-                      </CardContent>
-                    </Card>
+                        <Progress value={calculateCategoryProgress(type)} className="h-2" />
+                      </motion.div>
+                    ))}
                   </motion.div>
-                ))}
-              </motion.div>
-            </CardContent>
-          </Card>
-        </motion.div>
-        
-        <motion.div
-          variants={fadeIn}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: 0.2 }}
-        >
-          <SocialCommunityLinks className="mb-6" />
+                  
+                  <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-800">
+                    <h4 className="text-sm font-medium mb-2">Formations récentes</h4>
+                    <div className="space-y-2">
+                      {watchedVideos.slice(0, 3).map((watchedVideo) => {
+                        const training = trainings.find(t => t.id === watchedVideo.training_id);
+                        if (!training) return null;
+                        
+                        return (
+                          <div 
+                            key={watchedVideo.id}
+                            className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                            onClick={() => openVideoViewer(training)}
+                          >
+                            <div className="relative flex-shrink-0 w-10 h-10 rounded overflow-hidden">
+                              <img 
+                                src={`https://img.youtube.com/vi/${getYoutubeVideoId(training.video_url)}/mqdefault.jpg`} 
+                                alt={training.title}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                <Play className="h-4 w-4 text-white" />
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{training.title}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {new Date(watchedVideo.watched_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </motion.div>
         
         <motion.div
@@ -545,7 +602,7 @@ const Training = () => {
           animate="visible"
           transition={{ delay: 0.3 }}
         >
-          <Card className="bg-white dark:bg-slate-900 shadow-lg border-purple-100 dark:border-purple-900/30">
+          <Card className="bg-white dark:bg-slate-900 shadow-lg border-purple-100 dark:border-purple-900/30 mb-8">
             <CardHeader className="pb-2">
               <CardTitle>Catalogue de formations</CardTitle>
               <CardDescription>
@@ -606,7 +663,7 @@ const Training = () => {
                         )}
                       </div>
                     ) : (
-                      <ScrollArea className="h-[calc(100vh-570px)] min-h-[400px] pr-4">
+                      <ScrollArea className="h-[400px] pr-4">
                         <motion.div
                           variants={staggerContainer}
                           initial="hidden"
@@ -879,39 +936,17 @@ const Training = () => {
         </Dialog>
         
         <Dialog open={isWatching} onOpenChange={(open) => !open && closeVideoViewer()}>
-          <DialogContent className="sm:max-w-5xl h-[80vh] flex flex-col">
-            <DialogHeader>
-              <DialogTitle>{currentVideo?.title}</DialogTitle>
-              <DialogDescription>
-                {currentVideo?.description || "Aucune description disponible"}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="flex-1 overflow-hidden relative">
-              {currentVideo && (
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src={`https://www.youtube.com/embed/${getYoutubeVideoId(currentVideo.video_url)}?autoplay=1`}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title={currentVideo.title}
-                  className="absolute inset-0"
-                ></iframe>
-              )}
-            </div>
-            
-            <DialogFooter className="mt-4">
-              <Button variant="outline" onClick={() => closeVideoViewer()}>
-                Fermer
-              </Button>
-              {(role === 'creator' || role === 'agent') && (
-                <Button onClick={() => closeVideoViewer(true)}>
-                  Marquer comme visionnée
-                </Button>
-              )}
-            </DialogFooter>
+          <DialogContent className="sm:max-w-5xl h-[80vh] flex flex-col p-0">
+            {currentVideo && (
+              <YoutubePlayer 
+                videoUrl={currentVideo.video_url}
+                title={currentVideo.title}
+                description={currentVideo.description || ""}
+                autoplay={true}
+                onComplete={() => closeVideoViewer(true)}
+                className="h-full flex flex-col"
+              />
+            )}
           </DialogContent>
         </Dialog>
         

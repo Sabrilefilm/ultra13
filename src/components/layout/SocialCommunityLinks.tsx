@@ -72,7 +72,7 @@ export const SocialCommunityLinks = ({ className = "" }: SocialCommunityProps) =
     }
   };
 
-  // Hover animation variants - Fixed the type error by explicitly typing repeatType
+  // Hover animation variants - Fixed the type error by using "loop" as const
   const emojiVariants: Variants = {
     idle: { scale: 1, rotate: 0 },
     hover: { 
@@ -83,6 +83,37 @@ export const SocialCommunityLinks = ({ className = "" }: SocialCommunityProps) =
         repeat: Infinity, 
         repeatType: "loop" as const
       } 
+    }
+  };
+
+  // Auto-animation for the icons
+  const autoAnimateVariants = {
+    whatsapp: {
+      y: [0, -5, 0],
+      transition: {
+        duration: 2, 
+        repeat: Infinity,
+        repeatType: "loop" as const,
+        delay: 1
+      }
+    },
+    snapchat: {
+      scale: [1, 1.1, 1],
+      transition: {
+        duration: 2, 
+        repeat: Infinity,
+        repeatType: "loop" as const,
+        delay: 1.5
+      }
+    },
+    tiktok: {
+      rotate: [0, 5, 0, -5, 0],
+      transition: {
+        duration: 2, 
+        repeat: Infinity,
+        repeatType: "loop" as const,
+        delay: 2
+      }
     }
   };
 
@@ -111,11 +142,17 @@ export const SocialCommunityLinks = ({ className = "" }: SocialCommunityProps) =
             <motion.div 
               key={index} 
               variants={itemVariants}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ y: -5, transition: { duration: 0.2 } }}
               onMouseEnter={() => setHoverIndex(index)}
               onMouseLeave={() => setHoverIndex(null)}
               className="group"
+              animate={
+                index === 0 
+                  ? autoAnimateVariants.whatsapp 
+                  : index === 1 
+                    ? autoAnimateVariants.snapchat 
+                    : autoAnimateVariants.tiktok
+              }
             >
               <a 
                 href={link.url} 
