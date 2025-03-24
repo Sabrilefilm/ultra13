@@ -1,4 +1,3 @@
-
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
@@ -21,19 +20,34 @@ export const creatorStatsService = {
             live_schedules (
               hours,
               days
-            ),
-            diamonds!inner (
-              total_diamonds
             )
           `)
           .eq("role", "creator");
 
         if (error) throw error;
         
-        // Reformatting data to match expected structure
+        const creatorIds = data?.map(creator => creator.id) || [];
+        let diamondsData: Record<string, number> = {};
+        
+        if (creatorIds.length > 0) {
+          const { data: diamonds, error: diamondsError } = await supabase
+            .from("diamonds")
+            .select("user_id, total_diamonds")
+            .in("user_id", creatorIds);
+            
+          if (!diamondsError) {
+            diamondsData = (diamonds || []).reduce((acc, item) => {
+              acc[item.user_id] = item.total_diamonds;
+              return acc;
+            }, {} as Record<string, number>);
+          } else {
+            console.error("Error fetching diamonds:", diamondsError);
+          }
+        }
+        
         const formattedData = data?.map(creator => ({
           ...creator,
-          profiles: creator.diamonds ? [{ total_diamonds: creator.diamonds[0]?.total_diamonds || 0 }] : [{ total_diamonds: 0 }]
+          profiles: [{ total_diamonds: diamondsData[creator.id] || 0 }]
         })) || [];
         
         return formattedData;
@@ -58,9 +72,6 @@ export const creatorStatsService = {
             live_schedules (
               hours,
               days
-            ),
-            diamonds!inner (
-              total_diamonds
             )
           `)
           .eq("role", "creator")
@@ -68,10 +79,28 @@ export const creatorStatsService = {
 
         if (error) throw error;
         
-        // Reformatting data to match expected structure
+        const creatorIds = data?.map(creator => creator.id) || [];
+        let diamondsData: Record<string, number> = {};
+        
+        if (creatorIds.length > 0) {
+          const { data: diamonds, error: diamondsError } = await supabase
+            .from("diamonds")
+            .select("user_id, total_diamonds")
+            .in("user_id", creatorIds);
+            
+          if (!diamondsError) {
+            diamondsData = (diamonds || []).reduce((acc, item) => {
+              acc[item.user_id] = item.total_diamonds;
+              return acc;
+            }, {} as Record<string, number>);
+          } else {
+            console.error("Error fetching diamonds:", diamondsError);
+          }
+        }
+        
         const formattedData = data?.map(creator => ({
           ...creator,
-          profiles: creator.diamonds ? [{ total_diamonds: creator.diamonds[0]?.total_diamonds || 0 }] : [{ total_diamonds: 0 }]
+          profiles: [{ total_diamonds: diamondsData[creator.id] || 0 }]
         })) || [];
         
         return formattedData;
@@ -111,7 +140,6 @@ export const creatorStatsService = {
     try {
       console.log(`Updating diamonds for creator ${creator.id} to ${newValue}`);
       
-      // Utiliser la nouvelle fonction manage_diamonds
       const { data, error } = await supabase
         .rpc('manage_diamonds', {
           target_user_id: creator.id,
