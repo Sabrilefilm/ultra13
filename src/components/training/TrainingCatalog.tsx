@@ -10,7 +10,7 @@ import { BookOpen, Edit, Trash, Plus, Link, Video, Sparkles } from "lucide-react
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Tabs, TabsList, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsContent, TabsTrigger } from '@/components/ui/tabs';
 
 interface TrainingCourse {
   id: string;
@@ -173,18 +173,18 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
       <CardContent className="p-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-3 mb-4">
-            <Tab value="video" className="flex items-center gap-1">
+            <TabsTrigger value="video" className="flex items-center gap-1">
               <Video className="h-4 w-4" />
               Vidéos
-            </Tab>
-            <Tab value="document" className="flex items-center gap-1">
+            </TabsTrigger>
+            <TabsTrigger value="document" className="flex items-center gap-1">
               <BookOpen className="h-4 w-4" />
               Documents
-            </Tab>
-            <Tab value="external" className="flex items-center gap-1">
+            </TabsTrigger>
+            <TabsTrigger value="external" className="flex items-center gap-1">
               <Link className="h-4 w-4" />
               Ressources Externes
-            </Tab>
+            </TabsTrigger>
           </TabsList>
           
           {activeTab === "video" && (
