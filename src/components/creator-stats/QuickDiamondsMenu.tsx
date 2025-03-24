@@ -32,6 +32,12 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
     try {
       setIsSubmitting(true);
       
+      console.log("Calling manage_diamonds RPC with:", {
+        target_user_id: creatorId,
+        diamonds_value: diamondAmount,
+        operation: operationType
+      });
+      
       const { data, error } = await supabase.rpc('manage_diamonds', {
         target_user_id: creatorId,
         diamonds_value: diamondAmount,

@@ -609,6 +609,14 @@ export type Database = {
         }
         Returns: string
       }
+      manage_diamonds: {
+        Args: {
+          target_user_id: string
+          diamonds_value: number
+          operation: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       user_role: "creator" | "manager" | "founder"

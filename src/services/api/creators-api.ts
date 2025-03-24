@@ -65,7 +65,9 @@ export const creatorsApi = {
     try {
       if (creatorIds.length === 0) return {};
       
-      // Check if profiles table exists
+      console.log("Fetching diamond data for creators:", creatorIds);
+      
+      // Récupérer les données des diamants à partir des profils
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("id, total_diamonds")
@@ -73,33 +75,19 @@ export const creatorsApi = {
         
       if (profilesError) {
         console.error("Error fetching profiles:", profilesError);
-        
-        // Try using diamonds table if it exists
-        try {
-          const { data: diamonds, error: diamondsError } = await supabase
-            .from("diamonds")
-            .select("user_id, total_diamonds")
-            .in("user_id", creatorIds);
-            
-          if (diamondsError) {
-            console.error("Error fetching diamonds:", diamondsError);
-            return {};
-          }
-          
-          return (diamonds || []).reduce((acc, item) => {
-            acc[item.user_id] = item.total_diamonds;
-            return acc;
-          }, {} as Record<string, number>);
-        } catch (err) {
-          console.error("Error in diamonds fallback:", err);
-          return {};
-        }
+        console.warn("Falling back to empty diamond data");
+        return {};
       }
       
-      return (profiles || []).reduce((acc, item) => {
-        acc[item.id] = item.total_diamonds;
+      console.log("Profiles data received:", profiles);
+      
+      const formattedData = (profiles || []).reduce((acc, item) => {
+        acc[item.id] = item.total_diamonds || 0;
         return acc;
       }, {} as Record<string, number>);
+      
+      console.log("Formatted diamond data:", formattedData);
+      return formattedData;
     } catch (error) {
       console.error("Error fetching diamonds data:", error);
       return {};
