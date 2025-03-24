@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UltraSidebar } from '@/components/layout/UltraSidebar';
@@ -13,7 +12,7 @@ import { UserDiamondsTable } from '@/components/diamonds/UserDiamondsTable';
 import { AgencyOverview } from '@/components/diamonds/AgencyOverview';
 import { EditGoalDialog } from '@/components/diamonds/EditGoalDialog';
 import { DiamondManagementDialog } from '@/components/diamonds/DiamondManagementDialog';
-import { Creator } from '@/hooks/diamonds/use-diamond-fetch'; // Use consistent Creator type
+import { Creator } from '@/hooks/diamonds/use-diamond-fetch';
 
 const CreatorDiamonds = () => {
   const navigate = useNavigate();

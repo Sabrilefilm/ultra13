@@ -11,6 +11,7 @@ export interface ScheduleCreator {
   live_schedules?: Array<{ hours: number; days: number }>;
   total_diamonds?: number;
   diamonds_goal?: number;
+  profiles?: any; // Add this to fix the TS error in CreatorStats.tsx
 }
 
 export function useScheduleEditing(onSuccess: () => Promise<void>) {
