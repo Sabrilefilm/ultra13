@@ -15,7 +15,7 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
 
   const openEditDialog = (user: Creator) => {
     setSelectedCreator(user);
-    setNewDiamondGoal(user.diamonds_goal);
+    setNewDiamondGoal(user.diamonds_goal || 0);
     setIsDialogOpen(true);
   };
   
@@ -32,14 +32,14 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
     try {
       setIsEditing(true);
       
-      // Vérifiez d'abord si le profil existe
+      // Vérifier d'abord si le profil existe
       const { data: profileExists, error: checkError } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, username')
         .eq('id', selectedCreator.id)
         .maybeSingle();
         
-      if (checkError) {
+      if (checkError && checkError.code !== 'PGRST204') {
         throw checkError;
       }
       
@@ -88,14 +88,14 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
     try {
       setIsEditing(true);
       
-      // Vérifiez d'abord si le profil existe
+      // Vérifier d'abord si le profil existe
       const { data: profileExists, error: checkError } = await supabase
         .from('profiles')
-        .select('id, total_diamonds')
+        .select('id, total_diamonds, username')
         .eq('id', selectedCreator.id)
         .maybeSingle();
         
-      if (checkError) {
+      if (checkError && checkError.code !== 'PGRST204') {
         throw checkError;
       }
       
@@ -153,26 +153,46 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
     try {
       setIsEditing(true);
       
-      const { error } = await supabase
+      const { data: agencyProfile, error: checkError } = await supabase
         .from('profiles')
-        .update({ diamonds_goal: agencyGoal })
-        .eq('role', 'agency');
+        .select('id')
+        .eq('role', 'agency')
+        .maybeSingle();
         
-      if (error) {
+      if (checkError && checkError.code !== 'PGRST204') {
+        throw checkError;
+      }
+      
+      if (agencyProfile) {
+        // Si le profil d'agence existe, mise à jour
+        const { error } = await supabase
+          .from('profiles')
+          .update({ 
+            diamonds_goal: agencyGoal,
+            updated_at: new Date()
+          })
+          .eq('id', agencyProfile.id);
+          
+        if (error) throw error;
+      } else {
         // Si le profil n'existe pas, le créer
-        const { error: insertError } = await supabase
+        const { error } = await supabase
           .from('profiles')
           .insert({ 
+            id: crypto.randomUUID(),
             role: 'agency', 
             diamonds_goal: agencyGoal,
             username: 'Agency', // Ajout du username obligatoire
-            id: crypto.randomUUID() // Générer un UUID pour le profil agency
+            total_diamonds: 0,
+            created_at: new Date(),
+            updated_at: new Date()
           });
           
-        if (insertError) throw insertError;
+        if (error) throw error;
       }
       
       toast.success('Objectif diamants de l\'agence mis à jour');
+      await fetchUsers();
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error);
       toast.error('Erreur lors de la mise à jour de l\'objectif de l\'agence');

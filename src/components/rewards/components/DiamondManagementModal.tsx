@@ -28,13 +28,20 @@ export function DiamondManagementModal({
   const [diamondAmount, setDiamondAmount] = useState<number>(0);
   const [userId, setUserId] = useState<string>(selectedUser?.id || "");
   const [isLoading, setIsLoading] = useState(false);
+  const [updatedDiamonds, setUpdatedDiamonds] = useState<number | null>(null);
 
   // Mettre à jour l'identifiant de l'utilisateur sélectionné quand il change
   useEffect(() => {
     if (selectedUser?.id) {
       setUserId(selectedUser.id);
+      setUpdatedDiamonds(null); // Reset updated diamonds when user changes
     }
   }, [selectedUser]);
+
+  // Reset updated diamonds when diamond amount or operation type changes
+  useEffect(() => {
+    setUpdatedDiamonds(null);
+  }, [diamondAmount, operationType]);
 
   const handleUpdateDiamonds = async () => {
     if (!userId || diamondAmount <= 0) {
@@ -55,17 +62,15 @@ export function DiamondManagementModal({
       // Vérifier si le profil existe
       const { data: profileData, error: fetchError } = await supabase
         .from('profiles')
-        .select('id, total_diamonds')
+        .select('id, total_diamonds, username')
         .eq('id', userId)
         .maybeSingle();
       
-      if (fetchError && fetchError.code !== 'PGRST116') {
-        throw fetchError;
-      }
+      let newDiamondValue;
       
       if (!profileData) {
         // Si le profil n'existe pas, le créer
-        const newDiamondValue = operationType === 'add' ? diamondAmount : 0;
+        newDiamondValue = operationType === 'add' ? diamondAmount : 0;
         
         const { error: insertError } = await supabase
           .from('profiles')
@@ -83,7 +88,7 @@ export function DiamondManagementModal({
       } else {
         // Si le profil existe, mettre à jour la valeur des diamants
         const currentDiamonds = profileData.total_diamonds || 0;
-        const newDiamondValue = operationType === 'add' 
+        newDiamondValue = operationType === 'add' 
           ? currentDiamonds + diamondAmount 
           : Math.max(0, currentDiamonds - diamondAmount);
         
@@ -98,17 +103,41 @@ export function DiamondManagementModal({
         if (error) throw error;
       }
       
+      // Mettre à jour l'état local immédiatement
+      setUpdatedDiamonds(newDiamondValue);
+      
       const actionText = operationType === 'add' ? 'ajoutés' : 'retirés';
       const username = users.find(user => user.id === userId)?.username || userId;
       toast.success(`${diamondAmount} diamants ${actionText} pour ${username}`);
       
-      onOpenChange(false);
+      // Réinitialiser le formulaire
+      setDiamondAmount(0);
+      
+      // Rafraîchir les données
       await onSuccess();
     } catch (error) {
       console.error('Erreur lors de la mise à jour des diamants:', error);
       toast.error('Erreur lors de la mise à jour des diamants');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Récupérer l'utilisateur sélectionné avec ses diamants
+  const selectedUserData = users.find(u => u.id === userId);
+  const currentDiamonds = selectedUserData?.profiles?.[0]?.total_diamonds || 0;
+  
+  // Calculer le nouveau total prévu
+  const calculateNewTotal = () => {
+    if (updatedDiamonds !== null) {
+      return updatedDiamonds;
+    }
+    
+    const diamondBase = currentDiamonds;
+    if (operationType === 'add') {
+      return diamondBase + diamondAmount;
+    } else {
+      return Math.max(0, diamondBase - diamondAmount);
     }
   };
 
@@ -130,7 +159,10 @@ export function DiamondManagementModal({
             <Label className="text-white">Sélectionner un utilisateur</Label>
             <Select 
               value={userId} 
-              onValueChange={setUserId}
+              onValueChange={(value) => {
+                setUserId(value);
+                setUpdatedDiamonds(null);
+              }}
             >
               <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                 <SelectValue placeholder="Sélectionner un utilisateur" />
@@ -157,6 +189,19 @@ export function DiamondManagementModal({
               className="bg-slate-800 border-slate-700 text-white"
             />
           </div>
+          
+          {userId && (
+            <div className="pt-2 border-t border-slate-700">
+              <div className="flex justify-between text-slate-300">
+                <span>Diamants actuels:</span>
+                <span>{currentDiamonds} 💎</span>
+              </div>
+              <div className="flex justify-between font-medium mt-1">
+                <span className="text-white">Nouvelle valeur:</span>
+                <span className="text-white">{calculateNewTotal()} 💎</span>
+              </div>
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button 
