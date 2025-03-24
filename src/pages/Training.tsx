@@ -1,921 +1,989 @@
+
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { supabase } from "@/lib/supabase";
 import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
-import { useIndexAuth } from "@/hooks/use-index-auth";
-import { usePlatformSettings } from "@/hooks/use-platform-settings";
-import { useAccountManagement } from "@/hooks/use-account-management";
 import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
-import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { usePlatformSettings } from "@/hooks/use-platform-settings";
+import { useAuth } from "@/hooks/use-index-auth";
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle,
+  CardFooter,
+  CardDescription 
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 import { 
-  Play, Youtube, Book, Lightbulb, CheckCircle, VideoIcon, 
-  ListChecks, PlusCircle, X, Pencil, Save, BookOpen, ArrowLeft
+  PlayCircle, 
+  Clock, 
+  LucideIcon, 
+  BookOpen, 
+  Camera, 
+  Video, 
+  BellRing, 
+  Lightbulb,
+  Instagram,
+  TwitchIcon,
+  YoutubeIcon,
+  MessageCircle,
+  UserPlus,
+  Settings,
+  Heart,
+  ChevronRight,
+  PanelRight
 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { toast } from "sonner";
-import { supabase } from "@/lib/supabase";
-import { TRAINING_TYPES } from "@/components/live-schedule/constants";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Footer } from "@/components/layout/Footer";
-import { getYoutubeVideoId } from "@/utils/videoHelpers";
-import { SocialCommunityLinks } from "@/components/layout/SocialCommunityLinks";
+import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { YoutubePlayer } from "@/components/ui/youtube-player";
 
 interface Training {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   video_url: string;
   type: string;
-  created_at: string;
   order_index: number;
-}
-
-interface WatchedVideo {
-  id: string;
-  user_id: string;
-  training_id: string;
-  watched_at: string;
-  progress: number;
+  created_at: string;
 }
 
 const Training = () => {
-  const { toast: toastHook } = useToast();
-  const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
-  const { platformSettings, handleUpdateSettings } = usePlatformSettings(role);
-  const { handleCreateAccount } = useAccountManagement();
-  const navigate = useNavigate();
-  const isMobile = useIsMobile();
+  // User authentication and session management
+  const { username, role, userId, handleLogout } = useAuth();
+  const { settings: platformSettings } = usePlatformSettings();
+  const { showWarning, dismissWarning, formattedTime } = useInactivityTimer(handleLogout);
+  const { toast } = useToast();
   
+  // State for trainings and UI interactions
   const [trainings, setTrainings] = useState<Training[]>([]);
-  const [selectedType, setSelectedType] = useState("app");
   const [loading, setLoading] = useState(true);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedTraining, setSelectedTraining] = useState<Training | null>(null);
-  const [watchedVideos, setWatchedVideos] = useState<WatchedVideo[]>([]);
-  const [isWatching, setIsWatching] = useState(false);
-  const [currentVideo, setCurrentVideo] = useState<Training | null>(null);
-  const [featuredVideo, setFeaturedVideo] = useState<Training | null>(null);
+  const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
+  const [activeVideoTitle, setActiveVideoTitle] = useState<string>("");
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
+  const [communityDialogOpen, setCommunityDialogOpen] = useState(false);
+  const [equipmentDialogOpen, setEquipmentDialogOpen] = useState(false);
+  const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
   
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [videoUrl, setVideoUrl] = useState("");
-  const [trainingType, setTrainingType] = useState("app");
-  const [catalogName, setCatalogName] = useState("");
-  const [isAddCatalogOpen, setIsAddCatalogOpen] = useState(false);
-  
-  const { showWarning, dismissWarning, formattedTime } = useInactivityTimer({
-    timeout: 120000, // 2 minutes
-    onTimeout: () => {
-      handleLogout();
-      toastHook({
-        title: "Déconnexion automatique",
-        description: "Vous avez été déconnecté en raison d'inactivité.",
-      });
-    },
-    warningTime: 30000, 
-    onWarning: () => {}
-  });
-  
-  const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { 
-        duration: 0.5,
-        ease: "easeOut" 
-      }
-    }
-  };
-  
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-  
+  // Fetch trainings from the database
   useEffect(() => {
-    if (!isAuthenticated) {
-      window.location.href = '/';
-      return;
-    }
+    const fetchTrainings = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('trainings')
+          .select('*')
+          .order('order_index', { ascending: true });
+        
+        if (error) throw error;
+        setTrainings(data || []);
+      } catch (error) {
+        console.error('Error fetching trainings:', error);
+        toast({
+          title: 'Erreur',
+          description: 'Impossible de charger les formations',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
     
     fetchTrainings();
-    if (userId) {
-      fetchWatchedVideos();
+  }, []);
+
+  // Open the video modal
+  const handleOpenVideo = (url: string, title: string) => {
+    setActiveVideoUrl(url);
+    setActiveVideoTitle(title);
+    setIsVideoModalOpen(true);
+  };
+
+  // Filter trainings by type
+  const filteredTrainings = activeTab === 'all' 
+    ? trainings 
+    : trainings.filter(training => training.type.toLowerCase() === activeTab);
+
+  // Get YouTube video ID from URL
+  const getYoutubeVideoId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  // Group trainings by type
+  const trainingsByType = trainings.reduce((acc, training) => {
+    const type = training.type.toLowerCase();
+    if (!acc[type]) {
+      acc[type] = [];
     }
-  }, [isAuthenticated, selectedType, userId]);
-  
-  useEffect(() => {
-    if (trainings.length > 0 && !featuredVideo) {
-      const unwatchedVideos = trainings.filter(
-        training => !watchedVideos.some(wv => wv.training_id === training.id && wv.progress === 100)
-      );
-      
-      setFeaturedVideo(unwatchedVideos.length > 0 ? unwatchedVideos[0] : trainings[0]);
-    }
-  }, [trainings, watchedVideos, featuredVideo]);
-  
-  const fetchTrainings = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('trainings')
-        .select('*')
-        .eq('type', selectedType)
-        .order('order_index', { ascending: true });
-      
-      if (error) {
-        throw error;
+    acc[type].push(training);
+    return acc;
+  }, {} as Record<string, Training[]>);
+
+  // Animation variants for cards
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.1,
+        duration: 0.5,
+        ease: "easeOut"
       }
-      
-      setTrainings(data || []);
-    } catch (error) {
-      console.error('Erreur lors du chargement des formations:', error);
-      toast.error('Erreur lors du chargement des formations');
-    } finally {
-      setLoading(false);
-    }
+    })
   };
-  
-  const fetchWatchedVideos = async () => {
-    try {
-      const { error: tableError } = await supabase
-        .from('watched_videos')
-        .select('id')
-        .limit(1)
-        .single();
-        
-      if (tableError && tableError.code === '42P01') {
-        console.log('La table watched_videos n\'existe pas encore, elle sera créée ultérieurement');
-        return;
-      }
-      
-      const { data, error } = await supabase
-        .from('watched_videos')
-        .select('*')
-        .eq('user_id', userId);
-      
-      if (error) {
-        console.error('Erreur lors du chargement des vidéos visionnées:', error);
-        return;
-      }
-      
-      setWatchedVideos(data || []);
-    } catch (error) {
-      console.error('Erreur lors du chargement des vidéos visionnées:', error);
-    }
-  };
-  
-  const markVideoAsWatched = async (trainingId: string) => {
-    if (!userId) return;
-    
-    try {
-      const existingWatch = watchedVideos.find(
-        (wv) => wv.training_id === trainingId && wv.user_id === userId
-      );
-      
-      if (existingWatch) {
-        const { error } = await supabase
-          .from('watched_videos')
-          .update({ progress: 100 })
-          .eq('id', existingWatch.id);
-          
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('watched_videos')
-          .insert([
-            {
-              user_id: userId,
-              training_id: trainingId,
-              progress: 100,
-              watched_at: new Date().toISOString()
-            }
-          ]);
-          
-        if (error) throw error;
-      }
-      
-      fetchWatchedVideos();
-      toast.success('Vidéo marquée comme visionnée');
-    } catch (error) {
-      console.error('Erreur lors du marquage de la vidéo:', error);
-      toast.error('Erreur lors du marquage de la vidéo');
-    }
-  };
-  
-  const generateWatermarkGrid = () => {
-    let watermarkDivs = [];
-    const rows = 15;
-    const cols = 15;
-    
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        watermarkDivs.push(
-          <div 
-            key={`${i}-${j}`} 
-            className="absolute text-slate-200/10 text-[8px] font-bold whitespace-nowrap rotate-[-30deg]"
-            style={{
-              top: `${(i * 100) / rows}%`,
-              left: `${(j * 100) / cols}%`,
-              transform: 'translate(-50%, -50%) rotate(-30deg)'
-            }}
-          >
-            {username?.toUpperCase()}
-          </div>
-        );
-      }
-    }
-    
-    return watermarkDivs;
-  };
-  
-  const calculateCategoryProgress = (type: string) => {
-    const categoryVideos = trainings.filter(t => t.type === type);
-    if (categoryVideos.length === 0) return 0;
-    
-    const watchedCount = categoryVideos.filter(training => 
-      watchedVideos.some(wv => wv.training_id === training.id && wv.progress === 100)
-    ).length;
-    
-    return Math.round((watchedCount / categoryVideos.length) * 100);
-  };
-  
-  const isVideoWatched = (trainingId: string) => {
-    return watchedVideos.some(wv => wv.training_id === trainingId && wv.progress === 100);
-  };
-  
-  const handleAddTraining = async () => {
-    if (!title || !videoUrl) {
-      toast.warning('Veuillez remplir tous les champs obligatoires');
-      return;
-    }
-    
-    try {
-      const videoId = getYoutubeVideoId(videoUrl);
-      if (!videoId) {
-        toast.error('URL YouTube invalide');
-        return;
-      }
-      
-      const maxOrderIndex = trainings.length > 0 
-        ? Math.max(...trainings.map(t => t.order_index || 0)) 
-        : 0;
-      
-      const { data, error } = await supabase
-        .from('trainings')
-        .insert([
-          {
-            title,
-            description,
-            video_url: videoUrl,
-            type: trainingType,
-            order_index: maxOrderIndex + 1
-          }
-        ])
-        .select();
-      
-      if (error) {
-        throw error;
-      }
-      
-      toast.success('Formation ajoutée avec succès');
-      fetchTrainings();
-      resetForm();
-      setIsAddDialogOpen(false);
-    } catch (error) {
-      console.error('Erreur lors de l\'ajout de la formation:', error);
-      toast.error('Erreur lors de l\'ajout de la formation');
-    }
-  };
-  
-  const handleUpdateTraining = async () => {
-    if (!selectedTraining || !title || !videoUrl) {
-      toast.warning('Veuillez remplir tous les champs obligatoires');
-      return;
-    }
-    
-    try {
-      const videoId = getYoutubeVideoId(videoUrl);
-      if (!videoId) {
-        toast.error('URL YouTube invalide');
-        return;
-      }
-      
-      const { error } = await supabase
-        .from('trainings')
-        .update({
-          title,
-          description,
-          video_url: videoUrl
-        })
-        .eq('id', selectedTraining.id);
-      
-      if (error) {
-        throw error;
-      }
-      
-      toast.success('Formation mise à jour avec succès');
-      fetchTrainings();
-      resetForm();
-      setIsEditDialogOpen(false);
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour de la formation:', error);
-      toast.error('Erreur lors de la mise à jour de la formation');
-    }
-  };
-  
-  const handleAddCatalog = async () => {
-    if (!catalogName) {
-      toast.warning('Veuillez entrer un nom pour le catalogue');
-      return;
-    }
-    
-    try {
-      if (Object.values(TRAINING_TYPES).includes(catalogName)) {
-        toast.error('Ce catalogue existe déjà');
-        return;
-      }
-      
-      toast.success('Catalogue ajouté avec succès');
-      setCatalogName("");
-      setIsAddCatalogOpen(false);
-      
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (error) {
-      console.error('Erreur lors de l\'ajout du catalogue:', error);
-      toast.error('Erreur lors de l\'ajout du catalogue');
-    }
-  };
-  
-  const handleDeleteTraining = async (id: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette formation ?')) {
-      return;
-    }
-    
-    try {
-      const { error } = await supabase
-        .from('trainings')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        throw error;
-      }
-      
-      toast.success('Formation supprimée avec succès');
-      fetchTrainings();
-    } catch (error) {
-      console.error('Erreur lors de la suppression de la formation:', error);
-      toast.error('Erreur lors de la suppression de la formation');
-    }
-  };
-  
-  const resetForm = () => {
-    setTitle("");
-    setDescription("");
-    setVideoUrl("");
-    setTrainingType(selectedType);
-    setSelectedTraining(null);
-  };
-  
-  const openEditDialog = (training: Training) => {
-    setSelectedTraining(training);
-    setTitle(training.title);
-    setDescription(training.description || "");
-    setVideoUrl(training.video_url);
-    setTrainingType(training.type);
-    setIsEditDialogOpen(true);
-  };
-  
-  const openVideoViewer = (training: Training) => {
-    setCurrentVideo(training);
-    setIsWatching(true);
-  };
-  
-  const closeVideoViewer = (markAsWatched = false) => {
-    if (markAsWatched && currentVideo) {
-      markVideoAsWatched(currentVideo.id);
-    }
-    setIsWatching(false);
-    setCurrentVideo(null);
-  };
-  
+
   return (
-    <SidebarProvider defaultOpen={true}>
-      <UltraDashboard
-        username={username}
-        role={role || ''}
-        userId={userId || ''}
-        onLogout={handleLogout}
-        platformSettings={platformSettings}
-        handleCreateAccount={handleCreateAccount}
-        handleUpdateSettings={handleUpdateSettings}
-        showWarning={showWarning}
-        dismissWarning={dismissWarning}
-        formattedTime={formattedTime}
-        currentPage="training"
-      />
-      
-      <div className="fixed inset-0 pointer-events-none select-none z-0 overflow-hidden">
-        {generateWatermarkGrid()}
-      </div>
-      
-      <div className="p-4 md:p-6 md:ml-64 max-w-5xl mx-auto">
-        <motion.div 
-          variants={fadeIn}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 bg-gradient-to-r from-purple-900/10 to-indigo-900/10 p-4 rounded-xl border border-purple-900/20"
-        >
-          <div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/")}
-              className="mb-2"
+    <UltraDashboard
+      username={username}
+      role={role}
+      userId={userId}
+      onLogout={handleLogout}
+      platformSettings={platformSettings}
+      handleCreateAccount={() => {}}
+      handleUpdateSettings={() => Promise.resolve()}
+      showWarning={showWarning}
+      dismissWarning={dismissWarning}
+      formattedTime={formattedTime}
+      currentPage="training"
+    >
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
+        {/* Header Section */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-4">Nos Formations</h1>
+          <p className="text-gray-300 max-w-3xl">
+            Bienvenue dans l'espace de formation de Phocéen Agency. Nous avons préparé des ressources pour vous aider à
+            développer vos compétences et à améliorer votre présence en ligne.
+          </p>
+        </div>
+
+        {/* Main Content Container */}
+        <div className="grid grid-cols-1 gap-8">
+          {/* Quick Access Panels */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+            {/* Community Panel */}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour au tableau de bord
-            </Button>
-            <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
-              Centre de Formations
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400">
-              Apprenez à utiliser la plateforme et à développer votre présence en ligne
-            </p>
+              <Card 
+                className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border-purple-700/30 hover:border-purple-500/50 cursor-pointer transition-all duration-300 overflow-hidden"
+                onClick={() => setCommunityDialogOpen(true)}
+              >
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-purple-300">
+                    <UserPlus className="h-5 w-5" />
+                    <span>Rejoindre Notre Communauté</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-purple-200/80">
+                    Connectez-vous avec d'autres créateurs et bénéficiez d'un soutien supplémentaire.
+                  </p>
+                </CardContent>
+                <div className="absolute bottom-2 right-2">
+                  <ChevronRight className="h-5 w-5 text-purple-300/50" />
+                </div>
+              </Card>
+            </motion.div>
+
+            {/* Equipment Panel */}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <Card 
+                className="bg-gradient-to-br from-blue-900/40 to-teal-900/40 border-blue-700/30 hover:border-blue-500/50 cursor-pointer transition-all duration-300 overflow-hidden"
+                onClick={() => setEquipmentDialogOpen(true)}
+              >
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-blue-300">
+                    <Camera className="h-5 w-5" />
+                    <span>Recommandations Matériel</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-blue-200/80">
+                    Découvrez notre sélection de matériel recommandé pour améliorer vos lives.
+                  </p>
+                </CardContent>
+                <div className="absolute bottom-2 right-2">
+                  <ChevronRight className="h-5 w-5 text-blue-300/50" />
+                </div>
+              </Card>
+            </motion.div>
+
+            {/* Tools Panel */}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <Card 
+                className="bg-gradient-to-br from-amber-900/40 to-red-900/40 border-amber-700/30 hover:border-amber-500/50 cursor-pointer transition-all duration-300 overflow-hidden"
+                onClick={() => setToolsDialogOpen(true)}
+              >
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-amber-300">
+                    <Settings className="h-5 w-5" />
+                    <span>Outils et Logiciels</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-amber-200/80">
+                    Les meilleurs outils pour optimiser vos diffusions et votre contenu.
+                  </p>
+                </CardContent>
+                <div className="absolute bottom-2 right-2">
+                  <ChevronRight className="h-5 w-5 text-amber-300/50" />
+                </div>
+              </Card>
+            </motion.div>
           </div>
-          
-          <div className="flex gap-2">
-            {role === 'founder' && (
-              <>
-                <Button 
-                  onClick={() => setIsAddCatalogOpen(true)}
-                  variant="outline" 
-                  className="flex items-center gap-2"
-                >
-                  <PlusCircle className="h-4 w-4" />
-                  Ajouter un catalogue
-                </Button>
-                <Button 
-                  onClick={() => {
-                    resetForm();
-                    setTrainingType(selectedType);
-                    setIsAddDialogOpen(true);
-                  }}
-                  className="bg-purple-600 hover:bg-purple-700 flex items-center gap-2"
-                >
-                  <PlusCircle className="h-4 w-4" />
-                  Ajouter une formation
-                </Button>
-              </>
-            )}
-          </div>
-        </motion.div>
-        
-        <motion.div
-          variants={fadeIn}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: 0.1 }}
-          className="mb-6"
-        >
-          <Tabs defaultValue="app" value={selectedType} onValueChange={setSelectedType}>
-            <TabsList className="grid grid-cols-2 md:grid-cols-5 mb-4 w-full">
-              <TabsTrigger value="app" className="flex items-center gap-2">
-                <Book className="h-4 w-4" />
-                <span className={isMobile ? "hidden" : ""}>Application</span>
-              </TabsTrigger>
-              <TabsTrigger value="live" className="flex items-center gap-2">
-                <Play className="h-4 w-4" />
-                <span className={isMobile ? "hidden" : ""}>Techniques de live</span>
-              </TabsTrigger>
-              <TabsTrigger value="content" className="flex items-center gap-2">
-                <VideoIcon className="h-4 w-4" />
-                <span className={isMobile ? "hidden" : ""}>Création de contenu</span>
-              </TabsTrigger>
-              <TabsTrigger value="growth" className="flex items-center gap-2">
-                <Lightbulb className="h-4 w-4" />
-                <span className={isMobile ? "hidden" : ""}>Croissance</span>
-              </TabsTrigger>
-              <TabsTrigger value="monetization" className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span className={isMobile ? "hidden" : ""}>Monétisation</span>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </motion.div>
-        
-        <motion.div
-          variants={fadeIn}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: 0.2 }}
-          className="mb-6"
-        >
-          <Card className="border border-purple-100 dark:border-purple-900/30">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xl flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                Votre progression
-              </CardTitle>
-              <CardDescription>
-                Progression dans le catalogue {TRAINING_TYPES[selectedType]}
+
+          {/* Training Tabs */}
+          <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-sm shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-white">Formations Disponibles</CardTitle>
+              <CardDescription className="text-gray-400">
+                Sélectionnez une catégorie pour filtrer les formations
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium">{TRAINING_TYPES[selectedType]}</span>
-                <span className="text-sm font-bold">{calculateCategoryProgress(selectedType)}%</span>
-              </div>
-              <Progress value={calculateCategoryProgress(selectedType)} className="h-2 mb-4" />
+              <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid grid-cols-4 lg:grid-cols-5 mb-6">
+                  <TabsTrigger value="all">Tous</TabsTrigger>
+                  {Object.keys(trainingsByType).map((type) => (
+                    <TabsTrigger key={type} value={type}>
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+
+                <TabsContent value="all" className="space-y-6">
+                  {/* All Trainings */}
+                  {loading ? (
+                    <div className="flex items-center justify-center h-40">
+                      <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {trainings.map((training, i) => (
+                        <motion.div
+                          key={training.id}
+                          custom={i}
+                          initial="hidden"
+                          animate="visible"
+                          variants={cardVariants}
+                        >
+                          <Card className="bg-slate-800/70 border-slate-700/50 overflow-hidden hover:border-blue-600/50 transition-all duration-300">
+                            <div className="flex flex-col md:flex-row">
+                              <div 
+                                className="relative md:w-48 h-36 bg-slate-700 cursor-pointer"
+                                onClick={() => handleOpenVideo(training.video_url, training.title)}
+                              >
+                                {training.video_url && (
+                                  <div className="absolute inset-0 flex items-center justify-center group">
+                                    <img 
+                                      src={`https://img.youtube.com/vi/${getYoutubeVideoId(training.video_url)}/mqdefault.jpg`} 
+                                      alt={training.title}
+                                      className="w-full h-full object-cover opacity-80"
+                                    />
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                      <PlayCircle className="h-12 w-12 text-white opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="p-4 flex-1">
+                                <div className="flex justify-between items-start">
+                                  <h3 className="text-lg font-semibold text-white">{training.title}</h3>
+                                  <Badge 
+                                    variant="outline" 
+                                    className={
+                                      training.type === 'video' ? 'bg-blue-900/30 text-blue-400 border-blue-700/50' :
+                                      training.type === 'technique' ? 'bg-green-900/30 text-green-400 border-green-700/50' :
+                                      training.type === 'guide' ? 'bg-purple-900/30 text-purple-400 border-purple-700/50' :
+                                      'bg-amber-900/30 text-amber-400 border-amber-700/50'
+                                    }
+                                  >
+                                    {training.type}
+                                  </Badge>
+                                </div>
+                                <p className="text-gray-300 text-sm mt-2">{training.description}</p>
+                                <div className="mt-4 flex justify-between items-center">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    className="border-blue-600 text-blue-400 hover:bg-blue-900/20"
+                                    onClick={() => handleOpenVideo(training.video_url, training.title)}
+                                  >
+                                    <PlayCircle className="h-4 w-4 mr-2" />
+                                    Regarder
+                                  </Button>
+                                  <div className="flex items-center text-gray-400 text-xs">
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    <span>{new Date(training.created_at).toLocaleDateString('fr-FR')}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+
+                {/* Category Tabs */}
+                {Object.entries(trainingsByType).map(([type, typeTrainings]) => (
+                  <TabsContent key={type} value={type} className="space-y-6">
+                    <div className="space-y-4">
+                      {typeTrainings.map((training, i) => (
+                        <motion.div
+                          key={training.id}
+                          custom={i}
+                          initial="hidden"
+                          animate="visible"
+                          variants={cardVariants}
+                        >
+                          <Card className="bg-slate-800/70 border-slate-700/50 overflow-hidden hover:border-blue-600/50 transition-all duration-300">
+                            <div className="flex flex-col md:flex-row">
+                              <div 
+                                className="relative md:w-48 h-36 bg-slate-700 cursor-pointer"
+                                onClick={() => handleOpenVideo(training.video_url, training.title)}
+                              >
+                                {training.video_url && (
+                                  <div className="absolute inset-0 flex items-center justify-center group">
+                                    <img 
+                                      src={`https://img.youtube.com/vi/${getYoutubeVideoId(training.video_url)}/mqdefault.jpg`} 
+                                      alt={training.title}
+                                      className="w-full h-full object-cover opacity-80"
+                                    />
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                      <PlayCircle className="h-12 w-12 text-white opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="p-4 flex-1">
+                                <div className="flex justify-between items-start">
+                                  <h3 className="text-lg font-semibold text-white">{training.title}</h3>
+                                  <Badge 
+                                    variant="outline" 
+                                    className={
+                                      training.type === 'video' ? 'bg-blue-900/30 text-blue-400 border-blue-700/50' :
+                                      training.type === 'technique' ? 'bg-green-900/30 text-green-400 border-green-700/50' :
+                                      training.type === 'guide' ? 'bg-purple-900/30 text-purple-400 border-purple-700/50' :
+                                      'bg-amber-900/30 text-amber-400 border-amber-700/50'
+                                    }
+                                  >
+                                    {training.type}
+                                  </Badge>
+                                </div>
+                                <p className="text-gray-300 text-sm mt-2">{training.description}</p>
+                                <div className="mt-4 flex justify-between items-center">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    className="border-blue-600 text-blue-400 hover:bg-blue-900/20"
+                                    onClick={() => handleOpenVideo(training.video_url, training.title)}
+                                  >
+                                    <PlayCircle className="h-4 w-4 mr-2" />
+                                    Regarder
+                                  </Button>
+                                  <div className="flex items-center text-gray-400 text-xs">
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    <span>{new Date(training.created_at).toLocaleDateString('fr-FR')}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
             </CardContent>
           </Card>
-        </motion.div>
-        
-        {featuredVideo && selectedType === featuredVideo.type && (
-          <motion.div
-            variants={fadeIn}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.3 }}
-            className="mb-6"
-          >
-            <Card className="border border-purple-100 dark:border-purple-900/30">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Formation en vedette</CardTitle>
-                <CardDescription>
-                  Commencez par cette formation recommandée
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <YoutubePlayer 
-                  videoUrl={featuredVideo.video_url} 
-                  title={featuredVideo.title}
-                  description={featuredVideo.description}
-                  onComplete={() => markVideoAsWatched(featuredVideo.id)}
-                  className="mb-4"
-                />
-                {!isVideoWatched(featuredVideo.id) && (
-                  <Button 
-                    onClick={() => markVideoAsWatched(featuredVideo.id)}
-                    className="w-full bg-green-600 hover:bg-green-700"
-                  >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Marquer comme visionnée
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-        
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
-          className="space-y-4"
-        >
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-            </div>
-          ) : trainings.filter(t => t.type === selectedType).length === 0 ? (
-            <div className="text-center py-12 bg-white dark:bg-slate-900 shadow-sm rounded-lg border p-8">
-              <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400">
-                Aucune formation disponible dans cette catégorie
-              </h3>
-              {role === 'founder' && (
-                <Button 
-                  onClick={() => {
-                    resetForm();
-                    setTrainingType(selectedType);
-                    setIsAddDialogOpen(true);
-                  }}
-                  className="mt-4"
-                >
-                  Ajouter une formation
-                </Button>
-              )}
-            </div>
-          ) : (
-            trainings
-              .filter(training => training.type === selectedType)
-              .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
-              .map((training, index) => (
-                <motion.div
-                  key={training.id}
-                  variants={fadeIn}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  className="w-full"
-                >
-                  <Card 
-                    className={`overflow-hidden border transition-all hover:shadow-md ${
-                      isVideoWatched(training.id) 
-                        ? "border-green-300 dark:border-green-700" 
-                        : "border-gray-200 dark:border-gray-700"
-                    }`}
-                  >
-                    <div className="grid md:grid-cols-12 gap-4">
-                      <div 
-                        className="md:col-span-5 cursor-pointer group relative h-48 md:h-full min-h-[160px]"
-                        onClick={() => openVideoViewer(training)}
-                      >
-                        <img 
-                          src={`https://img.youtube.com/vi/${getYoutubeVideoId(training.video_url)}/mqdefault.jpg`}
-                          alt={training.title}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <motion.div
-                            whileHover={{ scale: 1.2, rotate: 5 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            <Play className="h-16 w-16 text-white" />
-                          </motion.div>
-                        </div>
-                        {isVideoWatched(training.id) && (
-                          <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                            Visionné
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="md:col-span-7 p-4 flex flex-col justify-between">
-                        <div>
-                          <div className="flex justify-between items-start">
-                            <h3 className="text-lg font-semibold mb-2">
-                              {training.title}
-                            </h3>
-                            
-                            {role === 'founder' && (
-                              <div className="flex gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    openEditDialog(training);
-                                  }}
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="text-red-500 hover:text-red-600"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteTraining(training.id);
-                                  }}
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {training.description && (
-                            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
-                              {training.description}
-                            </p>
-                          )}
-                        </div>
-                        
-                        <div className="flex justify-between items-center mt-auto pt-2 border-t border-dashed border-gray-200 dark:border-gray-700">
-                          <a 
-                            href={training.video_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-blue-500 hover:underline text-sm flex items-center gap-1"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Youtube className="h-4 w-4" />
-                            Voir sur YouTube
-                          </a>
-                          
-                          <div className="flex gap-2">
-                            {!isVideoWatched(training.id) && (
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  markVideoAsWatched(training.id);
-                                }}
-                              >
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Marquer comme vu
-                              </Button>
-                            )}
-                            
-                            <Button 
-                              size="sm" 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openVideoViewer(training);
-                              }}
-                              className="bg-purple-600 hover:bg-purple-700"
-                            >
-                              Visionner
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              ))
-          )}
-        </motion.div>
-        
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogContent className="sm:max-w-md">
+        </div>
+
+        {/* Video Player Modal */}
+        <Dialog open={isVideoModalOpen} onOpenChange={setIsVideoModalOpen}>
+          <DialogContent className="sm:max-w-3xl h-auto">
             <DialogHeader>
-              <DialogTitle>Ajouter une formation</DialogTitle>
-              <DialogDescription>
-                Créez une nouvelle formation avec contenu vidéo YouTube
-              </DialogDescription>
+              <DialogTitle className="text-white">{activeVideoTitle}</DialogTitle>
             </DialogHeader>
-            
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Titre*</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Le titre de la formation"
-                />
+            {activeVideoUrl && getYoutubeVideoId(activeVideoUrl) && (
+              <div className="aspect-video">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={`https://www.youtube.com/embed/${getYoutubeVideoId(activeVideoUrl)}`}
+                  title={activeVideoTitle}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="rounded-md overflow-hidden"
+                ></iframe>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Input
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Une description courte (optionnelle)"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="video_url">URL YouTube*</Label>
-                <Input
-                  id="video_url"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  placeholder="https://www.youtube.com/watch?v=..."
-                />
-                <p className="text-xs text-gray-500">Format: URL YouTube standard ou embed</p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="type">Catalogue</Label>
-                <select
-                  id="type"
-                  value={trainingType}
-                  onChange={(e) => setTrainingType(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  {Object.entries(TRAINING_TYPES).map(([key, value]) => (
-                    <option key={key} value={key}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                Annuler
-              </Button>
-              <Button onClick={handleAddTraining}>
-                Ajouter
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-        
-        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Modifier la formation</DialogTitle>
-              <DialogDescription>
-                Mettez à jour les informations de la formation
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-title">Titre*</Label>
-                <Input
-                  id="edit-title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="edit-description">Description</Label>
-                <Input
-                  id="edit-description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="edit-video_url">URL YouTube*</Label>
-                <Input
-                  id="edit-video_url"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                />
-              </div>
-            </div>
-            
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                Annuler
-              </Button>
-              <Button onClick={handleUpdateTraining}>
-                Enregistrer
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-        
-        <Dialog open={isAddCatalogOpen} onOpenChange={setIsAddCatalogOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Ajouter un catalogue</DialogTitle>
-              <DialogDescription>
-                Créez un nouveau catalogue de formations
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="catalog-name">Nom du catalogue*</Label>
-                <Input
-                  id="catalog-name"
-                  value={catalogName}
-                  onChange={(e) => setCatalogName(e.target.value)}
-                  placeholder="Ex: Édition Vidéo"
-                />
-              </div>
-            </div>
-            
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddCatalogOpen(false)}>
-                Annuler
-              </Button>
-              <Button onClick={handleAddCatalog}>
-                Créer le catalogue
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-        
-        <Dialog open={isWatching} onOpenChange={(open) => !open && closeVideoViewer()}>
-          <DialogContent className="sm:max-w-5xl h-[80vh] flex flex-col p-0">
-            {currentVideo && (
-              <YoutubePlayer 
-                videoUrl={currentVideo.video_url}
-                title={currentVideo.title}
-                description={currentVideo.description || ""}
-                autoplay={true}
-                onComplete={() => closeVideoViewer(true)}
-                className="h-full flex flex-col"
-              />
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Community Dialog */}
+        <Dialog open={communityDialogOpen} onOpenChange={setCommunityDialogOpen}>
+          <DialogContent className="sm:max-w-xl">
+            <DialogHeader>
+              <DialogTitle className="text-center text-xl font-bold text-white mb-2">
+                Rejoignez Notre Communauté
+              </DialogTitle>
+              <DialogDescription className="text-center text-gray-400">
+                Connectez-vous avec d'autres créateurs et l'équipe de Phocéen Agency
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+              <Card className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-purple-700/30 hover:border-purple-500/50 transition-all duration-300 overflow-hidden">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-purple-300 text-lg">
+                    <Instagram className="h-5 w-5" />
+                    <span>Instagram</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <p className="text-sm text-purple-200/80">
+                    Suivez-nous sur Instagram pour les dernières nouvelles et annonces
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    onClick={() => window.open('https://www.instagram.com/phoceen.agency', '_blank')}
+                  >
+                    <Instagram className="h-4 w-4 mr-2" />
+                    Rejoindre
+                  </Button>
+                </CardFooter>
+              </Card>
+              
+              <Card className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 border-purple-700/30 hover:border-purple-500/50 transition-all duration-300 overflow-hidden">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-purple-300 text-lg">
+                    <TwitchIcon className="h-5 w-5" />
+                    <span>Twitch</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <p className="text-sm text-purple-200/80">
+                    Rejoignez nos streams en direct et participez aux discussions
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    className="w-full bg-[#6441a5] hover:bg-[#7550ba]"
+                    onClick={() => window.open('https://www.twitch.tv/phoceen_agency', '_blank')}
+                  >
+                    <TwitchIcon className="h-4 w-4 mr-2" />
+                    Suivre
+                  </Button>
+                </CardFooter>
+              </Card>
+              
+              <Card className="bg-gradient-to-br from-red-900/20 to-amber-900/20 border-red-700/30 hover:border-red-500/50 transition-all duration-300 overflow-hidden">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-red-300 text-lg">
+                    <YoutubeIcon className="h-5 w-5" />
+                    <span>YouTube</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <p className="text-sm text-red-200/80">
+                    Abonnez-vous à notre chaîne pour des tutoriels et des highlights
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    className="w-full bg-red-600 hover:bg-red-700"
+                    onClick={() => window.open('https://www.youtube.com/channel/phoceen_agency', '_blank')}
+                  >
+                    <YoutubeIcon className="h-4 w-4 mr-2" />
+                    S'abonner
+                  </Button>
+                </CardFooter>
+              </Card>
+              
+              <Card className="bg-gradient-to-br from-blue-900/20 to-cyan-900/20 border-blue-700/30 hover:border-blue-500/50 transition-all duration-300 overflow-hidden">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-blue-300 text-lg">
+                    <MessageCircle className="h-5 w-5" />
+                    <span>Discord</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <p className="text-sm text-blue-200/80">
+                    Rejoignez notre serveur Discord pour échanger avec la communauté
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    className="w-full bg-[#5865f2] hover:bg-[#4752c4]"
+                    onClick={() => window.open('https://discord.gg/phoceen-agency', '_blank')}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Rejoindre
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setCommunityDialogOpen(false)}>
+                Fermer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         
-        <Footer className="mt-10" />
+        {/* Equipment Recommendations Dialog */}
+        <Dialog open={equipmentDialogOpen} onOpenChange={setEquipmentDialogOpen}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-center text-xl font-bold text-white mb-2">
+                Recommandations Matériel
+              </DialogTitle>
+              <DialogDescription className="text-center text-gray-400">
+                Notre sélection d'équipements recommandés pour améliorer la qualité de vos lives
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6 py-4">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-blue-400 flex items-center">
+                  <Camera className="h-5 w-5 mr-2" />
+                  Caméras
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="bg-slate-800/60 border-slate-700/50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Logitech StreamCam</CardTitle>
+                      <CardDescription>Prix: ~159€</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <p className="text-sm text-gray-300">
+                        Caméra 1080p 60fps, idéale pour les streamers débutants et intermédiaires.
+                      </p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        variant="outline" 
+                        className="w-full text-blue-400 border-blue-700/50 hover:bg-blue-900/20"
+                        onClick={() => window.open('https://www.amazon.fr/Logitech-StreamCam-Streaming-Verticales-Authentification/dp/B07W4DHNBF', '_blank')}
+                      >
+                        Voir le produit
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                  
+                  <Card className="bg-slate-800/60 border-slate-700/50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Sony ZV-1</CardTitle>
+                      <CardDescription>Prix: ~699€</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <p className="text-sm text-gray-300">
+                        Appareil photo compact optimisé pour les créateurs de contenu avec excellent suivi du visage.
+                      </p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        variant="outline" 
+                        className="w-full text-blue-400 border-blue-700/50 hover:bg-blue-900/20"
+                        onClick={() => window.open('https://www.amazon.fr/Sony-Appareil-Numérique-Compact-pour/dp/B088XTJG8R', '_blank')}
+                      >
+                        Voir le produit
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </div>
+              </div>
+              
+              <Separator className="bg-slate-700/50" />
+              
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                  <BellRing className="h-5 w-5 mr-2" />
+                  Microphones
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="bg-slate-800/60 border-slate-700/50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">HyperX QuadCast</CardTitle>
+                      <CardDescription>Prix: ~129€</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <p className="text-sm text-gray-300">
+                        Microphone USB à condensateur avec excellente qualité audio et filtre anti-pop intégré.
+                      </p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        variant="outline" 
+                        className="w-full text-green-400 border-green-700/50 hover:bg-green-900/20"
+                        onClick={() => window.open('https://www.amazon.fr/HyperX-QuadCast-Microphone-Condensateur-Autonome/dp/B07NZZZ746', '_blank')}
+                      >
+                        Voir le produit
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                  
+                  <Card className="bg-slate-800/60 border-slate-700/50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Blue Yeti X</CardTitle>
+                      <CardDescription>Prix: ~169€</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <p className="text-sm text-gray-300">
+                        Microphone USB professionnel avec 4 modes de captation et contrôle LED.
+                      </p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        variant="outline" 
+                        className="w-full text-green-400 border-green-700/50 hover:bg-green-900/20"
+                        onClick={() => window.open('https://www.amazon.fr/Blue-Microphones-Microphone-Condensateur-Professionnel/dp/B07YD2LHH6', '_blank')}
+                      >
+                        Voir le produit
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </div>
+              </div>
+              
+              <Separator className="bg-slate-700/50" />
+              
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-amber-400 flex items-center">
+                  <Lightbulb className="h-5 w-5 mr-2" />
+                  Éclairage
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="bg-slate-800/60 border-slate-700/50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Elgato Key Light Air</CardTitle>
+                      <CardDescription>Prix: ~129€</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <p className="text-sm text-gray-300">
+                        Lampe LED professionnelle avec température de couleur ajustable et contrôle via application.
+                      </p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        variant="outline" 
+                        className="w-full text-amber-400 border-amber-700/50 hover:bg-amber-900/20"
+                        onClick={() => window.open('https://www.amazon.fr/Elgato-Light-Air-professionnelle-température/dp/B082QHRZFW', '_blank')}
+                      >
+                        Voir le produit
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                  
+                  <Card className="bg-slate-800/60 border-slate-700/50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Neewer Ring Light</CardTitle>
+                      <CardDescription>Prix: ~89€</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <p className="text-sm text-gray-300">
+                        Anneau lumineux 18" avec support pour smartphone, idéal pour les créateurs débutants.
+                      </p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        variant="outline" 
+                        className="w-full text-amber-400 border-amber-700/50 hover:bg-amber-900/20"
+                        onClick={() => window.open('https://www.amazon.fr/Neewer-Extérieur-dEclairage-dAlimentation-Smartphone/dp/B07G379ZBH', '_blank')}
+                      >
+                        Voir le produit
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </div>
+              </div>
+              
+              <Separator className="bg-slate-700/50" />
+              
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-purple-400 flex items-center">
+                  <Heart className="h-5 w-5 mr-2" />
+                  Recommandation Spéciale Founder
+                </h3>
+                <Card className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-purple-700/50">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center justify-between">
+                      <span>Pack Streamer Elite</span>
+                      <Badge variant="outline" className="bg-purple-900/40 text-purple-300 border-purple-700/50">
+                        Premium
+                      </Badge>
+                    </CardTitle>
+                    <CardDescription>Prix: ~999€</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pb-4">
+                    <p className="text-sm text-gray-300 mb-3">
+                      Notre pack recommandé pour les créateurs professionnels comprenant:
+                    </p>
+                    <ul className="text-sm text-gray-300 space-y-1 list-disc pl-5">
+                      <li>Sony Alpha 6400 (Caméra)</li>
+                      <li>Shure SM7B (Microphone)</li>
+                      <li>GoXLR Mini (Interface audio)</li>
+                      <li>Elgato Stream Deck (Contrôleur)</li>
+                      <li>Set d'éclairage LED premium</li>
+                    </ul>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                      onClick={() => window.open('https://www.phoceen-agency.com/equipement-premium', '_blank')}
+                    >
+                      Découvrir le pack
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEquipmentDialogOpen(false)}>
+                Fermer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Tools and Software Dialog */}
+        <Dialog open={toolsDialogOpen} onOpenChange={setToolsDialogOpen}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-center text-xl font-bold text-white mb-2">
+                Outils et Logiciels Recommandés
+              </DialogTitle>
+              <DialogDescription className="text-center text-gray-400">
+                Les meilleurs logiciels pour optimiser vos diffusions et votre contenu
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6 py-4">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-blue-400 flex items-center">
+                  <Video className="h-5 w-5 mr-2" />
+                  Streaming
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="bg-slate-800/60 border-slate-700/50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">OBS Studio</CardTitle>
+                      <CardDescription>Prix: Gratuit</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <p className="text-sm text-gray-300">
+                        Logiciel de streaming et d'enregistrement Open Source, puissant et personnalisable.
+                      </p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        variant="outline" 
+                        className="w-full text-blue-400 border-blue-700/50 hover:bg-blue-900/20"
+                        onClick={() => window.open('https://obsproject.com/', '_blank')}
+                      >
+                        Télécharger
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                  
+                  <Card className="bg-slate-800/60 border-slate-700/50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Streamlabs</CardTitle>
+                      <CardDescription>Prix: Gratuit / Premium</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <p className="text-sm text-gray-300">
+                        Solution tout-en-un pour le streaming avec une interface conviviale et des outils intégrés.
+                      </p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        variant="outline" 
+                        className="w-full text-blue-400 border-blue-700/50 hover:bg-blue-900/20"
+                        onClick={() => window.open('https://streamlabs.com/', '_blank')}
+                      >
+                        Télécharger
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </div>
+              </div>
+              
+              <Separator className="bg-slate-700/50" />
+              
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-green-400 flex items-center">
+                  <BookOpen className="h-5 w-5 mr-2" />
+                  Édition Vidéo
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="bg-slate-800/60 border-slate-700/50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">DaVinci Resolve</CardTitle>
+                      <CardDescription>Prix: Gratuit / Studio 299€</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <p className="text-sm text-gray-300">
+                        Logiciel d'édition vidéo professionnel avec version gratuite puissante.
+                      </p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        variant="outline" 
+                        className="w-full text-green-400 border-green-700/50 hover:bg-green-900/20"
+                        onClick={() => window.open('https://www.blackmagicdesign.com/products/davinciresolve/', '_blank')}
+                      >
+                        Télécharger
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                  
+                  <Card className="bg-slate-800/60 border-slate-700/50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Adobe Premiere Pro</CardTitle>
+                      <CardDescription>Prix: Abonnement ~20€/mois</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <p className="text-sm text-gray-300">
+                        Solution professionnelle d'édition vidéo avec intégration complète à la suite Adobe.
+                      </p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        variant="outline" 
+                        className="w-full text-green-400 border-green-700/50 hover:bg-green-900/20"
+                        onClick={() => window.open('https://www.adobe.com/fr/products/premiere.html', '_blank')}
+                      >
+                        S'abonner
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </div>
+              </div>
+              
+              <Separator className="bg-slate-700/50" />
+              
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-indigo-400 flex items-center">
+                  <Settings className="h-5 w-5 mr-2" />
+                  Utilitaires
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="bg-slate-800/60 border-slate-700/50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">VoiceMeeter Banana</CardTitle>
+                      <CardDescription>Prix: Gratuit (donationware)</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <p className="text-sm text-gray-300">
+                        Table de mixage audio virtuelle pour gérer plusieurs entrées et sorties audio.
+                      </p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        variant="outline" 
+                        className="w-full text-indigo-400 border-indigo-700/50 hover:bg-indigo-900/20"
+                        onClick={() => window.open('https://vb-audio.com/Voicemeeter/banana.htm', '_blank')}
+                      >
+                        Télécharger
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                  
+                  <Card className="bg-slate-800/60 border-slate-700/50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">StreamElements</CardTitle>
+                      <CardDescription>Prix: Gratuit</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <p className="text-sm text-gray-300">
+                        Plateforme cloud pour gérer overlays, alertes, bots et autres outils pour streamers.
+                      </p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        variant="outline" 
+                        className="w-full text-indigo-400 border-indigo-700/50 hover:bg-indigo-900/20"
+                        onClick={() => window.open('https://streamelements.com/', '_blank')}
+                      >
+                        S'inscrire
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </div>
+              </div>
+              
+              <Separator className="bg-slate-700/50" />
+              
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-purple-400 flex items-center">
+                  <PanelRight className="h-5 w-5 mr-2" />
+                  Extensions et Overlays
+                </h3>
+                <Card className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-purple-700/50">
+                  <CardHeader className="pb-2">
+                    <CardTitle>Pack Exclusif Phocéen Agency</CardTitle>
+                    <CardDescription>Prix: Gratuit pour nos créateurs</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pb-4">
+                    <p className="text-sm text-gray-300 mb-3">
+                      Notre pack exclusif pour créateurs comprenant:
+                    </p>
+                    <ul className="text-sm text-gray-300 space-y-1 list-disc pl-5">
+                      <li>Overlays personnalisés pour TikTok et Twitch</li>
+                      <li>Alertes animées pour les nouveaux followers et dons</li>
+                      <li>Écrans de démarrage, pause et fin de stream</li>
+                      <li>Templates pour réseaux sociaux</li>
+                      <li>Accès à notre Discord exclusif pour créateurs</li>
+                    </ul>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                      onClick={() => window.open('https://www.phoceen-agency.com/overlay-pack', '_blank')}
+                    >
+                      Accéder au pack
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setToolsDialogOpen(false)}>
+                Fermer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-    </SidebarProvider>
+    </UltraDashboard>
   );
 };
 
