@@ -31,6 +31,7 @@ export const useDiamondsEditing = (
       let newDiamondValue = 0;
       const currentDiamonds = selectedCreator.profiles?.[0]?.total_diamonds || 0;
       
+      // Calculer la nouvelle valeur en fonction de l'opération sélectionnée
       switch (operationType) {
         case 'set':
           newDiamondValue = diamondAmount;

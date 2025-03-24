@@ -22,14 +22,21 @@ export const creatorStatsService = {
               hours,
               days
             ),
-            profiles (
+            diamonds!inner (
               total_diamonds
             )
           `)
           .eq("role", "creator");
 
         if (error) throw error;
-        return data || [];
+        
+        // Reformatting data to match expected structure
+        const formattedData = data?.map(creator => ({
+          ...creator,
+          profiles: creator.diamonds ? [{ total_diamonds: creator.diamonds[0]?.total_diamonds || 0 }] : [{ total_diamonds: 0 }]
+        })) || [];
+        
+        return formattedData;
       } else {
         const { data: agentData, error: agentError } = await supabase
           .from("user_accounts")
@@ -52,7 +59,7 @@ export const creatorStatsService = {
               hours,
               days
             ),
-            profiles (
+            diamonds!inner (
               total_diamonds
             )
           `)
@@ -60,7 +67,14 @@ export const creatorStatsService = {
           .eq("agent_id", agentData.id);
 
         if (error) throw error;
-        return data || [];
+        
+        // Reformatting data to match expected structure
+        const formattedData = data?.map(creator => ({
+          ...creator,
+          profiles: creator.diamonds ? [{ total_diamonds: creator.diamonds[0]?.total_diamonds || 0 }] : [{ total_diamonds: 0 }]
+        })) || [];
+        
+        return formattedData;
       }
     } catch (error) {
       console.error("Error fetching creators:", error);
@@ -97,12 +111,12 @@ export const creatorStatsService = {
     try {
       console.log(`Updating diamonds for creator ${creator.id} to ${newValue}`);
       
-      // Utiliser la fonction RPC définie dans la base de données
+      // Utiliser la nouvelle fonction manage_diamonds
       const { data, error } = await supabase
-        .rpc('create_or_update_profile', {
-          user_id: creator.id,
-          user_username: creator.username,
-          diamonds_value: newValue
+        .rpc('manage_diamonds', {
+          target_user_id: creator.id,
+          diamonds_value: newValue,
+          operation: 'set'
         });
       
       if (error) {
@@ -138,7 +152,7 @@ export const creatorStatsService = {
       const { error } = await supabase
         .from("live_schedules")
         .update({ hours: 0, days: 0 })
-        .not('creator_id', 'is', null);
+        .not("creator_id", "is", null);
       
       if (error) throw error;
       return true;
@@ -151,9 +165,9 @@ export const creatorStatsService = {
   async resetAllDiamonds() {
     try {
       const { error } = await supabase
-        .from("profiles")
+        .from("diamonds")
         .update({ total_diamonds: 0 })
-        .eq("role", "creator");
+        .eq("total_diamonds", ">");
       
       if (error) throw error;
       return true;
