@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UltraSidebar } from '@/components/layout/UltraSidebar';
@@ -92,7 +91,6 @@ const CreatorDiamonds = () => {
             </div>
           </div>
           
-          {/* Statistiques de l'agence */}
           <AgencyOverview
             totalAgencyDiamonds={totalAgencyDiamonds}
             agencyGoal={agencyGoal}
@@ -103,7 +101,6 @@ const CreatorDiamonds = () => {
             isEditing={isEditing}
           />
           
-          {/* Navigation par onglets pour les différents types d'utilisateurs */}
           <Tabs defaultValue="creators" onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-3 mb-4">
               <TabsTrigger value="creators">Créateurs</TabsTrigger>
@@ -152,7 +149,6 @@ const CreatorDiamonds = () => {
         </div>
       </div>
       
-      {/* Dialog pour modifier l'objectif de diamants */}
       <EditGoalDialog
         isOpen={isDialogOpen}
         onOpenChange={setIsDialogOpen}
@@ -163,7 +159,6 @@ const CreatorDiamonds = () => {
         isEditing={isEditing}
       />
       
-      {/* Dialog pour ajouter ou retirer des diamants */}
       <DiamondManagementDialog
         isOpen={isDiamondModalOpen}
         onOpenChange={setIsDiamondModalOpen}
