@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Home, Users, Calendar, Briefcase, Award, Bookmark, MessageSquare, Settings, LogOut, ChevronRight, ChevronLeft, FileText, Trophy, X, Pen, BookOpen } from "lucide-react";
+import { Home, Users, Calendar, Briefcase, Award, Bookmark, MessageSquare, Settings, LogOut, ChevronRight, ChevronLeft, FileText, Trophy, X, Pen, BookOpen, Diamond } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { SidebarLogo } from "./SidebarLogo";
 
@@ -86,7 +87,14 @@ export const UltraSidebar = ({
       action: "navigateTo",
       data: role === "creator" ? "creator-rewards" : "rewards-management",
       roles: ["founder", "manager", "creator"]
-    }, 
+    },
+    {
+      icon: Diamond,
+      label: "Diamants",
+      action: "navigateTo",
+      data: "creator-diamonds",
+      roles: ["founder", "manager", "agent"]
+    },
     {
       icon: MessageSquare,
       label: "Messagerie",

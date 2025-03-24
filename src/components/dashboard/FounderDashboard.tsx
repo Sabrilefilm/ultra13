@@ -11,7 +11,8 @@ import {
   ShieldAlert,
   Users,
   BookOpen,
-  Plus
+  Plus,
+  Diamond
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -108,6 +109,14 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({
       buttonText: "Gérer les règles",
       buttonAction: () => navigate("/creator-rules"),
       iconBgColor: "bg-cyan-500/10"
+    },
+    {
+      title: "Diamants des créateurs",
+      icon: <Diamond className="w-5 h-5" />,
+      action: () => navigate("/creator-diamonds"),
+      buttonText: "Gérer les diamants",
+      buttonAction: () => navigate("/creator-diamonds"),
+      iconBgColor: "bg-amber-500/10"
     }
   ];
 

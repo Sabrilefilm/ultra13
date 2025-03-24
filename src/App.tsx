@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Index from './pages/Index';
@@ -27,6 +28,7 @@ import CreatorStats from './pages/CreatorStats';
 import { useDarkMode } from './hooks/use-dark-mode';
 import Ambassador from './pages/Ambassador';
 import Training from './pages/Training';
+import CreatorDiamonds from './pages/CreatorDiamonds';
 
 function App() {
   const queryClient = new QueryClient();
@@ -62,6 +64,7 @@ function App() {
               <Route path="/creator-stats" element={<CreatorStats />} />
               <Route path="/ambassador" element={<Ambassador />} />
               <Route path="/training" element={<Training />} />
+              <Route path="/creator-diamonds" element={<CreatorDiamonds />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>

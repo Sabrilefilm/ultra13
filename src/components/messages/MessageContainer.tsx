@@ -20,7 +20,6 @@ export const MessageContainer = ({ username, role, userId }: MessageContainerPro
   const [activeTab, setActiveTab] = useState('contacts');
   const [isNewMessageOpen, setIsNewMessageOpen] = useState(false);
   const [selectedUserForNewMessage, setSelectedUserForNewMessage] = useState('');
-  const [newMessage, setNewMessage] = useState('');
   
   const isMobile = !useMediaQuery('(min-width: 768px)');
   

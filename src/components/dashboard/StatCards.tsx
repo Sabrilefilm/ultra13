@@ -1,275 +1,124 @@
-
-import {
-  Trophy,
-  Clock,
-  Calendar,
-  Target,
-  Award,
-  MessageSquare,
-  Diamond,
-  TrendingUp,
-  TrendingDown,
-  BookOpen
-} from "lucide-react";
+import React from "react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ArrowUpRight, TrendingUp, Users, Calendar, Award, MessageSquare, Trophy, BookOpen } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
-import { toast } from "sonner";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { MONTHS } from "@/components/live-schedule/constants";
 
 interface StatCardsProps {
   role: string;
-  onOpenSponsorshipForm?: () => void;
-  onOpenSponsorshipList?: () => void;
-  onCreatePoster?: () => void;
+  onOpenSponsorshipForm: () => void;
+  onOpenSponsorshipList: () => void;
 }
 
-export const StatCards = ({ 
-  role, 
-  onOpenSponsorshipForm, 
-  onOpenSponsorshipList, 
-  onCreatePoster 
-}: StatCardsProps) => {
+export const StatCards: React.FC<StatCardsProps> = ({ role, onOpenSponsorshipForm, onOpenSponsorshipList }) => {
   const navigate = useNavigate();
-  const isMobile = useMediaQuery("(max-width: 768px)");
-  
-  // Récupérer les horaires du créateur connecté
-  const { data: liveSchedule, isLoading: isLoadingSchedule } = useQuery({
-    queryKey: ["creator-stats-schedule"],
-    queryFn: async () => {
-      try {
-        // Récupérer l'ID de l'utilisateur connecté
-        const { data: session } = await supabase.auth.getSession();
-        const userId = session?.session?.user?.id;
-        
-        if (!userId) {
-          // Si pas connecté, essayer d'utiliser l'username stocké en localStorage
-          const username = localStorage.getItem('username');
-          if (!username) return { hours: 0, days: 0 };
-          
-          // Récupérer l'user_id à partir du username
-          const { data: userData, error: userError } = await supabase
-            .from('user_accounts')
-            .select('id')
-            .eq('username', username)
-            .maybeSingle();
-            
-          if (userError || !userData) {
-            console.error('Erreur lors de la récupération de l\'ID utilisateur:', userError);
-            return { hours: 0, days: 0 };
-          }
-          
-          // Récupérer l'horaire de live avec l'user_id trouvé
-          const { data: scheduleData, error } = await supabase
-            .from('live_schedules')
-            .select('hours, days')
-            .eq('creator_id', userData.id)
-            .maybeSingle();
-            
-          if (error) {
-            console.error('Erreur lors de la récupération des horaires:', error);
-            return { hours: 0, days: 0 };
-          }
-          
-          return scheduleData || { hours: 0, days: 0 };
-        }
-        
-        // Si connecté avec Supabase Auth, utiliser directement l'userId
-        const { data: scheduleData, error } = await supabase
-          .from('live_schedules')
-          .select('hours, days')
-          .eq('creator_id', userId)
-          .maybeSingle();
-
-        if (error) {
-          console.error('Erreur lors de la récupération des horaires:', error);
-          return { hours: 0, days: 0 };
-        }
-
-        return scheduleData || { hours: 0, days: 0 };
-      } catch (error) {
-        console.error("Erreur lors de la récupération des horaires:", error);
-        toast.error("Impossible de récupérer vos horaires de live");
-        return { hours: 0, days: 0 };
-      }
-    }
-  });
-
-  // Récupérer les diamants du créateur pour ce mois-ci et le mois dernier
-  const { data: diamondsData, isLoading: isLoadingDiamonds } = useQuery({
-    queryKey: ["creator-diamonds"],
-    queryFn: async () => {
-      try {
-        const username = localStorage.getItem('username');
-        if (!username) return { currentMonth: 0, previousMonth: 0 };
-        
-        const now = new Date();
-        const currentMonth = now.getMonth() + 1; // 1-12
-        const currentYear = now.getFullYear();
-        const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
-        const previousYear = currentMonth === 1 ? currentYear - 1 : currentYear;
-        
-        // Récupérer les diamants pour le mois actuel
-        const { data: currentMonthData, error: currentError } = await supabase
-          .from('creator_rewards')
-          .select('diamonds_count')
-          .eq('creator_id', username)
-          .gte('created_at', `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`)
-          .lt('created_at', currentMonth === 12 
-            ? `${currentYear + 1}-01-01` 
-            : `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`);
-        
-        // Récupérer les diamants pour le mois précédent
-        const { data: previousMonthData, error: previousError } = await supabase
-          .from('creator_rewards')
-          .select('diamonds_count')
-          .eq('creator_id', username)
-          .gte('created_at', `${previousYear}-${String(previousMonth).padStart(2, '0')}-01`)
-          .lt('created_at', previousMonth === 12 
-            ? `${previousYear + 1}-01-01` 
-            : `${previousYear}-${String(previousMonth + 1).padStart(2, '0')}-01`);
-        
-        if (currentError || previousError) {
-          console.error('Erreur lors de la récupération des diamants:', currentError || previousError);
-          return { currentMonth: 0, previousMonth: 0, currentMonthName: MONTHS[currentMonth - 1], previousMonthName: MONTHS[previousMonth - 1] };
-        }
-        
-        // Calculer le total des diamants pour chaque mois
-        const currentMonthTotal = currentMonthData?.reduce((sum, item) => sum + (item.diamonds_count || 0), 0) || 0;
-        const previousMonthTotal = previousMonthData?.reduce((sum, item) => sum + (item.diamonds_count || 0), 0) || 0;
-        
-        return { 
-          currentMonth: currentMonthTotal, 
-          previousMonth: previousMonthTotal,
-          currentMonthName: MONTHS[currentMonth - 1],
-          previousMonthName: MONTHS[previousMonth - 1] 
-        };
-      } catch (error) {
-        console.error("Erreur lors de la récupération des diamants:", error);
-        return { currentMonth: 0, previousMonth: 0, currentMonthName: '', previousMonthName: '' };
-      }
-    },
-    enabled: role === 'creator' // Activer uniquement pour les créateurs
-  });
-
-  // Ces valeurs seraient normalement récupérées depuis une API
-  const stats = [
-    { title: "Matchs", value: 5, icon: <Trophy className="w-5 h-5" /> },
-    { 
-      title: "Heures/jour", 
-      value: liveSchedule?.hours || 0, 
-      icon: <Clock className="w-5 h-5" /> 
-    },
-    { 
-      title: "Jours/semaine", 
-      value: liveSchedule?.days || 0, 
-      icon: <Calendar className="w-5 h-5" /> 
-    },
-    { title: "Objectifs", value: 3, icon: <Target className="w-5 h-5" /> },
-  ];
-
-  // Bouton de messagerie rapide
-  const handleOpenMessages = () => {
-    navigate("/messages");
-  };
-
-  // Bouton pour accéder aux formations
-  const handleOpenTraining = () => {
-    navigate("/training");
-  };
 
   return (
-    <>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
-        {stats.map((stat, index) => (
-          <div
-            key={index}
-            className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-purple-900/20 rounded-xl p-4 flex flex-col items-center justify-center transition-all hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-900/10 group"
-          >
-            <div className="mb-2 text-purple-400/80 group-hover:text-purple-400 transition-colors duration-300">
-              {stat.icon}
-            </div>
-            <div className="text-2xl font-bold text-white mb-1 group-hover:text-white/90">
-              {isLoadingSchedule ? (
-                <div className="h-6 w-8 bg-gray-800 animate-pulse rounded"></div>
-              ) : (
-                stat.value
-              )}
-            </div>
-            <div className="text-gray-400 group-hover:text-gray-300 text-xs transition-colors duration-300">
-              {stat.title}
-            </div>
-          </div>
-        ))}
-      </div>
-      
-      {/* Affichage des diamants pour les créateurs */}
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <Card className="bg-gradient-to-br from-purple-600/10 to-blue-600/10 border-purple-200 dark:border-purple-900/30">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xl flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-purple-400" />
+            Performance
+          </CardTitle>
+          <CardDescription>
+            Suivez les performances de votre équipe
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold">+20%</div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Par rapport au mois dernier
+          </p>
+        </CardContent>
+        <CardFooter>
+          <Button variant="outline" onClick={() => navigate("/team-management")}>
+            Voir les détails
+          </Button>
+        </CardFooter>
+      </Card>
+
+      <Card className="bg-gradient-to-br from-green-600/10 to-yellow-600/10 border-green-200 dark:border-green-900/30">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xl flex items-center gap-2">
+            <Users className="h-5 w-5 text-green-400" />
+            Utilisateurs
+          </CardTitle>
+          <CardDescription>
+            Gérez les membres de votre communauté
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold">1,250</div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Abonnés actifs
+          </p>
+        </CardContent>
+        <CardFooter>
+          <Button variant="outline" onClick={() => navigate("/user-management")}>
+            Gérer les utilisateurs
+          </Button>
+        </CardFooter>
+      </Card>
+
+      <Card className="bg-gradient-to-br from-orange-600/10 to-red-600/10 border-orange-200 dark:border-orange-900/30">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xl flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-orange-400" />
+            Événements
+          </CardTitle>
+          <CardDescription>
+            Planifiez vos prochains événements
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold">3</div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Événements à venir
+          </p>
+        </CardContent>
+        <CardFooter>
+          <Button variant="outline" onClick={() => navigate("/schedule")}>
+            Voir le calendrier
+          </Button>
+        </CardFooter>
+      </Card>
+
       {role === 'creator' && (
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-gradient-to-br from-indigo-900/80 to-purple-900/80 backdrop-blur-sm border border-indigo-500/20 rounded-xl p-4 flex items-center justify-between">
-            <div className="flex flex-col">
-              <div className="text-gray-400 text-xs mb-1">Vos diamants en {diamondsData?.currentMonthName}</div>
-              <div className="text-2xl font-bold text-white flex items-center gap-2">
-                {isLoadingDiamonds ? (
-                  <div className="h-6 w-16 bg-indigo-800/50 animate-pulse rounded"></div>
-                ) : (
-                  <>
-                    <Diamond className="h-5 w-5 text-indigo-400" />
-                    {diamondsData?.currentMonth.toLocaleString()}
-                  </>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center">
-              {(diamondsData?.previousMonth || 0) < (diamondsData?.currentMonth || 0) ? (
-                <TrendingUp className="h-8 w-8 text-green-400" />
-              ) : (
-                <TrendingDown className="h-8 w-8 text-amber-400" />
-              )}
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-violet-900/80 to-blue-900/80 backdrop-blur-sm border border-violet-500/20 rounded-xl p-4 flex items-center justify-between">
-            <div className="flex flex-col">
-              <div className="text-gray-400 text-xs mb-1">Vos diamants en {diamondsData?.previousMonthName}</div>
-              <div className="text-2xl font-bold text-white flex items-center gap-2">
-                {isLoadingDiamonds ? (
-                  <div className="h-6 w-16 bg-violet-800/50 animate-pulse rounded"></div>
-                ) : (
-                  <>
-                    <Diamond className="h-5 w-5 text-violet-400" />
-                    {diamondsData?.previousMonth.toLocaleString()}
-                  </>
-                )}
-              </div>
-            </div>
-            <div className="p-2 rounded-full bg-violet-800/30">
-              <Award className="h-6 w-6 text-violet-300" />
-            </div>
-          </div>
-        </div>
+        <Card className="bg-gradient-to-br from-pink-600/10 to-purple-600/10 border-pink-200 dark:border-pink-900/30">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xl flex items-center gap-2">
+              <Award className="h-5 w-5 text-pink-400" />
+              Sponsorings
+            </CardTitle>
+            <CardDescription>
+              Gérez vos opportunités de sponsoring
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">4</div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Sponsorings disponibles
+            </p>
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button variant="outline" onClick={onOpenSponsorshipForm}>
+              Nouveau Sponsoring
+            </Button>
+            <Button variant="secondary" onClick={onOpenSponsorshipList}>
+              Voir les détails
+            </Button>
+          </CardFooter>
+        </Card>
       )}
-      
-      {/* Boutons d'accès rapide */}
-      <div className="flex flex-wrap justify-center gap-4 mt-4">
-        <Button
-          onClick={handleOpenMessages}
-          className="bg-indigo-700 hover:bg-indigo-800 text-white flex items-center gap-2 px-6 py-2 rounded-lg transition-all duration-300 shadow-md hover:shadow-indigo-700/20"
-        >
-          <MessageSquare className="h-5 w-5" />
-          {isMobile ? "Messages" : "Accéder à la messagerie"}
-        </Button>
-        
-        <Button
-          onClick={handleOpenTraining}
-          className="bg-purple-700 hover:bg-purple-800 text-white flex items-center gap-2 px-6 py-2 rounded-lg transition-all duration-300 shadow-md hover:shadow-purple-700/20"
-        >
-          <BookOpen className="h-5 w-5" />
-          {isMobile ? "Formations" : "Nos formations"}
-        </Button>
-      </div>
-    </>
+    </div>
   );
 };
