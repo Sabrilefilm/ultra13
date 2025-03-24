@@ -21,6 +21,7 @@ export function RewardsPanelHeader({
   onOpenCreatorRewards,
   onOpenDiamondsPage
 }: RewardsPanelHeaderProps) {
+  // Only founder can manage rewards
   const canManageRewards = role === 'founder';
 
   return (
@@ -79,15 +80,7 @@ export function RewardsPanelHeader({
           </Button>
         </div>
       )}
-      {role === 'creator' && (
-        <Button
-          variant="outline"
-          onClick={onOpenCreatorRewards}
-          className="border-purple-200 dark:border-purple-800"
-        >
-          Voir le programme de récompenses 🏆
-        </Button>
-      )}
+      {/* Remove creator buttons for adding diamonds/settings */}
     </div>
   );
 }
