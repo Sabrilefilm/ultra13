@@ -93,6 +93,8 @@ const Messages = () => {
   }, [navigate]);
 
   const fetchAllUsers = async (currentUserId: string) => {
+    // We'll let the NewMessageDialog handle fetching the relevant users based on role
+    // This is just a fallback for backward compatibility
     setLoadingUsers(true);
     try {
       const { data, error } = await supabase
