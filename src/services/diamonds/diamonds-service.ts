@@ -54,7 +54,7 @@ export const diamondsService = {
           .insert([{ 
             id: creator.id,
             username: userData.username || creator.username,
-            role: userData.role || creator.role || 'creator',
+            role: userData.role || creator.role,
             total_diamonds: newDiamondValue,
             created_at: new Date(),
             updated_at: new Date()

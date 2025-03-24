@@ -1,9 +1,10 @@
 
 import { toast } from "sonner";
-import { creatorsApi, Creator } from "./api/creators-api";
+import { creatorsApi, Creator as ApiCreator } from "./api/creators-api";
 import { scheduleService } from "./schedule/schedule-service";
 import { diamondsService } from "./diamonds/diamonds-service";
 import { creatorManagementService } from "./creators/creator-management-service";
+import { Creator } from "@/hooks/diamonds/use-diamond-fetch"; // Use consistent Creator type
 
 export const creatorStatsService = {
   async fetchCreators(role: string, username: string) {
@@ -29,7 +30,9 @@ export const creatorStatsService = {
       // Combine the data
       const formattedData = creatorData.map(creator => ({
         ...creator,
-        profiles: [{ total_diamonds: diamondsData[creator.id] || 0 }]
+        role: creator.role || 'creator',
+        total_diamonds: diamondsData[creator.id] || 0,
+        diamonds_goal: 0 // Default value
       }));
       
       console.log("Formatted creator data with diamonds:", formattedData);

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Dialog, 
@@ -32,6 +33,8 @@ export function DiamondManagementDialog({
   onSave,
   isEditing
 }: DiamondManagementDialogProps) {
+  if (!selectedCreator) return null;
+  
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -48,11 +51,11 @@ export function DiamondManagementDialog({
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <p className="text-sm font-medium">Utilisateur:</p>
-            <p className="font-bold">{selectedCreator?.username} ({selectedCreator?.role})</p>
+            <p className="font-bold">{selectedCreator.username} ({selectedCreator.role})</p>
           </div>
           <div className="space-y-2">
             <p className="text-sm font-medium">Diamants actuels:</p>
-            <p>{selectedCreator?.total_diamonds.toLocaleString()}</p>
+            <p>{selectedCreator.total_diamonds.toLocaleString()}</p>
           </div>
           <div className="space-y-2">
             <p className="text-sm font-medium">

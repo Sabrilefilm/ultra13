@@ -1,69 +1,93 @@
 
-import { useState } from "react";
-import { toast } from "sonner";
-import { diamondsService } from "@/services/diamonds/diamonds-service";
-import { Creator } from "./types";
+import { useState } from 'react';
+import { Creator } from '../diamonds/use-diamond-fetch';
+import { diamondsService } from '@/services/diamonds/diamonds-service';
+import { toast } from 'sonner';
 
-export const useDiamondsEditing = (
-  creators: Creator[], 
-  setCreators: (creators: Creator[]) => void,
-  selectedCreator: Creator | null,
-  setSelectedCreator: (creator: Creator | null) => void,
-  fetchCreators: () => Promise<void>
-) => {
-  const [isEditingDiamonds, setIsEditingDiamonds] = useState(false);
-  const [diamondAmount, setDiamondAmount] = useState<number>(0);
-  const [operationType, setOperationType] = useState<'set' | 'add' | 'subtract'>('add');
-  const [isSaving, setIsSaving] = useState(false);
+export interface EditDiamondsState {
+  isOpen: boolean;
+  diamondAmount: number;
+  operationType: 'set' | 'add' | 'subtract';
+  isSaving: boolean;
+  selectedCreator: Creator | null;
+}
 
-  const handleEditDiamonds = (creator: Creator) => {
-    setSelectedCreator(creator);
-    setDiamondAmount(0); // Reset to 0 when opening the dialog
-    setOperationType('add');
-    setIsEditingDiamonds(true);
+export function useDiamondsEditing(onSuccess: () => Promise<void>) {
+  const [state, setState] = useState<EditDiamondsState>({
+    isOpen: false,
+    diamondAmount: 0,
+    operationType: 'add',
+    isSaving: false,
+    selectedCreator: null
+  });
+
+  const openDiamondsModal = (creator: Creator) => {
+    setState(prev => ({
+      ...prev,
+      isOpen: true,
+      selectedCreator: {
+        id: creator.id,
+        username: creator.username,
+        role: creator.role,
+        total_diamonds: creator.total_diamonds,
+        diamonds_goal: creator.diamonds_goal
+      },
+      diamondAmount: 0
+    }));
   };
 
-  const handleSaveDiamonds = async () => {
-    if (!selectedCreator) return;
-    
+  const closeDiamondsModal = () => {
+    setState(prev => ({ ...prev, isOpen: false, selectedCreator: null }));
+  };
+
+  const setDiamondAmount = (amount: number) => {
+    setState(prev => ({ ...prev, diamondAmount: amount }));
+  };
+
+  const setOperationType = (type: 'set' | 'add' | 'subtract') => {
+    setState(prev => ({ ...prev, operationType: type }));
+  };
+
+  const handleSave = async () => {
+    if (!state.selectedCreator || state.diamondAmount < 0) {
+      toast.error("Valeur de diamants invalide");
+      return;
+    }
+
     try {
-      setIsSaving(true);
+      setState(prev => ({ ...prev, isSaving: true }));
       
-      // Use the diamondsService to update the diamonds
       await diamondsService.updateDiamonds(
-        selectedCreator, 
-        diamondAmount,
-        operationType
+        state.selectedCreator, 
+        state.diamondAmount, 
+        state.operationType
       );
       
-      // Determine the action text based on operation type
-      const actionText = operationType === 'set' ? 'définis à' : 
-                         operationType === 'add' ? 'augmentés de' : 
-                         'réduits de';
+      // Message de confirmation en fonction de l'opération
+      const actionText = state.operationType === 'set' 
+        ? 'définis à' 
+        : state.operationType === 'add' 
+          ? 'augmentés de' 
+          : 'réduits de';
+          
+      toast.success(`Diamants ${actionText} ${state.diamondAmount} pour ${state.selectedCreator.username}`);
       
-      toast.success(`Diamants ${actionText} ${diamondAmount} pour ${selectedCreator.username}`);
-      
-      // Refresh the data
-      await fetchCreators();
-      
-      setIsEditingDiamonds(false);
+      await onSuccess();
+      closeDiamondsModal();
     } catch (error) {
-      console.error("Error updating diamonds:", error);
+      console.error("Erreur lors de la mise à jour des diamants:", error);
       toast.error("Une erreur est survenue lors de la mise à jour des diamants");
     } finally {
-      setIsSaving(false);
+      setState(prev => ({ ...prev, isSaving: false }));
     }
   };
 
   return {
-    isEditingDiamonds,
-    setIsEditingDiamonds,
-    diamondAmount,
+    state,
+    openDiamondsModal,
+    closeDiamondsModal,
     setDiamondAmount,
-    operationType,
     setOperationType,
-    isSaving,
-    handleEditDiamonds,
-    handleSaveDiamonds
+    handleSave
   };
-};
+}

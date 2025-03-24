@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Dialog, 
@@ -29,6 +30,8 @@ export function EditGoalDialog({
   onSave,
   isEditing
 }: EditGoalDialogProps) {
+  if (!selectedCreator) return null;
+  
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -38,11 +41,11 @@ export function EditGoalDialog({
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <p className="text-sm font-medium">Utilisateur:</p>
-            <p className="font-bold">{selectedCreator?.username}</p>
+            <p className="font-bold">{selectedCreator.username}</p>
           </div>
           <div className="space-y-2">
             <p className="text-sm font-medium">Diamants actuels:</p>
-            <p>{selectedCreator?.total_diamonds.toLocaleString()}</p>
+            <p>{selectedCreator.total_diamonds.toLocaleString()}</p>
           </div>
           <div className="space-y-2">
             <p className="text-sm font-medium">Nouvel objectif:</p>
