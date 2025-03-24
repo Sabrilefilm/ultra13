@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Creator } from './use-diamond-fetch';
 
 export function useDiamondSearch(creators: Creator[]) {
@@ -8,7 +8,7 @@ export function useDiamondSearch(creators: Creator[]) {
   const [activeTab, setActiveTab] = useState<string>('creators');
 
   // Update filtered creators when creators list changes
-  useState(() => {
+  useEffect(() => {
     setFilteredCreators(creators);
   }, [creators]);
 
