@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,7 +29,6 @@ export const StatCards: React.FC<StatCardsProps> = ({
   const navigate = useNavigate();
   const [isTopPerformersOpen, setIsTopPerformersOpen] = useState(false);
   
-  // Sample top performers data
   const topPerformers = [
     { id: 1, name: "Créateur 1", avatar: "C1", growth: "+32%", diamonds: 150000, category: "TikTok" },
     { id: 2, name: "Créateur 2", avatar: "C2", growth: "+28%", diamonds: 120000, category: "TikTok" },
@@ -39,13 +37,11 @@ export const StatCards: React.FC<StatCardsProps> = ({
     { id: 5, name: "Créateur 5", avatar: "C5", growth: "+18%", diamonds: 80000, category: "YouTube" }
   ];
   
-  // Auto-animate the trending data
   const [trendingValue, setTrendingValue] = useState(20);
   const [trendingDirection, setTrendingDirection] = useState<'up' | 'down'>('up');
   
   useEffect(() => {
     const interval = setInterval(() => {
-      // Randomly adjust the trending value between 15 and 25
       const newValue = Math.floor(Math.random() * 11) + 15;
       setTrendingValue(newValue);
       setTrendingDirection(Math.random() > 0.3 ? 'up' : 'down');
@@ -164,12 +160,15 @@ export const StatCards: React.FC<StatCardsProps> = ({
             </div>
           </CardContent>
           <CardFooter>
-            <Button variant="outline" onClick={() => setIsTopPerformersOpen(true)}>
-              Voir tous les créateurs
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/creator-rankings')}
+              className="flex items-center gap-2"
+            >
+              Voir le classement complet
             </Button>
           </CardFooter>
           
-          {/* Top Performers Dialog */}
           <Dialog open={isTopPerformersOpen} onOpenChange={setIsTopPerformersOpen}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>

@@ -34,3 +34,18 @@ export interface ThemeFilterProps {
 export interface TrainingCatalogProps {
   role: string;
 }
+
+export interface Creator {
+  id: string;
+  username: string;
+  role: string;
+  total_diamonds?: number;
+  diamonds_goal?: number;
+  total_hours?: number;
+  total_days?: number;
+  total_sponsorships?: number;
+}
+
+export interface CreatorPerformanceRankingProps {
+  role: string;
+}
