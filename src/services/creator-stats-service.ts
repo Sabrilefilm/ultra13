@@ -142,7 +142,7 @@ export const creatorStatsService = {
       const { error } = await supabase
         .from("live_schedules")
         .update({ hours: 0, days: 0 })
-        .is("creator_id", not.null());
+        .not('creator_id', 'is', null);
       
       if (error) throw error;
       return true;
