@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Creator } from './use-diamond-fetch';
+import { Creator } from '../../services/api/creators-api';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
@@ -15,7 +15,7 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
 
   const openEditDialog = (user: Creator) => {
     setSelectedCreator(user);
-    setNewDiamondGoal(user.diamonds_goal || 0);
+    setNewDiamondGoal(0);
     setIsDialogOpen(true);
   };
   
@@ -51,7 +51,8 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
         const { error } = await supabase
           .from('profiles')
           .update({ 
-            total_diamonds: selectedCreator.profiles?.[0]?.total_diamonds || 0, // Preserve current total_diamonds
+            // Get the total_diamonds from the API response if available
+            total_diamonds: getTotalDiamonds(selectedCreator),
             updated_at: new Date()
           })
           .eq('id', selectedCreator.id);
@@ -67,7 +68,7 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
           .insert([{ 
             id: selectedCreator.id,
             username: selectedCreator.username,
-            role: selectedCreator.role,
+            role: selectedCreator.role || 'creator',
             total_diamonds: 0,
             created_at: new Date(),
             updated_at: new Date()
@@ -88,6 +89,14 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
     } finally {
       setIsEditing(false);
     }
+  };
+  
+  // Helper function to get total diamonds from Creator object
+  const getTotalDiamonds = (creator: Creator): number => {
+    if (creator.profiles && creator.profiles.length > 0) {
+      return creator.profiles[0].total_diamonds;
+    }
+    return 0;
   };
   
   const handleUpdateDiamonds = async () => {
@@ -141,7 +150,7 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
           .insert([{ 
             id: selectedCreator.id,
             username: selectedCreator.username,
-            role: selectedCreator.role,
+            role: selectedCreator.role || 'creator',
             total_diamonds: newDiamondValue,
             created_at: new Date(),
             updated_at: new Date()
@@ -156,11 +165,15 @@ export function useDiamondDialogs(fetchUsers: () => Promise<void>) {
       const actionText = operationType === 'add' ? 'ajoutés à' : 'retirés de';
       toast.success(`${diamondAmount} diamants ${actionText} ${selectedCreator.username}`);
       
-      // Forcer la mise à jour immédiate de l'état local pour l'utilisateur sélectionné
-      if (selectedCreator && selectedCreator.profiles && selectedCreator.profiles.length > 0) {
-        selectedCreator.profiles[0].total_diamonds = newDiamondValue;
-      } else if (selectedCreator) {
-        selectedCreator.profiles = [{ total_diamonds: newDiamondValue }];
+      // Update the selectedCreator object with new diamond value for immediate UI update
+      if (selectedCreator) {
+        if (!selectedCreator.profiles) {
+          selectedCreator.profiles = [{ total_diamonds: newDiamondValue }];
+        } else if (selectedCreator.profiles.length > 0) {
+          selectedCreator.profiles[0].total_diamonds = newDiamondValue;
+        } else {
+          selectedCreator.profiles.push({ total_diamonds: newDiamondValue });
+        }
       }
       
       await fetchUsers();

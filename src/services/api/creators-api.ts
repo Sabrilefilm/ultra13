@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 export interface Creator {
   id: string;
   username: string;
+  role?: string;
   live_schedules?: Array<{ hours: number; days: number }>;
   profiles?: Array<{ total_diamonds: number }>;
 }
@@ -17,6 +18,7 @@ export const creatorsApi = {
           .select(`
             id,
             username,
+            role,
             live_schedules (
               hours,
               days
@@ -44,6 +46,7 @@ export const creatorsApi = {
           .select(`
             id,
             username,
+            role,
             live_schedules (
               hours,
               days

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Diamond, Plus, Minus, Save } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { diamondsService } from "@/services/diamonds/diamonds-service";
 import { toast } from "sonner";
 
 interface QuickDiamondsMenuProps {
@@ -41,64 +41,16 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
       // Calculer la nouvelle valeur avant l'appel à l'API
       const newDiamondValue = calculateNewTotal();
       
-      // Vérifier si le profil existe
-      const { data: profileExists, error: checkError } = await supabase
-        .from('profiles')
-        .select('id, total_diamonds, username')
-        .eq('id', creatorId)
-        .maybeSingle();
-        
-      if (checkError && checkError.code !== 'PGRST204') {
-        console.error("Error checking profile:", checkError);
-        throw checkError;
-      }
+      // Create a simplified creator object for the service
+      const creator = {
+        id: creatorId,
+        username: creatorUsername
+      };
       
-      if (profileExists) {
-        // Si le profil existe, mise à jour
-        const { error } = await supabase
-          .from('profiles')
-          .update({ 
-            total_diamonds: newDiamondValue,
-            updated_at: new Date()
-          })
-          .eq('id', creatorId);
-          
-        if (error) {
-          console.error("Error updating profile:", error);
-          throw error;
-        }
-      } else {
-        // Si le profil n'existe pas, création avec la valeur initiale
-        // Obtenir le nom d'utilisateur et le rôle de user_accounts
-        const { data: userData, error: userError } = await supabase
-          .from('user_accounts')
-          .select('username, role')
-          .eq('id', creatorId)
-          .single();
-          
-        if (userError) {
-          console.error("Error fetching user data:", userError);
-          throw userError;
-        }
-        
-        const { error } = await supabase
-          .from('profiles')
-          .insert([{ 
-            id: creatorId,
-            username: userData.username,
-            role: userData.role,
-            total_diamonds: newDiamondValue,
-            created_at: new Date(),
-            updated_at: new Date()
-          }]);
-          
-        if (error) {
-          console.error("Error creating profile:", error);
-          throw error;
-        }
-      }
+      // Use the diamondsService to update diamonds
+      await diamondsService.updateDiamonds(creator, diamondAmount, operationType);
       
-      // Mettre à jour l'état local immédiatement
+      // Update the display immediately for better user experience
       setDisplayedDiamonds(newDiamondValue);
       
       // Message de confirmation en fonction de l'opération
@@ -121,9 +73,9 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
   const calculateNewTotal = () => {
     switch (operationType) {
       case 'add':
-        return currentDiamonds + diamondAmount;
+        return displayedDiamonds + diamondAmount;
       case 'subtract':
-        return Math.max(0, currentDiamonds - diamondAmount);
+        return Math.max(0, displayedDiamonds - diamondAmount);
       case 'set':
       default:
         return diamondAmount;
