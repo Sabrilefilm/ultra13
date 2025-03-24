@@ -1,4 +1,3 @@
-
 import { Users, Diamond, Clock, Gift, Calendar, AlertTriangle, MessageCircle } from "lucide-react";
 import { StatsCard } from "@/components/StatsCard";
 import { useQuery } from "@tanstack/react-query";
@@ -226,11 +225,7 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
     const hoursColor = getProgressColor();
     const daysColor = getDaysProgressColor();
     
-    const diamondValue = platformSettings?.diamondValue || (10/36000); // Valeur par défaut: 10€ pour 36000 diamants
     const diamondsText = rewardsData ? `${rewardsData}` : "0";
-    const diamondValueText = rewardsData ? 
-      `(${((rewardsData * diamondValue) || 0).toFixed(2)}€)` : 
-      "(0.00€)";
     
     return (
       <div className="space-y-6">
@@ -247,7 +242,7 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
           />
           <StatsCard
             title="Diamants Reçus"
-            value={`${diamondsText} ${diamondValueText}`}
+            value={diamondsText}
             icon={<Diamond className="w-6 h-6 text-primary" />}
           />
         </div>

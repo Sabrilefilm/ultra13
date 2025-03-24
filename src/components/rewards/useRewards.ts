@@ -27,9 +27,6 @@ export function useRewards(role: string, userId: string) {
           console.error("Erreur lors de la récupération des paramètres:", settingsError);
         }
         
-        // Valeur par défaut: 10€ pour 36000 diamants (soit environ 0.000277€ par diamant)
-        const diamondValue = settingsData?.diamond_value || (10/36000);
-        
         // Requête principale pour les récompenses
         const query = supabase
           .from("creator_rewards")
@@ -52,8 +49,8 @@ export function useRewards(role: string, userId: string) {
         return (data || []).map(reward => ({
           ...reward,
           creator_username: reward.creator?.username || reward.creator_id,
-          // Calcul de la valeur monétaire des diamants si elle n'est pas déjà définie
-          amount_earned: reward.amount_earned || (reward.diamonds_count * diamondValue)
+          // On garde les diamants mais on n'utilise plus la conversion en euros
+          amount_earned: reward.amount_earned || 0
         }));
       } catch (error) {
         console.error("Erreur dans la récupération des récompenses:", error);
