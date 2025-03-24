@@ -56,7 +56,7 @@ export const CommunityLinkButton = ({
     }
   };
 
-  const textVariants = {
+  const textVariants: Variants = {
     rest: { x: 0 },
     hover: { 
       x: [0, 3, 0], 
@@ -68,7 +68,7 @@ export const CommunityLinkButton = ({
     }
   };
 
-  const glowVariants = {
+  const glowVariants: Variants = {
     rest: { opacity: 0, scale: 0.8 },
     hover: { 
       opacity: [0.5, 0.7, 0.5], 
