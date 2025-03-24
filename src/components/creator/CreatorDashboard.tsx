@@ -7,13 +7,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UserGuide } from "@/components/help/UserGuide";
 import { SocialCommunityLinks } from "@/components/layout/SocialCommunityLinks";
-import { MessageSquare, AlertTriangle, BarChart4, Calendar, ArrowRight, Clock, Trophy, Diamond } from "lucide-react";
+import { 
+  MessageSquare, AlertTriangle, BarChart4, Calendar, ArrowRight, 
+  Clock, Trophy, Diamond, UserCheck, Star 
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Footer } from "@/components/layout/Footer";
+import { motion } from "framer-motion";
 
 interface CreatorDashboardProps {
   onOpenSponsorshipForm: () => void;
@@ -33,6 +37,19 @@ export const CreatorDashboard = ({
   const [showGuide, setShowGuide] = useState(false);
   const [totalDiamonds, setTotalDiamonds] = useState(0);
   const username = localStorage.getItem('username') || 'Créateur';
+
+  // Animation variants
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        duration: 0.5,
+        ease: "easeOut" 
+      }
+    }
+  };
 
   // Récupérer les horaires et les diamants du créateur connecté
   const { data: creatorData, isLoading } = useQuery({
@@ -156,6 +173,32 @@ export const CreatorDashboard = ({
                   Retrouvez ici toutes les informations importantes concernant vos performances, vos objectifs et vos prochains matchs.
                 </p>
                 
+                {/* Performant Utilisateur Section */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="bg-gradient-to-r from-purple-900/20 to-indigo-900/20 rounded-lg border border-purple-800/30 p-4 mb-4"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <UserCheck className="h-5 w-5 text-green-400" />
+                    <h4 className="font-medium text-green-300">Créateur performant</h4>
+                  </div>
+                  <p className="text-gray-400 text-sm">
+                    En tant qu'utilisateur performant, vous avez accès à des fonctionnalités exclusives et des récompenses supplémentaires.
+                  </p>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <div className="bg-green-900/20 border border-green-800/30 rounded-lg p-2 flex items-center gap-2">
+                      <Star className="h-4 w-4 text-yellow-400" />
+                      <span className="text-sm text-green-300">Avantages exclusifs</span>
+                    </div>
+                    <div className="bg-green-900/20 border border-green-800/30 rounded-lg p-2 flex items-center gap-2">
+                      <Diamond className="h-4 w-4 text-blue-400" />
+                      <span className="text-sm text-green-300">Bonus de diamants</span>
+                    </div>
+                  </div>
+                </motion.div>
+                
                 <div className="flex flex-wrap gap-4 mb-6">
                   <Button 
                     onClick={() => navigate('/messages')}
@@ -173,6 +216,15 @@ export const CreatorDashboard = ({
                   >
                     <Diamond className="h-4 w-4" />
                     Mes Diamants 💎
+                  </Button>
+                  
+                  <Button
+                    onClick={() => navigate('/training')}
+                    variant="outline"
+                    className="bg-blue-900/40 hover:bg-blue-800/60 text-blue-300 border-blue-700/50 hover:border-blue-600 flex gap-2 items-center"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    Formations 📚
                   </Button>
                   
                   <Button 
@@ -232,10 +284,12 @@ export const CreatorDashboard = ({
                   
                   <div className="mt-2 pt-2 border-t border-purple-800/30">
                     <div className="h-2 bg-purple-900/30 rounded-full overflow-hidden">
-                      <div 
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(100, (weeklyHours / targetHours) * 100)}%` }}
+                        transition={{ duration: 1, ease: "easeOut" }}
                         className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"
-                        style={{ width: `${Math.min(100, (weeklyHours / targetHours) * 100)}%` }}
-                      ></div>
+                      ></motion.div>
                     </div>
                     <div className="text-right text-xs text-purple-400 mt-1">
                       {Math.round((weeklyHours / targetHours) * 100)}% de l'objectif
@@ -252,13 +306,18 @@ export const CreatorDashboard = ({
                   </div>
                   
                   <div className="text-center mb-2">
-                    <span className="block text-3xl font-bold text-indigo-300">
+                    <motion.span 
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.5 }}
+                      className="block text-3xl font-bold text-indigo-300"
+                    >
                       {isLoading ? (
                         <span className="h-10 w-24 bg-indigo-800/40 animate-pulse rounded inline-block"></span>
                       ) : (
                         totalDiamonds.toLocaleString()
                       )}
-                    </span>
+                    </motion.span>
                   </div>
                   
                   <Button 
@@ -280,11 +339,21 @@ export const CreatorDashboard = ({
                   {creatorData?.nextMatch ? (
                     <>
                       <p className="text-indigo-400/80 text-sm">{formatMatchDate(creatorData.nextMatch.match_date)}</p>
-                      <p className="text-indigo-300 mt-1">
-                        <span className="font-medium">{username}</span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <motion.span 
+                          className="bg-indigo-900/30 border border-indigo-700/30 rounded-full px-3 py-1 text-indigo-300 font-medium"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          {username}
+                        </motion.span>
                         <span className="text-indigo-400 mx-2">vs</span>
-                        <span className="font-medium">{creatorData.nextMatch.opponent_id}</span>
-                      </p>
+                        <motion.span 
+                          className="bg-indigo-900/30 border border-indigo-700/30 rounded-full px-3 py-1 text-indigo-300 font-medium"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          {creatorData.nextMatch.opponent_id}
+                        </motion.span>
+                      </div>
                     </>
                   ) : (
                     <p className="text-indigo-400/80 text-sm">Aucun match programmé pour le moment</p>
@@ -312,7 +381,13 @@ export const CreatorDashboard = ({
       />
       
       {/* Social Community Links */}
-      <SocialCommunityLinks />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <SocialCommunityLinks />
+      </motion.div>
       
       {/* User Guide */}
       {showGuide && (

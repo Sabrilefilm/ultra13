@@ -25,8 +25,9 @@ import { TRAINING_TYPES } from "@/components/live-schedule/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Footer } from "@/components/layout/Footer";
 import { getYoutubeVideoId } from "@/utils/videoHelpers";
+import { SocialCommunityLinks } from "@/components/layout/SocialCommunityLinks";
+import { motion } from "framer-motion";
 
-// Types pour les formations et le suivi des vidéos
 interface Training {
   id: string;
   title: string;
@@ -53,7 +54,6 @@ const Training = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
-  // États pour les formations
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [selectedType, setSelectedType] = useState("app");
   const [loading, setLoading] = useState(true);
@@ -64,7 +64,6 @@ const Training = () => {
   const [isWatching, setIsWatching] = useState(false);
   const [currentVideo, setCurrentVideo] = useState<Training | null>(null);
   
-  // États pour le formulaire
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
@@ -72,7 +71,6 @@ const Training = () => {
   const [catalogName, setCatalogName] = useState("");
   const [isAddCatalogOpen, setIsAddCatalogOpen] = useState(false);
   
-  // Inactivity timer for automatic logout
   const { showWarning, dismissWarning, formattedTime } = useInactivityTimer({
     timeout: 120000, // 2 minutes
     onTimeout: () => {
@@ -86,7 +84,28 @@ const Training = () => {
     onWarning: () => {}
   });
   
-  // Charger les formations et les vidéos visionnées
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        duration: 0.5,
+        ease: "easeOut" 
+      }
+    }
+  };
+  
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+  
   useEffect(() => {
     if (!isAuthenticated) {
       window.location.href = '/';
@@ -99,7 +118,6 @@ const Training = () => {
     }
   }, [isAuthenticated, selectedType, userId]);
   
-  // Fonction pour récupérer les formations depuis Supabase
   const fetchTrainings = async () => {
     try {
       setLoading(true);
@@ -122,10 +140,8 @@ const Training = () => {
     }
   };
   
-  // Fonction pour récupérer les vidéos visionnées par l'utilisateur
   const fetchWatchedVideos = async () => {
     try {
-      // Vérifier si la table watched_videos existe
       const { error: tableError } = await supabase
         .from('watched_videos')
         .select('id')
@@ -153,18 +169,15 @@ const Training = () => {
     }
   };
   
-  // Fonction pour marquer une vidéo comme visionnée
   const markVideoAsWatched = async (trainingId: string) => {
     if (!userId) return;
     
     try {
-      // Vérifier si la vidéo a déjà été visionnée
       const existingWatch = watchedVideos.find(
         (wv) => wv.training_id === trainingId && wv.user_id === userId
       );
       
       if (existingWatch) {
-        // Mettre à jour la progression à 100%
         const { error } = await supabase
           .from('watched_videos')
           .update({ progress: 100 })
@@ -172,7 +185,6 @@ const Training = () => {
           
         if (error) throw error;
       } else {
-        // Créer un nouvel enregistrement
         const { error } = await supabase
           .from('watched_videos')
           .insert([
@@ -187,7 +199,6 @@ const Training = () => {
         if (error) throw error;
       }
       
-      // Recharger les vidéos visionnées
       fetchWatchedVideos();
       toast.success('Vidéo marquée comme visionnée');
     } catch (error) {
@@ -196,7 +207,6 @@ const Training = () => {
     }
   };
   
-  // Username watermark grid
   const generateWatermarkGrid = () => {
     let watermarkDivs = [];
     const rows = 15;
@@ -223,7 +233,6 @@ const Training = () => {
     return watermarkDivs;
   };
   
-  // Calculer le pourcentage de progression pour une catégorie
   const calculateCategoryProgress = (type: string) => {
     const categoryVideos = trainings.filter(t => t.type === type);
     if (categoryVideos.length === 0) return 0;
@@ -235,12 +244,10 @@ const Training = () => {
     return Math.round((watchedCount / categoryVideos.length) * 100);
   };
   
-  // Vérifier si une vidéo a été visionnée
   const isVideoWatched = (trainingId: string) => {
     return watchedVideos.some(wv => wv.training_id === trainingId && wv.progress === 100);
   };
   
-  // Ajouter une nouvelle formation
   const handleAddTraining = async () => {
     if (!title || !videoUrl) {
       toast.warning('Veuillez remplir tous les champs obligatoires');
@@ -248,14 +255,12 @@ const Training = () => {
     }
     
     try {
-      // Vérifier que l'URL est valide pour YouTube
       const videoId = getYoutubeVideoId(videoUrl);
       if (!videoId) {
         toast.error('URL YouTube invalide');
         return;
       }
       
-      // Déterminer l'ordre d'index (dernier + 1)
       const maxOrderIndex = trainings.length > 0 
         ? Math.max(...trainings.map(t => t.order_index || 0)) 
         : 0;
@@ -287,7 +292,6 @@ const Training = () => {
     }
   };
   
-  // Mettre à jour une formation
   const handleUpdateTraining = async () => {
     if (!selectedTraining || !title || !videoUrl) {
       toast.warning('Veuillez remplir tous les champs obligatoires');
@@ -295,7 +299,6 @@ const Training = () => {
     }
     
     try {
-      // Vérifier que l'URL est valide pour YouTube
       const videoId = getYoutubeVideoId(videoUrl);
       if (!videoId) {
         toast.error('URL YouTube invalide');
@@ -325,7 +328,6 @@ const Training = () => {
     }
   };
   
-  // Ajouter un nouveau catalogue
   const handleAddCatalog = async () => {
     if (!catalogName) {
       toast.warning('Veuillez entrer un nom pour le catalogue');
@@ -333,22 +335,15 @@ const Training = () => {
     }
     
     try {
-      // Vérifier si le type existe déjà
       if (Object.values(TRAINING_TYPES).includes(catalogName)) {
         toast.error('Ce catalogue existe déjà');
         return;
       }
       
-      // Ajouter le nouveau type de formation
-      // Note: Dans une implémentation réelle, vous devriez mettre à jour la constante TRAINING_TYPES
-      // et persister cette modification dans la base de données
-      
       toast.success('Catalogue ajouté avec succès');
       setCatalogName("");
       setIsAddCatalogOpen(false);
       
-      // Temporaire: Recharger la page pour voir les changements
-      // Dans une implémentation réelle, vous mettriez à jour l'état local
       setTimeout(() => {
         window.location.reload();
       }, 1000);
@@ -358,7 +353,6 @@ const Training = () => {
     }
   };
   
-  // Supprimer une formation
   const handleDeleteTraining = async (id: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette formation ?')) {
       return;
@@ -382,7 +376,6 @@ const Training = () => {
     }
   };
   
-  // Réinitialiser le formulaire
   const resetForm = () => {
     setTitle("");
     setDescription("");
@@ -391,7 +384,6 @@ const Training = () => {
     setSelectedTraining(null);
   };
   
-  // Ouvrir le formulaire d'édition
   const openEditDialog = (training: Training) => {
     setSelectedTraining(training);
     setTitle(training.title);
@@ -401,13 +393,11 @@ const Training = () => {
     setIsEditDialogOpen(true);
   };
   
-  // Ouvrir la vidéo en mode plein écran
   const openVideoViewer = (training: Training) => {
     setCurrentVideo(training);
     setIsWatching(true);
   };
   
-  // Fermer la vidéo et marquer comme visionnée
   const closeVideoViewer = (markAsWatched = false) => {
     if (markAsWatched && currentVideo) {
       markVideoAsWatched(currentVideo.id);
@@ -432,14 +422,17 @@ const Training = () => {
         currentPage="training"
       />
       
-      {/* Watermark */}
       <div className="fixed inset-0 pointer-events-none select-none z-0 overflow-hidden">
         {generateWatermarkGrid()}
       </div>
       
-      <div className="p-4 md:p-6 md:ml-64 space-y-6">
-        {/* Bannière de la page */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+      <div className="p-4 md:p-6 md:ml-64 space-y-6 max-w-7xl mx-auto">
+        <motion.div 
+          variants={fadeIn}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 bg-gradient-to-r from-purple-900/10 to-indigo-900/10 p-4 rounded-xl border border-purple-900/20"
+        >
           <div>
             <Button
               variant="ghost"
@@ -483,10 +476,14 @@ const Training = () => {
               </>
             )}
           </div>
-        </div>
+        </motion.div>
         
-        {/* Progression globale */}
-        {(role === 'creator' || role === 'agent') && (
+        <motion.div
+          variants={fadeIn}
+          initial="hidden"
+          animate="visible"
+          transition={{ delay: 0.1 }}
+        >
           <Card className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 border-purple-100 dark:border-purple-900/30">
             <CardHeader className="pb-2">
               <CardTitle>Votre progression</CardTitle>
@@ -495,194 +492,242 @@ const Training = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                {Object.entries(TRAINING_TYPES).map(([type, label]) => (
-                  <Card key={type} className="bg-white/50 dark:bg-gray-800/50">
-                    <CardContent className="p-4">
-                      <div className="flex flex-col items-center">
-                        <p className="font-medium mb-2">{label}</p>
-                        <div className="w-20 h-20 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700 mb-2">
-                          <span className="text-xl font-bold">{calculateCategoryProgress(type)}%</span>
+              <motion.div 
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4"
+              >
+                {Object.entries(TRAINING_TYPES).map(([type, label], index) => (
+                  <motion.div 
+                    key={type} 
+                    variants={fadeIn}
+                    custom={index}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Card className="bg-white/50 dark:bg-gray-800/50 hover:shadow-md transition-all">
+                      <CardContent className="p-4">
+                        <div className="flex flex-col items-center">
+                          <p className="font-medium mb-2">{label}</p>
+                          <div className="w-20 h-20 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700 mb-2 relative overflow-hidden">
+                            <div
+                              className="absolute bottom-0 left-0 right-0 bg-purple-500"
+                              style={{ height: `${calculateCategoryProgress(type)}%` }}
+                            />
+                            <span className="text-xl font-bold relative z-10">
+                              {calculateCategoryProgress(type)}%
+                            </span>
+                          </div>
+                          <Progress value={calculateCategoryProgress(type)} className="w-full h-2 mt-2" />
                         </div>
-                        <Progress value={calculateCategoryProgress(type)} className="w-full h-2 mt-2" />
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             </CardContent>
           </Card>
-        )}
+        </motion.div>
         
-        {/* Catalogue de formations */}
-        <Card className="bg-white dark:bg-slate-900 shadow-lg border-purple-100 dark:border-purple-900/30">
-          <CardHeader className="pb-2">
-            <CardTitle>Catalogue de formations</CardTitle>
-            <CardDescription>
-              Explorez nos formations pour développer vos compétences
-            </CardDescription>
-          </CardHeader>
-          
-          <Tabs defaultValue="app" value={selectedType} onValueChange={setSelectedType}>
-            <div className="px-6">
-              <TabsList className="grid grid-cols-2 md:grid-cols-5 mb-4 w-full">
-                <TabsTrigger value="app" className="flex items-center gap-2">
-                  <Book className="h-4 w-4" />
-                  <span className={isMobile ? "hidden" : ""}>Application</span>
-                </TabsTrigger>
-                <TabsTrigger value="live" className="flex items-center gap-2">
-                  <Play className="h-4 w-4" />
-                  <span className={isMobile ? "hidden" : ""}>Techniques de live</span>
-                </TabsTrigger>
-                <TabsTrigger value="content" className="flex items-center gap-2">
-                  <VideoIcon className="h-4 w-4" />
-                  <span className={isMobile ? "hidden" : ""}>Création de contenu</span>
-                </TabsTrigger>
-                <TabsTrigger value="growth" className="flex items-center gap-2">
-                  <Lightbulb className="h-4 w-4" />
-                  <span className={isMobile ? "hidden" : ""}>Croissance</span>
-                </TabsTrigger>
-                <TabsTrigger value="monetization" className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  <span className={isMobile ? "hidden" : ""}>Monétisation</span>
-                </TabsTrigger>
-              </TabsList>
-            </div>
+        <motion.div
+          variants={fadeIn}
+          initial="hidden"
+          animate="visible"
+          transition={{ delay: 0.2 }}
+        >
+          <SocialCommunityLinks className="mb-6" />
+        </motion.div>
+        
+        <motion.div
+          variants={fadeIn}
+          initial="hidden"
+          animate="visible"
+          transition={{ delay: 0.3 }}
+        >
+          <Card className="bg-white dark:bg-slate-900 shadow-lg border-purple-100 dark:border-purple-900/30">
+            <CardHeader className="pb-2">
+              <CardTitle>Catalogue de formations</CardTitle>
+              <CardDescription>
+                Explorez nos formations pour développer vos compétences
+              </CardDescription>
+            </CardHeader>
             
-            {Object.keys(TRAINING_TYPES).map((type) => (
-              <TabsContent key={type} value={type} className="pt-2">
-                <CardContent>
-                  {loading ? (
-                    <div className="flex justify-center py-12">
-                      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-                    </div>
-                  ) : trainings.length === 0 ? (
-                    <div className="text-center py-12">
-                      <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                      <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400">
-                        Aucune formation disponible
-                      </h3>
-                      {role === 'founder' && (
-                        <Button 
-                          onClick={() => {
-                            resetForm();
-                            setTrainingType(type);
-                            setIsAddDialogOpen(true);
-                          }}
-                          className="mt-4"
-                        >
-                          Ajouter une formation
-                        </Button>
-                      )}
-                    </div>
-                  ) : (
-                    <ScrollArea className="h-[calc(100vh-450px)] min-h-[400px] pr-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {trainings.map((training) => (
-                          <Card 
-                            key={training.id} 
-                            className={`overflow-hidden border ${
-                              isVideoWatched(training.id) 
-                                ? "border-green-300 dark:border-green-700" 
-                                : "border-gray-200 dark:border-gray-700"
-                            } transition-all hover:shadow-md`}
+            <Tabs defaultValue="app" value={selectedType} onValueChange={setSelectedType}>
+              <div className="px-6">
+                <TabsList className="grid grid-cols-2 md:grid-cols-5 mb-4 w-full">
+                  <TabsTrigger value="app" className="flex items-center gap-2">
+                    <Book className="h-4 w-4" />
+                    <span className={isMobile ? "hidden" : ""}>Application</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="live" className="flex items-center gap-2">
+                    <Play className="h-4 w-4" />
+                    <span className={isMobile ? "hidden" : ""}>Techniques de live</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="content" className="flex items-center gap-2">
+                    <VideoIcon className="h-4 w-4" />
+                    <span className={isMobile ? "hidden" : ""}>Création de contenu</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="growth" className="flex items-center gap-2">
+                    <Lightbulb className="h-4 w-4" />
+                    <span className={isMobile ? "hidden" : ""}>Croissance</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="monetization" className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4" />
+                    <span className={isMobile ? "hidden" : ""}>Monétisation</span>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+              
+              {Object.keys(TRAINING_TYPES).map((type) => (
+                <TabsContent key={type} value={type} className="pt-2">
+                  <CardContent>
+                    {loading ? (
+                      <div className="flex justify-center py-12">
+                        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                      </div>
+                    ) : trainings.length === 0 ? (
+                      <div className="text-center py-12">
+                        <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                        <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400">
+                          Aucune formation disponible
+                        </h3>
+                        {role === 'founder' && (
+                          <Button 
+                            onClick={() => {
+                              resetForm();
+                              setTrainingType(type);
+                              setIsAddDialogOpen(true);
+                            }}
+                            className="mt-4"
                           >
-                            <div 
-                              className="aspect-video bg-gray-100 dark:bg-gray-800 relative cursor-pointer group"
-                              onClick={() => openVideoViewer(training)}
+                            Ajouter une formation
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <ScrollArea className="h-[calc(100vh-570px)] min-h-[400px] pr-4">
+                        <motion.div
+                          variants={staggerContainer}
+                          initial="hidden"
+                          animate="visible"
+                          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                        >
+                          {trainings.map((training, index) => (
+                            <motion.div
+                              key={training.id}
+                              variants={fadeIn}
+                              custom={index}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                             >
-                              {/* Miniature de la vidéo */}
-                              <img 
-                                src={`https://img.youtube.com/vi/${getYoutubeVideoId(training.video_url)}/mqdefault.jpg`}
-                                alt={training.title}
-                                className="w-full h-full object-cover"
-                              />
-                              {/* Overlay de lecture */}
-                              <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Play className="h-16 w-16 text-white" />
-                              </div>
-                              {/* Badge "Visionné" */}
-                              {isVideoWatched(training.id) && (
-                                <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                                  Visionné
-                                </div>
-                              )}
-                            </div>
-                            <CardContent className="pt-4">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h3 className="text-lg font-semibold mb-2">
-                                    {training.title}
-                                  </h3>
-                                  {training.description && (
-                                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2">
-                                      {training.description}
-                                    </p>
+                              <Card 
+                                className={`overflow-hidden border ${
+                                  isVideoWatched(training.id) 
+                                    ? "border-green-300 dark:border-green-700" 
+                                    : "border-gray-200 dark:border-gray-700"
+                                } transition-all hover:shadow-md`}
+                              >
+                                <div 
+                                  className="aspect-video bg-gray-100 dark:bg-gray-800 relative cursor-pointer group"
+                                  onClick={() => openVideoViewer(training)}
+                                >
+                                  <img 
+                                    src={`https://img.youtube.com/vi/${getYoutubeVideoId(training.video_url)}/mqdefault.jpg`}
+                                    alt={training.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <motion.div
+                                      whileHover={{ scale: 1.2, rotate: 5 }}
+                                      transition={{ duration: 0.2 }}
+                                    >
+                                      <Play className="h-16 w-16 text-white" />
+                                    </motion.div>
+                                  </div>
+                                  {isVideoWatched(training.id) && (
+                                    <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                                      Visionné
+                                    </div>
                                   )}
                                 </div>
-                                
-                                {role === 'founder' && (
-                                  <div className="flex gap-2">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
+                                <CardContent className="pt-4">
+                                  <div className="flex justify-between items-start">
+                                    <div>
+                                      <h3 className="text-lg font-semibold mb-2">
+                                        {training.title}
+                                      </h3>
+                                      {training.description && (
+                                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+                                          {training.description}
+                                        </p>
+                                      )}
+                                    </div>
+                                    
+                                    {role === 'founder' && (
+                                      <div className="flex gap-2">
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            openEditDialog(training);
+                                          }}
+                                        >
+                                          <Pencil className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="text-red-500 hover:text-red-600"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteTraining(training.id);
+                                          }}
+                                        >
+                                          <X className="h-4 w-4" />
+                                        </Button>
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="mt-2 pt-2 border-t border-dashed border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                                    <a 
+                                      href={training.video_url} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="text-blue-500 hover:underline text-sm flex items-center gap-1"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <Youtube className="h-4 w-4" />
+                                      Voir sur YouTube
+                                    </a>
+                                    
+                                    <Button 
+                                      size="sm" 
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        openEditDialog(training);
+                                        openVideoViewer(training);
                                       }}
+                                      className="bg-purple-600 hover:bg-purple-700"
                                     >
-                                      <Pencil className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="text-red-500 hover:text-red-600"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDeleteTraining(training.id);
-                                      }}
-                                    >
-                                      <X className="h-4 w-4" />
+                                      Visionner
                                     </Button>
                                   </div>
-                                )}
-                              </div>
-                              
-                              <div className="mt-2 pt-2 border-t border-dashed border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                                <a 
-                                  href={training.video_url} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 hover:underline text-sm flex items-center gap-1"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <Youtube className="h-4 w-4" />
-                                  Voir sur YouTube
-                                </a>
-                                
-                                <Button 
-                                  size="sm" 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    openVideoViewer(training);
-                                  }}
-                                >
-                                  Visionner
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  )}
-                </CardContent>
-              </TabsContent>
-            ))}
-          </Tabs>
-        </Card>
+                                </CardContent>
+                              </Card>
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      </ScrollArea>
+                    )}
+                  </CardContent>
+                </TabsContent>
+              ))}
+            </Tabs>
+          </Card>
+        </motion.div>
         
-        {/* Dialogue pour ajouter une formation */}
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -752,7 +797,6 @@ const Training = () => {
           </DialogContent>
         </Dialog>
         
-        {/* Dialogue pour modifier une formation */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -802,7 +846,6 @@ const Training = () => {
           </DialogContent>
         </Dialog>
         
-        {/* Dialogue pour ajouter un catalogue */}
         <Dialog open={isAddCatalogOpen} onOpenChange={setIsAddCatalogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -835,7 +878,6 @@ const Training = () => {
           </DialogContent>
         </Dialog>
         
-        {/* Modal de visionnage vidéo */}
         <Dialog open={isWatching} onOpenChange={(open) => !open && closeVideoViewer()}>
           <DialogContent className="sm:max-w-5xl h-[80vh] flex flex-col">
             <DialogHeader>
