@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
 import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
-import { useAuth } from "@/hooks/use-index-auth";
+import { useIndexAuth } from "@/hooks/use-index-auth";
 import { 
   Card, 
   CardContent, 
@@ -23,7 +22,6 @@ import { useToast } from "@/hooks/use-toast";
 import { 
   PlayCircle, 
   Clock, 
-  LucideIcon, 
   BookOpen, 
   Camera, 
   Video, 
@@ -54,8 +52,8 @@ interface Training {
 
 const Training = () => {
   // User authentication and session management
-  const { username, role, userId, handleLogout } = useAuth();
-  const { settings: platformSettings } = usePlatformSettings();
+  const { username, role, userId, handleLogout } = useIndexAuth();
+  const { platformSettings } = usePlatformSettings(role);
   const { showWarning, dismissWarning, formattedTime } = useInactivityTimer(handleLogout);
   const { toast } = useToast();
   
@@ -96,6 +94,12 @@ const Training = () => {
     
     fetchTrainings();
   }, []);
+
+  // Handle create account function that returns a Promise
+  const handleCreateAccount = async () => {
+    // This is a placeholder function to match the expected signature
+    return Promise.resolve();
+  };
 
   // Open the video modal
   const handleOpenVideo = (url: string, title: string) => {
@@ -147,7 +151,7 @@ const Training = () => {
       userId={userId}
       onLogout={handleLogout}
       platformSettings={platformSettings}
-      handleCreateAccount={() => {}}
+      handleCreateAccount={handleCreateAccount}
       handleUpdateSettings={() => Promise.resolve()}
       showWarning={showWarning}
       dismissWarning={dismissWarning}
@@ -167,7 +171,7 @@ const Training = () => {
         {/* Main Content Container */}
         <div className="grid grid-cols-1 gap-8">
           {/* Quick Access Panels */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             {/* Community Panel */}
             <motion.div
               whileHover={{ scale: 1.02 }}
@@ -260,7 +264,7 @@ const Training = () => {
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid grid-cols-4 lg:grid-cols-5 mb-6">
+                <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 mb-6">
                   <TabsTrigger value="all">Tous</TabsTrigger>
                   {Object.keys(trainingsByType).map((type) => (
                     <TabsTrigger key={type} value={type}>
@@ -288,7 +292,7 @@ const Training = () => {
                           <Card className="bg-slate-800/70 border-slate-700/50 overflow-hidden hover:border-blue-600/50 transition-all duration-300">
                             <div className="flex flex-col md:flex-row">
                               <div 
-                                className="relative md:w-48 h-36 bg-slate-700 cursor-pointer"
+                                className="relative w-full md:w-48 h-36 bg-slate-700 cursor-pointer"
                                 onClick={() => handleOpenVideo(training.video_url, training.title)}
                               >
                                 {training.video_url && (
@@ -305,7 +309,7 @@ const Training = () => {
                                 )}
                               </div>
                               <div className="p-4 flex-1">
-                                <div className="flex justify-between items-start">
+                                <div className="flex justify-between items-start flex-wrap gap-2">
                                   <h3 className="text-lg font-semibold text-white">{training.title}</h3>
                                   <Badge 
                                     variant="outline" 
@@ -359,7 +363,7 @@ const Training = () => {
                           <Card className="bg-slate-800/70 border-slate-700/50 overflow-hidden hover:border-blue-600/50 transition-all duration-300">
                             <div className="flex flex-col md:flex-row">
                               <div 
-                                className="relative md:w-48 h-36 bg-slate-700 cursor-pointer"
+                                className="relative w-full md:w-48 h-36 bg-slate-700 cursor-pointer"
                                 onClick={() => handleOpenVideo(training.video_url, training.title)}
                               >
                                 {training.video_url && (
@@ -376,7 +380,7 @@ const Training = () => {
                                 )}
                               </div>
                               <div className="p-4 flex-1">
-                                <div className="flex justify-between items-start">
+                                <div className="flex justify-between items-start flex-wrap gap-2">
                                   <h3 className="text-lg font-semibold text-white">{training.title}</h3>
                                   <Badge 
                                     variant="outline" 
