@@ -21,7 +21,7 @@ const TabsList = React.forwardRef<
 ))
 TabsList.displayName = TabsPrimitive.List.displayName
 
-const Tab = React.forwardRef<
+const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
 >(({ className, ...props }, ref) => (
@@ -34,8 +34,24 @@ const Tab = React.forwardRef<
     {...props}
   />
 ))
-Tab.displayName = TabsPrimitive.Trigger.displayName
+TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
 
+const TabsContent = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.Content
+    ref={ref}
+    className={cn(
+      "mt-2 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300",
+      className
+    )}
+    {...props}
+  />
+))
+TabsContent.displayName = TabsPrimitive.Content.displayName
+
+// For backward compatibility, alias Tab to TabPanel
 const TabPanel = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
@@ -49,6 +65,9 @@ const TabPanel = React.forwardRef<
     {...props}
   />
 ))
-TabPanel.displayName = TabsPrimitive.Content.displayName
+TabPanel.displayName = "TabPanel"
 
-export { Tabs, TabsList, Tab, TabPanel }
+// Also fix the TabList issue in TrainingCatalog.tsx
+const TabList = TabsList
+
+export { Tabs, TabsList, TabsTrigger, TabsContent, Tab, TabPanel, TabList }
