@@ -1,268 +1,258 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Paperclip, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { useMessages } from '@/hooks/use-messages';
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 import { ContactList } from './ContactList';
 import { MessageList } from './MessageList';
-import { Loader2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { MessageHeader } from './MessageHeader';
+import { MessageComposer } from './MessageComposer';
+import { Loading } from '@/components/ui/loading';
 
-interface MessageContainerProps {
-  username?: string;
-  role?: string;
-  userId?: string;
+interface Contact {
+  id: string;
+  username: string;
+  role: string;
+  lastMessage: string;
+  lastMessageTime: string;
+  unreadCount: number;
 }
 
-export const MessageContainer = ({
-  username = '',
-  role = '',
-  userId = ''
-}: MessageContainerProps) => {
-  const {
-    conversations,
-    messages,
-    activeContact,
-    setActiveContact,
-    newMessage,
-    setNewMessage,
-    sendMessage,
-    sendingMessage,
-    loadingConversations,
-    loadingMessages,
-    unreadCount,
-    archiveConversation,
-    archiving,
-    handleAttachment,
-    attachmentPreview,
-    clearAttachment
-  } = useMessages(userId);
+interface MessageContainerProps {
+  username: string;
+  role: string;
+  userId: string;
+}
 
-  const [isNewMessageOpen, setIsNewMessageOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+export const MessageContainer = ({ username, role, userId }: MessageContainerProps) => {
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [activeContactId, setActiveContactId] = useState<string>('');
+  const [messages, setMessages] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    fetchContacts();
+    
+    // Set up real-time subscription for new messages
+    const channel = supabase
+      .channel('new-messages')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'chats' 
+      }, (payload) => {
+        const newMessage = payload.new;
+        
+        // Update messages if from active conversation
+        if (
+          (newMessage.sender_id === activeContactId && newMessage.receiver_id === userId) || 
+          (newMessage.sender_id === userId && newMessage.receiver_id === activeContactId)
+        ) {
+          setMessages(prev => [...prev, newMessage]);
+        }
+        
+        // Update contact list with new message info
+        fetchContacts();
+      })
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId, activeContactId]);
+  
+  useEffect(() => {
+    if (activeContactId) {
+      fetchMessages();
     }
-  }, [messages]);
-
-  const handleSendMessage = () => {
-    if ((newMessage.trim() || attachmentPreview) && activeContact) {
-      sendMessage();
+  }, [activeContactId]);
+  
+  const fetchContacts = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Fetch all users except current user
+      const { data: usersData, error: usersError } = await supabase
+        .from('user_accounts')
+        .select('id, username, role')
+        .not('id', 'eq', userId);
+        
+      if (usersError) throw usersError;
+      
+      // For each user, get the last message between them and current user
+      const contactsWithMessages = await Promise.all(
+        usersData.map(async (user) => {
+          // Get last message and unread count
+          const { data: lastMessageData, error: messageError } = await supabase
+            .from('chats')
+            .select('*')
+            .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+            .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+            .order('created_at', { ascending: false })
+            .limit(1);
+            
+          if (messageError) throw messageError;
+          
+          // Count unread messages
+          const { count, error: countError } = await supabase
+            .from('chats')
+            .select('*', { count: 'exact', head: false })
+            .eq('sender_id', user.id)
+            .eq('receiver_id', userId)
+            .eq('read', false);
+            
+          if (countError) throw countError;
+          
+          // Format last message time
+          const lastMessage = lastMessageData?.[0] || null;
+          const lastMessageText = lastMessage ? lastMessage.message : '';
+          const lastMessageTime = lastMessage 
+            ? new Date(lastMessage.created_at).toLocaleString() 
+            : '';
+            
+          return {
+            ...user,
+            lastMessage: lastMessageText,
+            lastMessageTime,
+            unreadCount: count || 0
+          };
+        })
+      );
+      
+      // Update unread counts
+      const newUnreadCounts: Record<string, number> = {};
+      contactsWithMessages.forEach(contact => {
+        newUnreadCounts[contact.id] = contact.unreadCount;
+      });
+      setUnreadCounts(newUnreadCounts);
+      
+      // Sort contacts by last message time (most recent first)
+      const sortedContacts = contactsWithMessages
+        .filter(contact => contact.lastMessage) // Only show contacts with messages
+        .sort((a, b) => {
+          if (!a.lastMessageTime) return 1;
+          if (!b.lastMessageTime) return -1;
+          return new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime();
+        });
+      
+      setContacts(sortedContacts);
+    } catch (error) {
+      console.error('Error fetching contacts:', error);
+      toast.error('Erreur lors du chargement des contacts');
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      handleAttachment(files[0]);
+  
+  const fetchMessages = async () => {
+    if (!activeContactId) return;
+    
+    try {
+      setIsLoading(true);
+      
+      // Get all messages between current user and active contact
+      const { data, error } = await supabase
+        .from('chats')
+        .select('*')
+        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+        .or(`sender_id.eq.${activeContactId},receiver_id.eq.${activeContactId}`)
+        .order('created_at', { ascending: true });
+        
+      if (error) throw error;
+      
+      setMessages(data || []);
+      
+      // Mark messages as read
+      if (data && data.length > 0) {
+        const unreadMessages = data.filter(msg => 
+          msg.sender_id === activeContactId && 
+          msg.receiver_id === userId && 
+          !msg.read
+        );
+        
+        if (unreadMessages.length > 0) {
+          await supabase
+            .from('chats')
+            .update({ read: true })
+            .in('id', unreadMessages.map(msg => msg.id));
+          
+          // Update unread count after marking as read
+          setUnreadCounts(prev => ({
+            ...prev,
+            [activeContactId]: 0
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      toast.error('Erreur lors du chargement des messages');
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+  
+  const sendMessage = async (message: string) => {
+    if (!message.trim() || !activeContactId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('chats')
+        .insert([
+          {
+            sender_id: userId,
+            receiver_id: activeContactId,
+            message,
+            read: false
+          }
+        ]);
+        
+      if (error) throw error;
+      
+      // Refresh messages (real-time subscription should handle this)
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Erreur lors de l\'envoi du message');
     }
   };
-
-  const activeUser = conversations?.find(conv => conv.id === activeContact);
-
-  // Back to dashboard button
-  const BackToDashboardButton = () => (
-    <Button 
-      variant="outline" 
-      className="mb-4 w-full"
-      onClick={() => window.location.href = '/'}
-    >
-      Retour au tableau de bord
-    </Button>
-  );
-
-  if (loadingConversations) {
-    return (
-      <div className="w-full h-full flex items-center justify-center p-8">
-        <div className="text-center">
-          <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />
-          <p>Chargement de vos conversations...</p>
-          <BackToDashboardButton />
-        </div>
-      </div>
-    );
-  }
-
+  
   return (
-    <div className="flex flex-col md:flex-row w-full h-full bg-gray-50 dark:bg-gray-900">
-      {/* Sidebar with conversations */}
-      <div className="w-full md:w-1/3 lg:w-1/4 border-r border-gray-200 dark:border-gray-800 flex flex-col">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex flex-col space-y-4">
-          <BackToDashboardButton />
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold">Messagerie</h2>
-            {unreadCount && unreadCount > 0 && (
-              <Badge variant="destructive" className="ml-2">
-                {unreadCount} non lu{unreadCount > 1 ? 's' : ''}
-              </Badge>
-            )}
-          </div>
+    <div className="h-full flex flex-col">
+      <div className="flex h-full">
+        <div className="w-1/3 border-r dark:border-gray-700 h-full">
+          <ContactList 
+            contacts={contacts}
+            activeContactId={activeContactId}
+            onSelectContact={setActiveContactId}
+            isLoading={isLoading}
+            unreadCounts={unreadCounts}
+          />
         </div>
         
-        <ContactList 
-          contacts={conversations || []} 
-          activeContactId={activeContact || ''}
-          onSelectContact={setActiveContact}
-          isLoading={loadingConversations}
-        />
-      </div>
-      
-      {/* Main chat area */}
-      <div className="flex-1 flex flex-col h-full">
-        {!activeContact ? (
-          <div className="flex-1 flex items-center justify-center p-8 text-gray-500 dark:text-gray-400">
-            <div className="text-center">
-              <p>Sélectionnez une conversation pour afficher les messages</p>
-            </div>
-          </div>
-        ) : (
-          <>
-            {/* Chat header */}
-            <div className="border-b border-gray-200 dark:border-gray-800 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-primary/10 text-primary">
-                      {activeUser?.username?.charAt(0).toUpperCase() || "?"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <span className="font-bold">{activeUser?.username}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{activeUser?.role}</span>
-                  </div>
-                </div>
-                <div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => archiveConversation()}
-                    disabled={archiving}
-                  >
-                    Archiver
-                  </Button>
-                </div>
-              </div>
-            </div>
-            
-            {/* Messages area */}
-            <ScrollArea className="flex-1 p-4 overflow-y-auto">
-              {loadingMessages ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                </div>
-              ) : messages && messages.length > 0 ? (
-                <div className="space-y-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${message.sender_id === userId ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-[75%] rounded-lg px-4 py-2 ${
-                          message.sender_id === userId
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-                        }`}
-                      >
-                        {message.attachment_url && (
-                          <div className="mb-2">
-                            <img 
-                              src={message.attachment_url} 
-                              alt="Attachment" 
-                              className="max-w-full rounded" 
-                              style={{ maxHeight: '200px' }}
-                            />
-                          </div>
-                        )}
-                        <p>{message.message}</p>
-                        <p className="text-xs opacity-75 mt-1">
-                          {format(new Date(message.created_at), 'Pp', { locale: fr })}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  Commencez la conversation en envoyant un message.
-                </div>
-              )}
-            </ScrollArea>
-            
-            {/* Message input */}
-            <div className="border-t border-gray-200 dark:border-gray-800 p-4">
-              {attachmentPreview && (
-                <div className="mb-2 relative inline-block">
-                  <img 
-                    src={attachmentPreview} 
-                    alt="Preview" 
-                    className="h-20 w-auto rounded border border-gray-300 dark:border-gray-700" 
-                  />
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                    onClick={clearAttachment}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-              <div className="flex items-center gap-2">
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  className="hidden" 
-                  accept="image/*"
-                  onChange={handleFileChange}
+        <div className="w-2/3 flex flex-col h-full">
+          {activeContactId ? (
+            <>
+              <MessageHeader 
+                contact={contacts.find(c => c.id === activeContactId)} 
+              />
+              
+              <div className="flex-1 overflow-auto p-4">
+                <MessageList 
+                  messages={messages} 
+                  currentUserId={userId} 
+                  contactId={activeContactId}
                 />
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Paperclip className="h-5 w-5" />
-                </Button>
-                <Input
-                  type="text"
-                  placeholder="Écrire un message..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  className="flex-1"
-                />
-                <Button 
-                  onClick={handleSendMessage} 
-                  disabled={(!newMessage.trim() && !attachmentPreview) || sendingMessage}
-                >
-                  {sendingMessage ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <Send className="h-5 w-5 mr-2" />
-                  )}
-                  Envoyer
-                </Button>
               </div>
+              
+              <MessageComposer onSendMessage={sendMessage} />
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-gray-500 dark:text-gray-400">
+                Sélectionnez un contact pour commencer à discuter
+              </p>
             </div>
-          </>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

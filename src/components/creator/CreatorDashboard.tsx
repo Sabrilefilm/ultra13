@@ -1,17 +1,18 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StatCards } from "@/components/dashboard/StatCards";
 import { LeaveAgencyDialog } from "@/components/agency/LeaveAgencyDialog";
 import { DailyQuote } from "@/components/dashboard/DailyQuote";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UserGuide } from "@/components/help/UserGuide";
-import { MessageSquare, AlertTriangle, BarChart4, Calendar, ArrowRight, Clock, Trophy } from "lucide-react";
+import { MessageSquare, AlertTriangle, BarChart4, Calendar, ArrowRight, Clock, Trophy, Diamond } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { Footer } from "@/components/layout/Footer";
 
 interface CreatorDashboardProps {
   onOpenSponsorshipForm: () => void;
@@ -29,53 +30,69 @@ export const CreatorDashboard = ({
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [showGuide, setShowGuide] = useState(false);
+  const [totalDiamonds, setTotalDiamonds] = useState(0);
 
-  // Récupérer les horaires du créateur connecté
-  const { data: liveSchedule, isLoading } = useQuery({
-    queryKey: ["creator-schedule"],
+  // Récupérer les horaires et les diamants du créateur connecté
+  const { data: creatorData, isLoading } = useQuery({
+    queryKey: ["creator-data"],
     queryFn: async () => {
       try {
         // Récupérer l'ID de l'utilisateur connecté via localStorage
         const username = localStorage.getItem('username');
+        const userId = localStorage.getItem('userId');
         
-        if (!username) {
-          return { hours: 0, days: 0 };
+        if (!username || !userId) {
+          return { 
+            schedule: { hours: 0, days: 0 },
+            diamonds: 0
+          };
         }
         
-        // Récupérer l'ID utilisateur à partir du username
-        const { data: userData, error: userError } = await supabase
-          .from('user_accounts')
-          .select('id')
-          .eq('username', username)
-          .maybeSingle();
-          
-        if (userError || !userData) {
-          console.error('Erreur lors de la récupération de l\'ID utilisateur:', userError);
-          return { hours: 0, days: 0 };
-        }
-
         // Récupérer l'horaire de live
-        const { data: scheduleData, error } = await supabase
+        const { data: scheduleData, error: scheduleError } = await supabase
           .from('live_schedules')
           .select('hours, days')
-          .eq('creator_id', userData.id)
+          .eq('creator_id', userId)
           .maybeSingle();
 
-        if (error) {
-          throw error;
+        if (scheduleError) {
+          console.error("Error fetching schedule:", scheduleError);
         }
 
-        return scheduleData || { hours: 0, days: 0 };
+        // Récupérer les diamants
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('total_diamonds')
+          .eq('id', userId)
+          .maybeSingle();
+
+        if (profileError) {
+          console.error("Error fetching profile:", profileError);
+        }
+
+        return {
+          schedule: scheduleData || { hours: 0, days: 0 },
+          diamonds: profileData?.total_diamonds || 0
+        };
       } catch (error) {
-        console.error("Erreur lors de la récupération des horaires:", error);
-        toast.error("Impossible de récupérer vos horaires de live");
-        return { hours: 0, days: 0 };
+        console.error("Erreur lors de la récupération des données:", error);
+        toast.error("Impossible de récupérer vos données");
+        return { 
+          schedule: { hours: 0, days: 0 },
+          diamonds: 0
+        };
       }
     }
   });
 
+  useEffect(() => {
+    if (creatorData?.diamonds) {
+      setTotalDiamonds(creatorData.diamonds);
+    }
+  }, [creatorData]);
+
   // Calculer le total d'heures hebdomadaires
-  const weeklyHours = liveSchedule ? (liveSchedule.hours * liveSchedule.days) : 0;
+  const weeklyHours = creatorData?.schedule ? (creatorData.schedule.hours * creatorData.schedule.days) : 0;
   
   // Objectifs à atteindre
   const targetHours = 15;
@@ -100,7 +117,7 @@ export const CreatorDashboard = ({
               <div className="md:w-2/3">
                 <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
                   <Trophy className="h-5 w-5 text-amber-400" />
-                  Bienvenue sur votre tableau de bord!
+                  Bienvenue sur votre tableau de bord! ✨
                 </h3>
                 
                 <p className="text-gray-400 mb-4">
@@ -114,7 +131,16 @@ export const CreatorDashboard = ({
                     className="bg-indigo-900/40 hover:bg-indigo-800/60 text-indigo-300 border-indigo-700/50 hover:border-indigo-600 flex gap-2 items-center"
                   >
                     <MessageSquare className="h-4 w-4" />
-                    Messagerie
+                    Messagerie 💬
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => navigate('/creator-rewards')}
+                    variant="outline" 
+                    className="bg-purple-900/40 hover:bg-purple-800/60 text-purple-300 border-purple-700/50 hover:border-purple-600 flex gap-2 items-center"
+                  >
+                    <Diamond className="h-4 w-4" />
+                    Mes Diamants 💎
                   </Button>
                   
                   <Button 
@@ -122,7 +148,7 @@ export const CreatorDashboard = ({
                     variant="outline"
                     className="bg-purple-900/40 hover:bg-purple-800/60 text-purple-300 border-purple-700/50 hover:border-purple-600 flex gap-2 items-center"
                   >
-                    {showGuide ? "Masquer le guide" : "Voir le guide d'utilisation"}
+                    {showGuide ? "Masquer le guide" : "Voir le guide d'utilisation 📖"}
                   </Button>
                 </div>
               </div>
@@ -132,7 +158,7 @@ export const CreatorDashboard = ({
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-medium text-purple-300 flex items-center gap-2">
                       <Clock className="h-4 w-4" />
-                      Vos horaires
+                      Vos horaires ⏰
                     </h4>
                     <div className="px-2 py-1 bg-purple-800/30 border border-purple-700/30 rounded-md text-xs text-purple-300">
                       Planning
@@ -145,7 +171,7 @@ export const CreatorDashboard = ({
                         {isLoading ? (
                           <span className="h-8 w-16 bg-purple-800/40 animate-pulse rounded inline-block"></span>
                         ) : (
-                          liveSchedule?.hours || 0
+                          creatorData?.schedule?.hours || 0
                         )}
                       </span>
                       <span className="text-xs text-purple-200/70">heures/jour</span>
@@ -155,7 +181,7 @@ export const CreatorDashboard = ({
                         {isLoading ? (
                           <span className="h-8 w-16 bg-purple-800/40 animate-pulse rounded inline-block"></span>
                         ) : (
-                          liveSchedule?.days || 0
+                          creatorData?.schedule?.days || 0
                         )}
                       </span>
                       <span className="text-xs text-purple-200/70">jours/semaine</span>
@@ -184,6 +210,33 @@ export const CreatorDashboard = ({
                     </div>
                   </div>
                 </div>
+                
+                <div className="mt-4 p-4 bg-indigo-900/20 border border-indigo-700/30 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium text-indigo-300 flex items-center gap-2">
+                      <Diamond className="h-4 w-4" />
+                      Vos diamants 💎
+                    </h4>
+                  </div>
+                  
+                  <div className="text-center mb-2">
+                    <span className="block text-3xl font-bold text-indigo-300">
+                      {isLoading ? (
+                        <span className="h-10 w-24 bg-indigo-800/40 animate-pulse rounded inline-block"></span>
+                      ) : (
+                        totalDiamonds.toLocaleString()
+                      )}
+                    </span>
+                  </div>
+                  
+                  <Button 
+                    variant="ghost" 
+                    className="w-full text-indigo-300 hover:text-indigo-100 hover:bg-indigo-700/30 mt-2"
+                    onClick={() => navigate('/creator-rewards')}
+                  >
+                    Voir mes récompenses <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </div>
               </div>
             </div>
             
@@ -191,7 +244,7 @@ export const CreatorDashboard = ({
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-indigo-400" />
                 <div>
-                  <p className="text-indigo-300 font-medium">Prochain match prévu</p>
+                  <p className="text-indigo-300 font-medium">Prochain match prévu 🎮</p>
                   <p className="text-indigo-400/80 text-sm">Demain à 20h00</p>
                 </div>
               </div>
@@ -229,7 +282,7 @@ export const CreatorDashboard = ({
           onClick={() => navigate("/messages")}
         >
           <MessageSquare className="h-5 w-5 mr-2" />
-          {isMobile ? "Messages" : "Accéder à la messagerie"}
+          {isMobile ? "Messages 💬" : "Accéder à la messagerie 💬"}
         </Button>
         
         {/* Bouton quitter l'agence avec avertissement */}
@@ -244,6 +297,8 @@ export const CreatorDashboard = ({
           <LeaveAgencyDialog />
         </Button>
       </div>
+      
+      <Footer role={role} />
     </div>
   );
 };

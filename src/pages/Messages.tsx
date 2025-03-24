@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMessages } from '@/hooks/use-messages';
@@ -8,7 +9,8 @@ import { supabase } from '@/lib/supabase';
 import { MessageContainer } from '@/components/messages/MessageContainer';
 import { NewMessageDialog } from '@/components/messages/NewMessageDialog';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { HomeIcon, Plus } from 'lucide-react';
+import { Footer } from '@/components/layout/Footer';
 
 const Messages = () => {
   const navigate = useNavigate();
@@ -18,6 +20,8 @@ const Messages = () => {
   const [loading, setLoading] = useState(true);
   const [isNewMessageDialogOpen, setIsNewMessageDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string>('');
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
   
   useEffect(() => {
     const checkAuth = async () => {
@@ -41,6 +45,7 @@ const Messages = () => {
         setUserId(storedUserId);
         setUsername(storedUsername);
         setRole(storedRole);
+        await fetchAllUsers(storedUserId);
         setLoading(false);
         return;
       }
@@ -65,6 +70,7 @@ const Messages = () => {
           localStorage.setItem('userId', data.id); // Save to localStorage for future use
           setUsername(storedUsername);
           setRole(storedRole);
+          await fetchAllUsers(data.id);
         } else {
           console.error("User not found for username:", storedUsername);
           throw new Error('User not found');
@@ -80,6 +86,25 @@ const Messages = () => {
     
     checkAuth();
   }, [navigate]);
+
+  const fetchAllUsers = async (currentUserId: string) => {
+    setLoadingUsers(true);
+    try {
+      const { data, error } = await supabase
+        .from('user_accounts')
+        .select('id, username, role')
+        .not('id', 'eq', currentUserId);
+        
+      if (error) throw error;
+      
+      setAllUsers(data || []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error('Erreur lors du chargement des utilisateurs');
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -125,21 +150,40 @@ const Messages = () => {
       />
       
       <div className="flex-1 flex flex-col relative">
-        <div className="absolute top-4 right-4 z-10">
-          <Button 
-            onClick={() => setIsNewMessageDialogOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Nouveau message
-          </Button>
+        <div className="flex items-center justify-between p-4">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            💬 Messages
+          </h1>
+          
+          <div className="flex items-center gap-2">
+            <Button 
+              onClick={() => navigate('/')}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <HomeIcon className="h-4 w-4" />
+              Retour au tableau de bord
+            </Button>
+            
+            <Button 
+              onClick={() => setIsNewMessageDialogOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Nouveau message
+            </Button>
+          </div>
         </div>
         
-        <MessageContainer 
-          username={username}
-          role={role}
-          userId={userId}
-        />
+        <div className="flex-1">
+          <MessageContainer 
+            username={username}
+            role={role}
+            userId={userId}
+          />
+        </div>
+        
+        <Footer className="mt-auto" />
       </div>
       
       <NewMessageDialog 
@@ -150,6 +194,8 @@ const Messages = () => {
         onStartConversation={handleStartNewConversation}
         currentUserRole={role}
         currentUserId={userId}
+        allUsers={allUsers}
+        loadingUsers={loadingUsers}
       />
     </div>
   );

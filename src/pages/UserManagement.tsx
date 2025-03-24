@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, UsersRound, FileSpreadsheet } from "lucide-react";
+import { ArrowLeft, Plus, UsersRound, FileSpreadsheet, HomeIcon } from "lucide-react";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { UserSearchBar } from "@/components/UserSearchBar";
 import { CreatorDetailsDialog } from "@/components/creator/CreatorDetailsDialog";
@@ -15,10 +15,11 @@ import { ExcelImportButton } from "@/components/user-management/ExcelImportButto
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UltraSidebar } from "@/components/layout/UltraSidebar";
 import { ScheduleExcelImport } from "@/components/schedule/ScheduleExcelImport";
+import { Footer } from "@/components/layout/Footer";
 
 const UserManagement = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, role, username, handleLogout } = useIndexAuth();
+  const { isAuthenticated, role, username, userId, handleLogout } = useIndexAuth();
   const { handleCreateAccount } = useAccountManagement();
   const {
     users,
@@ -60,6 +61,17 @@ const UserManagement = () => {
     }
   }, [role, navigate, isAuthenticated]);
 
+  // Username watermark
+  const usernameWatermark = (
+    <div className="fixed inset-0 pointer-events-none select-none z-0 flex items-center justify-center">
+      <div className="w-full h-full flex items-center justify-center rotate-[-30deg]">
+        <p className="text-slate-200/30 text-[6vw] font-bold whitespace-nowrap">
+          {username?.toUpperCase()}
+        </p>
+      </div>
+    </div>
+  );
+
   // Only show loading or null if user isn't authenticated yet
   if (!isAuthenticated) {
     return null;
@@ -78,9 +90,12 @@ const UserManagement = () => {
     return (
       <SidebarProvider defaultOpen={true}>
         <div className="min-h-screen flex">
+          {usernameWatermark}
+
           <UltraSidebar 
             username={username || ''}
             role={role || ''}
+            userId={userId || ''}
             onLogout={handleLogout}
             currentPage="users"
           />
@@ -97,15 +112,26 @@ const UserManagement = () => {
                   >
                     <ArrowLeft className="h-5 w-5" />
                   </Button>
-                  <h1 className="text-2xl font-bold">Gestion des Utilisateurs</h1>
+                  <h1 className="text-2xl font-bold">Gestion des Utilisateurs 👥</h1>
                 </div>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/")}
+                  className="flex items-center gap-2"
+                >
+                  <HomeIcon className="h-4 w-4" />
+                  Retour au tableau de bord
+                </Button>
               </div>
 
               <div className="bg-card p-8 rounded-lg border shadow text-center">
-                <h2 className="text-xl font-semibold mb-4">Accès limité</h2>
+                <h2 className="text-xl font-semibold mb-4">Accès limité 🔒</h2>
                 <p className="text-muted-foreground mb-6">En tant qu'agent, vous avez un accès limité à cette page.</p>
                 <Button onClick={() => navigate("/")}>Retourner au tableau de bord</Button>
               </div>
+              
+              <Footer role={role} />
             </div>
           </div>
         </div>
@@ -116,9 +142,12 @@ const UserManagement = () => {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex">
+        {usernameWatermark}
+        
         <UltraSidebar 
           username={username || ''}
           role={role || ''}
+          userId={userId || ''}
           onLogout={handleLogout}
           currentPage="users"
         />
@@ -135,10 +164,19 @@ const UserManagement = () => {
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <h1 className="text-2xl font-bold">Gestion des Utilisateurs</h1>
+                <h1 className="text-2xl font-bold">Gestion des Utilisateurs 👥</h1>
               </div>
               
               <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/")}
+                  className="flex items-center gap-2"
+                >
+                  <HomeIcon className="h-4 w-4" />
+                  Retour au tableau de bord
+                </Button>
+                
                 {isFounder && (
                   <Button
                     variant="outline"
@@ -192,7 +230,7 @@ const UserManagement = () => {
                 {users.manager.length > 0 && (
                   <UserTable
                     users={users.manager}
-                    title="Managers"
+                    title="Managers 👨‍💼"
                     onDeleteUser={handleDeleteUser}
                     onViewDetails={handleViewDetails}
                     onRoleChange={handleRoleChange}
@@ -209,7 +247,7 @@ const UserManagement = () => {
                 {users.creator.length > 0 && (
                   <UserTable
                     users={users.creator}
-                    title="Créateurs"
+                    title="Créateurs 👨‍💻"
                     onDeleteUser={handleDeleteUser}
                     onViewDetails={handleViewDetails}
                     onRoleChange={handleRoleChange}
@@ -226,7 +264,7 @@ const UserManagement = () => {
                 {users.agent.length > 0 && (
                   <UserTable
                     users={users.agent}
-                    title="Agents"
+                    title="Agents 🕵️‍♂️"
                     onDeleteUser={handleDeleteUser}
                     onViewDetails={handleViewDetails}
                     onRoleChange={handleRoleChange}
@@ -268,6 +306,8 @@ const UserManagement = () => {
                 onSubmit={handleCreateAccount}
               />
             )}
+            
+            <Footer role={role} />
           </div>
         </div>
       </div>

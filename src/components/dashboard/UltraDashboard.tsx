@@ -8,6 +8,7 @@ import { RedesignedDashContent } from "@/components/dashboard/RedesignedDashCont
 import { MenuIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Footer } from "@/components/layout/Footer";
 
 interface UltraDashboardProps {
   username: string;
@@ -134,7 +135,7 @@ export const UltraDashboard = ({
           </div>
         </div>
         
-        <div className="flex-1 overflow-auto pb-20 transition-all duration-300">
+        <div className="flex-1 overflow-auto pb-20 transition-all duration-300 flex flex-col">
           <RedesignedDashContent
             username={username}
             role={role}
@@ -176,6 +177,8 @@ export const UltraDashboard = ({
             onLogout={onLogout}
             remainingTime={formattedTime}
           />
+          
+          <Footer role={role} className="mt-auto" />
         </div>
       </div>
     </div>

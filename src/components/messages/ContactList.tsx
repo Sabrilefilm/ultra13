@@ -1,113 +1,94 @@
 
-import React from 'react';
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Clock } from "lucide-react";
-import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
-
-interface Contact {
-  id: string;
-  username: string;
-  role: string;
-  lastMessage: string;
-  lastMessageTime: string;
-  unreadCount: number;
-}
+import { useState } from 'react';
+import { Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 
 export interface ContactListProps {
-  contacts: Contact[];
+  contacts: {
+    id: any;
+    username: any;
+    role: any;
+    lastMessage: string;
+    lastMessageTime: string;
+    unreadCount: number;
+  }[];
   activeContactId: string;
-  onSelectContact: (contactId: string) => void;
+  onSelectContact: (id: string) => void;
   isLoading: boolean;
   unreadCounts: Record<string, number>;
 }
 
-export const ContactList = ({
-  contacts,
-  activeContactId,
-  onSelectContact,
+export const ContactList = ({ 
+  contacts, 
+  activeContactId, 
+  onSelectContact, 
   isLoading,
   unreadCounts
 }: ContactListProps) => {
-  if (isLoading) {
-    return (
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
-      </div>
-    );
-  }
-
-  if (contacts.length === 0) {
-    return (
-      <div className="flex-1 flex items-center justify-center p-4 text-gray-500 dark:text-gray-400">
-        <p>Aucune conversation</p>
-      </div>
-    );
-  }
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const filteredContacts = contacts.filter(contact => 
+    contact.username.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="overflow-y-auto h-full">
-      <ul className="divide-y divide-gray-200 dark:divide-gray-800">
-        {contacts.map((contact) => {
-          const unreadCount = unreadCounts[contact.id] || contact.unreadCount || 0;
-          
-          return (
-            <li
-              key={contact.id}
-              className={`p-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors ${
-                contact.id === activeContactId
-                  ? "bg-blue-50 dark:bg-blue-900/20"
-                  : ""
-              }`}
-              onClick={() => onSelectContact(contact.id)}
-            >
-              <div className="flex items-start gap-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback className="bg-primary/10 text-primary">
-                    {contact.username.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start">
-                    <div className="flex flex-col">
-                      <span className="font-medium truncate">
-                        {contact.username}
-                      </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {contact.role}
-                      </span>
-                    </div>
-                    
-                    <div className="flex flex-col items-end">
-                      <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                        <Clock className="w-3 h-3 mr-1" />
-                        <span>
-                          {formatDistanceToNow(new Date(contact.lastMessageTime), {
-                            addSuffix: true,
-                            locale: fr
-                          })}
-                        </span>
-                      </div>
-                      
-                      {unreadCount > 0 && (
-                        <Badge variant="destructive" className="mt-1">
-                          {unreadCount}
-                        </Badge>
-                      )}
-                    </div>
+    <div className="h-full flex flex-col">
+      <div className="p-4 border-b dark:border-gray-700">
+        <div className="relative">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher..."
+            className="pl-9"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      </div>
+      
+      <ScrollArea className="flex-1">
+        {isLoading ? (
+          <div className="flex justify-center items-center h-24">
+            <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full" />
+          </div>
+        ) : filteredContacts.length > 0 ? (
+          <div className="space-y-1 p-2">
+            {filteredContacts.map((contact) => (
+              <button
+                key={contact.id}
+                className={`w-full flex items-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors ${
+                  activeContactId === contact.id ? 'bg-muted' : ''
+                }`}
+                onClick={() => onSelectContact(contact.id)}
+              >
+                <div className="flex-1 overflow-hidden text-left">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium truncate">{contact.username}</span>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      {contact.lastMessageTime ? new Date(contact.lastMessageTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                    </span>
                   </div>
-                  
-                  <p className="truncate text-sm text-gray-600 dark:text-gray-300 mt-1">
-                    {contact.lastMessage}
-                  </p>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-sm text-muted-foreground truncate max-w-[70%]">
+                      {contact.lastMessage || 'Aucun message'}
+                    </p>
+                    {(unreadCounts[contact.id] || 0) > 0 && (
+                      <Badge variant="default" className="bg-primary text-white">
+                        {unreadCounts[contact.id]}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-40 text-muted-foreground p-4">
+            <p className="text-center">Aucun contact trouvé</p>
+          </div>
+        )}
+      </ScrollArea>
     </div>
   );
 };
