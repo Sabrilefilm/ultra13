@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Dialog, 
@@ -9,14 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-
-interface Creator {
-  id: string;
-  username: string;
-  role: string;
-  total_diamonds: number;
-  diamonds_goal: number;
-}
+import { Creator } from '@/hooks/diamonds/use-diamond-fetch';
 
 interface EditGoalDialogProps {
   isOpen: boolean;

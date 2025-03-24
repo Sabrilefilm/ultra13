@@ -1,17 +1,9 @@
-
 import React from 'react';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Plus, Minus, Edit } from 'lucide-react';
-
-interface Creator {
-  id: string;
-  username: string;
-  role: string;
-  total_diamonds: number;
-  diamonds_goal: number;
-}
+import { Creator } from '@/hooks/diamonds/use-diamond-fetch';
 
 interface UserDiamondsTableProps { 
   users: Creator[];

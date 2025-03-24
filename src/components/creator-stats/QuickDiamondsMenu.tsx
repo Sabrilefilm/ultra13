@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Diamond, Plus, Minus, Save } from "lucide-react";
 import { diamondsService } from "@/services/diamonds/diamonds-service";
 import { toast } from "sonner";
+import { Creator } from "@/hooks/diamonds/use-diamond-fetch"; // Consistent type import
 
 interface QuickDiamondsMenuProps {
   creatorId: string;
@@ -42,9 +43,12 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
       const newDiamondValue = calculateNewTotal();
       
       // Create a simplified creator object for the service
-      const creator = {
+      const creator: Creator = {
         id: creatorId,
-        username: creatorUsername
+        username: creatorUsername,
+        role: 'creator',
+        total_diamonds: currentDiamonds,
+        diamonds_goal: 0
       };
       
       // Use the diamondsService to update diamonds

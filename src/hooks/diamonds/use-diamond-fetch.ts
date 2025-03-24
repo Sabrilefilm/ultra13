@@ -9,6 +9,7 @@ export interface Creator {
   role: string;
   total_diamonds: number;
   diamonds_goal: number;
+  profiles?: Array<{ total_diamonds: number }>;
 }
 
 export function useDiamondFetch() {

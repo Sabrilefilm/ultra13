@@ -1,6 +1,6 @@
 
 import { supabase } from "@/lib/supabase";
-import { Creator } from "../api/creators-api";
+import { Creator } from "@/hooks/diamonds/use-diamond-fetch"; // Use consistent Creator type
 
 export const diamondsService = {
   async updateDiamonds(creator: Creator, newValue: number, operation: 'set' | 'add' | 'subtract' = 'set') {

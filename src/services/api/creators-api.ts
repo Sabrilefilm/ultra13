@@ -7,6 +7,8 @@ export interface Creator {
   role?: string;
   live_schedules?: Array<{ hours: number; days: number }>;
   profiles?: Array<{ total_diamonds: number }>;
+  total_diamonds?: number;
+  diamonds_goal?: number;
 }
 
 export const creatorsApi = {
