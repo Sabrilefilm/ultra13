@@ -338,19 +338,6 @@ export const CreatorDashboard = ({
       {/* Statistiques */}
       <StatCards role={role} onOpenSponsorshipForm={onOpenSponsorshipForm} onOpenSponsorshipList={onOpenSponsorshipList} onCreatePoster={onCreatePoster} />
       
-      {/* Social Community Links */}
-      <motion.div initial={{
-      opacity: 0,
-      y: 20
-    }} animate={{
-      opacity: 1,
-      y: 0
-    }} transition={{
-      delay: 0.3
-    }}>
-        <SocialCommunityLinks />
-      </motion.div>
-      
       {/* User Guide */}
       {showGuide && <div className="mt-6">
           <UserGuide />
