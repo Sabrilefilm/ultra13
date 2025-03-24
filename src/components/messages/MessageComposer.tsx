@@ -1,13 +1,15 @@
+
 import { useState, KeyboardEvent, ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Paperclip, X } from 'lucide-react';
 
 interface MessageComposerProps {
-  message: string;
-  onChange: (value: string) => void;
-  onSend: () => void;
-  isSending: boolean;
+  onSendMessage?: (message: string) => Promise<void>;
+  message?: string;
+  onChange?: (value: string) => void;
+  onSend?: () => void;
+  isSending?: boolean;
   disabled?: boolean;
   onAttachFile?: (file: File) => void;
   attachmentPreview?: string | null;
@@ -15,23 +17,48 @@ interface MessageComposerProps {
 }
 
 export const MessageComposer = ({
-  message,
+  onSendMessage,
+  message = '',
   onChange,
   onSend,
-  isSending,
+  isSending = false,
   disabled = false,
   onAttachFile,
   attachmentPreview,
   onClearAttachment
 }: MessageComposerProps) => {
+  const [localMessage, setLocalMessage] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  
+  // Determine if we're using controlled or uncontrolled input
+  const isControlled = onChange !== undefined && message !== undefined;
+  const currentMessage = isControlled ? message : localMessage;
+  
+  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    if (isControlled && onChange) {
+      onChange(e.target.value);
+    } else {
+      setLocalMessage(e.target.value);
+    }
+  };
+  
+  const handleSend = () => {
+    if ((currentMessage.trim() || attachmentPreview) && !isSending) {
+      if (onSend) {
+        onSend();
+      } else if (onSendMessage) {
+        onSendMessage(currentMessage);
+        if (!isControlled) {
+          setLocalMessage('');
+        }
+      }
+    }
+  };
   
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if ((message.trim() || attachmentPreview) && !isSending) {
-        onSend();
-      }
+      handleSend();
     }
   };
   
@@ -91,8 +118,8 @@ export const MessageComposer = ({
         <Textarea
           placeholder="Tapez un message..."
           className="resize-none py-3 min-h-[80px] bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500"
-          value={message}
-          onChange={(e) => onChange(e.target.value)}
+          value={currentMessage}
+          onChange={handleChange}
           onKeyDown={handleKeyDown}
           disabled={disabled || isSending}
         />
@@ -123,8 +150,8 @@ export const MessageComposer = ({
           )}
           
           <Button 
-            onClick={onSend}
-            disabled={(!message.trim() && !attachmentPreview) || isSending || disabled}
+            onClick={handleSend}
+            disabled={(!currentMessage.trim() && !attachmentPreview) || isSending || disabled}
             className="h-10 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white"
           >
             {isSending ? (

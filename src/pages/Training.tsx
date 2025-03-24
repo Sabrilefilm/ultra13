@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -24,6 +23,7 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { TRAINING_TYPES } from "@/components/live-schedule/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Footer } from "@/components/layout/Footer";
 
 // Types pour les formations et le suivi des vidéos
 interface Training {
@@ -124,6 +124,18 @@ const Training = () => {
   // Fonction pour récupérer les vidéos visionnées par l'utilisateur
   const fetchWatchedVideos = async () => {
     try {
+      // Vérifier si la table watched_videos existe
+      const { error: tableError } = await supabase
+        .from('watched_videos')
+        .select('id')
+        .limit(1)
+        .single();
+        
+      if (tableError && tableError.code === '42P01') {
+        console.log('La table watched_videos n\'existe pas encore, elle sera créée ultérieurement');
+        return;
+      }
+      
       const { data, error } = await supabase
         .from('watched_videos')
         .select('*')
@@ -183,16 +195,31 @@ const Training = () => {
     }
   };
   
-  // Fonction pour extraire l'ID de la vidéo YouTube
-  const getYoutubeVideoId = (url: string) => {
-    if (!url) return null;
+  // Username watermark grid
+  const generateWatermarkGrid = () => {
+    let watermarkDivs = [];
+    const rows = 15;
+    const cols = 15;
     
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        watermarkDivs.push(
+          <div 
+            key={`${i}-${j}`} 
+            className="absolute text-slate-200/10 text-[8px] font-bold whitespace-nowrap rotate-[-30deg]"
+            style={{
+              top: `${(i * 100) / rows}%`,
+              left: `${(j * 100) / cols}%`,
+              transform: 'translate(-50%, -50%) rotate(-30deg)'
+            }}
+          >
+            {username?.toUpperCase()}
+          </div>
+        );
+      }
+    }
     
-    return (match && match[2].length === 11)
-      ? match[2]
-      : null;
+    return watermarkDivs;
   };
   
   // Calculer le pourcentage de progression pour une catégorie
@@ -403,6 +430,11 @@ const Training = () => {
         formattedTime={formattedTime}
         currentPage="training"
       />
+      
+      {/* Watermark */}
+      <div className="fixed inset-0 pointer-events-none select-none z-0 overflow-hidden">
+        {generateWatermarkGrid()}
+      </div>
       
       <div className="p-4 md:p-6 md:ml-64 space-y-6">
         {/* Bannière de la page */}
@@ -839,6 +871,8 @@ const Training = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        
+        <Footer className="mt-10" />
       </div>
     </SidebarProvider>
   );

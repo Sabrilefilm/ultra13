@@ -5,19 +5,30 @@ import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-interface MessageHeaderProps {
+interface Contact {
+  id: string;
   username: string;
-  unreadCount: number;
-  onNewMessage: () => void;
-  isMobile: boolean;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
   role: string;
+  lastMessage: string;
+  lastMessageTime: string;
+  unreadCount: number;
+}
+
+interface MessageHeaderProps {
+  contact?: Contact;
+  username?: string;
+  unreadCount?: number;
+  onNewMessage?: () => void;
+  isMobile?: boolean;
+  activeTab?: string;
+  setActiveTab?: (tab: string) => void;
+  role?: string;
 }
 
 export const MessageHeader = ({
+  contact,
   username,
-  unreadCount,
+  unreadCount = 0,
   onNewMessage,
   isMobile,
   activeTab,
@@ -54,7 +65,7 @@ export const MessageHeader = ({
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">
-          Messagerie
+          {contact ? contact.username : "Messagerie"} 
         </h1>
         {unreadCount > 0 && (
           <Badge variant="destructive" className="ml-2 animate-pulse">

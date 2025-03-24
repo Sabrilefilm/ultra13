@@ -7,6 +7,7 @@ import { MessageList } from './MessageList';
 import { MessageHeader } from './MessageHeader';
 import { MessageComposer } from './MessageComposer';
 import { Loading } from '@/components/ui/loading';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Contact {
   id: string;
@@ -29,6 +30,10 @@ export const MessageContainer = ({ username, role, userId }: MessageContainerPro
   const [messages, setMessages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
+  const [messageText, setMessageText] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [activeTab, setActiveTab] = useState('contacts');
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     fetchContacts();
@@ -64,6 +69,7 @@ export const MessageContainer = ({ username, role, userId }: MessageContainerPro
   useEffect(() => {
     if (activeContactId) {
       fetchMessages();
+      setActiveTab('messages');
     }
   }, [activeContactId]);
   
@@ -195,6 +201,7 @@ export const MessageContainer = ({ username, role, userId }: MessageContainerPro
     if (!message.trim() || !activeContactId) return;
     
     try {
+      setIsSending(true);
       const { error } = await supabase
         .from('chats')
         .insert([
@@ -208,51 +215,117 @@ export const MessageContainer = ({ username, role, userId }: MessageContainerPro
         
       if (error) throw error;
       
+      setMessageText('');
       // Refresh messages (real-time subscription should handle this)
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Erreur lors de l\'envoi du message');
+    } finally {
+      setIsSending(false);
     }
   };
+
+  const activeContact = contacts.find(c => c.id === activeContactId);
   
   return (
     <div className="h-full flex flex-col">
       <div className="flex h-full">
-        <div className="w-1/3 border-r dark:border-gray-700 h-full">
-          <ContactList 
-            contacts={contacts}
-            activeContactId={activeContactId}
-            onSelectContact={setActiveContactId}
-            isLoading={isLoading}
-            unreadCounts={unreadCounts}
-          />
-        </div>
-        
-        <div className="w-2/3 flex flex-col h-full">
-          {activeContactId ? (
-            <>
-              <MessageHeader 
-                contact={contacts.find(c => c.id === activeContactId)} 
-              />
-              
-              <div className="flex-1 overflow-auto p-4">
-                <MessageList 
-                  messages={messages} 
-                  currentUserId={userId} 
-                  contactId={activeContactId}
+        {/* Mobile view */}
+        {isMobile ? (
+          <>
+            <MessageHeader 
+              contact={activeContact}
+              unreadCount={Object.values(unreadCounts).reduce((sum, count) => sum + count, 0)}
+              onNewMessage={() => {}} 
+              isMobile={true}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              role={role}
+            />
+            
+            <div className="w-full flex-1 flex flex-col">
+              {activeTab === 'contacts' ? (
+                <ContactList 
+                  contacts={contacts}
+                  activeContactId={activeContactId}
+                  onSelectContact={setActiveContactId}
+                  isLoading={isLoading}
+                  unreadCounts={unreadCounts}
                 />
-              </div>
-              
-              <MessageComposer onSendMessage={sendMessage} />
-            </>
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500 dark:text-gray-400">
-                Sélectionnez un contact pour commencer à discuter
-              </p>
+              ) : (
+                activeContactId ? (
+                  <div className="flex-1 flex flex-col h-full">
+                    <div className="flex-1 overflow-auto p-4">
+                      <MessageList 
+                        messages={messages} 
+                        currentUserId={userId}
+                        isLoading={isLoading}
+                      />
+                    </div>
+                    
+                    <MessageComposer 
+                      message={messageText}
+                      onChange={setMessageText}
+                      onSend={() => sendMessage(messageText)}
+                      isSending={isSending}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Sélectionnez un contact pour commencer à discuter
+                    </p>
+                  </div>
+                )
+              )}
             </div>
-          )}
-        </div>
+          </>
+        ) : (
+          /* Desktop view */
+          <>
+            <div className="w-1/3 border-r dark:border-gray-700 h-full">
+              <ContactList 
+                contacts={contacts}
+                activeContactId={activeContactId}
+                onSelectContact={setActiveContactId}
+                isLoading={isLoading}
+                unreadCounts={unreadCounts}
+              />
+            </div>
+            
+            <div className="w-2/3 flex flex-col h-full">
+              {activeContactId ? (
+                <>
+                  <MessageHeader 
+                    contact={activeContact}
+                    role={role}
+                  />
+                  
+                  <div className="flex-1 overflow-auto p-4">
+                    <MessageList 
+                      messages={messages} 
+                      currentUserId={userId}
+                      isLoading={isLoading} 
+                    />
+                  </div>
+                  
+                  <MessageComposer 
+                    message={messageText}
+                    onChange={setMessageText}
+                    onSend={() => sendMessage(messageText)}
+                    isSending={isSending}
+                  />
+                </>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500 dark:text-gray-400">
+                    Sélectionnez un contact pour commencer à discuter
+                  </p>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

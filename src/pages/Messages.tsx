@@ -122,15 +122,31 @@ const Messages = () => {
   };
 
   // Username watermark
-  const usernameWatermark = (
-    <div className="fixed inset-0 pointer-events-none select-none z-0 flex items-center justify-center">
-      <div className="w-full h-full flex items-center justify-center rotate-[-30deg]">
-        <p className="text-slate-200/30 text-[6vw] font-bold whitespace-nowrap">
-          {username.toUpperCase()}
-        </p>
-      </div>
-    </div>
-  );
+  const generateWatermarkGrid = () => {
+    let watermarkDivs = [];
+    const rows = 15;
+    const cols = 15;
+    
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        watermarkDivs.push(
+          <div 
+            key={`${i}-${j}`} 
+            className="absolute text-slate-200/10 text-[8px] font-bold whitespace-nowrap rotate-[-30deg]"
+            style={{
+              top: `${(i * 100) / rows}%`,
+              left: `${(j * 100) / cols}%`,
+              transform: 'translate(-50%, -50%) rotate(-30deg)'
+            }}
+          >
+            {username.toUpperCase()}
+          </div>
+        );
+      }
+    }
+    
+    return watermarkDivs;
+  };
 
   if (loading) {
     return <Loading fullScreen size="large" text="Chargement de la messagerie..." />;
@@ -139,7 +155,9 @@ const Messages = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex relative overflow-hidden">
       {/* Watermark */}
-      {usernameWatermark}
+      <div className="fixed inset-0 pointer-events-none select-none z-0 overflow-hidden">
+        {generateWatermarkGrid()}
+      </div>
       
       <UltraSidebar 
         username={username}

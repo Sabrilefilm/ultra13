@@ -1,3 +1,4 @@
+
 import { useEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -18,10 +19,11 @@ interface Message {
 interface MessageListProps {
   messages: Message[];
   currentUserId: string;
-  isLoading: boolean;
+  contactId?: string;
+  isLoading?: boolean;
 }
 
-export const MessageList = ({ messages, currentUserId, isLoading }: MessageListProps) => {
+export const MessageList = ({ messages, currentUserId, contactId, isLoading = false }: MessageListProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
