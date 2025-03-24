@@ -24,6 +24,7 @@ import { supabase } from "@/lib/supabase";
 import { TRAINING_TYPES } from "@/components/live-schedule/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Footer } from "@/components/layout/Footer";
+import { getYoutubeVideoId } from "@/utils/videoHelpers";
 
 // Types pour les formations et le suivi des vidéos
 interface Training {

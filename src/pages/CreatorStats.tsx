@@ -1,8 +1,7 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Clock, Calendar, UserMinus, PencilLine, Diamond, HomeIcon } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, UserMinus, PencilLine, Diamond, HomeIcon, Coins } from "lucide-react";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -15,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Footer } from "@/components/layout/Footer";
+import { usePlatformSettings } from "@/hooks/use-platform-settings";
 
 const CreatorStats = () => {
   const navigate = useNavigate();
@@ -27,9 +27,13 @@ const CreatorStats = () => {
   const [days, setDays] = useState(0);
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
   const isMobile = useIsMobile();
+  
+  const [isEditingDiamonds, setIsEditingDiamonds] = useState(false);
+  const [diamondAmount, setDiamondAmount] = useState(0);
+  const [operationType, setOperationType] = useState<'set' | 'add' | 'subtract'>('set');
+  const { platformSettings } = usePlatformSettings(role || null);
 
   useEffect(() => {
-    // Only agents, managers and founders should be able to access this page
     if (!['agent', 'manager', 'founder', 'ambassadeur'].includes(role || '')) {
       navigate('/');
       return;
@@ -40,7 +44,6 @@ const CreatorStats = () => {
       try {
         console.log("Fetching creators for agent:", username);
         
-        // For founder or manager, fetch all creators
         if (role === 'founder' || role === 'manager') {
           const { data: creatorsData, error: creatorsError } = await supabase
             .from("user_accounts")
@@ -68,8 +71,6 @@ const CreatorStats = () => {
           return;
         }
         
-        // For agents, fetch only their assigned creators
-        // Step 1: Get the agent's ID
         const { data: agentData, error: agentError } = await supabase
           .from("user_accounts")
           .select("id")
@@ -91,7 +92,6 @@ const CreatorStats = () => {
 
         console.log("Agent ID found:", agentData.id);
 
-        // Step 2: Get all creators assigned to this agent
         const { data: creatorsData, error: creatorsError } = await supabase
           .from("user_accounts")
           .select(`
@@ -159,9 +159,7 @@ const CreatorStats = () => {
     if (!selectedCreator) return;
     
     try {
-      // Check if the creator already has a schedule
       if (selectedCreator.live_schedules && selectedCreator.live_schedules.length > 0) {
-        // Update existing schedule
         const scheduleId = selectedCreator.live_schedules[0].id;
         const { error } = await supabase
           .from("live_schedules")
@@ -170,7 +168,6 @@ const CreatorStats = () => {
         
         if (error) throw error;
       } else {
-        // Create new schedule
         const { error } = await supabase
           .from("live_schedules")
           .insert([
@@ -182,7 +179,6 @@ const CreatorStats = () => {
       
       toast.success("Horaires mis à jour avec succès");
       
-      // Update local state
       setCreators(creators.map(c => {
         if (c.id === selectedCreator.id) {
           return {
@@ -218,7 +214,6 @@ const CreatorStats = () => {
       
       toast.success("Créateur retiré avec succès");
       
-      // Update local state
       setCreators(creators.filter(c => c.id !== selectedCreator.id));
       setRemoveDialogOpen(false);
     } catch (error) {
@@ -227,13 +222,86 @@ const CreatorStats = () => {
     }
   };
 
-  // Username watermark
+  const handleEditDiamonds = (creator: any) => {
+    setSelectedCreator(creator);
+    setDiamondAmount(creator.profiles?.[0]?.total_diamonds || 0);
+    setOperationType('set');
+    setIsEditingDiamonds(true);
+  };
+
+  const handleSaveDiamonds = async () => {
+    if (!selectedCreator) return;
+    
+    try {
+      let newDiamondValue = 0;
+      const currentDiamonds = selectedCreator.profiles?.[0]?.total_diamonds || 0;
+      
+      switch (operationType) {
+        case 'set':
+          newDiamondValue = diamondAmount;
+          break;
+        case 'add':
+          newDiamondValue = currentDiamonds + diamondAmount;
+          break;
+        case 'subtract':
+          newDiamondValue = Math.max(0, currentDiamonds - diamondAmount);
+          break;
+      }
+      
+      const { error } = await supabase
+        .from('profiles')
+        .update({ total_diamonds: newDiamondValue })
+        .eq('id', selectedCreator.id);
+        
+      if (error) throw error;
+      
+      setCreators(creators.map(c => {
+        if (c.id === selectedCreator.id) {
+          return {
+            ...c,
+            profiles: [{ ...c.profiles[0], total_diamonds: newDiamondValue }]
+          };
+        }
+        return c;
+      }));
+      
+      const actionText = operationType === 'set' ? 'définis à' : operationType === 'add' ? 'augmentés de' : 'réduits de';
+      toast.success(`Diamants ${actionText} ${diamondAmount} pour ${selectedCreator.username}`);
+      setIsEditingDiamonds(false);
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour des diamants:", error);
+      toast.error("Erreur lors de la mise à jour des diamants");
+    }
+  };
+
   const usernameWatermark = (
     <div className="fixed inset-0 pointer-events-none select-none z-0 flex items-center justify-center">
       <div className="w-full h-full flex items-center justify-center rotate-[-30deg]">
         <p className="text-slate-200/30 text-[6vw] font-bold whitespace-nowrap">
           {username?.toUpperCase()}
         </p>
+      </div>
+    </div>
+  );
+
+  const miniWatermark = (
+    <div className="fixed inset-0 pointer-events-none select-none z-0">
+      <div className="w-full h-full opacity-30">
+        {Array.from({ length: 500 }).map((_, i) => (
+          <div 
+            key={i} 
+            style={{
+              position: 'absolute',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              transform: 'rotate(-30deg)',
+              fontSize: '8px',
+              color: 'rgba(100, 100, 100, 0.3)'
+            }}
+          >
+            {username?.toUpperCase()}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -246,9 +314,14 @@ const CreatorStats = () => {
     );
   }
 
+  const rewardThreshold = 36000;
+  const creatorsWithRewards = creators.filter(creator => 
+    (creator.profiles?.[0]?.total_diamonds || 0) >= rewardThreshold
+  );
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      {usernameWatermark}
+      {miniWatermark}
       
       <UltraSidebar 
         username={username || ''}
@@ -286,7 +359,6 @@ const CreatorStats = () => {
           </Button>
         </div>
 
-        {/* Summary cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-2">
@@ -321,11 +393,29 @@ const CreatorStats = () => {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">{getTotalDiamonds().toLocaleString()}</p>
+              {platformSettings && (
+                <p className="text-sm text-muted-foreground">
+                  Valeur: {((getTotalDiamonds() * platformSettings.diamondValue) || 0).toLocaleString()}€
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Creators table */}
+        {creatorsWithRewards.length > 0 && (
+          <div className="bg-green-900/20 border border-green-700/30 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-3">
+              <Coins className="h-6 w-6 text-green-400 animate-pulse" />
+              <div>
+                <h4 className="font-medium text-green-300">🎉 Récompenses disponibles!</h4>
+                <p className="text-green-400/80 text-sm">
+                  {creatorsWithRewards.length} créateur(s) {creatorsWithRewards.length > 1 ? 'ont' : 'a'} atteint le seuil de {rewardThreshold.toLocaleString()} diamants pour une récompense.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <Card className="w-full overflow-hidden">
           <CardHeader>
             <CardTitle>Détails des Créateurs ({creators.length}) 📊</CardTitle>
@@ -356,7 +446,21 @@ const CreatorStats = () => {
                         <TableCell className="font-medium">{creator.username}</TableCell>
                         <TableCell>{creator.live_schedules?.[0]?.hours || 0}h</TableCell>
                         <TableCell>{creator.live_schedules?.[0]?.days || 0}j</TableCell>
-                        <TableCell>{(creator.profiles?.[0]?.total_diamonds || 0).toLocaleString()} 💎</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span>{(creator.profiles?.[0]?.total_diamonds || 0).toLocaleString()} 💎</span>
+                            {platformSettings && (
+                              <span className="text-xs text-muted-foreground">
+                                {((creator.profiles?.[0]?.total_diamonds || 0) * platformSettings.diamondValue).toLocaleString()}€
+                              </span>
+                            )}
+                            {(creator.profiles?.[0]?.total_diamonds || 0) >= rewardThreshold && (
+                              <span className="text-xs text-green-500 animate-pulse">
+                                🏆 Récompense disponible!
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
                             <Button 
@@ -367,6 +471,17 @@ const CreatorStats = () => {
                               <PencilLine className="h-4 w-4 mr-1" />
                               {isMobile ? '' : 'Modifier les horaires'}
                             </Button>
+                            
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="border-purple-500 text-purple-500 hover:bg-purple-100 hover:text-purple-700"
+                              onClick={() => handleEditDiamonds(creator)}
+                            >
+                              <Diamond className="h-4 w-4 mr-1" />
+                              {isMobile ? '' : 'Modifier les diamants'}
+                            </Button>
+                            
                             <Button 
                               variant="outline" 
                               size="sm"
@@ -387,7 +502,6 @@ const CreatorStats = () => {
           </CardContent>
         </Card>
 
-        {/* Edit Schedule Dialog */}
         <Dialog open={isEditingSchedule} onOpenChange={setIsEditingSchedule}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
@@ -428,7 +542,93 @@ const CreatorStats = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Remove Creator Dialog */}
+        <Dialog open={isEditingDiamonds} onOpenChange={setIsEditingDiamonds}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Gérer les diamants 💎</DialogTitle>
+              <DialogDescription>
+                Modifiez les diamants pour {selectedCreator?.username}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="flex items-center justify-between mb-2">
+                <Label>Diamants actuels:</Label>
+                <span className="font-bold text-lg">{(selectedCreator?.profiles?.[0]?.total_diamonds || 0).toLocaleString()} 💎</span>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="operationType" className="text-right">
+                  Opération
+                </Label>
+                <div className="col-span-3 flex gap-2">
+                  <Button
+                    type="button"
+                    variant={operationType === 'set' ? 'default' : 'outline'}
+                    onClick={() => setOperationType('set')}
+                    className="flex-1"
+                  >
+                    Définir
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={operationType === 'add' ? 'default' : 'outline'}
+                    onClick={() => setOperationType('add')}
+                    className="flex-1"
+                  >
+                    Ajouter
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={operationType === 'subtract' ? 'default' : 'outline'}
+                    onClick={() => setOperationType('subtract')}
+                    className="flex-1"
+                  >
+                    Déduire
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="diamonds" className="text-right">
+                  {operationType === 'set' ? 'Nouvelle valeur' : 'Quantité'}
+                </Label>
+                <Input
+                  id="diamonds"
+                  type="number"
+                  min="0"
+                  value={diamondAmount}
+                  onChange={(e) => setDiamondAmount(Number(e.target.value))}
+                  className="col-span-3"
+                />
+              </div>
+
+              {platformSettings && (
+                <div className="bg-muted/50 p-3 rounded-md">
+                  <p className="text-sm">
+                    Valeur: {(diamondAmount * platformSettings.diamondValue).toLocaleString()}€
+                  </p>
+                </div>
+              )}
+              
+              {operationType !== 'set' && (
+                <div className="flex items-center justify-between">
+                  <Label>Nouvelle valeur totale:</Label>
+                  <span className="font-bold">
+                    {operationType === 'add' 
+                      ? (selectedCreator?.profiles?.[0]?.total_diamonds || 0) + diamondAmount
+                      : Math.max(0, (selectedCreator?.profiles?.[0]?.total_diamonds || 0) - diamondAmount)
+                    } 💎
+                  </span>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditingDiamonds(false)}>Annuler</Button>
+              <Button type="submit" onClick={handleSaveDiamonds}>Sauvegarder</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <Dialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
           <DialogContent>
             <DialogHeader>
@@ -444,7 +644,7 @@ const CreatorStats = () => {
           </DialogContent>
         </Dialog>
         
-        <Footer role={role} />
+        <Footer role={role} version="1.3" />
       </div>
     </div>
   );

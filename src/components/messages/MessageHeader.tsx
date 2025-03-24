@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Plus, Users, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Plus, Users, MessageSquare, Diamond } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -65,7 +65,7 @@ export const MessageHeader = ({
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">
-          {contact ? contact.username : "Messagerie"} 
+          {contact ? contact.username : "Messagerie 💬"} 
         </h1>
         {unreadCount > 0 && (
           <Badge variant="destructive" className="ml-2 animate-pulse">
@@ -76,14 +76,24 @@ export const MessageHeader = ({
       
       <div className="flex items-center gap-2">
         {(role === 'founder' || role === 'manager' || role === 'agent') && (
-          <Button
-            className={`hidden md:flex items-center gap-1 ${getRoleButtonClass()}`}
-            onClick={onNewMessage}
-            size="sm"
-          >
-            <Plus className="h-4 w-4" />
-            Nouveau message
-          </Button>
+          <>
+            <Button
+              onClick={() => navigate('/creator-diamonds')}
+              size="sm"
+              className="hidden md:flex items-center gap-1 bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white"
+            >
+              <Diamond className="h-4 w-4" />
+              Gérer les diamants 💎
+            </Button>
+            <Button
+              className={`hidden md:flex items-center gap-1 ${getRoleButtonClass()}`}
+              onClick={onNewMessage}
+              size="sm"
+            >
+              <Plus className="h-4 w-4" />
+              Nouveau message ✨
+            </Button>
+          </>
         )}
         
         {isMobile && (

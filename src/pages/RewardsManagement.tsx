@@ -4,9 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { RewardsPanel } from "@/components/RewardsPanel";
+import { Footer } from "@/components/layout/Footer";
+import { useIndexAuth } from "@/hooks/use-index-auth";
 
 const RewardsManagement = () => {
   const navigate = useNavigate();
+  const { role } = useIndexAuth();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4">
@@ -20,10 +23,12 @@ const RewardsManagement = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold">Gestion des Récompenses</h1>
+          <h1 className="text-2xl font-bold">Gestion des Récompenses 🏆</h1>
         </div>
 
         <RewardsPanel role="founder" userId="founder" />
+        
+        <Footer role={role} version="1.3" />
       </div>
     </div>
   );
