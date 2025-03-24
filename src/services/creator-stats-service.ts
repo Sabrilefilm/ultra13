@@ -97,16 +97,12 @@ export const creatorStatsService = {
     try {
       console.log(`Updating diamonds for creator ${creator.id} to ${newValue}`);
       
-      // Mise à jour directe du profil avec transactions
+      // Utiliser la fonction RPC définie dans la base de données
       const { data, error } = await supabase
-        .from("profiles")
-        .upsert({ 
-          id: creator.id, 
-          username: creator.username,
-          role: 'creator',
-          total_diamonds: newValue
-        }, { 
-          onConflict: 'id'
+        .rpc('create_or_update_profile', {
+          user_id: creator.id,
+          user_username: creator.username,
+          diamonds_value: newValue
         });
       
       if (error) {
