@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Dialog,
@@ -27,7 +26,6 @@ export function LeaveAgencyDialog() {
     
     if (type === "amicable") {
       try {
-        // Get current user id
         const username = localStorage.getItem('username');
         if (!username) {
           toast({
@@ -38,7 +36,6 @@ export function LeaveAgencyDialog() {
           return;
         }
         
-        // Get user id from username
         const { data: userData, error: userError } = await supabase
           .from('user_accounts')
           .select('id')
@@ -47,7 +44,6 @@ export function LeaveAgencyDialog() {
           
         if (userError) throw userError;
         
-        // Get founder id
         const { data: founderData, error: founderError } = await supabase
           .from('user_accounts')
           .select('id')
@@ -56,7 +52,6 @@ export function LeaveAgencyDialog() {
           
         if (founderError) throw founderError;
         
-        // Send message to founder
         const { error: messageError } = await supabase
           .from('chats')
           .insert({
@@ -170,7 +165,6 @@ export function LeaveAgencyDialog() {
         </DialogContent>
       </Dialog>
       
-      {/* Trigger button - hidden visually but accessible to JavaScript */}
       <div 
         className="absolute inset-0 w-full h-full cursor-pointer"
         onClick={() => setIsOpen(true)}

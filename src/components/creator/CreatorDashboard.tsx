@@ -14,12 +14,14 @@ import { toast } from "sonner";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
+
 interface CreatorDashboardProps {
   onOpenSponsorshipForm: () => void;
   onOpenSponsorshipList: () => void;
   onCreatePoster: () => void;
   role: string;
 }
+
 export const CreatorDashboard = ({
   onOpenSponsorshipForm,
   onOpenSponsorshipList,
@@ -32,7 +34,6 @@ export const CreatorDashboard = ({
   const [totalDiamonds, setTotalDiamonds] = useState(0);
   const username = localStorage.getItem('username') || 'Créateur';
 
-  // Animation variants
   const fadeIn = {
     hidden: {
       opacity: 0,
@@ -48,7 +49,6 @@ export const CreatorDashboard = ({
     }
   };
 
-  // Récupérer les horaires et les diamants du créateur connecté
   const {
     data: creatorData,
     isLoading
@@ -56,7 +56,6 @@ export const CreatorDashboard = ({
     queryKey: ["creator-data"],
     queryFn: async () => {
       try {
-        // Récupérer l'ID de l'utilisateur connecté via localStorage
         const username = localStorage.getItem('username');
         const userId = localStorage.getItem('userId');
         if (!username || !userId) {
@@ -69,7 +68,6 @@ export const CreatorDashboard = ({
           };
         }
 
-        // Récupérer l'horaire de live
         const {
           data: scheduleData,
           error: scheduleError
@@ -78,7 +76,6 @@ export const CreatorDashboard = ({
           console.error("Error fetching schedule:", scheduleError);
         }
 
-        // Récupérer les diamants
         const {
           data: profileData,
           error: profileError
@@ -87,7 +84,6 @@ export const CreatorDashboard = ({
           console.error("Error fetching profile:", profileError);
         }
 
-        // Récupérer le prochain match
         const now = new Date();
         const {
           data: matchData,
@@ -120,20 +116,18 @@ export const CreatorDashboard = ({
       }
     }
   });
+
   useEffect(() => {
     if (creatorData?.diamonds) {
       setTotalDiamonds(creatorData.diamonds);
     }
   }, [creatorData]);
 
-  // Calculer le total d'heures hebdomadaires
   const weeklyHours = creatorData?.schedule ? creatorData.schedule.hours * creatorData.schedule.days : 0;
 
-  // Objectifs à atteindre
   const targetHours = 15;
   const targetDays = 7;
 
-  // Formater la date du prochain match
   const formatMatchDate = (dateString: string) => {
     if (!dateString) return "Non planifié";
     const date = new Date(dateString);
@@ -145,11 +139,10 @@ export const CreatorDashboard = ({
       minute: '2-digit'
     });
   };
+
   return <div className="space-y-6">
-      {/* Quote du jour */}
       <DailyQuote />
       
-      {/* Résumé */}
       <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-purple-900/20 rounded-xl shadow-md hover:shadow-lg transition-all">
         <CardHeader className="bg-gradient-to-r from-purple-900/20 to-indigo-900/20 rounded-t-xl border-b border-purple-900/10">
           <CardTitle className="text-xl text-white/90 flex items-center gap-2">
@@ -170,7 +163,6 @@ export const CreatorDashboard = ({
                   Retrouvez ici toutes les informations importantes concernant vos performances, vos objectifs et vos prochains matchs.
                 </p>
                 
-                {/* Performant Utilisateur Section */}
                 <motion.div initial={{
                 opacity: 0,
                 y: 10
@@ -335,22 +327,16 @@ export const CreatorDashboard = ({
         </CardContent>
       </Card>
       
-      {/* Statistiques */}
       <StatCards role={role} onOpenSponsorshipForm={onOpenSponsorshipForm} onOpenSponsorshipList={onOpenSponsorshipList} onCreatePoster={onCreatePoster} />
       
-      {/* User Guide */}
       {showGuide && <div className="mt-6">
           <UserGuide />
         </div>}
       
-      {/* Actions rapides */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
-        
-        {/* Bouton quitter l'agence avec avertissement */}
-        <Button variant="destructive" className="h-14 group relative transition-all duration-300 bg-gradient-to-r from-red-600/80 to-orange-600/80 hover:from-red-700 hover:to-orange-700">
-          <div className="flex items-center justify-center w-full">
-            <AlertTriangle className="h-5 w-5 mr-2 group-hover:animate-pulse" />
+      <div className="flex justify-end mt-10">
+        <Button variant="ghost" className="text-xs text-red-400 hover:text-red-300 hover:bg-red-900/10 relative h-8 px-3 group">
+          <div className="flex items-center justify-center gap-1">
+            <AlertTriangle className="h-3 w-3 mr-1 group-hover:animate-pulse" />
             Je souhaite quitter l'agence
           </div>
           <LeaveAgencyDialog />
