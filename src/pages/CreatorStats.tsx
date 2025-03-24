@@ -6,7 +6,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { UltraSidebar } from "@/components/layout/UltraSidebar";
 import { UsernameWatermark } from "@/components/layout/UsernameWatermark";
 import { Footer } from "@/components/layout/Footer";
-import { useCreatorStats } from "@/hooks/use-creator-stats";
+import { useCreatorStats } from "@/hooks/creator-stats"; // Updated import path
 
 // Import our components
 import { StatsHeader } from "@/components/creator-stats/StatsHeader";

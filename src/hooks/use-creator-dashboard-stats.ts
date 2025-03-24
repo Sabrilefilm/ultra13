@@ -1,99 +1,106 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-import { useLiveSchedule } from "@/hooks/use-live-schedule";
-import { useCreatorRewards } from "@/hooks/use-creator-rewards";
-import { useMonthProgress } from "@/hooks/use-month-progress";
-import { Button } from "@/components/ui/button";
+import { supabase } from "@/lib/supabase";
 
-export function useCreatorDashboardStats(userId?: string) {
+interface LiveSchedule {
+  hours: number;
+  days: number;
+}
+
+interface CreatorData {
+  schedule?: LiveSchedule;
+  nextMatch?: {
+    match_date: string;
+    opponent_id: string;
+  };
+}
+
+export const useCreatorDashboardStats = (userId?: string) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [showWarning, setShowWarning] = useState(false);
-  const { dayOfMonth, daysInMonth, monthProgress } = useMonthProgress();
+  const [liveSchedule, setLiveSchedule] = useState<LiveSchedule | null>(null);
+  const [monthlyHours, setMonthlyHours] = useState(0);
+  const [creatorData, setCreatorData] = useState<CreatorData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [totalDiamonds, setTotalDiamonds] = useState(0);
+  const [diamondsText, setDiamondsText] = useState("Chargement...");
+  const [username, setUsername] = useState("");
+
+  // Target values for creator
+  const requiredHours = 30;
+  const requiredDays = 10;
   
-  const { data: liveSchedule, isError: isLiveScheduleError } = useLiveSchedule(userId, "creator");
-  const { data: rewardsData, isError: isRewardsError } = useCreatorRewards(userId, "creator");
+  // Calculated values
+  const hoursColor = monthlyHours >= requiredHours ? "text-green-500" : "text-red-500";
+  const daysColor = (liveSchedule?.days || 0) >= requiredDays ? "text-green-500" : "text-red-500";
+  const showWarning = (liveSchedule?.hours || 0) < requiredHours || (liveSchedule?.days || 0) < requiredDays;
 
   useEffect(() => {
-    if (liveSchedule) {
-      const monthlyHours = liveSchedule.hours * liveSchedule.days;
-      const requiredHours = 15;
-      const progressPercentage = (monthlyHours / requiredHours) * 100;
-      
-      if (monthProgress > 50 && progressPercentage < 50) {
-        setShowWarning(true);
-        toast({
-          variant: "destructive",
-          title: "Attention aux objectifs",
-          description: "Vous risquez de ne pas atteindre vos objectifs mensuels, ce qui peut entraîner une exclusion de l'agence ou une perte de récompenses.",
-          action: (
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="border-white/20 text-white hover:bg-red-900/50"
-              onClick={() => navigate('/messages')}
-            >
-              Contacter le fondateur
-            </Button>
-          ),
+    const fetchCreatorData = async () => {
+      setIsLoading(true);
+      try {
+        const storedUserId = userId || localStorage.getItem('userId');
+        if (!storedUserId) return;
+
+        // Fetch schedule data
+        const { data: scheduleData } = await supabase
+          .from("live_schedules")
+          .select("hours, days")
+          .eq("creator_id", storedUserId)
+          .maybeSingle();
+
+        // Fetch profile data
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("username, total_diamonds")
+          .eq("id", storedUserId)
+          .maybeSingle();
+
+        // Fetch upcoming match
+        const { data: matchData } = await supabase
+          .from("upcoming_matches")
+          .select("*")
+          .eq("creator_id", storedUserId)
+          .eq("status", "scheduled")
+          .order("match_date", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+
+        setLiveSchedule(scheduleData || { hours: 0, days: 0 });
+        setMonthlyHours(scheduleData?.hours || 0);
+        setTotalDiamonds(profileData?.total_diamonds || 0);
+        setUsername(profileData?.username || "");
+        
+        setCreatorData({
+          schedule: scheduleData || { hours: 0, days: 0 },
+          nextMatch: matchData || undefined
         });
+
+        setDiamondsText(`${totalDiamonds.toLocaleString()} 💎`);
+      } catch (error) {
+        console.error("Error fetching creator stats:", error);
+      } finally {
+        setIsLoading(false);
       }
-    }
-  }, [liveSchedule, monthProgress, toast, navigate]);
+    };
 
-  if (isLiveScheduleError || isRewardsError) {
-    toast({
-      variant: "destructive",
-      title: "Erreur",
-      description: "Erreur lors de la récupération des statistiques"
-    });
-  }
+    fetchCreatorData();
+  }, [userId]);
 
-  const monthlyHours = liveSchedule ? (liveSchedule.hours * liveSchedule.days) : 0;
-  const requiredHours = 15;
-  const requiredDays = 7;
-  
-  const hoursCompleted = monthlyHours >= requiredHours;
-  const daysCompleted = (liveSchedule?.days || 0) >= requiredDays;
-  
-  const getProgressColor = () => {
-    const progressPercentage = (monthlyHours / requiredHours) * 100;
+  const formatMatchDate = (dateString?: string) => {
+    if (!dateString) return "";
     
-    if (hoursCompleted) return "text-green-500";
-    
-    if (monthProgress < 33) return "text-green-500";
-    
-    if (monthProgress < 66) {
-      return progressPercentage >= monthProgress ? "text-green-500" : "text-orange-500";
-    }
-    
-    return progressPercentage >= monthProgress ? "text-green-500" : "text-red-500";
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("fr-FR", {
+      day: "numeric",
+      month: "long",
+      hour: "2-digit",
+      minute: "2-digit"
+    }).format(date);
   };
-  
-  const getDaysProgressColor = () => {
-    const progressPercentage = ((liveSchedule?.days || 0) / requiredDays) * 100;
-    
-    if (daysCompleted) return "text-green-500";
-    
-    if (monthProgress < 33) return "text-green-500";
-    
-    if (monthProgress < 66) {
-      return progressPercentage >= monthProgress ? "text-green-500" : "text-orange-500";
-    }
-    
-    return progressPercentage >= monthProgress ? "text-green-500" : "text-red-500";
-  };
-  
-  const hoursColor = getProgressColor();
-  const daysColor = getDaysProgressColor();
-  
-  const diamondsText = rewardsData ? `${rewardsData}` : "0";
 
   return {
     liveSchedule,
-    rewardsData,
     monthlyHours,
     requiredHours,
     requiredDays,
@@ -101,6 +108,11 @@ export function useCreatorDashboardStats(userId?: string) {
     daysColor,
     diamondsText,
     showWarning,
-    navigate
+    navigate,
+    creatorData,
+    isLoading,
+    totalDiamonds,
+    username,
+    formatMatchDate
   };
-}
+};
