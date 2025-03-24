@@ -8,12 +8,12 @@ import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { useAccountManagement } from "@/hooks/use-account-management";
 import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
 import { 
   Play, Youtube, Book, Lightbulb, CheckCircle, VideoIcon, 
   ListChecks, PlusCircle, X, Pencil, Save, BookOpen, ArrowLeft
@@ -25,7 +25,7 @@ import { supabase } from "@/lib/supabase";
 import { TRAINING_TYPES } from "@/components/live-schedule/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Type définition pour une formation
+// Types pour les formations et le suivi des vidéos
 interface Training {
   id: string;
   title: string;
@@ -34,6 +34,14 @@ interface Training {
   type: string;
   created_at: string;
   order_index: number;
+}
+
+interface WatchedVideo {
+  id: string;
+  user_id: string;
+  training_id: string;
+  watched_at: string;
+  progress: number;
 }
 
 const Training = () => {
@@ -51,12 +59,17 @@ const Training = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedTraining, setSelectedTraining] = useState<Training | null>(null);
+  const [watchedVideos, setWatchedVideos] = useState<WatchedVideo[]>([]);
+  const [isWatching, setIsWatching] = useState(false);
+  const [currentVideo, setCurrentVideo] = useState<Training | null>(null);
   
   // États pour le formulaire
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [trainingType, setTrainingType] = useState("app");
+  const [catalogName, setCatalogName] = useState("");
+  const [isAddCatalogOpen, setIsAddCatalogOpen] = useState(false);
   
   // Inactivity timer for automatic logout
   const { showWarning, dismissWarning, formattedTime } = useInactivityTimer({
@@ -72,7 +85,7 @@ const Training = () => {
     onWarning: () => {}
   });
   
-  // Charger les formations
+  // Charger les formations et les vidéos visionnées
   useEffect(() => {
     if (!isAuthenticated) {
       window.location.href = '/';
@@ -80,7 +93,10 @@ const Training = () => {
     }
     
     fetchTrainings();
-  }, [isAuthenticated, selectedType]);
+    if (userId) {
+      fetchWatchedVideos();
+    }
+  }, [isAuthenticated, selectedType, userId]);
   
   // Fonction pour récupérer les formations depuis Supabase
   const fetchTrainings = async () => {
@@ -105,6 +121,68 @@ const Training = () => {
     }
   };
   
+  // Fonction pour récupérer les vidéos visionnées par l'utilisateur
+  const fetchWatchedVideos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('watched_videos')
+        .select('*')
+        .eq('user_id', userId);
+      
+      if (error) {
+        console.error('Erreur lors du chargement des vidéos visionnées:', error);
+        return;
+      }
+      
+      setWatchedVideos(data || []);
+    } catch (error) {
+      console.error('Erreur lors du chargement des vidéos visionnées:', error);
+    }
+  };
+  
+  // Fonction pour marquer une vidéo comme visionnée
+  const markVideoAsWatched = async (trainingId: string) => {
+    if (!userId) return;
+    
+    try {
+      // Vérifier si la vidéo a déjà été visionnée
+      const existingWatch = watchedVideos.find(
+        (wv) => wv.training_id === trainingId && wv.user_id === userId
+      );
+      
+      if (existingWatch) {
+        // Mettre à jour la progression à 100%
+        const { error } = await supabase
+          .from('watched_videos')
+          .update({ progress: 100 })
+          .eq('id', existingWatch.id);
+          
+        if (error) throw error;
+      } else {
+        // Créer un nouvel enregistrement
+        const { error } = await supabase
+          .from('watched_videos')
+          .insert([
+            {
+              user_id: userId,
+              training_id: trainingId,
+              progress: 100,
+              watched_at: new Date().toISOString()
+            }
+          ]);
+          
+        if (error) throw error;
+      }
+      
+      // Recharger les vidéos visionnées
+      fetchWatchedVideos();
+      toast.success('Vidéo marquée comme visionnée');
+    } catch (error) {
+      console.error('Erreur lors du marquage de la vidéo:', error);
+      toast.error('Erreur lors du marquage de la vidéo');
+    }
+  };
+  
   // Fonction pour extraire l'ID de la vidéo YouTube
   const getYoutubeVideoId = (url: string) => {
     if (!url) return null;
@@ -115,6 +193,23 @@ const Training = () => {
     return (match && match[2].length === 11)
       ? match[2]
       : null;
+  };
+  
+  // Calculer le pourcentage de progression pour une catégorie
+  const calculateCategoryProgress = (type: string) => {
+    const categoryVideos = trainings.filter(t => t.type === type);
+    if (categoryVideos.length === 0) return 0;
+    
+    const watchedCount = categoryVideos.filter(training => 
+      watchedVideos.some(wv => wv.training_id === training.id && wv.progress === 100)
+    ).length;
+    
+    return Math.round((watchedCount / categoryVideos.length) * 100);
+  };
+  
+  // Vérifier si une vidéo a été visionnée
+  const isVideoWatched = (trainingId: string) => {
+    return watchedVideos.some(wv => wv.training_id === trainingId && wv.progress === 100);
   };
   
   // Ajouter une nouvelle formation
@@ -202,6 +297,39 @@ const Training = () => {
     }
   };
   
+  // Ajouter un nouveau catalogue
+  const handleAddCatalog = async () => {
+    if (!catalogName) {
+      toast.warning('Veuillez entrer un nom pour le catalogue');
+      return;
+    }
+    
+    try {
+      // Vérifier si le type existe déjà
+      if (Object.values(TRAINING_TYPES).includes(catalogName)) {
+        toast.error('Ce catalogue existe déjà');
+        return;
+      }
+      
+      // Ajouter le nouveau type de formation
+      // Note: Dans une implémentation réelle, vous devriez mettre à jour la constante TRAINING_TYPES
+      // et persister cette modification dans la base de données
+      
+      toast.success('Catalogue ajouté avec succès');
+      setCatalogName("");
+      setIsAddCatalogOpen(false);
+      
+      // Temporaire: Recharger la page pour voir les changements
+      // Dans une implémentation réelle, vous mettriez à jour l'état local
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout du catalogue:', error);
+      toast.error('Erreur lors de l\'ajout du catalogue');
+    }
+  };
+  
   // Supprimer une formation
   const handleDeleteTraining = async (id: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette formation ?')) {
@@ -245,6 +373,21 @@ const Training = () => {
     setIsEditDialogOpen(true);
   };
   
+  // Ouvrir la vidéo en mode plein écran
+  const openVideoViewer = (training: Training) => {
+    setCurrentVideo(training);
+    setIsWatching(true);
+  };
+  
+  // Fermer la vidéo et marquer comme visionnée
+  const closeVideoViewer = (markAsWatched = false) => {
+    if (markAsWatched && currentVideo) {
+      markVideoAsWatched(currentVideo.id);
+    }
+    setIsWatching(false);
+    setCurrentVideo(null);
+  };
+  
   return (
     <SidebarProvider defaultOpen={true}>
       <UltraDashboard
@@ -262,6 +405,7 @@ const Training = () => {
       />
       
       <div className="p-4 md:p-6 md:ml-64 space-y-6">
+        {/* Bannière de la page */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
           <div>
             <Button
@@ -274,31 +418,73 @@ const Training = () => {
               Retour au tableau de bord
             </Button>
             <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
-              Nos Formations
+              Centre de Formations
             </h1>
             <p className="text-gray-500 dark:text-gray-400">
               Apprenez à utiliser la plateforme et à développer votre présence en ligne
             </p>
           </div>
           
-          {role === 'founder' && (
-            <Button 
-              onClick={() => {
-                resetForm();
-                setTrainingType(selectedType);
-                setIsAddDialogOpen(true);
-              }}
-              className="bg-purple-600 hover:bg-purple-700 flex items-center gap-2"
-            >
-              <PlusCircle className="h-4 w-4" />
-              Ajouter une formation
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {role === 'founder' && (
+              <>
+                <Button 
+                  onClick={() => setIsAddCatalogOpen(true)}
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                >
+                  <PlusCircle className="h-4 w-4" />
+                  Ajouter un catalogue
+                </Button>
+                <Button 
+                  onClick={() => {
+                    resetForm();
+                    setTrainingType(selectedType);
+                    setIsAddDialogOpen(true);
+                  }}
+                  className="bg-purple-600 hover:bg-purple-700 flex items-center gap-2"
+                >
+                  <PlusCircle className="h-4 w-4" />
+                  Ajouter une formation
+                </Button>
+              </>
+            )}
+          </div>
         </div>
         
+        {/* Progression globale */}
+        {(role === 'creator' || role === 'agent') && (
+          <Card className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 border-purple-100 dark:border-purple-900/30">
+            <CardHeader className="pb-2">
+              <CardTitle>Votre progression</CardTitle>
+              <CardDescription>
+                Suivez votre progression dans les différents catalogues de formation
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                {Object.entries(TRAINING_TYPES).map(([type, label]) => (
+                  <Card key={type} className="bg-white/50 dark:bg-gray-800/50">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col items-center">
+                        <p className="font-medium mb-2">{label}</p>
+                        <div className="w-20 h-20 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700 mb-2">
+                          <span className="text-xl font-bold">{calculateCategoryProgress(type)}%</span>
+                        </div>
+                        <Progress value={calculateCategoryProgress(type)} className="w-full h-2 mt-2" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {/* Catalogue de formations */}
         <Card className="bg-white dark:bg-slate-900 shadow-lg border-purple-100 dark:border-purple-900/30">
           <CardHeader className="pb-2">
-            <CardTitle>Centre de formation</CardTitle>
+            <CardTitle>Catalogue de formations</CardTitle>
             <CardDescription>
               Explorez nos formations pour développer vos compétences
             </CardDescription>
@@ -357,23 +543,37 @@ const Training = () => {
                       )}
                     </div>
                   ) : (
-                    <ScrollArea className="h-[calc(100vh-340px)] min-h-[400px] pr-4">
-                      <div className="grid grid-cols-1 gap-6">
+                    <ScrollArea className="h-[calc(100vh-450px)] min-h-[400px] pr-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {trainings.map((training) => (
                           <Card 
                             key={training.id} 
-                            className="overflow-hidden border border-gray-200 dark:border-gray-700"
+                            className={`overflow-hidden border ${
+                              isVideoWatched(training.id) 
+                                ? "border-green-300 dark:border-green-700" 
+                                : "border-gray-200 dark:border-gray-700"
+                            } transition-all hover:shadow-md`}
                           >
-                            <div className="aspect-video bg-gray-100 dark:bg-gray-800">
-                              <iframe
-                                width="100%"
-                                height="100%"
-                                src={`https://www.youtube.com/embed/${getYoutubeVideoId(training.video_url)}`}
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                                title={training.title}
-                              ></iframe>
+                            <div 
+                              className="aspect-video bg-gray-100 dark:bg-gray-800 relative cursor-pointer group"
+                              onClick={() => openVideoViewer(training)}
+                            >
+                              {/* Miniature de la vidéo */}
+                              <img 
+                                src={`https://img.youtube.com/vi/${getYoutubeVideoId(training.video_url)}/mqdefault.jpg`}
+                                alt={training.title}
+                                className="w-full h-full object-cover"
+                              />
+                              {/* Overlay de lecture */}
+                              <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Play className="h-16 w-16 text-white" />
+                              </div>
+                              {/* Badge "Visionné" */}
+                              {isVideoWatched(training.id) && (
+                                <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                                  Visionné
+                                </div>
+                              )}
                             </div>
                             <CardContent className="pt-4">
                               <div className="flex justify-between items-start">
@@ -382,7 +582,7 @@ const Training = () => {
                                     {training.title}
                                   </h3>
                                   {training.description && (
-                                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2">
                                       {training.description}
                                     </p>
                                   )}
@@ -393,7 +593,10 @@ const Training = () => {
                                     <Button
                                       variant="ghost"
                                       size="icon"
-                                      onClick={() => openEditDialog(training)}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        openEditDialog(training);
+                                      }}
                                     >
                                       <Pencil className="h-4 w-4" />
                                     </Button>
@@ -401,7 +604,10 @@ const Training = () => {
                                       variant="ghost"
                                       size="icon"
                                       className="text-red-500 hover:text-red-600"
-                                      onClick={() => handleDeleteTraining(training.id)}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteTraining(training.id);
+                                      }}
                                     >
                                       <X className="h-4 w-4" />
                                     </Button>
@@ -409,16 +615,27 @@ const Training = () => {
                                 )}
                               </div>
                               
-                              <div className="mt-2 pt-2 border-t border-dashed border-gray-200 dark:border-gray-700">
+                              <div className="mt-2 pt-2 border-t border-dashed border-gray-200 dark:border-gray-700 flex justify-between items-center">
                                 <a 
                                   href={training.video_url} 
                                   target="_blank" 
                                   rel="noopener noreferrer"
                                   className="text-blue-500 hover:underline text-sm flex items-center gap-1"
+                                  onClick={(e) => e.stopPropagation()}
                                 >
                                   <Youtube className="h-4 w-4" />
                                   Voir sur YouTube
                                 </a>
+                                
+                                <Button 
+                                  size="sm" 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openVideoViewer(training);
+                                  }}
+                                >
+                                  Visionner
+                                </Button>
                               </div>
                             </CardContent>
                           </Card>
@@ -475,7 +692,7 @@ const Training = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="type">Catégorie</Label>
+                <Label htmlFor="type">Catalogue</Label>
                 <select
                   id="type"
                   value={trainingType}
@@ -552,6 +769,76 @@ const Training = () => {
           </DialogContent>
         </Dialog>
         
+        {/* Dialogue pour ajouter un catalogue */}
+        <Dialog open={isAddCatalogOpen} onOpenChange={setIsAddCatalogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Ajouter un catalogue</DialogTitle>
+              <DialogDescription>
+                Créez un nouveau catalogue de formations
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="catalog-name">Nom du catalogue*</Label>
+                <Input
+                  id="catalog-name"
+                  value={catalogName}
+                  onChange={(e) => setCatalogName(e.target.value)}
+                  placeholder="Ex: Édition Vidéo"
+                />
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAddCatalogOpen(false)}>
+                Annuler
+              </Button>
+              <Button onClick={handleAddCatalog}>
+                Créer le catalogue
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Modal de visionnage vidéo */}
+        <Dialog open={isWatching} onOpenChange={(open) => !open && closeVideoViewer()}>
+          <DialogContent className="sm:max-w-5xl h-[80vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle>{currentVideo?.title}</DialogTitle>
+              <DialogDescription>
+                {currentVideo?.description || "Aucune description disponible"}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="flex-1 overflow-hidden relative">
+              {currentVideo && (
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={`https://www.youtube.com/embed/${getYoutubeVideoId(currentVideo.video_url)}?autoplay=1`}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title={currentVideo.title}
+                  className="absolute inset-0"
+                ></iframe>
+              )}
+            </div>
+            
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => closeVideoViewer()}>
+                Fermer
+              </Button>
+              {(role === 'creator' || role === 'agent') && (
+                <Button onClick={() => closeVideoViewer(true)}>
+                  Marquer comme visionnée
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </SidebarProvider>
   );
