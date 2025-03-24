@@ -122,10 +122,12 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
       return;
     }
 
-    if (courses.some(course => course.id === editingCourse.id)) {
-      setCourses(courses.map(course => 
-        course.id === editingCourse.id ? editingCourse : course
-      ));
+    const updatedCourses = [...courses];
+    const existingIndex = updatedCourses.findIndex(course => course.id === editingCourse.id);
+    
+    if (existingIndex !== -1) {
+      updatedCourses[existingIndex] = editingCourse;
+      setCourses(updatedCourses);
       toast.success("Formation mise à jour avec succès");
     } else {
       setCourses([...courses, editingCourse]);
@@ -203,8 +205,8 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
           )}
           
           <TabsContent value="video" className="pt-2">
-            <ScrollArea className="h-[400px]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <ScrollArea className="h-[450px]">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {filteredCourses.length > 0 ? (
                   filteredCourses.map(course => (
                     <Card key={course.id} className="overflow-hidden border-blue-100 dark:border-blue-900/20 hover:shadow-md transition-shadow">
@@ -215,30 +217,30 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
                           className="w-full h-full object-cover"
                         />
                         {course.duration && (
-                          <Badge className="absolute bottom-2 right-2 bg-black/70">
+                          <Badge className="absolute bottom-2 right-2 bg-black/70 text-xs">
                             {course.duration}
                           </Badge>
                         )}
                         {course.theme && (
-                          <Badge className="absolute top-2 left-2 bg-blue-500/90">
+                          <Badge className="absolute top-2 left-2 bg-blue-500/90 text-xs">
                             {course.theme}
                           </Badge>
                         )}
                       </div>
-                      <CardContent className="p-3">
-                        <h3 className="font-medium text-base">{course.title}</h3>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      <CardContent className="p-2">
+                        <h3 className="font-medium text-sm line-clamp-1">{course.title}</h3>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2 h-8">
                           {course.description}
                         </p>
-                        <div className="flex justify-between items-center mt-3">
+                        <div className="flex justify-between items-center mt-2">
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="text-xs"
+                            className="text-xs py-0 h-7"
                             onClick={() => window.open(course.url, '_blank')}
                           >
                             <Video className="h-3 w-3 mr-1" />
-                            Visionner
+                            Voir
                           </Button>
                           
                           {role === 'founder' && (
@@ -246,7 +248,7 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
                               <Button 
                                 variant="ghost" 
                                 size="sm"
-                                className="h-7 w-7 p-0"
+                                className="h-6 w-6 p-0"
                                 onClick={() => handleEditCourse(course)}
                               >
                                 <Edit className="h-3 w-3" />
@@ -254,7 +256,7 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className="text-red-500 hover:text-red-700 h-7 w-7 p-0"
+                                className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
                                 onClick={() => handleDeleteCourse(course.id)}
                               >
                                 <Trash className="h-3 w-3" />
@@ -266,7 +268,7 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
                     </Card>
                   ))
                 ) : (
-                  <div className="col-span-2 flex flex-col items-center justify-center py-12 text-center">
+                  <div className="col-span-3 flex flex-col items-center justify-center py-12 text-center">
                     <Sparkles className="h-12 w-12 text-blue-200 mb-4" />
                     <h3 className="text-lg font-medium mb-2">Aucune formation trouvée</h3>
                     <p className="text-sm text-muted-foreground max-w-md">
@@ -281,32 +283,32 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
           </TabsContent>
           
           <TabsContent value="document" className="pt-2">
-            <ScrollArea className="h-[400px]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <ScrollArea className="h-[450px]">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filteredCourses.map(course => (
                   <Card key={course.id} className="overflow-hidden border-blue-100 dark:border-blue-900/20">
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <div className="bg-blue-100 dark:bg-blue-900/20 p-2 rounded-lg">
-                          <BookOpen className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    <CardContent className="p-3">
+                      <div className="flex items-start gap-2">
+                        <div className="bg-blue-100 dark:bg-blue-900/20 p-1.5 rounded-lg">
+                          <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <h3 className="font-medium text-base">{course.title}</h3>
+                          <div className="flex items-start justify-between gap-1">
+                            <h3 className="font-medium text-sm line-clamp-1">{course.title}</h3>
                             {course.theme && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge variant="outline" className="text-xs whitespace-nowrap">
                                 {course.theme}
                               </Badge>
                             )}
                           </div>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 mb-3">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 mb-2 line-clamp-2 h-8">
                             {course.description}
                           </p>
                           <div className="flex justify-between items-center">
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="text-xs"
+                              className="text-xs py-0 h-7"
                               onClick={() => window.open(course.url, '_blank')}
                             >
                               Télécharger
@@ -317,7 +319,7 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
                                 <Button 
                                   variant="ghost" 
                                   size="sm"
-                                  className="h-7 w-7 p-0"
+                                  className="h-6 w-6 p-0"
                                   onClick={() => handleEditCourse(course)}
                                 >
                                   <Edit className="h-3 w-3" />
@@ -325,7 +327,7 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
-                                  className="text-red-500 hover:text-red-700 h-7 w-7 p-0"
+                                  className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
                                   onClick={() => handleDeleteCourse(course.id)}
                                 >
                                   <Trash className="h-3 w-3" />
@@ -343,35 +345,35 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
           </TabsContent>
           
           <TabsContent value="external" className="pt-2">
-            <ScrollArea className="h-[400px]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <ScrollArea className="h-[450px]">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filteredCourses.map(course => (
                   <Card key={course.id} className="overflow-hidden border-blue-100 dark:border-blue-900/20">
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <div className="bg-blue-100 dark:bg-blue-900/20 p-2 rounded-lg">
-                          <Link className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    <CardContent className="p-3">
+                      <div className="flex items-start gap-2">
+                        <div className="bg-blue-100 dark:bg-blue-900/20 p-1.5 rounded-lg">
+                          <Link className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <h3 className="font-medium text-base">{course.title}</h3>
+                          <div className="flex items-start justify-between gap-1">
+                            <h3 className="font-medium text-sm line-clamp-1">{course.title}</h3>
                             {course.theme && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge variant="outline" className="text-xs whitespace-nowrap">
                                 {course.theme}
                               </Badge>
                             )}
                           </div>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 mb-3">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 mb-2 line-clamp-2 h-8">
                             {course.description}
                           </p>
                           <div className="flex justify-between items-center">
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="text-xs"
+                              className="text-xs py-0 h-7"
                               onClick={() => window.open(course.url, '_blank')}
                             >
-                              Visiter le site
+                              Visiter
                             </Button>
                             
                             {role === 'founder' && (
@@ -379,7 +381,7 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
                                 <Button 
                                   variant="ghost" 
                                   size="sm"
-                                  className="h-7 w-7 p-0"
+                                  className="h-6 w-6 p-0"
                                   onClick={() => handleEditCourse(course)}
                                 >
                                   <Edit className="h-3 w-3" />
@@ -387,7 +389,7 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
-                                  className="text-red-500 hover:text-red-700 h-7 w-7 p-0"
+                                  className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
                                   onClick={() => handleDeleteCourse(course.id)}
                                 >
                                   <Trash className="h-3 w-3" />
