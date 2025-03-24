@@ -67,6 +67,9 @@ const TabPanel = React.forwardRef<
 ))
 TabPanel.displayName = "TabPanel"
 
+// Define Tab as an alias to TabsTrigger for backward compatibility
+const Tab = TabsTrigger
+
 // Also fix the TabList issue in TrainingCatalog.tsx
 const TabList = TabsList
 
