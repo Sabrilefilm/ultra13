@@ -13,11 +13,10 @@ const Messages = () => {
   const { userId, role, username, loading, handleLogout } = useMessagesAuth();
   const [isNewMessageDialogOpen, setIsNewMessageDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string>('');
-  const [allUsers, setAllUsers] = useState<any[]>([]);
-  const [loadingUsers, setLoadingUsers] = useState(false);
   
   // Use the hook for managing messages
   const messageHook = useMessages(userId);
+  const { allUsers, loadingUsers } = messageHook;
 
   const handleStartNewConversation = async () => {
     if (!selectedUser) {
@@ -67,7 +66,7 @@ const Messages = () => {
         onStartConversation={handleStartNewConversation}
         currentUserRole={role}
         currentUserId={userId}
-        allUsers={allUsers}
+        allUsers={allUsers || []}
         loadingUsers={loadingUsers}
       />
     </MessagesLayout>

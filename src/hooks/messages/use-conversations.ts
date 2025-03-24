@@ -10,10 +10,21 @@ export const useConversations = (userId: string) => {
     queryFn: async () => {
       if (!userId) return [];
       
-      const { data, error } = await supabase
-        .from('user_accounts')
-        .select('id, username, role')
-        .neq('id', userId);
+      // Get the current user's role
+      const userRole = localStorage.getItem('userRole');
+      let query = supabase.from('user_accounts').select('id, username, role');
+      
+      // If the user is a founder, they can see all users
+      if (userRole === 'founder') {
+        query = query.neq('id', userId);
+      } 
+      // For other roles, apply specific filtering logic
+      else {
+        // This filtering logic can be enhanced based on other role requirements
+        query = query.neq('id', userId);
+      }
+      
+      const { data, error } = await query;
         
       if (error) throw error;
       return data || [];
