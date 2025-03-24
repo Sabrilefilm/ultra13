@@ -1,59 +1,57 @@
 
-import { useState } from "react";
-import { toast } from "sonner";
-import { creatorStatsService } from "@/services/creator-stats-service";
-import { Creator } from "./types";
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { Creator } from '@/hooks/diamonds/use-diamond-fetch';
+import { scheduleService } from '@/services/schedule/schedule-service';
 
-export const useScheduleEditing = (
-  creators: Creator[], 
-  setCreators: (creators: Creator[]) => void,
-  selectedCreator: Creator | null,
-  setSelectedCreator: (creator: Creator | null) => void,
-  fetchCreators: () => Promise<void>
-) => {
+export function useScheduleEditing(onSuccess: () => Promise<void>) {
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
-  const [hours, setHours] = useState(0);
-  const [days, setDays] = useState(0);
+  const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
+  const [hours, setHours] = useState<number>(0);
+  const [days, setDays] = useState<number>(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleEditSchedule = (creator: Creator) => {
     setSelectedCreator(creator);
-    setHours(creator.live_schedules?.[0]?.hours || 0);
-    setDays(creator.live_schedules?.[0]?.days || 0);
+    // Get current hours and days
+    const creatorSchedule = creator.live_schedules?.[0];
+    setHours(creatorSchedule?.hours || 0);
+    setDays(creatorSchedule?.days || 0);
     setIsEditingSchedule(true);
   };
 
   const handleSaveSchedule = async () => {
     if (!selectedCreator) return;
-    
+
     try {
-      await creatorStatsService.updateSchedule(selectedCreator, hours, days);
+      setIsSubmitting(true);
       
-      toast.success("Horaires mis à jour avec succès");
+      await scheduleService.updateSchedule(selectedCreator.id, Number(hours), Number(days));
       
-      setCreators(creators.map(c => {
-        if (c.id === selectedCreator.id) {
-          return {
-            ...c,
-            live_schedules: [{ hours, days }]
-          };
-        }
-        return c;
-      }));
-      
+      toast.success(`Horaire mis à jour pour ${selectedCreator.username}`);
       setIsEditingSchedule(false);
+      
+      // Refresh data
+      await onSuccess();
     } catch (error) {
-      toast.error("Erreur lors de la mise à jour des horaires");
+      console.error("Erreur lors de la mise à jour des horaires:", error);
+      toast.error("Une erreur est survenue lors de la mise à jour des horaires");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return {
     isEditingSchedule,
     setIsEditingSchedule,
+    selectedCreator,
+    setSelectedCreator,
     hours,
     setHours,
     days,
     setDays,
+    isSubmitting,
     handleEditSchedule,
     handleSaveSchedule
   };
-};
+}

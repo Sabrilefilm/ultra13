@@ -1,15 +1,49 @@
 
 import { useState } from 'react';
-import { Creator } from './use-diamond-fetch';
+import { Creator, useDiamondFetch } from './use-diamond-fetch';
+import { useDiamondGoal } from './use-diamond-goal';
+import { useAgencyGoal } from './use-agency-goal';
+import { useDiamondDialogs } from './use-diamond-dialogs';
+import { useDiamondSearch } from './use-diamond-search';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
-export function useDiamondManagement(fetchUsers: () => Promise<void>) {
+export function useDiamondManagement() {
+  // Use the base diamond fetching hook
+  const {
+    loading,
+    creators,
+    managers,
+    agents,
+    diamondValue,
+    agencyGoal,
+    setAgencyGoal,
+    userId,
+    role,
+    username,
+    totalAgencyDiamonds,
+    agencyProgressPercentage,
+    fetchAllUsers
+  } = useDiamondFetch();
+
+  // Use the search hook
+  const { searchQuery, setSearchQuery, filteredCreators } = useDiamondSearch(creators);
+
+  // Use the goal management hooks
+  const diamondGoalHook = useDiamondGoal(fetchAllUsers);
+  const agencyGoalHook = useAgencyGoal(fetchAllUsers);
+  
+  // Local state for this hook
+  const [activeTab, setActiveTab] = useState<string>('creators');
   const [isDiamondModalOpen, setIsDiamondModalOpen] = useState(false);
   const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
   const [diamondAmount, setDiamondAmount] = useState<number>(0);
   const [operationType, setOperationType] = useState<'add' | 'subtract'>('add');
   const [isEditing, setIsEditing] = useState(false);
+
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+  };
 
   const openDiamondModal = (user: Creator, type: 'add' | 'subtract') => {
     setSelectedCreator(user);
@@ -84,10 +118,7 @@ export function useDiamondManagement(fetchUsers: () => Promise<void>) {
       const actionText = operationType === 'add' ? 'ajoutés à' : 'retirés de';
       toast.success(`${diamondAmount} diamants ${actionText} ${selectedCreator.username}`);
       
-      // Update the selectedCreator with new diamond value for immediate UI update
-      selectedCreator.total_diamonds = newDiamondValue;
-      
-      await fetchUsers();
+      await fetchAllUsers();
       setIsDiamondModalOpen(false);
     } catch (error) {
       console.error('Erreur lors de la mise à jour des diamants:', error);
@@ -97,17 +128,72 @@ export function useDiamondManagement(fetchUsers: () => Promise<void>) {
     }
   };
 
+  const getActiveUsers = () => {
+    switch (activeTab) {
+      case 'creators':
+        return filteredCreators;
+      case 'managers':
+        return managers;
+      case 'agents':
+        return agents;
+      default:
+        return filteredCreators;
+    }
+  };
+
   return {
+    // Basic user data
+    loading,
+    role,
+    username,
+    userId,
+    
+    // Search functionality
+    searchQuery,
+    handleSearch,
+    
+    // User data
+    creators: filteredCreators,
+    managers,
+    agents,
+    
+    // Diamond goal dialog
+    isDialogOpen: diamondGoalHook.isDialogOpen,
+    setIsDialogOpen: diamondGoalHook.setIsDialogOpen,
+    selectedCreator: selectedCreator || diamondGoalHook.selectedCreator,
+    setSelectedCreator,
+    newDiamondGoal: diamondGoalHook.newDiamondGoal,
+    setNewDiamondGoal: diamondGoalHook.setNewDiamondGoal,
+    openEditDialog: diamondGoalHook.openEditDialog,
+    handleUpdateDiamondGoal: diamondGoalHook.handleUpdateDiamondGoal,
+    
+    // Agency goal management
+    agencyGoal,
+    setAgencyGoal,
+    handleUpdateAgencyGoal: agencyGoalHook.handleUpdateAgencyGoal,
+    
+    // Diamond management dialog
     isDiamondModalOpen,
     setIsDiamondModalOpen,
-    selectedCreator,
-    setSelectedCreator,
     diamondAmount,
     setDiamondAmount,
     operationType,
     setOperationType,
-    isEditing,
     openDiamondModal,
-    handleUpdateDiamonds
+    handleUpdateDiamonds,
+    
+    // UI state
+    isEditing: diamondGoalHook.isEditing || agencyGoalHook.isEditing || isEditing,
+    diamondValue,
+    totalAgencyDiamonds,
+    agencyProgressPercentage,
+    
+    // Tab navigation
+    activeTab,
+    setActiveTab,
+    
+    // Data operations
+    fetchAllUsers,
+    getActiveUsers
   };
 }

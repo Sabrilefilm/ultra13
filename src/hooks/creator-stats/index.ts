@@ -6,7 +6,7 @@ import { useScheduleEditing } from "./use-schedule-editing";
 import { useDiamondsEditing } from "./use-diamonds-editing";
 import { useCreatorRemoval } from "./use-creator-removal";
 import { useStatistics } from "./use-statistics";
-import { Creator } from "./types";
+import { Creator } from "@/hooks/diamonds/use-diamond-fetch";
 
 export const useCreatorStats = (role: string | null, username: string | null) => {
   const { creators, setCreators, loading, fetchCreators } = useCreatorsData(role, username);
@@ -23,7 +23,7 @@ export const useCreatorStats = (role: string | null, username: string | null) =>
     setDays, 
     handleEditSchedule, 
     handleSaveSchedule 
-  } = useScheduleEditing(creators, setCreators, selectedCreator, setSelectedCreator, fetchCreators);
+  } = useScheduleEditing(fetchCreators);
   
   const { 
     isEditingDiamonds, 
@@ -35,14 +35,14 @@ export const useCreatorStats = (role: string | null, username: string | null) =>
     isSaving,
     handleEditDiamonds, 
     handleSaveDiamonds 
-  } = useDiamondsEditing(creators, setCreators, selectedCreator, setSelectedCreator, fetchCreators);
+  } = useDiamondsEditing(fetchCreators);
   
   const { 
     removeDialogOpen, 
     setRemoveDialogOpen, 
     handleRemoveCreator, 
     confirmRemoveCreator 
-  } = useCreatorRemoval(creators, setCreators, selectedCreator, setSelectedCreator, fetchCreators);
+  } = useCreatorRemoval(fetchCreators);
   
   const { 
     getTotalHours, 

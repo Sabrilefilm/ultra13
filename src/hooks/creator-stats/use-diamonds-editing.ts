@@ -21,6 +21,12 @@ export function useDiamondsEditing(onSuccess: () => Promise<void>) {
     selectedCreator: null
   });
 
+  // Additional flags for external state mapping
+  const isEditingDiamonds = state.isOpen;
+  const diamondAmount = state.diamondAmount;
+  const operationType = state.operationType;
+  const isSaving = state.isSaving;
+
   const openDiamondsModal = (creator: Creator) => {
     setState(prev => ({
       ...prev,
@@ -48,7 +54,15 @@ export function useDiamondsEditing(onSuccess: () => Promise<void>) {
     setState(prev => ({ ...prev, operationType: type }));
   };
 
-  const handleSave = async () => {
+  const setIsEditingDiamonds = (value: boolean) => {
+    setState(prev => ({ ...prev, isOpen: value }));
+  };
+
+  const handleEditDiamonds = (creator: Creator) => {
+    openDiamondsModal(creator);
+  };
+
+  const handleSaveDiamonds = async () => {
     if (!state.selectedCreator || state.diamondAmount < 0) {
       toast.error("Valeur de diamants invalide");
       return;
@@ -84,10 +98,17 @@ export function useDiamondsEditing(onSuccess: () => Promise<void>) {
 
   return {
     state,
+    isEditingDiamonds,
+    setIsEditingDiamonds,
+    diamondAmount,
+    setDiamondAmount,
+    operationType,
+    setOperationType,
+    isSaving,
+    handleEditDiamonds,
+    handleSaveDiamonds,
     openDiamondsModal,
     closeDiamondsModal,
-    setDiamondAmount,
-    setOperationType,
-    handleSave
+    handleSave: handleSaveDiamonds
   };
 }
