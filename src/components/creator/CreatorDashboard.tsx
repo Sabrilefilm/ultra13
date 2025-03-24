@@ -333,14 +333,18 @@ export const CreatorDashboard = ({
           <UserGuide />
         </div>}
       
-      <div className="flex justify-end mt-10">
-        <Button variant="ghost" className="text-xs text-red-400 hover:text-red-300 hover:bg-red-900/10 relative h-8 px-3 group">
-          <div className="flex items-center justify-center gap-1">
-            <AlertTriangle className="h-3 w-3 mr-1 group-hover:animate-pulse" />
-            Je souhaite quitter l'agence
-          </div>
-          <LeaveAgencyDialog />
-        </Button>
+      <div className="mt-12 pt-6 border-t border-gray-800/30">
+        <Footer role={role} />
+        
+        <div className="flex justify-center mt-2">
+          <Button variant="ghost" className="text-xs text-gray-500 hover:text-red-400 hover:bg-red-900/10 relative h-8 px-3 group">
+            <div className="flex items-center justify-center gap-1">
+              <AlertTriangle className="h-3 w-3 mr-1 opacity-50 group-hover:opacity-100" />
+              Je souhaite quitter l'agence
+            </div>
+            <LeaveAgencyDialog />
+          </Button>
+        </div>
       </div>
     </div>;
 };
