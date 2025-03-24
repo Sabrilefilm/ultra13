@@ -223,6 +223,12 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
     const hoursColor = getProgressColor();
     const daysColor = getDaysProgressColor();
     
+    const diamondValue = platformSettings?.diamondValue || 10/36000; // Valeur par défaut si les paramètres ne sont pas chargés
+    const diamondsText = rewardsData ? `${rewardsData}` : "0";
+    const diamondValueText = rewardsData ? 
+      `(${((rewardsData * diamondValue) || 0).toFixed(2)}€)` : 
+      "(0.00€)";
+    
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -238,7 +244,7 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
           />
           <StatsCard
             title="Diamants Reçus"
-            value={`${rewardsData || 0}`}
+            value={`${diamondsText} ${diamondValueText}`}
             icon={<Diamond className="w-6 h-6 text-primary" />}
           />
         </div>

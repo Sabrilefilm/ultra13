@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Footer } from "@/components/layout/Footer";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
+import { UsernameWatermark } from "@/components/layout/UsernameWatermark";
 
 const CreatorStats = () => {
   const navigate = useNavigate();
@@ -321,7 +323,8 @@ const CreatorStats = () => {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      {miniWatermark}
+      {/* Utiliser notre composant UsernameWatermark */}
+      {username && <UsernameWatermark username={username} />}
       
       <UltraSidebar 
         username={username || ''}
