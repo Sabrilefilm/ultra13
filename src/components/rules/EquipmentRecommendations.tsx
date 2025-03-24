@@ -6,10 +6,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ShoppingCart, Edit, Trash, Plus, Settings, Save } from "lucide-react";
+import { ShoppingCart, Edit, Trash, Plus, Settings, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Equipment {
   id: string;
@@ -116,43 +117,8 @@ export const EquipmentRecommendations: React.FC<EquipmentRecommendationsProps> =
     }
   };
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.5 }
-    }
-  };
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const buttonAnimation = {
-    pulse: {
-      scale: [1, 1.05, 1],
-      boxShadow: [
-        "0 0 0 0 rgba(134, 46, 255, 0)",
-        "0 0 0 10px rgba(134, 46, 255, 0.3)",
-        "0 0 0 0 rgba(134, 46, 255, 0)"
-      ],
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        repeatType: "loop" as const
-      }
-    }
-  };
-
   return (
-    <Card className="border-purple-200 dark:border-purple-900/30 overflow-hidden">
+    <Card className="border-purple-200 dark:border-purple-900/30 overflow-hidden max-w-5xl mx-auto">
       <CardHeader className="bg-gradient-to-r from-purple-50 to-white dark:from-purple-950/30 dark:to-slate-950">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -160,89 +126,77 @@ export const EquipmentRecommendations: React.FC<EquipmentRecommendationsProps> =
             <span>Recommandations de Matériel</span>
           </div>
           {role === 'founder' && (
-            <motion.div
-              animate="pulse"
-              variants={buttonAnimation}
+            <Button 
+              onClick={handleAddEquipment} 
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+              size="sm"
             >
-              <Button 
-                onClick={handleAddEquipment} 
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Ajouter du matériel
-              </Button>
-            </motion.div>
+              <Plus className="mr-2 h-4 w-4" />
+              Ajouter du matériel
+            </Button>
           )}
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="p-6">
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+      <CardContent className="p-4">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
           Voici une liste de matériel recommandé pour améliorer la qualité de vos lives et de votre contenu.
-          Ces recommandations ne sont pas obligatoires mais peuvent vous aider à améliorer votre production.
         </p>
         
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {equipmentList.map((equipment, index) => (
-            <motion.div 
-              key={equipment.id}
-              variants={cardVariants}
-              whileHover={{ y: -5, transition: { duration: 0.2 } }}
-              className="relative"
-            >
-              <Card className="h-full border-purple-100 dark:border-purple-900/20 shadow-sm hover:shadow-md transition-all duration-300">
-                <CardHeader className="pb-2">
+        <ScrollArea className="h-[400px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {equipmentList.map((equipment) => (
+              <Card key={equipment.id} className="h-full border-purple-100 dark:border-purple-900/20 shadow-sm hover:shadow-md transition-all duration-300">
+                <CardHeader className="pb-2 pt-4 px-4">
                   <Badge className={`absolute right-2 top-2 ${getCategoryBadgeColor(equipment.category)}`}>
                     {getCategoryLabel(equipment.category)}
                   </Badge>
-                  <CardTitle className="text-lg">{equipment.name}</CardTitle>
+                  <CardTitle className="text-base">{equipment.name}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                <CardContent className="px-4 py-2">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     {equipment.description}
                   </p>
-                  <p className="font-bold text-lg mt-2 text-purple-700 dark:text-purple-400">
+                  <p className="font-bold text-base mt-2 text-purple-700 dark:text-purple-400">
                     {equipment.price}
                   </p>
                 </CardContent>
-                <CardFooter className="flex justify-between">
+                <CardFooter className="flex justify-between p-3">
                   <Button 
                     variant="outline" 
                     size="sm"
+                    className="text-xs"
                     onClick={() => window.open(equipment.link, '_blank')}
                   >
-                    Voir le produit
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    Voir
                   </Button>
                   
                   {role === 'founder' && (
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                       <Button 
                         variant="ghost" 
                         size="sm"
+                        className="h-7 w-7 p-0"
                         onClick={() => handleEditEquipment(equipment)}
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3 w-3" />
                       </Button>
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-500 hover:text-red-700 h-7 w-7 p-0"
                         onClick={() => handleDeleteEquipment(equipment.id)}
                       >
-                        <Trash className="h-4 w-4" />
+                        <Trash className="h-3 w-3" />
                       </Button>
                     </div>
                   )}
                 </CardFooter>
               </Card>
-            </motion.div>
-          ))}
-        </motion.div>
+            ))}
+          </div>
+        </ScrollArea>
       </CardContent>
       
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -328,7 +282,6 @@ export const EquipmentRecommendations: React.FC<EquipmentRecommendationsProps> =
               Annuler
             </Button>
             <Button onClick={handleSaveEquipment}>
-              <Save className="mr-2 h-4 w-4" />
               Enregistrer
             </Button>
           </DialogFooter>

@@ -2,7 +2,7 @@
 import { useState, KeyboardEvent, ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Paperclip, X } from 'lucide-react';
+import { Send, Paperclip, X, Smile } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface MessageComposerProps {
@@ -97,7 +97,7 @@ export const MessageComposer = ({
   };
   
   return (
-    <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900">
+    <div className="p-3 border-t border-gray-200 dark:border-gray-700/30 bg-white dark:bg-slate-800 backdrop-blur-md bg-opacity-80 dark:bg-opacity-80">
       {/* File preview */}
       {attachmentPreview && (
         <div className="mb-2 relative rounded overflow-hidden border border-blue-200 dark:border-blue-800 inline-block">
@@ -116,14 +116,14 @@ export const MessageComposer = ({
       )}
       
       <div 
-        className={`flex items-end gap-2 ${isDragging ? 'border-2 border-dashed border-blue-500 rounded-lg p-2' : ''}`}
+        className={`flex items-end gap-2 ${isDragging ? 'border-2 border-dashed border-blue-500 rounded-lg p-2 bg-blue-50 dark:bg-blue-900/20' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         <Textarea
           placeholder="Tapez un message..."
-          className="resize-none py-3 min-h-[80px] bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500"
+          className="resize-none py-3 min-h-[80px] bg-white dark:bg-slate-800 border-blue-100 dark:border-blue-900/30 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
           value={currentMessage}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
@@ -131,6 +131,15 @@ export const MessageComposer = ({
         />
         
         <div className="flex flex-col gap-2">
+          <Button
+            variant="outline" 
+            size="icon"
+            className="h-10 w-10 border-blue-200 dark:border-blue-800 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full"
+            disabled={disabled}
+          >
+            <Smile className="h-5 w-5" />
+          </Button>
+        
           {onAttachFile && (
             <div className="relative">
               <input
@@ -146,10 +155,10 @@ export const MessageComposer = ({
                   type="button"
                   variant="outline"
                   size="icon"
-                  className="h-10 w-10 cursor-pointer border-blue-200 dark:border-blue-800 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                  className="h-10 w-10 cursor-pointer border-blue-200 dark:border-blue-800 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full"
                   disabled={disabled || isSending}
                 >
-                  <Paperclip className="h-4 w-4" />
+                  <Paperclip className="h-5 w-5" />
                 </Button>
               </label>
             </div>
@@ -158,12 +167,12 @@ export const MessageComposer = ({
           <Button 
             onClick={handleSend}
             disabled={(!currentMessage.trim() && !attachmentPreview) || isSending || disabled}
-            className="h-10 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white"
+            className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white p-0"
           >
             {isSending ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             ) : (
-              <Send className="h-4 w-4" />
+              <Send className="h-5 w-5" />
             )}
           </Button>
         </div>
