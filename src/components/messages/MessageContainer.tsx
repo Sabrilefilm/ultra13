@@ -15,29 +15,35 @@ interface Message {
 }
 
 interface MessageContainerProps {
-  contacts: any[];
-  activeContactId: string; 
-  onSelectContact: (contactId: string) => void;
-  messages: any[];
-  onSendMessage: (message: string) => void;
-  isLoading: boolean;
-  error: any;
-  currentUserId: string;
-  unreadCounts: Record<string, number>;
-  markAsRead: (contactId: string) => void;
+  contacts?: any[];
+  activeContactId?: string; 
+  onSelectContact?: (contactId: string) => void;
+  messages?: any[];
+  onSendMessage?: (message: string) => void;
+  isLoading?: boolean;
+  error?: any;
+  currentUserId?: string;
+  unreadCounts?: Record<string, number>;
+  markAsRead?: (contactId: string) => void;
+  username?: string;
+  role?: string;
+  userId?: string;
 }
 
 export const MessageContainer = ({
-  contacts,
-  activeContactId,
-  onSelectContact,
-  messages,
-  onSendMessage,
-  isLoading,
-  error,
-  currentUserId,
-  unreadCounts,
-  markAsRead
+  contacts = [],
+  activeContactId = '',
+  onSelectContact = () => {},
+  messages = [],
+  onSendMessage = () => {},
+  isLoading = false,
+  error = null,
+  currentUserId = '',
+  unreadCounts = {},
+  markAsRead = () => {},
+  username = '',
+  role = '',
+  userId = ''
 }: MessageContainerProps) => {
   const activeContact = contacts.find((contact) => contact.id === activeContactId);
   const [messageInput, setMessageInput] = React.useState('');
