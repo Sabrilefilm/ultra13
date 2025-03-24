@@ -43,6 +43,7 @@ export const useDiamondsEditing = (
       
       await creatorStatsService.updateDiamonds(selectedCreator, newDiamondValue);
       
+      // Mise à jour de l'état local pour refléter le changement
       setCreators(creators.map(c => {
         if (c.id === selectedCreator.id) {
           return {
@@ -57,11 +58,12 @@ export const useDiamondsEditing = (
       toast.success(`Diamants ${actionText} ${diamondAmount} pour ${selectedCreator.username}`);
       setIsEditingDiamonds(false);
       
-      // Refresh the data to ensure everything is up to date
-      fetchCreators();
+      // Actualisation des données pour s'assurer que tout est à jour
+      await fetchCreators();
       
     } catch (error) {
-      toast.error("Erreur lors de la mise à jour des diamants");
+      console.error("Erreur lors de la mise à jour des diamants:", error);
+      toast.error("Erreur lors de la mise à jour des diamants. Veuillez réessayer.");
     }
   };
 

@@ -95,34 +95,57 @@ export const creatorStatsService = {
 
   async updateDiamonds(creator: Creator, newValue: number) {
     try {
-      // First check if a profile already exists
+      console.log(`Updating diamonds for creator ${creator.id} to ${newValue}`);
+      
+      // On vérifie d'abord si le profil existe déjà en utilisant user_accounts comme point de vérification
+      const { data: userData, error: userError } = await supabase
+        .from('user_accounts')
+        .select('id, username')
+        .eq('id', creator.id)
+        .single();
+      
+      if (userError) {
+        console.error("Error fetching user:", userError);
+        throw userError;
+      }
+      
+      // Ensuite, vérifiez si un profil existe déjà
       const { data: existingProfile, error: checkError } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, total_diamonds')
         .eq('id', creator.id)
         .maybeSingle();
       
-      if (checkError) throw checkError;
+      if (checkError) {
+        console.error("Error checking profile:", checkError);
+        throw checkError;
+      }
       
       if (existingProfile) {
-        // Update existing profile
+        // Mettre à jour le profil existant
+        console.log("Updating existing profile");
         const { error } = await supabase
           .from('profiles')
           .update({ total_diamonds: newValue })
           .eq('id', creator.id);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Error updating profile:", error);
+          throw error;
+        }
       } else {
-        // Create a new profile
-        const { error } = await supabase
-          .from('profiles')
-          .insert([{ 
-            id: creator.id, 
-            total_diamonds: newValue,
-            username: creator.username
-          }]);
-          
-        if (error) throw error;
+        // Créer un nouveau profil avec RPC pour éviter les problèmes de RLS
+        console.log("Creating new profile");
+        const { error } = await supabase.rpc('create_or_update_profile', { 
+          user_id: creator.id,
+          user_username: userData.username,
+          diamonds_value: newValue
+        });
+        
+        if (error) {
+          console.error("Error creating profile with RPC:", error);
+          throw error;
+        }
       }
       
       return true;

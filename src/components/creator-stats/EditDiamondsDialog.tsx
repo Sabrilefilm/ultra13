@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,8 @@ export const EditDiamondsDialog: React.FC<EditDiamondsDialogProps> = ({
   setOperationType,
   onSave,
 }) => {
+  const [isSaving, setIsSaving] = useState(false);
+
   const calculateNewTotal = () => {
     switch (operationType) {
       case 'add':
@@ -37,6 +39,17 @@ export const EditDiamondsDialog: React.FC<EditDiamondsDialogProps> = ({
       case 'set':
       default:
         return diamondAmount;
+    }
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await onSave();
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde:", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -111,8 +124,24 @@ export const EditDiamondsDialog: React.FC<EditDiamondsDialogProps> = ({
           )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
-          <Button type="submit" onClick={onSave}>Sauvegarder</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>Annuler</Button>
+          <Button 
+            type="submit" 
+            onClick={handleSave}
+            disabled={isSaving}
+            className="relative"
+          >
+            {isSaving ? (
+              <>
+                <span className="opacity-0">Sauvegarder</span>
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <div className="h-5 w-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                </span>
+              </>
+            ) : (
+              'Sauvegarder'
+            )}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
