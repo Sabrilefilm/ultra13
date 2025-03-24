@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UltraSidebar } from "@/components/layout/UltraSidebar";
@@ -16,6 +17,8 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { UsernameWatermark } from "@/components/layout/UsernameWatermark";
+
 const Matches = () => {
   const navigate = useNavigate();
   const {
@@ -52,11 +55,14 @@ const Matches = () => {
     warningTime: 30000,
     onWarning: () => {}
   });
+  
   if (!isAuthenticated) {
     window.location.href = '/';
     return null;
   }
+  
   const canScheduleMatch = ['agent', 'manager', 'founder'].includes(role || '');
+  
   const exportMatchesToPDF = () => {
     if (!matches || matches.length === 0) {
       toast({
@@ -145,8 +151,13 @@ const Matches = () => {
       });
     }
   };
-  return <SidebarProvider defaultOpen={true}>
+  
+  return (
+    <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex">
+        {/* Add username watermark */}
+        {username && <UsernameWatermark username={username} />}
+        
         <UltraSidebar username={username || ''} role={role || ''} onLogout={handleLogout} currentPage="matches" />
         
         <div className="flex-1 flex flex-col">
@@ -182,6 +193,8 @@ const Matches = () => {
         
         {canScheduleMatch && <ScheduleMatchDialog isOpen={isMatchDialogOpen} onClose={() => setIsMatchDialogOpen(false)} />}
       </div>
-    </SidebarProvider>;
+    </SidebarProvider>
+  );
 };
+
 export default Matches;

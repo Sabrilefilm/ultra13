@@ -48,7 +48,7 @@ export const LoginForm = ({
     }
   };
 
-  // Créer le filigrane avec le nom d'utilisateur
+  // Logo watermark instead of username watermark
   const logoWatermark = (
     <div className="fixed inset-0 flex items-center justify-center pointer-events-none select-none z-0">
       <p className="text-slate-200/5 text-[15vw] font-bold rotate-[-30deg] transform">
@@ -59,7 +59,7 @@ export const LoginForm = ({
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 to-slate-950 text-white p-4 relative overflow-hidden">
-      {/* Watermark */}
+      {/* Logo Watermark */}
       {logoWatermark}
       
       <div className="w-full max-w-md mx-auto space-y-8">
