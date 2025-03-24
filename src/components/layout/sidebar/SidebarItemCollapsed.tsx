@@ -14,11 +14,16 @@ export const SidebarItemCollapsed: React.FC<SidebarItemProps> = ({ item, isActiv
     return `${baseClass} text-slate-300 hover:bg-slate-700/50 hover:text-white`;
   };
 
+  const handleClick = () => {
+    const data = typeof item.data === 'function' ? item.data('') : item.data;
+    onClick(item.action, data);
+  };
+
   return (
     <Button 
       variant="ghost" 
       className={getItemClass(item, isActive)}
-      onClick={() => onClick(item.action, item.data)}
+      onClick={handleClick}
     >
       <item.icon className="h-5 w-5" />
     </Button>

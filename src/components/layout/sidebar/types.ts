@@ -5,7 +5,7 @@ export interface SidebarItem {
   icon: React.ElementType;
   label: string;
   action: string;
-  data?: string;
+  data?: string | ((role: string) => string);
   roles: string[];
   animated?: boolean;
 }
