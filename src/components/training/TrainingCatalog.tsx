@@ -19,7 +19,7 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
     isEditModalOpen,
     setIsEditModalOpen,
     editingCourse,
-    setEditingCourse,
+    handleCourseChange,
     handleAddCourse,
     handleEditCourse,
     handleDeleteCourse,
@@ -68,7 +68,7 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
         isOpen={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
         editingCourse={editingCourse}
-        setEditingCourse={setEditingCourse}
+        onCourseChange={handleCourseChange}
         onSave={handleSaveCourse}
       />
     </Card>

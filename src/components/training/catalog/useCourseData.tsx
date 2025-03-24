@@ -90,6 +90,10 @@ export const useCourseData = (initialActiveTab: string = "video") => {
     toast.success("Formation supprimée avec succès");
   };
 
+  const handleCourseChange = (updatedCourse: TrainingCourse) => {
+    setEditingCourse(updatedCourse);
+  };
+
   const handleSaveCourse = () => {
     if (!editingCourse) return;
     
@@ -136,6 +140,7 @@ export const useCourseData = (initialActiveTab: string = "video") => {
     setIsEditModalOpen,
     editingCourse,
     setEditingCourse,
+    handleCourseChange,
     handleAddCourse,
     handleEditCourse,
     handleDeleteCourse,

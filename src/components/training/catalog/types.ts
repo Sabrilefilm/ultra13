@@ -14,7 +14,7 @@ export interface CourseEditModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   editingCourse: TrainingCourse | null;
-  setEditingCourse: (course: TrainingCourse | null) => void;
+  onCourseChange: (updatedCourse: TrainingCourse) => void;
   onSave: () => void;
 }
 

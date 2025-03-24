@@ -11,9 +11,20 @@ export const CourseEditModal: React.FC<CourseEditModalProps> = ({
   isOpen,
   onOpenChange,
   editingCourse,
-  setEditingCourse,
+  onCourseChange,
   onSave
 }) => {
+  const handleFieldChange = (field: string, value: string) => {
+    if (!editingCourse) return;
+    
+    const updatedCourse = {
+      ...editingCourse,
+      [field]: value
+    };
+    
+    onCourseChange(updatedCourse);
+  };
+  
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -29,9 +40,7 @@ export const CourseEditModal: React.FC<CourseEditModalProps> = ({
             <Input
               id="title"
               value={editingCourse?.title || ''}
-              onChange={(e) => setEditingCourse(prev => 
-                prev ? {...prev, title: e.target.value} : null
-              )}
+              onChange={(e) => handleFieldChange('title', e.target.value)}
               placeholder="Titre de la formation"
             />
           </div>
@@ -41,9 +50,7 @@ export const CourseEditModal: React.FC<CourseEditModalProps> = ({
             <Textarea
               id="description"
               value={editingCourse?.description || ''}
-              onChange={(e) => setEditingCourse(prev => 
-                prev ? {...prev, description: e.target.value} : null
-              )}
+              onChange={(e) => handleFieldChange('description', e.target.value)}
               placeholder="Description de la formation"
               rows={3}
             />
@@ -54,9 +61,7 @@ export const CourseEditModal: React.FC<CourseEditModalProps> = ({
             <select
               id="category"
               value={editingCourse?.category || 'video'}
-              onChange={(e) => setEditingCourse(prev => 
-                prev ? {...prev, category: e.target.value as "video" | "document" | "external"} : null
-              )}
+              onChange={(e) => handleFieldChange('category', e.target.value as "video" | "document" | "external")}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="video">Vidéo</option>
@@ -70,9 +75,7 @@ export const CourseEditModal: React.FC<CourseEditModalProps> = ({
             <select
               id="theme"
               value={editingCourse?.theme || ''}
-              onChange={(e) => setEditingCourse(prev => 
-                prev ? {...prev, theme: e.target.value} : null
-              )}
+              onChange={(e) => handleFieldChange('theme', e.target.value)}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="">Sélectionner une thématique</option>
@@ -89,9 +92,7 @@ export const CourseEditModal: React.FC<CourseEditModalProps> = ({
             <Input
               id="url"
               value={editingCourse?.url || ''}
-              onChange={(e) => setEditingCourse(prev => 
-                prev ? {...prev, url: e.target.value} : null
-              )}
+              onChange={(e) => handleFieldChange('url', e.target.value)}
               placeholder="https://example.com/course"
             />
           </div>
@@ -103,9 +104,7 @@ export const CourseEditModal: React.FC<CourseEditModalProps> = ({
                 <Input
                   id="thumbnail"
                   value={editingCourse?.thumbnail || ''}
-                  onChange={(e) => setEditingCourse(prev => 
-                    prev ? {...prev, thumbnail: e.target.value} : null
-                  )}
+                  onChange={(e) => handleFieldChange('thumbnail', e.target.value)}
                   placeholder="https://example.com/thumbnail.jpg"
                 />
               </div>
@@ -115,9 +114,7 @@ export const CourseEditModal: React.FC<CourseEditModalProps> = ({
                 <Input
                   id="duration"
                   value={editingCourse?.duration || ''}
-                  onChange={(e) => setEditingCourse(prev => 
-                    prev ? {...prev, duration: e.target.value} : null
-                  )}
+                  onChange={(e) => handleFieldChange('duration', e.target.value)}
                   placeholder="15 min"
                 />
               </div>
