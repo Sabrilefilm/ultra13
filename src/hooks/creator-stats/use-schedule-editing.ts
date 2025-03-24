@@ -4,8 +4,13 @@ import { toast } from "sonner";
 import { creatorStatsService } from "@/services/creator-stats-service";
 import { Creator } from "./types";
 
-export const useScheduleEditing = (creators: Creator[], setCreators: (creators: Creator[]) => void) => {
-  const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
+export const useScheduleEditing = (
+  creators: Creator[], 
+  setCreators: (creators: Creator[]) => void,
+  selectedCreator: Creator | null,
+  setSelectedCreator: (creator: Creator | null) => void,
+  fetchCreators: () => Promise<void>
+) => {
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
   const [hours, setHours] = useState(0);
   const [days, setDays] = useState(0);
@@ -42,8 +47,6 @@ export const useScheduleEditing = (creators: Creator[], setCreators: (creators: 
   };
 
   return {
-    selectedCreator,
-    setSelectedCreator,
     isEditingSchedule,
     setIsEditingSchedule,
     hours,

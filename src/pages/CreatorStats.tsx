@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useIndexAuth } from "@/hooks/use-index-auth";
@@ -22,6 +23,7 @@ const CreatorStats = () => {
     creators,
     loading,
     selectedCreator,
+    setSelectedCreator,
     isEditingSchedule,
     setIsEditingSchedule,
     hours,
