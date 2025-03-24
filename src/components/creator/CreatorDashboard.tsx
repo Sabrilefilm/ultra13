@@ -9,7 +9,7 @@ import { UserGuide } from "@/components/help/UserGuide";
 import { SocialCommunityLinks } from "@/components/layout/SocialCommunityLinks";
 import { 
   MessageSquare, AlertTriangle, BarChart4, Calendar, ArrowRight, 
-  Clock, Trophy, Diamond, UserCheck, Star 
+  Clock, Trophy, Diamond, UserCheck, Star, BookOpen
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";

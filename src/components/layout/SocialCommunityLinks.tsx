@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,10 +71,18 @@ export const SocialCommunityLinks = ({ className = "" }: SocialCommunityProps) =
     }
   };
 
-  // Hover animation variants
+  // Hover animation variants - fixed the type error by specifying "loop" as the repeatType
   const emojiVariants = {
     idle: { scale: 1, rotate: 0 },
-    hover: { scale: 1.3, rotate: [0, -10, 10, -10, 0], transition: { duration: 0.5, repeat: Infinity, repeatType: "reverse" } }
+    hover: { 
+      scale: 1.3, 
+      rotate: [0, -10, 10, -10, 0], 
+      transition: { 
+        duration: 0.5, 
+        repeat: Infinity, 
+        repeatType: "loop" 
+      } 
+    }
   };
 
   return (
