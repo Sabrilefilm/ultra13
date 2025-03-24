@@ -35,7 +35,7 @@ export const Footer = ({ role, version = "1.0", className = "" }: FooterProps) =
   return (
     <footer className={`mt-8 mb-4 text-center text-sm text-gray-400 dark:text-gray-600 ${className}`}>
       <div className="flex flex-col md:flex-row items-center justify-center gap-2">
-        <p>© {currentYear} Phocéen Agency 2025/2026</p>
+        <p>© {currentYear} Phocéen Agency</p>
         <span className="hidden md:inline">•</span>
         <p>Tous droits réservés</p>
         <span className="hidden md:inline">•</span>
