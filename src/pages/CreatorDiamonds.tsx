@@ -13,7 +13,7 @@ import { UserDiamondsTable } from '@/components/diamonds/UserDiamondsTable';
 import { AgencyOverview } from '@/components/diamonds/AgencyOverview';
 import { EditGoalDialog } from '@/components/diamonds/EditGoalDialog';
 import { DiamondManagementDialog } from '@/components/diamonds/DiamondManagementDialog';
-import { Creator } from '@/hooks/diamonds/use-diamond-fetch';
+import { Creator } from '@/hooks/diamonds/use-diamond-fetch'; // Use consistent Creator type
 
 const CreatorDiamonds = () => {
   const navigate = useNavigate();
@@ -99,7 +99,7 @@ const CreatorDiamonds = () => {
             diamondValue={diamondValue}
             role={role}
             setAgencyGoal={setAgencyGoal}
-            handleUpdateAgencyGoal={handleUpdateAgencyGoal}
+            handleUpdateAgencyGoal={(newGoal: number) => handleUpdateAgencyGoal(newGoal)}
             isEditing={isEditing}
           />
           
@@ -138,7 +138,7 @@ const CreatorDiamonds = () => {
                   )}
                   
                   <UserDiamondsTable 
-                    users={getActiveUsers()}
+                    users={getActiveUsers() as Creator[]}
                     diamondValue={diamondValue}
                     role={role}
                     openEditDialog={openEditDialog}
