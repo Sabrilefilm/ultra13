@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { StatCards } from "@/components/dashboard/StatCards";
 import { LeaveAgencyDialog } from "@/components/agency/LeaveAgencyDialog";
@@ -337,7 +338,7 @@ export const CreatorDashboard = ({
         <Footer role={role} />
       </div>
       
-      <div className="flex justify-center">
+      <div className="flex justify-center mt-4">
         <Button variant="ghost" className="text-xs text-gray-500 hover:text-red-400 hover:bg-red-900/10 relative h-8 px-3 group">
           <div className="flex items-center justify-center gap-1">
             <AlertTriangle className="h-3 w-3 mr-1 opacity-50 group-hover:opacity-100" />
