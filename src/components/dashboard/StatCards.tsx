@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,11 +15,17 @@ import { useNavigate } from "react-router-dom";
 
 interface StatCardsProps {
   role: string;
-  onOpenSponsorshipForm: () => void;
-  onOpenSponsorshipList: () => void;
+  onOpenSponsorshipForm?: () => void;
+  onOpenSponsorshipList?: () => void;
+  onCreatePoster?: () => void;
 }
 
-export const StatCards: React.FC<StatCardsProps> = ({ role, onOpenSponsorshipForm, onOpenSponsorshipList }) => {
+export const StatCards: React.FC<StatCardsProps> = ({ 
+  role, 
+  onOpenSponsorshipForm = () => {}, 
+  onOpenSponsorshipList = () => {},
+  onCreatePoster = () => {}
+}) => {
   const navigate = useNavigate();
 
   return (

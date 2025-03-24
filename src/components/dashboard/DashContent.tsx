@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { RoleStats } from "@/components/dashboard/RoleStats";
 import { UpcomingMatches } from "@/components/dashboard/UpcomingMatches";
@@ -54,7 +53,12 @@ export const DashContent = ({
               handle={`@${role === 'founder' ? 'Fondateur' : role}`}
             />
             <div className="mb-6">
-              <StatCards role={role} />
+              <StatCards 
+                role={role} 
+                onOpenSponsorshipForm={() => onAction('openSponsorshipForm')}
+                onOpenSponsorshipList={() => onAction('openSponsorshipList')}
+                onCreatePoster={() => onAction('openCreatePoster')}
+              />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <Card className="bg-[#1e1f2e]/90 backdrop-blur-sm border border-gray-800/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300">

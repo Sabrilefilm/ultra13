@@ -1,183 +1,154 @@
+import React from 'react';
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
-import React, { useState, useEffect } from 'react';
-import { ContactList } from './ContactList';
-import { MessageList } from './MessageList';
-import { MessageComposer } from './MessageComposer';
-import { MessageHeader } from './MessageHeader';
-import { NewMessageDialog } from './NewMessageDialog';
-import { useMediaQuery } from '../../hooks/use-media-query';
-import { toast } from 'sonner';
-import { Users } from 'lucide-react';
-import { useMessages } from '@/hooks/use-messages';
-
-interface MessageContainerProps {
-  username: string;
-  role: string;
-  userId: string;
+interface Message {
+  id: string;
+  senderId: string;
+  content: string;
+  timestamp: string;
 }
 
-export const MessageContainer = ({ username, role, userId }: MessageContainerProps) => {
-  const [activeTab, setActiveTab] = useState('contacts');
-  const [isNewMessageOpen, setIsNewMessageOpen] = useState(false);
-  const [selectedUserForNewMessage, setSelectedUserForNewMessage] = useState('');
-  
-  const isMobile = !useMediaQuery('(min-width: 768px)');
-  
-  const {
-    conversations,
-    messages,
-    activeContact,
-    setActiveContact,
-    newMessage: messageText,
-    setNewMessage: setMessageText,
-    sendMessage,
-    sendingMessage,
-    loadingConversations,
-    loadingMessages,
-    unreadCount,
-    allUsers,
-    loadingUsers,
-    archiveConversation,
-    archiving,
-    handleAttachment,
-    attachmentPreview,
-    clearAttachment
-  } = useMessages(userId);
-  
-  useEffect(() => {
-    // If active contact is selected, switch to messages tab on mobile
-    if (activeContact && isMobile) {
-      setActiveTab('messages');
+interface MessageContainerProps {
+  contacts: any[];
+  activeContactId: string; 
+  onSelectContact: (contactId: string) => void;
+  messages: any[];
+  onSendMessage: (message: string) => void;
+  isLoading: boolean;
+  error: any;
+  currentUserId: string;
+  unreadCounts: Record<string, number>;
+  markAsRead: (contactId: string) => void;
+}
+
+export const MessageContainer = ({
+  contacts,
+  activeContactId,
+  onSelectContact,
+  messages,
+  onSendMessage,
+  isLoading,
+  error,
+  currentUserId,
+  unreadCounts,
+  markAsRead
+}: MessageContainerProps) => {
+  const activeContact = contacts.find((contact) => contact.id === activeContactId);
+  const [messageInput, setMessageInput] = React.useState('');
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [activeContact, isMobile]);
-  
-  const handleContactSelect = (contactId: string) => {
-    setActiveContact(contactId);
-    if (isMobile) {
-      setActiveTab('messages');
-    }
-  };
-  
+  }, [messages]);
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-4 text-red-500">
+        Error: {error.message}
+      </div>
+    );
+  }
+
+  if (!activeContact) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-4 text-gray-500 dark:text-gray-400">
+        Sélectionnez une conversation pour afficher les messages.
+      </div>
+    );
+  }
+
   const handleSendMessage = () => {
-    if ((messageText.trim() || attachmentPreview) && activeContact) {
-      sendMessage();
-    }
-  };
-  
-  const handleNewMessageClick = () => {
-    setIsNewMessageOpen(true);
-  };
-  
-  const handleStartNewConversation = () => {
-    if (!selectedUserForNewMessage) {
-      toast.error("Veuillez sélectionner un utilisateur.");
-      return;
-    }
-    
-    // Vérifier les autorisations basées sur le rôle
-    const selectedUser = allUsers?.find(user => user.id === selectedUserForNewMessage);
-    
-    if (selectedUser) {
-      if (role === 'creator') {
-        // Le créateur ne peut contacter que le fondateur ou son agent assigné
-        if (selectedUser.role !== 'founder' && selectedUser.role !== 'agent') {
-          toast.error("En tant que créateur, vous ne pouvez contacter que le fondateur ou votre agent.");
-          return;
-        }
-      } else if (role === 'agent') {
-        // L'agent ne peut contacter que les créateurs, managers ou fondateurs
-        if (!['creator', 'manager', 'founder'].includes(selectedUser.role)) {
-          toast.error("En tant qu'agent, vous ne pouvez contacter que les créateurs, managers ou fondateurs.");
-          return;
-        }
-      }
-      
-      // If this is an existing contact, select it
-      const existingContact = conversations.find(contact => contact.id === selectedUserForNewMessage);
-      if (existingContact) {
-        setActiveContact(existingContact.id);
-        if (isMobile) {
-          setActiveTab('messages');
-        }
-      } else {
-        // Initialize conversation
-        setActiveContact(selectedUserForNewMessage);
-        if (isMobile) {
-          setActiveTab('messages');
-        }
-      }
-      setIsNewMessageOpen(false);
+    if (messageInput.trim()) {
+      onSendMessage(messageInput);
+      setMessageInput('');
     }
   };
 
+  React.useEffect(() => {
+    if (activeContactId) {
+      markAsRead(activeContactId);
+    }
+  }, [activeContactId, markAsRead]);
+  
   return (
-    <div className="h-screen flex flex-col bg-white dark:bg-slate-950">
-      <MessageHeader 
-        username={username}
-        unreadCount={unreadCount}
-        onNewMessage={handleNewMessageClick}
-        isMobile={isMobile}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        role={role}
-      />
-      
-      <div className="flex flex-1 h-[calc(100vh-64px)] overflow-hidden">
-        {(!isMobile || activeTab === 'contacts') && (
-          <div className={`${isMobile ? 'w-full' : 'w-1/3 border-r'} border-gray-200 dark:border-gray-800`}>
-            <ContactList 
-              contacts={conversations}
-              activeContactId={activeContact} 
-              onSelectContact={handleContactSelect} 
-              isLoading={loadingConversations}
-              unreadCounts={unreadCount}
-            />
+    <div className="flex flex-col h-full">
+      <div className="border-b border-gray-200 dark:border-gray-800 p-4">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="bg-primary/10 text-primary">
+              {activeContact.username.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <span className="font-medium">{activeContact.username}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{activeContact.role}</span>
           </div>
-        )}
-        
-        {(!isMobile || activeTab === 'messages') && (
-          <div className={`${isMobile ? 'w-full' : 'w-2/3'} flex flex-col h-full`}>
-            {activeContact ? (
-              <>
-                <MessageList 
-                  messages={messages} 
-                  currentUserId={userId}
-                  isLoading={loadingMessages}
-                />
-                <MessageComposer 
-                  message={messageText}
-                  onChange={setMessageText}
-                  onSend={handleSendMessage}
-                  isSending={sendingMessage}
-                  onAttachFile={handleAttachment}
-                  attachmentPreview={attachmentPreview}
-                  onClearAttachment={clearAttachment}
-                />
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full p-4 text-center text-gray-500 dark:text-gray-400">
-                <Users className="h-16 w-16 mb-4 text-gray-300 dark:text-gray-600" />
-                <h3 className="text-xl font-semibold mb-2">Aucune conversation sélectionnée</h3>
-                <p className="max-w-md">
-                  Sélectionnez une conversation existante dans la liste ou créez une nouvelle conversation.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
+        </div>
       </div>
       
-      <NewMessageDialog 
-        isOpen={isNewMessageOpen}
-        onOpenChange={setIsNewMessageOpen}
-        selectedUser={selectedUserForNewMessage}
-        onUserChange={setSelectedUserForNewMessage}
-        onStartConversation={handleStartNewConversation}
-        allUsers={allUsers}
-        loadingUsers={loadingUsers}
-        currentUserRole={role}
-        currentUserId={userId}
-      />
+      <div className="flex-1 overflow-y-auto p-4" ref={scrollRef}>
+        <ScrollArea className="h-full">
+          <div className="flex flex-col gap-2">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex flex-col ${
+                  message.senderId === currentUserId ? 'items-end' : 'items-start'
+                }`}
+              >
+                <div
+                  className={`rounded-xl px-4 py-2 text-sm max-w-[75%] ${
+                    message.senderId === currentUserId
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                  }`}
+                >
+                  {message.content}
+                </div>
+                <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {format(new Date(message.timestamp), 'Pp', { locale: fr })}
+                </span>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
+      
+      <div className="border-t border-gray-200 dark:border-gray-800 p-4">
+        <div className="flex items-center gap-3">
+          <Input
+            type="text"
+            placeholder="Écrire un message..."
+            value={messageInput}
+            onChange={(e) => setMessageInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSendMessage();
+              }
+            }}
+          />
+          <Button onClick={handleSendMessage}>
+            <Send className="w-4 h-4 mr-2" />
+            Envoyer
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
