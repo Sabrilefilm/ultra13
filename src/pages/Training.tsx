@@ -18,7 +18,7 @@ import {
   Play, Youtube, Book, Lightbulb, CheckCircle, VideoIcon, 
   ListChecks, PlusCircle, X, Pencil, Save, BookOpen, ArrowLeft
 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
