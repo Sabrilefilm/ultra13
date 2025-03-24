@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { StatCards } from "@/components/dashboard/StatCards";
 import { LeaveAgencyDialog } from "@/components/agency/LeaveAgencyDialog";
@@ -325,6 +324,15 @@ export const CreatorDashboard = ({
               </Button>
             </div>
           </div>
+          
+          <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4 flex items-center gap-3">
+            <Clock className="h-6 w-6 text-blue-400 animate-pulse" />
+            <p className="text-blue-400/80 text-sm">
+              Les horaires et diamants sont mis à jour toutes les 24-48 heures, hors week-end. 
+              Seul le fondateur peut modifier ces valeurs.
+            </p>
+          </div>
+          
         </CardContent>
       </Card>
       
