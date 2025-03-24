@@ -1,116 +1,116 @@
 
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Plus, Users, MessageSquare, Diamond } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-interface Contact {
-  id: string;
-  username: string;
-  role: string;
-  lastMessage: string;
-  lastMessageTime: string;
-  unreadCount: number;
-}
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, Archive, User } from 'lucide-react';
 
 interface MessageHeaderProps {
-  contact?: Contact;
-  username?: string;
-  unreadCount?: number;
+  contact?: {
+    id: string;
+    username: string;
+    role: string;
+  };
+  onArchive?: () => void;
   onNewMessage?: () => void;
+  role?: string;
+  unreadCount?: number;
   isMobile?: boolean;
   activeTab?: string;
   setActiveTab?: (tab: string) => void;
-  role?: string;
+  onBack?: () => void;
 }
 
-export const MessageHeader = ({
-  contact,
-  username,
-  unreadCount = 0,
-  onNewMessage,
+export const MessageHeader = ({ 
+  contact, 
+  onArchive, 
+  role,
+  unreadCount,
   isMobile,
   activeTab,
   setActiveTab,
-  role
+  onBack
 }: MessageHeaderProps) => {
-  const navigate = useNavigate();
-  
-  // Classes pour les animations et les couleurs selon le rôle
-  const getRoleButtonClass = () => {
-    switch(role) {
-      case 'founder':
-        return "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white";
-      case 'manager':
-        return "bg-gradient-to-r from-amber-500 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white";
-      case 'agent':
-        return "bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 text-white";
-      case 'creator':
-        return "bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white";
-      default:
-        return "bg-gray-500 hover:bg-gray-600 text-white";
-    }
-  };
-  
-  return (
-    <div className="bg-white dark:bg-slate-950 border-b border-gray-200 dark:border-gray-800 p-4 flex items-center justify-between shadow-md">
-      <div className="flex items-center space-x-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate("/")}
-          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">
-          {contact ? contact.username : "Messagerie 💬"} 
-        </h1>
-        {unreadCount > 0 && (
-          <Badge variant="destructive" className="ml-2 animate-pulse">
-            {unreadCount} non lu{unreadCount > 1 ? 's' : ''}
-          </Badge>
-        )}
-      </div>
-      
-      <div className="flex items-center gap-2">
-        {(role === 'founder' || role === 'manager' || role === 'agent') && (
-          <>
-            <Button
-              onClick={() => navigate('/creator-diamonds')}
-              size="sm"
-              className="hidden md:flex items-center gap-1 bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white"
-            >
-              <Diamond className="h-4 w-4" />
-              Gérer les diamants 💎
-            </Button>
-            <Button
-              className={`hidden md:flex items-center gap-1 ${getRoleButtonClass()}`}
-              onClick={onNewMessage}
-              size="sm"
-            >
-              <Plus className="h-4 w-4" />
-              Nouveau message ✨
-            </Button>
-          </>
-        )}
-        
-        {isMobile && (
-          <div className="md:hidden">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="bg-gray-100 dark:bg-gray-800">
-                <TabsTrigger value="contacts" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white">
-                  <Users className="h-5 w-5" />
-                </TabsTrigger>
-                <TabsTrigger value="messages" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white">
-                  <MessageSquare className="h-5 w-5" />
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+  if (isMobile) {
+    return (
+      <div className="w-full border-b dark:border-gray-700 p-3 flex flex-col space-y-2">
+        {contact && activeTab === 'messages' && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="h-8 w-8"
+                onClick={onBack}
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <span className="font-medium">{contact.username}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                ({contact.role})
+              </span>
+            </div>
+            
+            {onArchive && role === 'founder' && (
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                onClick={onArchive}
+              >
+                <Archive className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         )}
+        
+        <Tabs 
+          value={activeTab} 
+          onValueChange={setActiveTab}
+          className="w-full"
+        >
+          <TabsList className="grid grid-cols-2 w-full">
+            <TabsTrigger value="contacts" className="relative">
+              Contacts
+              {unreadCount && unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="messages" disabled={!contact}>
+              Messages
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
+    );
+  }
+  
+  if (!contact) return null;
+  
+  return (
+    <div className="border-b dark:border-gray-700 p-4 flex justify-between items-center">
+      <div className="flex items-center space-x-2">
+        <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+          <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+        </div>
+        <div>
+          <h3 className="font-medium">{contact.username}</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{contact.role}</p>
+        </div>
+      </div>
+      
+      {onArchive && role === 'founder' && (
+        <Button 
+          variant="outline" 
+          size="sm"
+          className="text-red-500 border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-900/20"
+          onClick={onArchive}
+        >
+          <Archive className="h-4 w-4 mr-2" />
+          Archiver
+        </Button>
+      )}
     </div>
   );
 };

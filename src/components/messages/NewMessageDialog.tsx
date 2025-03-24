@@ -1,9 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -32,6 +32,7 @@ export const NewMessageDialog = ({
   loadingUsers
 }: NewMessageDialogProps) => {
   const [initialMessage, setInitialMessage] = useState('');
+  const [isSending, setIsSending] = useState(false);
   
   const handleSendMessage = async () => {
     if (!selectedUser) {
@@ -44,18 +45,17 @@ export const NewMessageDialog = ({
       return;
     }
     
+    setIsSending(true);
+    
     try {
-      const { error } = await supabase
-        .from('chats')
-        .insert([
-          {
-            sender_id: currentUserId,
-            receiver_id: selectedUser,
-            message: initialMessage,
-            read: false
-          }
-        ]);
-        
+      // Use RPC instead of direct insert to avoid row-level security issues
+      const { error } = await supabase.rpc('send_message', {
+        p_sender_id: currentUserId,
+        p_receiver_id: selectedUser,
+        p_message: initialMessage.trim(),
+        p_attachment_url: null
+      });
+      
       if (error) throw error;
       
       toast.success('Message envoyé');
@@ -65,15 +65,29 @@ export const NewMessageDialog = ({
       onStartConversation();
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error('Erreur lors de l\'envoi du message');
+      toast.error('Erreur lors de l\'envoi du message. Vérifiez vos permissions.');
+    } finally {
+      setIsSending(false);
     }
   };
 
+  // Reset form when dialog closes
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setInitialMessage('');
+      onUserChange('');
+    }
+    onOpenChange(open);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Nouvelle conversation 💬</DialogTitle>
+          <DialogDescription>
+            Commencez une nouvelle conversation en envoyant un message.
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
@@ -102,7 +116,7 @@ export const NewMessageDialog = ({
           </div>
           <div className="space-y-2">
             <Label htmlFor="message">Message initial</Label>
-            <Input
+            <Textarea
               id="message"
               value={initialMessage}
               onChange={(e) => setInitialMessage(e.target.value)}
@@ -115,8 +129,18 @@ export const NewMessageDialog = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuler
           </Button>
-          <Button onClick={handleSendMessage} disabled={!selectedUser || !initialMessage.trim()}>
-            Envoyer
+          <Button 
+            onClick={handleSendMessage} 
+            disabled={!selectedUser || !initialMessage.trim() || isSending}
+          >
+            {isSending ? (
+              <span className="flex items-center">
+                <span className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                Envoi...
+              </span>
+            ) : (
+              'Envoyer'
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

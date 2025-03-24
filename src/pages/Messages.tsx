@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMessages } from '@/hooks/use-messages';
@@ -11,9 +10,11 @@ import { NewMessageDialog } from '@/components/messages/NewMessageDialog';
 import { Button } from '@/components/ui/button';
 import { HomeIcon, Plus } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Messages = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [userId, setUserId] = useState<string>('');
   const [role, setRole] = useState<string>('');
   const [username, setUsername] = useState<string>('');
@@ -111,41 +112,24 @@ const Messages = () => {
     navigate('/');
   };
 
-  const handleStartNewConversation = () => {
+  const handleStartNewConversation = async () => {
     if (!selectedUser) {
       toast.error('Veuillez sélectionner un destinataire');
       return;
     }
-    
-    setIsNewMessageDialogOpen(false);
-    setSelectedUser('');
-  };
 
-  // Username watermark
-  const generateWatermarkGrid = () => {
-    let watermarkDivs = [];
-    const rows = 15;
-    const cols = 15;
-    
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        watermarkDivs.push(
-          <div 
-            key={`${i}-${j}`} 
-            className="absolute text-slate-200/10 text-[8px] font-bold whitespace-nowrap rotate-[-30deg]"
-            style={{
-              top: `${(i * 100) / rows}%`,
-              left: `${(j * 100) / cols}%`,
-              transform: 'translate(-50%, -50%) rotate(-30deg)'
-            }}
-          >
-            {username.toUpperCase()}
-          </div>
-        );
-      }
+    try {
+      // Force refresh conversations
+      const { data: messages } = useMessages(userId);
+      await messages?.refetch();
+      
+      setIsNewMessageDialogOpen(false);
+      setSelectedUser('');
+      toast.success('Conversation démarrée');
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+      toast.error('Erreur lors du démarrage de la conversation');
     }
-    
-    return watermarkDivs;
   };
 
   if (loading) {
@@ -153,12 +137,7 @@ const Messages = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex relative overflow-hidden">
-      {/* Watermark */}
-      <div className="fixed inset-0 pointer-events-none select-none z-0 overflow-hidden">
-        {generateWatermarkGrid()}
-      </div>
-      
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col md:flex-row relative">
       <UltraSidebar 
         username={username}
         role={role}
@@ -168,27 +147,29 @@ const Messages = () => {
       />
       
       <div className="flex-1 flex flex-col relative">
-        <div className="flex items-center justify-between p-4">
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 gap-3">
+          <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
             💬 Messages
           </h1>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <Button 
               onClick={() => navigate('/')}
               variant="outline"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 flex-1 sm:flex-initial justify-center"
+              size={isMobile ? "sm" : "default"}
             >
               <HomeIcon className="h-4 w-4" />
-              Retour au tableau de bord
+              {!isMobile && "Retour au tableau de bord"}
             </Button>
             
             <Button 
               onClick={() => setIsNewMessageDialogOpen(true)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 flex-1 sm:flex-initial justify-center"
+              size={isMobile ? "sm" : "default"}
             >
               <Plus className="h-4 w-4" />
-              Nouveau message
+              {!isMobile && "Nouveau message"}
             </Button>
           </div>
         </div>

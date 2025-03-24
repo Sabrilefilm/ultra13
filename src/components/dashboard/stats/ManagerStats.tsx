@@ -8,7 +8,7 @@ const ManagerStats: React.FC = () => {
   const { monthProgress } = useMonthProgress();
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
       <StatsCard
         title="Créateurs Actifs"
         value="0"

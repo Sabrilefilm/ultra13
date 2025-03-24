@@ -32,7 +32,7 @@ export const useMessages = (userId: string) => {
   const [attachmentPreview, setAttachmentPreview] = useState<string | null>(null);
 
   // Fetch all users for new conversation creation
-  const { data: allUsers, isLoading: loadingUsers } = useQuery({
+  const { data: allUsers, isLoading: loadingUsers, refetch: refetchUsers } = useQuery({
     queryKey: ['all-users'],
     queryFn: async () => {
       if (!userId) return [];
@@ -49,85 +49,97 @@ export const useMessages = (userId: string) => {
   });
 
   // Fetch conversations (unique users the current user has chatted with)
-  const { data: conversations, isLoading: loadingConversations } = useQuery({
+  const { data: conversations, isLoading: loadingConversations, refetch: refetchConversations } = useQuery({
     queryKey: ['conversations', userId],
     queryFn: async () => {
       if (!userId) return [];
       
-      // Get all messages involving the current user
-      const { data: messages, error } = await supabase
-        .from('chats')
-        .select('receiver_id, sender_id, created_at, message, read, archived')
-        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
-        .is('archived', null) // Exclude archived messages
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      // Extract unique user IDs (conversation partners)
-      const userCounts: Record<string, { 
-        unreadCount: number, 
-        lastMessage?: string,
-        lastMessageTime?: string
-      }> = {};
-      
-      messages?.forEach(msg => {
-        const partnerId = msg.sender_id === userId ? msg.receiver_id : msg.sender_id;
+      try {
+        // Get all messages involving the current user
+        const { data: messages, error } = await supabase
+          .from('chats')
+          .select('receiver_id, sender_id, created_at, message, read, archived')
+          .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+          .is('archived', null) // Exclude archived messages
+          .order('created_at', { ascending: false });
         
-        if (!userCounts[partnerId]) {
-          userCounts[partnerId] = { unreadCount: 0 };
-        }
+        if (error) throw error;
         
-        // Count unread messages
-        if (msg.receiver_id === userId && !msg.read) {
-          userCounts[partnerId].unreadCount += 1;
-        }
+        // Extract unique user IDs (conversation partners)
+        const userCounts: Record<string, { 
+          unreadCount: number, 
+          lastMessage?: string,
+          lastMessageTime?: string
+        }> = {};
         
-        // Track last message
-        if (!userCounts[partnerId].lastMessage) {
-          userCounts[partnerId].lastMessage = msg.message;
-          userCounts[partnerId].lastMessageTime = msg.created_at;
-        }
-      });
-      
-      // Get user details for all conversation partners
-      const partnerIds = Object.keys(userCounts);
-      if (partnerIds.length === 0) return [];
-      
-      const { data: userDetails, error: userError } = await supabase
-        .from('user_accounts')
-        .select('id, username, role')
-        .in('id', partnerIds);
-      
-      if (userError) throw userError;
-      
-      // Combine user details with unread counts
-      return userDetails?.map(user => ({
-        ...user,
-        unreadCount: userCounts[user.id].unreadCount,
-        lastMessage: userCounts[user.id].lastMessage,
-        lastMessageTime: userCounts[user.id].lastMessageTime
-      })) || [];
+        messages?.forEach(msg => {
+          const partnerId = msg.sender_id === userId ? msg.receiver_id : msg.sender_id;
+          
+          if (!userCounts[partnerId]) {
+            userCounts[partnerId] = { unreadCount: 0 };
+          }
+          
+          // Count unread messages
+          if (msg.receiver_id === userId && !msg.read) {
+            userCounts[partnerId].unreadCount += 1;
+          }
+          
+          // Track last message
+          if (!userCounts[partnerId].lastMessage) {
+            userCounts[partnerId].lastMessage = msg.message;
+            userCounts[partnerId].lastMessageTime = msg.created_at;
+          }
+        });
+        
+        // Get user details for all conversation partners
+        const partnerIds = Object.keys(userCounts);
+        if (partnerIds.length === 0) return [];
+        
+        const { data: userDetails, error: userError } = await supabase
+          .from('user_accounts')
+          .select('id, username, role')
+          .in('id', partnerIds);
+        
+        if (userError) throw userError;
+        
+        // Combine user details with unread counts
+        return userDetails?.map(user => ({
+          ...user,
+          unreadCount: userCounts[user.id].unreadCount,
+          lastMessage: userCounts[user.id].lastMessage,
+          lastMessageTime: userCounts[user.id].lastMessageTime
+        })) || [];
+      } catch (error) {
+        console.error('Error fetching conversations:', error);
+        toast.error('Erreur lors du chargement des conversations');
+        return [];
+      }
     },
     enabled: !!userId,
     retry: 1,
   });
 
   // Fetch messages for the active conversation
-  const { data: messages, isLoading: loadingMessages } = useQuery({
+  const { data: messages, isLoading: loadingMessages, refetch: refetchMessages } = useQuery({
     queryKey: ['messages', userId, activeContact],
     queryFn: async () => {
       if (!activeContact || !userId) return [];
       
-      const { data, error } = await supabase
-        .from('chats')
-        .select('*')
-        .or(`and(sender_id.eq.${userId},receiver_id.eq.${activeContact}),and(sender_id.eq.${activeContact},receiver_id.eq.${userId})`)
-        .is('archived', null) // Exclude archived messages
-        .order('created_at', { ascending: true });
-      
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data, error } = await supabase
+          .from('chats')
+          .select('*')
+          .or(`and(sender_id.eq.${userId},receiver_id.eq.${activeContact}),and(sender_id.eq.${activeContact},receiver_id.eq.${userId})`)
+          .is('archived', null) // Exclude archived messages
+          .order('created_at', { ascending: true });
+        
+        if (error) throw error;
+        return data || [];
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+        toast.error('Erreur lors du chargement des messages');
+        return [];
+      }
     },
     enabled: !!activeContact && !!userId,
     retry: 1,
@@ -143,16 +155,22 @@ export const useMessages = (userId: string) => {
       );
       
       if (unreadMessages.length > 0) {
-        const { error } = await supabase
-          .from('chats')
-          .update({ read: true })
-          .in('id', unreadMessages.map(msg => msg.id));
-        
-        if (error) console.error('Error marking messages as read:', error);
-        else {
+        try {
+          const { error } = await supabase
+            .from('chats')
+            .update({ read: true })
+            .in('id', unreadMessages.map(msg => msg.id));
+          
+          if (error) {
+            console.error('Error marking messages as read:', error);
+            return;
+          }
+          
           queryClient.invalidateQueries({ queryKey: ['messages'] });
           queryClient.invalidateQueries({ queryKey: ['conversations'] });
           queryClient.invalidateQueries({ queryKey: ['unread'] });
+        } catch (error) {
+          console.error('Error marking messages as read:', error);
         }
       }
     };
@@ -191,44 +209,50 @@ export const useMessages = (userId: string) => {
   // Send a new message
   const { mutate: sendMessage, isPending: sendingMessage } = useMutation({
     mutationFn: async () => {
-      if (!activeContact || (!newMessage.trim() && !attachment) || !userId) return;
-      
-      let attachmentUrl = null;
-      
-      // Upload attachment if exists
-      if (attachment) {
-        const fileName = `${userId}_${Date.now()}_${attachment.name}`;
-        const filePath = `message_attachments/${fileName}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('chat_attachments')
-          .upload(filePath, attachment);
-          
-        if (uploadError) {
-          throw new Error(`Error uploading file: ${uploadError.message}`);
-        }
-        
-        // Get public URL
-        const { data } = supabase.storage
-          .from('chat_attachments')
-          .getPublicUrl(filePath);
-          
-        attachmentUrl = data.publicUrl;
+      if (!activeContact || (!newMessage.trim() && !attachment) || !userId) {
+        throw new Error('Informations manquantes pour l\'envoi du message');
       }
       
-      const { error } = await supabase
-        .from('chats')
-        .insert({
-          sender_id: userId,
-          receiver_id: activeContact,
-          message: newMessage.trim(),
-          read: false,
-          attachment_url: attachmentUrl
+      try {
+        let attachmentUrl = null;
+        
+        // Upload attachment if exists
+        if (attachment) {
+          const fileName = `${userId}_${Date.now()}_${attachment.name}`;
+          const filePath = `message_attachments/${fileName}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('chat_attachments')
+            .upload(filePath, attachment);
+            
+          if (uploadError) {
+            throw new Error(`Error uploading file: ${uploadError.message}`);
+          }
+          
+          // Get public URL
+          const { data } = supabase.storage
+            .from('chat_attachments')
+            .getPublicUrl(filePath);
+            
+          attachmentUrl = data.publicUrl;
+        }
+        
+        // Insert message with RPC call instead of direct insert
+        const { error } = await supabase.rpc('send_message', {
+          p_sender_id: userId,
+          p_receiver_id: activeContact,
+          p_message: newMessage.trim(),
+          p_attachment_url: attachmentUrl
         });
-      
-      if (error) throw error;
-      setNewMessage('');
-      clearAttachment();
+        
+        if (error) throw error;
+        
+        setNewMessage('');
+        clearAttachment();
+      } catch (error) {
+        console.error('Error sending message:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages'] });
@@ -237,28 +261,35 @@ export const useMessages = (userId: string) => {
     },
     onError: (error) => {
       console.error('Error sending message:', error);
-      toast.error('Erreur lors de l\'envoi du message');
+      toast.error('Erreur lors de l\'envoi du message. Vérifiez vos permissions.');
     }
   });
 
   // Archive conversation (for founder)
   const { mutate: archiveConversation, isPending: archiving } = useMutation({
     mutationFn: async () => {
-      if (!activeContact || !userId) return;
+      if (!activeContact || !userId) {
+        throw new Error('Contact actif ou ID utilisateur non défini');
+      }
       
-      // Calculate archive date (1 month from now for normal users, never for founder)
-      const isFounder = localStorage.getItem('userRole') === 'founder';
-      const archiveDate = isFounder ? null : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-      
-      const { error } = await supabase
-        .from('chats')
-        .update({ 
-          archived: true,
-          archive_date: archiveDate 
-        })
-        .or(`and(sender_id.eq.${userId},receiver_id.eq.${activeContact}),and(sender_id.eq.${activeContact},receiver_id.eq.${userId})`);
-      
-      if (error) throw error;
+      try {
+        // Calculate archive date (1 month from now for normal users, never for founder)
+        const isFounder = localStorage.getItem('userRole') === 'founder';
+        const archiveDate = isFounder ? null : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+        
+        const { error } = await supabase
+          .from('chats')
+          .update({ 
+            archived: true,
+            archive_date: archiveDate 
+          })
+          .or(`and(sender_id.eq.${userId},receiver_id.eq.${activeContact}),and(sender_id.eq.${activeContact},receiver_id.eq.${userId})`);
+        
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error archiving conversation:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       const isFounder = localStorage.getItem('userRole') === 'founder';
@@ -279,24 +310,37 @@ export const useMessages = (userId: string) => {
   });
 
   // Get unread message count
-  const { data: unreadCount, isLoading: loadingUnread } = useQuery({
+  const { data: unreadCount, isLoading: loadingUnread, refetch: refetchUnread } = useQuery({
     queryKey: ['unread', userId],
     queryFn: async () => {
       if (!userId) return 0;
       
-      const { data, error, count } = await supabase
-        .from('chats')
-        .select('*', { count: 'exact' })
-        .eq('receiver_id', userId)
-        .eq('read', false)
-        .is('archived', null);
-      
-      if (error) throw error;
-      return count || 0;
+      try {
+        const { data, error, count } = await supabase
+          .from('chats')
+          .select('*', { count: 'exact' })
+          .eq('receiver_id', userId)
+          .eq('read', false)
+          .is('archived', null);
+        
+        if (error) throw error;
+        return count || 0;
+      } catch (error) {
+        console.error('Error fetching unread count:', error);
+        return 0;
+      }
     },
     enabled: !!userId,
     retry: 1,
   });
+
+  // Function to refetch all message data
+  const refetch = () => {
+    refetchConversations();
+    refetchMessages();
+    refetchUnread();
+    refetchUsers();
+  };
 
   // Set up real-time subscription for new messages
   useEffect(() => {
@@ -357,6 +401,7 @@ export const useMessages = (userId: string) => {
     handleAttachment,
     attachment,
     attachmentPreview,
-    clearAttachment
+    clearAttachment,
+    refetch
   };
 };

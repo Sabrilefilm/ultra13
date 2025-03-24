@@ -11,24 +11,31 @@ interface PlaceholderPageContentProps {
 export const PlaceholderPageContent: React.FC<PlaceholderPageContentProps> = ({ currentPage }) => {
   const [showGuide, setShowGuide] = useState(false);
 
+  const getPageTitle = () => {
+    switch(currentPage) {
+      case 'dashboard': return 'Tableau de bord';
+      case 'penalties': return 'Gestion des pénalités';
+      case 'team': return 'Gestion d\'équipe';
+      case 'schedule': return 'Planning';
+      case 'internal-rules': return 'Règlement intérieur';
+      case 'creator-rules': return 'Règles des créateurs';
+      case 'training': return 'Formations';
+      default: return 'Ultra by Phocéen Agency';
+    }
+  };
+
   return (
-    <div className="p-6 bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-purple-900/20 rounded-xl">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-medium text-white">
-          {currentPage === 'dashboard' ? 'Tableau de bord' : 
-           currentPage === 'penalties' ? 'Gestion des pénalités' : 
-           currentPage === 'team' ? 'Gestion d\'équipe' : 
-           currentPage === 'schedule' ? 'Planning' : 
-           currentPage === 'internal-rules' ? 'Règlement intérieur' :
-           currentPage === 'creator-rules' ? 'Règles des créateurs' :
-           'Ultra by Phocéen Agency'}
+    <div className="p-4 sm:p-6 bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-purple-900/20 rounded-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <h2 className="text-lg sm:text-xl font-medium text-white">
+          {getPageTitle()}
         </h2>
         
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={() => setShowGuide(!showGuide)}
-          className="text-purple-400 hover:text-purple-300 hover:bg-purple-900/30"
+          className="text-purple-400 hover:text-purple-300 hover:bg-purple-900/30 w-fit"
         >
           <HelpCircle className="h-4 w-4 mr-2" />
           Aide

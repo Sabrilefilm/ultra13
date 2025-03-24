@@ -3,6 +3,7 @@ import { useState, KeyboardEvent, ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Paperclip, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface MessageComposerProps {
   onSendMessage?: (message: string) => Promise<void>;
@@ -42,15 +43,20 @@ export const MessageComposer = ({
     }
   };
   
-  const handleSend = () => {
+  const handleSend = async () => {
     if ((currentMessage.trim() || attachmentPreview) && !isSending) {
-      if (onSend) {
-        onSend();
-      } else if (onSendMessage) {
-        onSendMessage(currentMessage);
-        if (!isControlled) {
-          setLocalMessage('');
+      try {
+        if (onSend) {
+          onSend();
+        } else if (onSendMessage) {
+          await onSendMessage(currentMessage);
+          if (!isControlled) {
+            setLocalMessage('');
+          }
         }
+      } catch (error) {
+        console.error('Error sending message:', error);
+        toast.error("Erreur lors de l'envoi du message. Veuillez réessayer.");
       }
     }
   };
