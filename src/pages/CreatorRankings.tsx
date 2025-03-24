@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, HomeIcon, MessageCircle } from "lucide-react";
+import { ArrowLeft, HomeIcon } from "lucide-react";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { CreatorPerformanceRanking } from "@/components/creators/CreatorPerformanceRanking";
 import { Footer } from "@/components/layout/Footer";
@@ -79,20 +79,6 @@ const CreatorRankings = () => {
               </div>
               
               <div className="flex items-center gap-3">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate("/messages")}
-                    className="flex items-center gap-2 rounded-full px-5 py-6 bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 border-indigo-200 dark:border-indigo-800/50 hover:shadow-md transition-all"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    <span>Messagerie</span>
-                  </Button>
-                </motion.div>
-                
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}

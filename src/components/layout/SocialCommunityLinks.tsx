@@ -254,68 +254,6 @@ export const SocialCommunityLinks = ({ className = "" }: SocialCommunityProps) =
                 />
               </motion.div>
             ))}
-            
-            {/* Messagerie Button */}
-            <motion.div
-              variants={itemVariants}
-              className="relative mt-2"
-            >
-              <motion.div
-                variants={buttonVariants}
-                initial="rest"
-                whileHover="hover"
-                whileTap="tap"
-                className="relative z-10 overflow-hidden rounded-full"
-              >
-                <Button 
-                  variant="outline"
-                  onClick={() => navigate("/messages")}
-                  className="w-full py-6 bg-gradient-to-r from-indigo-400 to-purple-600 hover:from-indigo-500 hover:to-purple-700 text-white border-none rounded-full shadow-md shadow-purple-500/30"
-                >
-                  <div className="flex items-center justify-center gap-3 z-10 relative">
-                    <motion.div 
-                      initial={{ y: 0 }}
-                      animate={{ y: [0, -3, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      <MessageCircle className="h-6 w-6" />
-                    </motion.div>
-                    <span className="text-lg font-bold">Messagerie Interne</span>
-                  </div>
-                  
-                  {/* Subtle animation for the button */}
-                  <motion.div 
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-                    initial={{ x: -100, opacity: 0 }}
-                    animate={{ 
-                      x: ['-100%', '200%'],
-                      opacity: [0, 0.5, 0]
-                    }}
-                    transition={{ 
-                      duration: 2,
-                      repeat: Infinity,
-                      repeatType: "loop",
-                      ease: "easeInOut"
-                    }}
-                  />
-                </Button>
-              </motion.div>
-              
-              {/* Glow effect */}
-              <motion.div 
-                className="absolute inset-0 rounded-full blur-xl z-0 bg-gradient-to-r from-indigo-400 to-purple-600"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ 
-                  opacity: [0.2, 0.4, 0.2],
-                  scale: [0.9, 1.1, 0.9]
-                }}
-                transition={{ 
-                  duration: 3,
-                  repeat: Infinity,
-                  repeatType: "loop"
-                }}
-              />
-            </motion.div>
           </div>
           
           <motion.p 
