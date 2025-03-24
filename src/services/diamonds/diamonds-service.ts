@@ -29,12 +29,28 @@ export const diamondsService = {
 
   async resetAllDiamonds() {
     try {
-      const { error } = await supabase
-        .from("diamonds")
-        .update({ total_diamonds: 0 })
-        .eq("total_diamonds", ">");
+      // Use manage_diamonds RPC to set all diamonds to 0
+      const { data: creators, error: creatorsError } = await supabase
+        .from("user_accounts")
+        .select("id")
+        .eq("role", "creator");
       
-      if (error) throw error;
+      if (creatorsError) {
+        console.error("Error getting creators:", creatorsError);
+        throw creatorsError;
+      }
+      
+      // Reset all creators' diamonds to 0
+      if (creators && creators.length > 0) {
+        for (const creator of creators) {
+          await supabase.rpc('manage_diamonds', {
+            target_user_id: creator.id,
+            diamonds_value: 0,
+            operation: 'set'
+          });
+        }
+      }
+      
       return true;
     } catch (error) {
       console.error("Error resetting diamonds:", error);

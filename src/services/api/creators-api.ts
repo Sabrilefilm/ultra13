@@ -65,18 +65,39 @@ export const creatorsApi = {
     try {
       if (creatorIds.length === 0) return {};
       
-      const { data: diamonds, error: diamondsError } = await supabase
-        .from("diamonds")
-        .select("user_id, total_diamonds")
-        .in("user_id", creatorIds);
+      // Check if profiles table exists
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, total_diamonds")
+        .in("id", creatorIds);
         
-      if (diamondsError) {
-        console.error("Error fetching diamonds:", diamondsError);
-        return {};
+      if (profilesError) {
+        console.error("Error fetching profiles:", profilesError);
+        
+        // Try using diamonds table if it exists
+        try {
+          const { data: diamonds, error: diamondsError } = await supabase
+            .from("diamonds")
+            .select("user_id, total_diamonds")
+            .in("user_id", creatorIds);
+            
+          if (diamondsError) {
+            console.error("Error fetching diamonds:", diamondsError);
+            return {};
+          }
+          
+          return (diamonds || []).reduce((acc, item) => {
+            acc[item.user_id] = item.total_diamonds;
+            return acc;
+          }, {} as Record<string, number>);
+        } catch (err) {
+          console.error("Error in diamonds fallback:", err);
+          return {};
+        }
       }
       
-      return (diamonds || []).reduce((acc, item) => {
-        acc[item.user_id] = item.total_diamonds;
+      return (profiles || []).reduce((acc, item) => {
+        acc[item.id] = item.total_diamonds;
         return acc;
       }, {} as Record<string, number>);
     } catch (error) {
