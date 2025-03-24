@@ -54,6 +54,7 @@ export const useCreatorStats = (role: string | null, username: string | null) =>
   return {
     creators,
     loading,
+    fetchCreators,
     selectedCreator,
     setSelectedCreator,
     isEditingSchedule,

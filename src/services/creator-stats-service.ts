@@ -97,19 +97,24 @@ export const creatorStatsService = {
     try {
       console.log(`Updating diamonds for creator ${creator.id} to ${newValue}`);
       
-      // Utilisation de la fonction RPC pour gérer la création ou mise à jour du profil
-      const { data, error } = await supabase.rpc('create_or_update_profile', { 
-        user_id: creator.id,
-        user_username: creator.username,
-        diamonds_value: newValue
-      });
+      // Mise à jour directe du profil avec transactions
+      const { data, error } = await supabase
+        .from("profiles")
+        .upsert({ 
+          id: creator.id, 
+          username: creator.username,
+          role: 'creator',
+          total_diamonds: newValue
+        }, { 
+          onConflict: 'id'
+        });
       
       if (error) {
-        console.error("Error using RPC:", error);
+        console.error("Error updating profile:", error);
         throw error;
       }
       
-      console.log("RPC response:", data);
+      console.log("Profile update response:", data);
       return true;
     } catch (error) {
       console.error("Error updating diamonds:", error);
@@ -128,6 +133,36 @@ export const creatorStatsService = {
       return true;
     } catch (error) {
       console.error("Error removing creator:", error);
+      throw error;
+    }
+  },
+
+  async resetAllSchedules() {
+    try {
+      const { error } = await supabase
+        .from("live_schedules")
+        .update({ hours: 0, days: 0 })
+        .is("creator_id", not.null());
+      
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error("Error resetting schedules:", error);
+      throw error;
+    }
+  },
+
+  async resetAllDiamonds() {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ total_diamonds: 0 })
+        .eq("role", "creator");
+      
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error("Error resetting diamonds:", error);
       throw error;
     }
   }

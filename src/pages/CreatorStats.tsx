@@ -15,6 +15,7 @@ import { CreatorsTable } from "@/components/creator-stats/CreatorsTable";
 import { EditScheduleDialog } from "@/components/creator-stats/EditScheduleDialog";
 import { EditDiamondsDialog } from "@/components/creator-stats/EditDiamondsDialog";
 import { RemoveCreatorDialog } from "@/components/creator-stats/RemoveCreatorDialog";
+import { ResetActionsCard } from "@/components/creator-stats/ResetActionsCard";
 
 const CreatorStats = () => {
   const { role, username, userId } = useIndexAuth();
@@ -22,6 +23,7 @@ const CreatorStats = () => {
   const {
     creators,
     loading,
+    fetchCreators,
     selectedCreator,
     setSelectedCreator,
     isEditingSchedule,
@@ -88,6 +90,9 @@ const CreatorStats = () => {
           creatorsWithRewards={getCreatorsWithRewards()} 
           rewardThreshold={rewardThreshold} 
         />
+        
+        {/* Nouvelle carte pour les actions de réinitialisation */}
+        <ResetActionsCard onReset={fetchCreators} role={role} />
 
         <Card className="w-full overflow-hidden">
           <CardHeader>

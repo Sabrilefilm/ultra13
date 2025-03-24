@@ -1,38 +1,34 @@
 
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
 import { creatorStatsService } from "@/services/creator-stats-service";
 import { Creator } from "./types";
+import { toast } from "sonner";
 
 export const useCreatorsData = (role: string | null, username: string | null) => {
-  const navigate = useNavigate();
   const [creators, setCreators] = useState<Creator[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    if (!['agent', 'manager', 'founder', 'ambassadeur'].includes(role || '')) {
-      navigate('/');
+  const fetchCreators = useCallback(async () => {
+    if (!role || !username) {
+      setLoading(false);
       return;
     }
 
-    fetchCreators();
-  }, [navigate, role, username]);
-
-  const fetchCreators = async () => {
-    if (!role || !username) return;
-    
-    setLoading(true);
     try {
-      const creatorsData = await creatorStatsService.fetchCreators(role, username);
-      setCreators(creatorsData);
+      setLoading(true);
+      const data = await creatorStatsService.fetchCreators(role, username);
+      setCreators(data);
     } catch (error) {
-      console.error("Error:", error);
-      toast.error(error instanceof Error ? error.message : "Une erreur est survenue");
+      console.error("Error fetching creators:", error);
+      toast.error("Erreur lors du chargement des créateurs");
     } finally {
       setLoading(false);
     }
-  };
+  }, [role, username]);
+
+  useEffect(() => {
+    fetchCreators();
+  }, [fetchCreators]);
 
   return {
     creators,
