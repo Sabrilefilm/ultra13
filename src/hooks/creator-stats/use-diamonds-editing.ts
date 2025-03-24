@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { creatorStatsService } from "@/services/creator-stats-service";
+import { supabase } from "@/lib/supabase";
 import { Creator } from "./types";
 
 export const useDiamondsEditing = (
@@ -28,10 +28,25 @@ export const useDiamondsEditing = (
     
     try {
       setIsSaving(true);
-      let newDiamondValue = 0;
-      const currentDiamonds = selectedCreator.profiles?.[0]?.total_diamonds || 0;
       
-      // Calculer la nouvelle valeur en fonction de l'opération sélectionnée
+      // Use the manage_diamonds RPC function
+      const { data, error } = await supabase.rpc('manage_diamonds', {
+        target_user_id: selectedCreator.id,
+        diamonds_value: diamondAmount,
+        operation: operationType
+      });
+      
+      if (error) {
+        console.error("Error updating diamonds:", error);
+        toast.error("Erreur lors de la mise à jour des diamants. Veuillez réessayer.");
+        return;
+      }
+      
+      // Mise à jour de l'état local pour refléter le changement immédiatement
+      const currentDiamonds = selectedCreator.profiles?.[0]?.total_diamonds || 0;
+      let newDiamondValue = 0;
+      
+      // Calculate new value for UI update
       switch (operationType) {
         case 'set':
           newDiamondValue = diamondAmount;
@@ -44,9 +59,6 @@ export const useDiamondsEditing = (
           break;
       }
       
-      await creatorStatsService.updateDiamonds(selectedCreator, newDiamondValue);
-      
-      // Mise à jour de l'état local pour refléter le changement immédiatement
       setCreators(creators.map(c => {
         if (c.id === selectedCreator.id) {
           return {
@@ -64,7 +76,7 @@ export const useDiamondsEditing = (
       toast.success(`Diamants ${actionText} ${diamondAmount} pour ${selectedCreator.username}`);
       setIsEditingDiamonds(false);
       
-      // Actualisation des données pour s'assurer que tout est à jour
+      // Refresh data to ensure everything is up to date
       await fetchCreators();
       
     } catch (error) {
