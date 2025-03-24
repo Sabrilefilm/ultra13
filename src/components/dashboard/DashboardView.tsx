@@ -48,8 +48,30 @@ export const DashboardView = ({
   const [showSponsorshipList, setShowSponsorshipList] = useState(false);
   const [isCreatePosterModalOpen, setIsCreatePosterModalOpen] = useState(false);
 
+  // Create username watermark - multiple small instances
+  const usernameWatermark = (
+    <div className="fixed inset-0 pointer-events-none select-none z-0 overflow-hidden">
+      {Array.from({ length: 500 }).map((_, index) => (
+        <div 
+          key={index} 
+          className="absolute text-[8px] font-bold text-slate-200/10" 
+          style={{
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            transform: `rotate(${Math.random() * 360}deg)`
+          }}
+        >
+          {username.toUpperCase()}
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="min-h-screen flex flex-col bg-[#111827] text-white">
+      {/* Filigrame du nom d'utilisateur */}
+      {usernameWatermark}
+      
       <Header role={role} username={username} />
       
       <div className="flex-1 p-4">

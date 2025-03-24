@@ -89,20 +89,28 @@ export const UltraDashboard = ({
     }
   };
 
-  // Créer le filigrane avec le nom d'utilisateur - repositionné et plus transparent
+  // Create username watermark - repositioned and with updated styling
   const usernameWatermark = (
-    <div className="fixed inset-0 pointer-events-none select-none z-0 flex items-center justify-center">
-      <div className="w-full h-full flex items-center justify-center rotate-[-30deg]">
-        <p className="text-slate-200/30 text-[6vw] font-bold whitespace-nowrap">
+    <div className="fixed inset-0 pointer-events-none select-none z-0 overflow-hidden">
+      {Array.from({ length: 500 }).map((_, index) => (
+        <div 
+          key={index} 
+          className="absolute text-[8px] font-bold text-slate-200/10" 
+          style={{
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            transform: `rotate(${Math.random() * 360}deg)`
+          }}
+        >
           {username.toUpperCase()}
-        </p>
-      </div>
+        </div>
+      ))}
     </div>
   );
 
   return (
     <div className="flex flex-col h-screen w-full bg-gradient-to-br from-slate-900 to-slate-950 text-white overflow-hidden">
-      {/* Filigrane du nom d'utilisateur */}
+      {/* Filigrame du nom d'utilisateur */}
       {usernameWatermark}
       
       {/* Mobile menu button */}

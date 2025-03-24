@@ -9,10 +9,32 @@ import { useIndexAuth } from "@/hooks/use-index-auth";
 
 const RewardsManagement = () => {
   const navigate = useNavigate();
-  const { role } = useIndexAuth();
+  const { role, username } = useIndexAuth();
+
+  // Create username watermark with multiple small instances
+  const usernameWatermark = (
+    <div className="fixed inset-0 pointer-events-none select-none z-0 overflow-hidden">
+      {Array.from({ length: 500 }).map((_, index) => (
+        <div 
+          key={index} 
+          className="absolute text-[8px] font-bold text-slate-200/10" 
+          style={{
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            transform: `rotate(${Math.random() * 360}deg)`
+          }}
+        >
+          {username ? username.toUpperCase() : 'USER'}
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 p-4">
+      {/* Filigrame du nom d'utilisateur */}
+      {usernameWatermark}
+      
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center gap-4 mb-6">
           <Button

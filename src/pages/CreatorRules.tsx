@@ -6,6 +6,7 @@ import { useAccountManagement } from "@/hooks/use-account-management";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { useToast } from "@/hooks/use-toast";
 import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
+import { UsernameWatermark } from "@/components/layout/UsernameWatermark";
 
 const CreatorRules = () => {
   const {
@@ -44,23 +45,31 @@ const CreatorRules = () => {
   }, []);
 
   if (!isAuthenticated) {
-    return <p>Vous n'êtes pas connecté.</p>;
+    return (
+      <>
+        {username && <UsernameWatermark username={username} />}
+        <p>Vous n'êtes pas connecté.</p>
+      </>
+    );
   }
 
   return (
-    <UltraDashboard
-      username={username}
-      role={role || ''}
-      userId={userId || ''}
-      onLogout={handleLogout}
-      platformSettings={platformSettings}
-      handleCreateAccount={handleCreateAccount}
-      handleUpdateSettings={handleUpdateSettings}
-      showWarning={showWarning}
-      dismissWarning={dismissWarning}
-      formattedTime={formattedTime}
-      currentPage="creator-rules"
-    />
+    <>
+      {username && <UsernameWatermark username={username} />}
+      <UltraDashboard
+        username={username}
+        role={role || ''}
+        userId={userId || ''}
+        onLogout={handleLogout}
+        platformSettings={platformSettings}
+        handleCreateAccount={handleCreateAccount}
+        handleUpdateSettings={handleUpdateSettings}
+        showWarning={showWarning}
+        dismissWarning={dismissWarning}
+        formattedTime={formattedTime}
+        currentPage="creator-rules"
+      />
+    </>
   );
 };
 
