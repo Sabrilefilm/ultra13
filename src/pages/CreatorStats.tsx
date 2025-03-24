@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -16,6 +16,7 @@ import { EditScheduleDialog } from "@/components/creator-stats/EditScheduleDialo
 import { EditDiamondsDialog } from "@/components/creator-stats/EditDiamondsDialog";
 import { RemoveCreatorDialog } from "@/components/creator-stats/RemoveCreatorDialog";
 import { ResetActionsCard } from "@/components/creator-stats/ResetActionsCard";
+import { QuickDiamondsMenu } from "@/components/creator-stats/QuickDiamondsMenu";
 
 const CreatorStats = () => {
   const { role, username, userId } = useIndexAuth();
@@ -54,6 +55,14 @@ const CreatorStats = () => {
     handleRemoveCreator,
     confirmRemoveCreator
   } = useCreatorStats(role, username);
+  
+  const [showQuickDiamonds, setShowQuickDiamonds] = useState(false);
+  const [quickDiamondsCreator, setQuickDiamondsCreator] = useState<any>(null);
+
+  const handleShowQuickDiamonds = (creator: any) => {
+    setQuickDiamondsCreator(creator);
+    setShowQuickDiamonds(true);
+  };
 
   if (loading) {
     return (
@@ -91,7 +100,20 @@ const CreatorStats = () => {
           rewardThreshold={rewardThreshold} 
         />
         
-        {/* Nouvelle carte pour les actions de réinitialisation */}
+        {/* Affichage du menu rapide pour les diamants */}
+        {showQuickDiamonds && quickDiamondsCreator && (
+          <QuickDiamondsMenu
+            creatorId={quickDiamondsCreator.id}
+            creatorUsername={quickDiamondsCreator.username}
+            currentDiamonds={quickDiamondsCreator.profiles?.[0]?.total_diamonds || 0}
+            onSuccess={async () => {
+              await fetchCreators();
+              setShowQuickDiamonds(false);
+              setQuickDiamondsCreator(null);
+            }}
+          />
+        )}
+        
         <ResetActionsCard onReset={fetchCreators} role={role} />
 
         <Card className="w-full overflow-hidden">
@@ -104,7 +126,7 @@ const CreatorStats = () => {
               isMobile={isMobile}
               rewardThreshold={rewardThreshold}
               onEditSchedule={handleEditSchedule}
-              onEditDiamonds={handleEditDiamonds}
+              onEditDiamonds={handleShowQuickDiamonds}
               onRemoveCreator={handleRemoveCreator}
             />
           </CardContent>
