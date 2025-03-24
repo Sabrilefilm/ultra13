@@ -22,6 +22,7 @@ interface UltraDashboardProps {
   dismissWarning: () => void;
   formattedTime: string;
   currentPage?: string;
+  children?: React.ReactNode; // Add children prop
 }
 
 export const UltraDashboard = ({
@@ -35,7 +36,8 @@ export const UltraDashboard = ({
   showWarning,
   dismissWarning,
   formattedTime,
-  currentPage = 'dashboard'
+  currentPage = 'dashboard',
+  children // Destructure children from props
 }: UltraDashboardProps) => {
   // Modal states
   const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
@@ -144,12 +146,17 @@ export const UltraDashboard = ({
         </div>
         
         <div className="flex-1 overflow-auto pb-20 transition-all duration-300 flex flex-col">
-          <RedesignedDashContent
-            username={username}
-            role={role}
-            currentPage={currentPage}
-            onAction={onAction}
-          />
+          {/* Render children if provided, otherwise use RedesignedDashContent */}
+          {children ? (
+            children
+          ) : (
+            <RedesignedDashContent
+              username={username}
+              role={role}
+              currentPage={currentPage}
+              onAction={onAction}
+            />
+          )}
           
           <ModalManager
             isCreateAccountModalOpen={isCreateAccountModalOpen}
