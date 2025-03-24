@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMessages } from '@/hooks/use-messages';
@@ -23,6 +24,9 @@ const Messages = () => {
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  
+  // Move the hook call to the top level
+  const messageHook = useMessages(userId);
   
   useEffect(() => {
     const checkAuth = async () => {
@@ -119,9 +123,8 @@ const Messages = () => {
     }
 
     try {
-      // Force refresh conversations
-      const { data: messages } = useMessages(userId);
-      await messages?.refetch();
+      // Use the messageHook defined at the top level to refetch conversations
+      await messageHook.refetch();
       
       setIsNewMessageDialogOpen(false);
       setSelectedUser('');
