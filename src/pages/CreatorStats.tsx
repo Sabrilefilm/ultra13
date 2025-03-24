@@ -8,7 +8,7 @@ import { UsernameWatermark } from "@/components/layout/UsernameWatermark";
 import { Footer } from "@/components/layout/Footer";
 import { useCreatorStats } from "@/hooks/use-creator-stats";
 
-// Import our new components
+// Import our components
 import { StatsHeader } from "@/components/creator-stats/StatsHeader";
 import { StatsSummaryCards } from "@/components/creator-stats/StatsSummaryCards";
 import { RewardsNotification } from "@/components/creator-stats/RewardsNotification";
@@ -81,7 +81,6 @@ const CreatorStats = () => {
           totalHours={getTotalHours()}
           totalDays={getTotalDays()}
           totalDiamonds={getTotalDiamonds()}
-          diamondValue={platformSettings?.diamondValue}
         />
 
         <RewardsNotification 
@@ -98,7 +97,6 @@ const CreatorStats = () => {
               creators={creators}
               isMobile={isMobile}
               rewardThreshold={rewardThreshold}
-              diamondValue={platformSettings?.diamondValue}
               onEditSchedule={handleEditSchedule}
               onEditDiamonds={handleEditDiamonds}
               onRemoveCreator={handleRemoveCreator}
@@ -127,7 +125,6 @@ const CreatorStats = () => {
           operationType={operationType}
           setOperationType={setOperationType}
           onSave={handleSaveDiamonds}
-          diamondValue={platformSettings?.diamondValue}
         />
 
         <RemoveCreatorDialog 

@@ -146,7 +146,7 @@ export const useCreatorStats = (role: string | null, username: string | null) =>
         if (c.id === selectedCreator.id) {
           return {
             ...c,
-            profiles: [{ ...c.profiles![0], total_diamonds: newDiamondValue }]
+            profiles: [{ total_diamonds: newDiamondValue }]
           };
         }
         return c;
@@ -155,6 +155,10 @@ export const useCreatorStats = (role: string | null, username: string | null) =>
       const actionText = operationType === 'set' ? 'définis à' : operationType === 'add' ? 'augmentés de' : 'réduits de';
       toast.success(`Diamants ${actionText} ${diamondAmount} pour ${selectedCreator.username}`);
       setIsEditingDiamonds(false);
+      
+      // Refresh the data to ensure everything is up to date
+      fetchCreators();
+      
     } catch (error) {
       toast.error("Erreur lors de la mise à jour des diamants");
     }

@@ -95,12 +95,36 @@ export const creatorStatsService = {
 
   async updateDiamonds(creator: Creator, newValue: number) {
     try {
-      const { error } = await supabase
+      // First check if a profile already exists
+      const { data: existingProfile, error: checkError } = await supabase
         .from('profiles')
-        .update({ total_diamonds: newValue })
-        .eq('id', creator.id);
-        
-      if (error) throw error;
+        .select('id')
+        .eq('id', creator.id)
+        .maybeSingle();
+      
+      if (checkError) throw checkError;
+      
+      if (existingProfile) {
+        // Update existing profile
+        const { error } = await supabase
+          .from('profiles')
+          .update({ total_diamonds: newValue })
+          .eq('id', creator.id);
+          
+        if (error) throw error;
+      } else {
+        // Create a new profile
+        const { error } = await supabase
+          .from('profiles')
+          .insert([{ 
+            id: creator.id, 
+            total_diamonds: newValue,
+            username: creator.username
+          }]);
+          
+        if (error) throw error;
+      }
+      
       return true;
     } catch (error) {
       console.error("Error updating diamonds:", error);
