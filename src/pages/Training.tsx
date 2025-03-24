@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -122,9 +121,7 @@ const Training = () => {
   }, [isAuthenticated, selectedType, userId]);
   
   useEffect(() => {
-    // Set a featured video for the header section
     if (trainings.length > 0 && !featuredVideo) {
-      // Get the first unwatched video, or the first video if all are watched
       const unwatchedVideos = trainings.filter(
         training => !watchedVideos.some(wv => wv.training_id === training.id && wv.progress === 100)
       );
@@ -441,7 +438,7 @@ const Training = () => {
         {generateWatermarkGrid()}
       </div>
       
-      <div className="p-4 md:p-6 md:ml-64 max-w-7xl mx-auto">
+      <div className="p-4 md:p-6 md:ml-64 max-w-5xl mx-auto">
         <motion.div 
           variants={fadeIn}
           initial="hidden"
@@ -493,296 +490,262 @@ const Training = () => {
           </div>
         </motion.div>
         
-        {/* Featured Video Section */}
         <motion.div
           variants={fadeIn}
           initial="hidden"
           animate="visible"
           transition={{ delay: 0.1 }}
-          className="mb-8"
+          className="mb-6"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              {featuredVideo ? (
-                <YoutubePlayer 
-                  videoUrl={featuredVideo.video_url} 
-                  title={featuredVideo.title}
-                  description={featuredVideo.description}
-                  onComplete={() => markVideoAsWatched(featuredVideo.id)}
-                />
-              ) : (
-                <Card className="aspect-video flex items-center justify-center">
-                  <CardContent className="p-6 text-center">
-                    <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                    <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400">
-                      Aucune formation disponible
-                    </h3>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-            
-            <div>
-              <Card className="h-full">
-                <CardHeader>
-                  <CardTitle className="text-xl flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    Votre progression
-                  </CardTitle>
-                  <CardDescription>
-                    Suivez votre progression dans les différents catalogues
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <motion.div 
-                    variants={staggerContainer}
-                    initial="hidden"
-                    animate="visible"
-                    className="space-y-4"
-                  >
-                    {Object.entries(TRAINING_TYPES).map(([type, label], index) => (
-                      <motion.div 
-                        key={type} 
-                        variants={fadeIn}
-                        custom={index}
-                        className="space-y-2"
-                      >
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium">{label}</span>
-                          <span className="text-sm font-bold">{calculateCategoryProgress(type)}%</span>
-                        </div>
-                        <Progress value={calculateCategoryProgress(type)} className="h-2" />
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                  
-                  <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-800">
-                    <h4 className="text-sm font-medium mb-2">Formations récentes</h4>
-                    <div className="space-y-2">
-                      {watchedVideos.slice(0, 3).map((watchedVideo) => {
-                        const training = trainings.find(t => t.id === watchedVideo.training_id);
-                        if (!training) return null;
-                        
-                        return (
-                          <div 
-                            key={watchedVideo.id}
-                            className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-                            onClick={() => openVideoViewer(training)}
-                          >
-                            <div className="relative flex-shrink-0 w-10 h-10 rounded overflow-hidden">
-                              <img 
-                                src={`https://img.youtube.com/vi/${getYoutubeVideoId(training.video_url)}/mqdefault.jpg`} 
-                                alt={training.title}
-                                className="w-full h-full object-cover"
-                              />
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                                <Play className="h-4 w-4 text-white" />
-                              </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">{training.title}</p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {new Date(watchedVideo.watched_at).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+          <Tabs defaultValue="app" value={selectedType} onValueChange={setSelectedType}>
+            <TabsList className="grid grid-cols-2 md:grid-cols-5 mb-4 w-full">
+              <TabsTrigger value="app" className="flex items-center gap-2">
+                <Book className="h-4 w-4" />
+                <span className={isMobile ? "hidden" : ""}>Application</span>
+              </TabsTrigger>
+              <TabsTrigger value="live" className="flex items-center gap-2">
+                <Play className="h-4 w-4" />
+                <span className={isMobile ? "hidden" : ""}>Techniques de live</span>
+              </TabsTrigger>
+              <TabsTrigger value="content" className="flex items-center gap-2">
+                <VideoIcon className="h-4 w-4" />
+                <span className={isMobile ? "hidden" : ""}>Création de contenu</span>
+              </TabsTrigger>
+              <TabsTrigger value="growth" className="flex items-center gap-2">
+                <Lightbulb className="h-4 w-4" />
+                <span className={isMobile ? "hidden" : ""}>Croissance</span>
+              </TabsTrigger>
+              <TabsTrigger value="monetization" className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span className={isMobile ? "hidden" : ""}>Monétisation</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </motion.div>
         
         <motion.div
           variants={fadeIn}
           initial="hidden"
           animate="visible"
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.2 }}
+          className="mb-6"
         >
-          <Card className="bg-white dark:bg-slate-900 shadow-lg border-purple-100 dark:border-purple-900/30 mb-8">
+          <Card className="border border-purple-100 dark:border-purple-900/30">
             <CardHeader className="pb-2">
-              <CardTitle>Catalogue de formations</CardTitle>
+              <CardTitle className="text-xl flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                Votre progression
+              </CardTitle>
               <CardDescription>
-                Explorez nos formations pour développer vos compétences
+                Progression dans le catalogue {TRAINING_TYPES[selectedType]}
               </CardDescription>
             </CardHeader>
-            
-            <Tabs defaultValue="app" value={selectedType} onValueChange={setSelectedType}>
-              <div className="px-6">
-                <TabsList className="grid grid-cols-2 md:grid-cols-5 mb-4 w-full">
-                  <TabsTrigger value="app" className="flex items-center gap-2">
-                    <Book className="h-4 w-4" />
-                    <span className={isMobile ? "hidden" : ""}>Application</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="live" className="flex items-center gap-2">
-                    <Play className="h-4 w-4" />
-                    <span className={isMobile ? "hidden" : ""}>Techniques de live</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="content" className="flex items-center gap-2">
-                    <VideoIcon className="h-4 w-4" />
-                    <span className={isMobile ? "hidden" : ""}>Création de contenu</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="growth" className="flex items-center gap-2">
-                    <Lightbulb className="h-4 w-4" />
-                    <span className={isMobile ? "hidden" : ""}>Croissance</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="monetization" className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4" />
-                    <span className={isMobile ? "hidden" : ""}>Monétisation</span>
-                  </TabsTrigger>
-                </TabsList>
+            <CardContent>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium">{TRAINING_TYPES[selectedType]}</span>
+                <span className="text-sm font-bold">{calculateCategoryProgress(selectedType)}%</span>
               </div>
-              
-              {Object.keys(TRAINING_TYPES).map((type) => (
-                <TabsContent key={type} value={type} className="pt-2">
-                  <CardContent>
-                    {loading ? (
-                      <div className="flex justify-center py-12">
-                        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-                      </div>
-                    ) : trainings.length === 0 ? (
-                      <div className="text-center py-12">
-                        <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                        <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400">
-                          Aucune formation disponible
-                        </h3>
-                        {role === 'founder' && (
-                          <Button 
-                            onClick={() => {
-                              resetForm();
-                              setTrainingType(type);
-                              setIsAddDialogOpen(true);
-                            }}
-                            className="mt-4"
+              <Progress value={calculateCategoryProgress(selectedType)} className="h-2 mb-4" />
+            </CardContent>
+          </Card>
+        </motion.div>
+        
+        {featuredVideo && selectedType === featuredVideo.type && (
+          <motion.div
+            variants={fadeIn}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.3 }}
+            className="mb-6"
+          >
+            <Card className="border border-purple-100 dark:border-purple-900/30">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl">Formation en vedette</CardTitle>
+                <CardDescription>
+                  Commencez par cette formation recommandée
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <YoutubePlayer 
+                  videoUrl={featuredVideo.video_url} 
+                  title={featuredVideo.title}
+                  description={featuredVideo.description}
+                  onComplete={() => markVideoAsWatched(featuredVideo.id)}
+                  className="mb-4"
+                />
+                {!isVideoWatched(featuredVideo.id) && (
+                  <Button 
+                    onClick={() => markVideoAsWatched(featuredVideo.id)}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Marquer comme visionnée
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+        
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+          className="space-y-4"
+        >
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+            </div>
+          ) : trainings.filter(t => t.type === selectedType).length === 0 ? (
+            <div className="text-center py-12 bg-white dark:bg-slate-900 shadow-sm rounded-lg border p-8">
+              <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400">
+                Aucune formation disponible dans cette catégorie
+              </h3>
+              {role === 'founder' && (
+                <Button 
+                  onClick={() => {
+                    resetForm();
+                    setTrainingType(selectedType);
+                    setIsAddDialogOpen(true);
+                  }}
+                  className="mt-4"
+                >
+                  Ajouter une formation
+                </Button>
+              )}
+            </div>
+          ) : (
+            trainings
+              .filter(training => training.type === selectedType)
+              .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+              .map((training, index) => (
+                <motion.div
+                  key={training.id}
+                  variants={fadeIn}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  className="w-full"
+                >
+                  <Card 
+                    className={`overflow-hidden border transition-all hover:shadow-md ${
+                      isVideoWatched(training.id) 
+                        ? "border-green-300 dark:border-green-700" 
+                        : "border-gray-200 dark:border-gray-700"
+                    }`}
+                  >
+                    <div className="grid md:grid-cols-12 gap-4">
+                      <div 
+                        className="md:col-span-5 cursor-pointer group relative h-48 md:h-full min-h-[160px]"
+                        onClick={() => openVideoViewer(training)}
+                      >
+                        <img 
+                          src={`https://img.youtube.com/vi/${getYoutubeVideoId(training.video_url)}/mqdefault.jpg`}
+                          alt={training.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <motion.div
+                            whileHover={{ scale: 1.2, rotate: 5 }}
+                            transition={{ duration: 0.2 }}
                           >
-                            Ajouter une formation
-                          </Button>
+                            <Play className="h-16 w-16 text-white" />
+                          </motion.div>
+                        </div>
+                        {isVideoWatched(training.id) && (
+                          <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                            Visionné
+                          </div>
                         )}
                       </div>
-                    ) : (
-                      <ScrollArea className="h-[400px] pr-4">
-                        <motion.div
-                          variants={staggerContainer}
-                          initial="hidden"
-                          animate="visible"
-                          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                        >
-                          {trainings.map((training, index) => (
-                            <motion.div
-                              key={training.id}
-                              variants={fadeIn}
-                              custom={index}
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                            >
-                              <Card 
-                                className={`overflow-hidden border ${
-                                  isVideoWatched(training.id) 
-                                    ? "border-green-300 dark:border-green-700" 
-                                    : "border-gray-200 dark:border-gray-700"
-                                } transition-all hover:shadow-md`}
-                              >
-                                <div 
-                                  className="aspect-video bg-gray-100 dark:bg-gray-800 relative cursor-pointer group"
-                                  onClick={() => openVideoViewer(training)}
+                      
+                      <div className="md:col-span-7 p-4 flex flex-col justify-between">
+                        <div>
+                          <div className="flex justify-between items-start">
+                            <h3 className="text-lg font-semibold mb-2">
+                              {training.title}
+                            </h3>
+                            
+                            {role === 'founder' && (
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openEditDialog(training);
+                                  }}
                                 >
-                                  <img 
-                                    src={`https://img.youtube.com/vi/${getYoutubeVideoId(training.video_url)}/mqdefault.jpg`}
-                                    alt={training.title}
-                                    className="w-full h-full object-cover"
-                                  />
-                                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <motion.div
-                                      whileHover={{ scale: 1.2, rotate: 5 }}
-                                      transition={{ duration: 0.2 }}
-                                    >
-                                      <Play className="h-16 w-16 text-white" />
-                                    </motion.div>
-                                  </div>
-                                  {isVideoWatched(training.id) && (
-                                    <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                                      Visionné
-                                    </div>
-                                  )}
-                                </div>
-                                <CardContent className="pt-4">
-                                  <div className="flex justify-between items-start">
-                                    <div>
-                                      <h3 className="text-lg font-semibold mb-2">
-                                        {training.title}
-                                      </h3>
-                                      {training.description && (
-                                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2">
-                                          {training.description}
-                                        </p>
-                                      )}
-                                    </div>
-                                    
-                                    {role === 'founder' && (
-                                      <div className="flex gap-2">
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            openEditDialog(training);
-                                          }}
-                                        >
-                                          <Pencil className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="text-red-500 hover:text-red-600"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDeleteTraining(training.id);
-                                          }}
-                                        >
-                                          <X className="h-4 w-4" />
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </div>
-                                  
-                                  <div className="mt-2 pt-2 border-t border-dashed border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                                    <a 
-                                      href={training.video_url} 
-                                      target="_blank" 
-                                      rel="noopener noreferrer"
-                                      className="text-blue-500 hover:underline text-sm flex items-center gap-1"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <Youtube className="h-4 w-4" />
-                                      Voir sur YouTube
-                                    </a>
-                                    
-                                    <Button 
-                                      size="sm" 
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        openVideoViewer(training);
-                                      }}
-                                      className="bg-purple-600 hover:bg-purple-700"
-                                    >
-                                      Visionner
-                                    </Button>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            </motion.div>
-                          ))}
-                        </motion.div>
-                      </ScrollArea>
-                    )}
-                  </CardContent>
-                </TabsContent>
-              ))}
-            </Tabs>
-          </Card>
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-red-500 hover:text-red-600"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteTraining(training.id);
+                                  }}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {training.description && (
+                            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+                              {training.description}
+                            </p>
+                          )}
+                        </div>
+                        
+                        <div className="flex justify-between items-center mt-auto pt-2 border-t border-dashed border-gray-200 dark:border-gray-700">
+                          <a 
+                            href={training.video_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:underline text-sm flex items-center gap-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Youtube className="h-4 w-4" />
+                            Voir sur YouTube
+                          </a>
+                          
+                          <div className="flex gap-2">
+                            {!isVideoWatched(training.id) && (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  markVideoAsWatched(training.id);
+                                }}
+                              >
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                Marquer comme vu
+                              </Button>
+                            )}
+                            
+                            <Button 
+                              size="sm" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openVideoViewer(training);
+                              }}
+                              className="bg-purple-600 hover:bg-purple-700"
+                            >
+                              Visionner
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))
+          )}
         </motion.div>
         
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
