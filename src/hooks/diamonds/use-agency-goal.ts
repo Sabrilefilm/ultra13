@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
-export function useAgencyGoal(fetchUsers: () => Promise<void>) {
+export function useAgencyGoal() {
   const [isEditing, setIsEditing] = useState(false);
 
   const handleUpdateAgencyGoal = async (agencyGoal: number) => {
@@ -56,7 +56,8 @@ export function useAgencyGoal(fetchUsers: () => Promise<void>) {
       }
       
       toast.success('Paramètres de l\'agence mis à jour');
-      await fetchUsers();
+      
+      // Fetch all users will be called by the parent component
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error);
       toast.error('Erreur lors de la mise à jour des paramètres de l\'agence');

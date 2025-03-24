@@ -1,9 +1,9 @@
 
 import { supabase } from "@/lib/supabase";
-import { Creator } from "../api/creators-api";
+import { ScheduleCreator } from "@/hooks/creator-stats/use-schedule-editing";
 
 export const scheduleService = {
-  async updateSchedule(creator: Creator, hours: number, days: number) {
+  async updateSchedule(creator: ScheduleCreator, hours: number, days: number) {
     try {
       if (creator.live_schedules && creator.live_schedules.length > 0) {
         const { error } = await supabase

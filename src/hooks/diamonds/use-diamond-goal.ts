@@ -4,7 +4,7 @@ import { Creator } from './use-diamond-fetch';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
-export function useDiamondGoal(fetchUsers: () => Promise<void>) {
+export function useDiamondGoal() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
   const [newDiamondGoal, setNewDiamondGoal] = useState<number>(0);
@@ -72,8 +72,9 @@ export function useDiamondGoal(fetchUsers: () => Promise<void>) {
       }
       
       toast.success(`Objectif de diamants mis à jour pour ${selectedCreator.username}`);
-      await fetchUsers();
       setIsDialogOpen(false);
+      
+      // Fetch all users will be called by the parent component
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error);
       toast.error('Erreur lors de la mise à jour des paramètres');

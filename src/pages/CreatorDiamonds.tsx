@@ -99,7 +99,7 @@ const CreatorDiamonds = () => {
             diamondValue={diamondValue}
             role={role}
             setAgencyGoal={setAgencyGoal}
-            handleUpdateAgencyGoal={handleUpdateAgencyGoal}
+            handleUpdateAgencyGoal={(newGoal: number) => handleUpdateAgencyGoal(newGoal)}
             isEditing={isEditing}
           />
           

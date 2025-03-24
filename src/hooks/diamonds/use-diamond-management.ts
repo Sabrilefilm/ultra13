@@ -3,8 +3,6 @@ import { useState } from 'react';
 import { Creator, useDiamondFetch } from './use-diamond-fetch';
 import { useDiamondGoal } from './use-diamond-goal';
 import { useAgencyGoal } from './use-agency-goal';
-import { useDiamondDialogs } from './use-diamond-dialogs';
-import { useDiamondSearch } from './use-diamond-search';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
@@ -26,13 +24,6 @@ export function useDiamondManagement() {
     fetchAllUsers
   } = useDiamondFetch();
 
-  // Use the search hook
-  const { searchQuery, setSearchQuery, filteredCreators } = useDiamondSearch(creators);
-
-  // Use the goal management hooks
-  const diamondGoalHook = useDiamondGoal(fetchAllUsers);
-  const agencyGoalHook = useAgencyGoal(fetchAllUsers);
-  
   // Local state for this hook
   const [activeTab, setActiveTab] = useState<string>('creators');
   const [isDiamondModalOpen, setIsDiamondModalOpen] = useState(false);
@@ -40,9 +31,35 @@ export function useDiamondManagement() {
   const [diamondAmount, setDiamondAmount] = useState<number>(0);
   const [operationType, setOperationType] = useState<'add' | 'subtract'>('add');
   const [isEditing, setIsEditing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredCreators, setFilteredCreators] = useState<Creator[]>(creators);
+
+  // Use the goal management hooks
+  const diamondGoalHook = useDiamondGoal();
+  const agencyGoalHook = useAgencyGoal();
+
+  // Update filtered creators when creators list or search query changes
+  useState(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredCreators(creators);
+    } else {
+      const filtered = creators.filter(creator => 
+        creator.username.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredCreators(filtered);
+    }
+  });
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);
+    if (value.trim() === '') {
+      setFilteredCreators(creators);
+    } else {
+      const filtered = creators.filter(creator => 
+        creator.username.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredCreators(filtered);
+    }
   };
 
   const openDiamondModal = (user: Creator, type: 'add' | 'subtract') => {
@@ -50,6 +67,10 @@ export function useDiamondManagement() {
     setDiamondAmount(0);
     setOperationType(type);
     setIsDiamondModalOpen(true);
+  };
+
+  const openEditDialog = (user: Creator) => {
+    diamondGoalHook.openEditDialog(user);
   };
 
   const handleUpdateDiamonds = async () => {
@@ -160,11 +181,11 @@ export function useDiamondManagement() {
     // Diamond goal dialog
     isDialogOpen: diamondGoalHook.isDialogOpen,
     setIsDialogOpen: diamondGoalHook.setIsDialogOpen,
-    selectedCreator: selectedCreator || diamondGoalHook.selectedCreator,
+    selectedCreator,
     setSelectedCreator,
     newDiamondGoal: diamondGoalHook.newDiamondGoal,
     setNewDiamondGoal: diamondGoalHook.setNewDiamondGoal,
-    openEditDialog: diamondGoalHook.openEditDialog,
+    openEditDialog,
     handleUpdateDiamondGoal: diamondGoalHook.handleUpdateDiamondGoal,
     
     // Agency goal management

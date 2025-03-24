@@ -1,17 +1,26 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Creator } from '@/hooks/diamonds/use-diamond-fetch';
 import { scheduleService } from '@/services/schedule/schedule-service';
+
+// Update the Creator type to include live_schedules
+export interface ScheduleCreator {
+  id: string;
+  username: string;
+  role?: string;
+  live_schedules?: Array<{ hours: number; days: number }>;
+  total_diamonds?: number;
+  diamonds_goal?: number;
+}
 
 export function useScheduleEditing(onSuccess: () => Promise<void>) {
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
-  const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
+  const [selectedCreator, setSelectedCreator] = useState<ScheduleCreator | null>(null);
   const [hours, setHours] = useState<number>(0);
   const [days, setDays] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleEditSchedule = (creator: Creator) => {
+  const handleEditSchedule = (creator: ScheduleCreator) => {
     setSelectedCreator(creator);
     // Get current hours and days
     const creatorSchedule = creator.live_schedules?.[0];
@@ -26,7 +35,7 @@ export function useScheduleEditing(onSuccess: () => Promise<void>) {
     try {
       setIsSubmitting(true);
       
-      await scheduleService.updateSchedule(selectedCreator.id, Number(hours), Number(days));
+      await scheduleService.updateSchedule(selectedCreator, Number(hours), Number(days));
       
       toast.success(`Horaire mis à jour pour ${selectedCreator.username}`);
       setIsEditingSchedule(false);
