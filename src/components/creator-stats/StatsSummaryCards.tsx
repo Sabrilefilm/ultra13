@@ -7,14 +7,12 @@ interface StatsSummaryCardsProps {
   totalHours: number;
   totalDays: number;
   totalDiamonds: number;
-  diamondValue?: number;
 }
 
 export const StatsSummaryCards: React.FC<StatsSummaryCardsProps> = ({
   totalHours,
   totalDays,
   totalDiamonds,
-  diamondValue
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -51,11 +49,6 @@ export const StatsSummaryCards: React.FC<StatsSummaryCardsProps> = ({
         </CardHeader>
         <CardContent>
           <p className="text-3xl font-bold">{totalDiamonds.toLocaleString()}</p>
-          {diamondValue && (
-            <p className="text-sm text-muted-foreground">
-              Valeur: {((totalDiamonds * diamondValue) || 0).toLocaleString()}€
-            </p>
-          )}
         </CardContent>
       </Card>
     </div>

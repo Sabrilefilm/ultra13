@@ -15,7 +15,6 @@ interface EditDiamondsDialogProps {
   operationType: 'set' | 'add' | 'subtract';
   setOperationType: (type: 'set' | 'add' | 'subtract') => void;
   onSave: () => Promise<void>;
-  diamondValue?: number;
 }
 
 export const EditDiamondsDialog: React.FC<EditDiamondsDialogProps> = ({
@@ -28,7 +27,6 @@ export const EditDiamondsDialog: React.FC<EditDiamondsDialogProps> = ({
   operationType,
   setOperationType,
   onSave,
-  diamondValue,
 }) => {
   const calculateNewTotal = () => {
     switch (operationType) {
@@ -102,14 +100,6 @@ export const EditDiamondsDialog: React.FC<EditDiamondsDialogProps> = ({
               className="col-span-3"
             />
           </div>
-
-          {diamondValue && (
-            <div className="bg-muted/50 p-3 rounded-md">
-              <p className="text-sm">
-                Valeur: {(diamondAmount * diamondValue).toLocaleString()}€
-              </p>
-            </div>
-          )}
           
           {operationType !== 'set' && (
             <div className="flex items-center justify-between">

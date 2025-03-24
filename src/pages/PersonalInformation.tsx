@@ -7,7 +7,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Check } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const PersonalInformation = () => {
   const { toast } = useToast();
@@ -15,6 +17,7 @@ const PersonalInformation = () => {
   
   const [isLoading, setIsLoading] = useState(true);
   const [savedProfile, setSavedProfile] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [profile, setProfile] = useState({
     firstName: "",
     lastName: "",
@@ -176,6 +179,16 @@ const PersonalInformation = () => {
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!acceptedTerms) {
+      toast({
+        variant: "destructive",
+        title: "Acceptation requise",
+        description: "Vous devez accepter les conditions générales pour continuer."
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
@@ -238,6 +251,9 @@ const PersonalInformation = () => {
         description: "Vos informations personnelles ont été enregistrées.",
       });
       setSavedProfile(true);
+      
+      // Rediriger vers la page d'accueil après sauvegarde réussie
+      navigate("/");
     } catch (error) {
       console.error("Erreur lors de l'enregistrement du profil:", error);
       toast({
@@ -363,6 +379,25 @@ const PersonalInformation = () => {
                   />
                 </div>
               </div>
+              
+              <div className="flex items-start space-x-2 pt-4">
+                <Checkbox 
+                  id="terms" 
+                  checked={acceptedTerms}
+                  onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <label
+                    htmlFor="terms"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    J'accepte les conditions générales
+                  </label>
+                  <p className="text-sm text-muted-foreground">
+                    En soumettant ce formulaire, je confirme que toutes les informations fournies sont exactes et j'accepte que l'agence traite mes données personnelles conformément à sa politique de confidentialité.
+                  </p>
+                </div>
+              </div>
             </CardContent>
             <CardFooter className="flex justify-between gap-2">
               <span className="text-sm text-muted-foreground italic">
@@ -378,10 +413,11 @@ const PersonalInformation = () => {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || !acceptedTerms}
+                  className="flex items-center gap-2"
                 >
-                  {isLoading ? "Enregistrement..." : "Enregistrer manuellement"}
-                  {!isLoading && <Save className="ml-2 h-4 w-4" />}
+                  {isLoading ? "Enregistrement..." : "Enregistrer et accepter"}
+                  {!isLoading && <Check className="h-4 w-4" />}
                 </Button>
               </div>
             </CardFooter>

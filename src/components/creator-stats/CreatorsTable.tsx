@@ -15,7 +15,6 @@ interface CreatorsTableProps {
   creators: Creator[];
   isMobile: boolean;
   rewardThreshold: number;
-  diamondValue?: number;
   onEditSchedule: (creator: Creator) => void;
   onEditDiamonds: (creator: Creator) => void;
   onRemoveCreator: (creator: Creator) => void;
@@ -25,7 +24,6 @@ export const CreatorsTable: React.FC<CreatorsTableProps> = ({
   creators,
   isMobile,
   rewardThreshold,
-  diamondValue,
   onEditSchedule,
   onEditDiamonds,
   onRemoveCreator
@@ -59,11 +57,6 @@ export const CreatorsTable: React.FC<CreatorsTableProps> = ({
               <TableCell>
                 <div className="flex flex-col">
                   <span>{(creator.profiles?.[0]?.total_diamonds || 0).toLocaleString()} 💎</span>
-                  {diamondValue && (
-                    <span className="text-xs text-muted-foreground">
-                      {((creator.profiles?.[0]?.total_diamonds || 0) * diamondValue).toLocaleString()}€
-                    </span>
-                  )}
                   {(creator.profiles?.[0]?.total_diamonds || 0) >= rewardThreshold && (
                     <span className="text-xs text-green-500 animate-pulse">
                       🏆 Récompense disponible!

@@ -17,7 +17,6 @@ interface Reward {
   created_at: string;
   creator_username?: string;
   payment_status?: string;
-  amount_earned?: number;
 }
 
 interface RewardsTableProps {
