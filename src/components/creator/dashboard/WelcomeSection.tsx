@@ -1,6 +1,6 @@
 
 import React from "react";
-import { UserCheck, Star, Diamond, BookOpen, MessageSquare } from "lucide-react";
+import { UserCheck, Star, Diamond, BookOpen, MessageSquare, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
