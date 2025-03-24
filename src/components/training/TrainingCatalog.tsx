@@ -6,11 +6,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { BookOpen, Edit, Trash, Plus, Link, Video } from "lucide-react";
+import { BookOpen, Edit, Trash, Plus, Link, Video, Sparkles } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Tab, Tabs, TabList, TabPanel } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsContent } from '@/components/ui/tabs';
 
 interface TrainingCourse {
   id: string;
@@ -20,6 +20,7 @@ interface TrainingCourse {
   url: string;
   thumbnail?: string;
   duration?: string;
+  theme?: string;
 }
 
 interface TrainingCatalogProps {
@@ -30,6 +31,7 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("video");
   const [editingCourse, setEditingCourse] = useState<TrainingCourse | null>(null);
+  const [selectedTheme, setSelectedTheme] = useState<string>("all");
   
   const [courses, setCourses] = useState<TrainingCourse[]>([
     {
@@ -39,7 +41,8 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
       category: "video",
       url: "https://example.com/video1",
       thumbnail: "/placeholder.svg",
-      duration: "15 min"
+      duration: "15 min",
+      theme: "Live TikTok"
     },
     {
       id: "2",
@@ -47,6 +50,7 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
       description: "Comprendre et maîtriser l'interface de streaming de TikTok.",
       category: "document",
       url: "https://example.com/doc1",
+      theme: "Live TikTok"
     },
     {
       id: "3",
@@ -55,7 +59,8 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
       category: "video",
       url: "https://example.com/video2",
       thumbnail: "/placeholder.svg",
-      duration: "22 min"
+      duration: "22 min",
+      theme: "Engagement"
     },
     {
       id: "4",
@@ -63,6 +68,27 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
       description: "Liste de ressources externes pour continuer à vous former.",
       category: "external",
       url: "https://www.tiktok.com/creator-center/",
+      theme: "Ressources"
+    },
+    {
+      id: "5",
+      title: "Optimiser votre contenu TikTok",
+      description: "Techniques pour augmenter la visibilité de vos vidéos TikTok.",
+      category: "video",
+      url: "https://example.com/video3",
+      thumbnail: "/placeholder.svg",
+      duration: "18 min",
+      theme: "Contenu"
+    },
+    {
+      id: "6",
+      title: "Utiliser les effets TikTok efficacement",
+      description: "Guide complet sur l'utilisation des filtres et effets lors des lives.",
+      category: "video",
+      url: "https://example.com/video4",
+      thumbnail: "/placeholder.svg",
+      duration: "12 min",
+      theme: "Live TikTok"
     }
   ]);
 
@@ -73,6 +99,7 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
       description: "",
       category: activeTab as "video" | "document" | "external",
       url: "",
+      theme: "Live TikTok"
     });
     setIsEditModalOpen(true);
   };
@@ -109,7 +136,15 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
     setEditingCourse(null);
   };
 
-  const filteredCourses = courses.filter(course => course.category === activeTab);
+  // Extract unique themes from courses
+  const themes = ["all", ...Array.from(new Set(courses.map(course => course.theme))).filter(Boolean)] as string[];
+
+  // Filter courses by active tab and selected theme
+  const filteredCourses = courses.filter(course => {
+    const matchesTab = course.category === activeTab;
+    const matchesTheme = selectedTheme === "all" || course.theme === selectedTheme;
+    return matchesTab && matchesTheme;
+  });
 
   return (
     <Card className="border-blue-200 dark:border-blue-900/30 overflow-hidden max-w-5xl mx-auto">
@@ -130,78 +165,122 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
             </Button>
           )}
         </CardTitle>
+        <div className="text-sm text-muted-foreground">
+          Nos formations sont régulièrement mises à jour pour vous proposer le meilleur contenu.
+        </div>
       </CardHeader>
       
       <CardContent className="p-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabList className="grid grid-cols-3 mb-4">
-            <Tab value="video">Vidéos</Tab>
-            <Tab value="document">Documents</Tab>
-            <Tab value="external">Ressources Externes</Tab>
-          </TabList>
+          <TabsList className="grid grid-cols-3 mb-4">
+            <Tab value="video" className="flex items-center gap-1">
+              <Video className="h-4 w-4" />
+              Vidéos
+            </Tab>
+            <Tab value="document" className="flex items-center gap-1">
+              <BookOpen className="h-4 w-4" />
+              Documents
+            </Tab>
+            <Tab value="external" className="flex items-center gap-1">
+              <Link className="h-4 w-4" />
+              Ressources Externes
+            </Tab>
+          </TabsList>
           
-          <TabPanel value="video" className="pt-2">
+          {activeTab === "video" && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {themes.map(theme => (
+                <Badge 
+                  key={theme} 
+                  variant={selectedTheme === theme ? "default" : "outline"}
+                  className={`cursor-pointer ${selectedTheme === theme ? 'bg-blue-500' : ''}`}
+                  onClick={() => setSelectedTheme(theme)}
+                >
+                  {theme === "all" ? "Toutes les thématiques" : theme}
+                </Badge>
+              ))}
+            </div>
+          )}
+          
+          <TabsContent value="video" className="pt-2">
             <ScrollArea className="h-[400px]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredCourses.map(course => (
-                  <Card key={course.id} className="overflow-hidden border-blue-100 dark:border-blue-900/20">
-                    <div className="relative aspect-video bg-blue-100 dark:bg-blue-900/20">
-                      <img 
-                        src={course.thumbnail || "/placeholder.svg"} 
-                        alt={course.title}
-                        className="w-full h-full object-cover"
-                      />
-                      {course.duration && (
-                        <Badge className="absolute bottom-2 right-2 bg-black/70">
-                          {course.duration}
-                        </Badge>
-                      )}
-                    </div>
-                    <CardContent className="p-3">
-                      <h3 className="font-medium text-base">{course.title}</h3>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                        {course.description}
-                      </p>
-                      <div className="flex justify-between items-center mt-3">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-xs"
-                          onClick={() => window.open(course.url, '_blank')}
-                        >
-                          <Video className="h-3 w-3 mr-1" />
-                          Visionner
-                        </Button>
-                        
-                        {role === 'founder' && (
-                          <div className="flex gap-1">
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              className="h-7 w-7 p-0"
-                              onClick={() => handleEditCourse(course)}
-                            >
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="text-red-500 hover:text-red-700 h-7 w-7 p-0"
-                              onClick={() => handleDeleteCourse(course.id)}
-                            >
-                              <Trash className="h-3 w-3" />
-                            </Button>
-                          </div>
+                {filteredCourses.length > 0 ? (
+                  filteredCourses.map(course => (
+                    <Card key={course.id} className="overflow-hidden border-blue-100 dark:border-blue-900/20 hover:shadow-md transition-shadow">
+                      <div className="relative aspect-video bg-blue-100 dark:bg-blue-900/20">
+                        <img 
+                          src={course.thumbnail || "/placeholder.svg"} 
+                          alt={course.title}
+                          className="w-full h-full object-cover"
+                        />
+                        {course.duration && (
+                          <Badge className="absolute bottom-2 right-2 bg-black/70">
+                            {course.duration}
+                          </Badge>
+                        )}
+                        {course.theme && (
+                          <Badge className="absolute top-2 left-2 bg-blue-500/90">
+                            {course.theme}
+                          </Badge>
                         )}
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      <CardContent className="p-3">
+                        <h3 className="font-medium text-base">{course.title}</h3>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                          {course.description}
+                        </p>
+                        <div className="flex justify-between items-center mt-3">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-xs"
+                            onClick={() => window.open(course.url, '_blank')}
+                          >
+                            <Video className="h-3 w-3 mr-1" />
+                            Visionner
+                          </Button>
+                          
+                          {role === 'founder' && (
+                            <div className="flex gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="h-7 w-7 p-0"
+                                onClick={() => handleEditCourse(course)}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-red-500 hover:text-red-700 h-7 w-7 p-0"
+                                onClick={() => handleDeleteCourse(course.id)}
+                              >
+                                <Trash className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="col-span-2 flex flex-col items-center justify-center py-12 text-center">
+                    <Sparkles className="h-12 w-12 text-blue-200 mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Aucune formation trouvée</h3>
+                    <p className="text-sm text-muted-foreground max-w-md">
+                      {selectedTheme !== "all" 
+                        ? `Aucune formation disponible pour la thématique "${selectedTheme}".` 
+                        : "Aucune formation vidéo n'est disponible pour le moment."}
+                    </p>
+                  </div>
+                )}
               </div>
             </ScrollArea>
-          </TabPanel>
+          </TabsContent>
           
-          <TabPanel value="document" className="pt-2">
+          <TabsContent value="document" className="pt-2">
             <ScrollArea className="h-[400px]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredCourses.map(course => (
@@ -212,7 +291,14 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
                           <BookOpen className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-medium text-base">{course.title}</h3>
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-medium text-base">{course.title}</h3>
+                            {course.theme && (
+                              <Badge variant="outline" className="text-xs">
+                                {course.theme}
+                              </Badge>
+                            )}
+                          </div>
                           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 mb-3">
                             {course.description}
                           </p>
@@ -254,9 +340,9 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
                 ))}
               </div>
             </ScrollArea>
-          </TabPanel>
+          </TabsContent>
           
-          <TabPanel value="external" className="pt-2">
+          <TabsContent value="external" className="pt-2">
             <ScrollArea className="h-[400px]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredCourses.map(course => (
@@ -267,7 +353,14 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
                           <Link className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-medium text-base">{course.title}</h3>
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-medium text-base">{course.title}</h3>
+                            {course.theme && (
+                              <Badge variant="outline" className="text-xs">
+                                {course.theme}
+                              </Badge>
+                            )}
+                          </div>
                           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 mb-3">
                             {course.description}
                           </p>
@@ -309,7 +402,7 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
                 ))}
               </div>
             </ScrollArea>
-          </TabPanel>
+          </TabsContent>
         </Tabs>
       </CardContent>
       
@@ -362,6 +455,25 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
                 <option value="video">Vidéo</option>
                 <option value="document">Document</option>
                 <option value="external">Ressource externe</option>
+              </select>
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="theme">Thématique</Label>
+              <select
+                id="theme"
+                value={editingCourse?.theme || ''}
+                onChange={(e) => setEditingCourse(prev => 
+                  prev ? {...prev, theme: e.target.value} : null
+                )}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">Sélectionner une thématique</option>
+                <option value="Live TikTok">Live TikTok</option>
+                <option value="Contenu">Contenu</option>
+                <option value="Engagement">Engagement</option>
+                <option value="Ressources">Ressources</option>
+                <option value="Marketing">Marketing</option>
               </select>
             </div>
             
