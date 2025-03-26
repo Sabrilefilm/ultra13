@@ -90,7 +90,7 @@ export const useCreatorStats = (role: string | null, username: string | null) =>
     handleSaveSchedule 
   } = useScheduleEditing(fetchCreators);
   
-  // Updated to use the correct function with the right arguments
+  // Just use the hook without passing extra arguments - the hook in use-diamonds-editing.ts only expects one parameter
   const diamondEditingState = useCreatorDiamondsEditing(fetchCreators);
   
   const { 
