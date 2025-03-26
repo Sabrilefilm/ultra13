@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
-import { Footer } from "@/components/layout/Footer";
 
 interface AuthViewProps {
   onLogin: (username: string, password: string) => void;
@@ -27,7 +26,7 @@ export const AuthView = ({
         onClose={() => setIsForgotPasswordModalOpen(false)} 
       />
       
-      <Footer />
+      {/* Footer supprimé */}
     </div>
   );
 };
