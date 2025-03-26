@@ -9,7 +9,7 @@ import { useIndexAuth } from "@/hooks/use-index-auth";
 
 const RewardsManagement = () => {
   const navigate = useNavigate();
-  const { role, username } = useIndexAuth();
+  const { role, username, userId } = useIndexAuth();
 
   // Create username watermark with multiple small instances
   const usernameWatermark = (
@@ -48,7 +48,7 @@ const RewardsManagement = () => {
           <h1 className="text-2xl font-bold">Gestion des Récompenses 🏆</h1>
         </div>
 
-        <RewardsPanel role="founder" userId="founder" />
+        <RewardsPanel role={role || 'founder'} userId={userId || 'founder'} />
         
         <Footer role={role} version="1.3" />
       </div>

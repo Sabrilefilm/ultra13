@@ -398,6 +398,39 @@ export type Database = {
           },
         ]
       }
+      reward_tiers: {
+        Row: {
+          created_at: string | null
+          creator_type: string
+          diamonds_max: number
+          diamonds_min: number
+          id: string
+          reward_amount: number
+          tier: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_type: string
+          diamonds_max?: number
+          diamonds_min?: number
+          id?: string
+          reward_amount?: number
+          tier: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_type?: string
+          diamonds_max?: number
+          diamonds_min?: number
+          id?: string
+          reward_amount?: number
+          tier?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       sponsorships: {
         Row: {
           agent_name: string

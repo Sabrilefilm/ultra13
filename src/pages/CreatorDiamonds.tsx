@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UltraSidebar } from '@/components/layout/UltraSidebar';
@@ -98,7 +99,7 @@ const CreatorDiamonds = () => {
             diamondValue={diamondValue}
             role={role}
             setAgencyGoal={setAgencyGoal}
-            handleUpdateAgencyGoal={(newGoal: number) => handleUpdateAgencyGoal(newGoal)}
+            handleUpdateAgencyGoal={handleUpdateAgencyGoal}
             isEditing={isEditing}
           />
           
