@@ -1,4 +1,3 @@
-
 import { 
   Home, 
   Users, 
@@ -12,7 +11,8 @@ import {
   Trophy, 
   Pen, 
   BookOpen,
-  Diamond
+  Diamond,
+  FileSpreadsheet
 } from "lucide-react";
 import { SidebarItem } from "./types";
 
@@ -125,4 +125,22 @@ export const getAmbassadorItems = (items: SidebarItem[]): SidebarItem[] => {
   });
   
   return newItems;
+};
+
+export const getNavigationItems = (role: string | null, currentPage: string) => {
+  const items = [...navigationItems];
+
+  // Items spécifiques au rôle fondateur
+  if (role === "founder") {
+    items.push(
+      {
+        title: "Importation Excel",
+        icon: <FileSpreadsheet size={16} />,
+        href: "/creator-import",
+        active: currentPage === "creator-import"
+      }
+    );
+  }
+
+  return items;
 };

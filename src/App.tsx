@@ -29,6 +29,7 @@ import Ambassador from './pages/Ambassador';
 import Training from './pages/Training';
 import CreatorDiamonds from './pages/CreatorDiamonds';
 import CreatorRankings from './pages/CreatorRankings';
+import CreatorImport from "./pages/CreatorImport";
 
 function App() {
   const queryClient = new QueryClient();
@@ -66,6 +67,7 @@ function App() {
               <Route path="/training" element={<Training />} />
               <Route path="/creator-diamonds" element={<CreatorDiamonds />} />
               <Route path="/creator-rankings" element={<CreatorRankings />} />
+              <Route path="/creator-import" element={<CreatorImport />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>
