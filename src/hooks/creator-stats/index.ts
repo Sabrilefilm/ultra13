@@ -7,7 +7,7 @@ import { useCreatorRemoval } from "./use-creator-removal";
 import { useStatistics } from "./use-statistics";
 import { Creator } from "@/hooks/diamonds/use-diamond-fetch";
 import { useState as useStateEffect } from "react";
-import { useDiamondsEditing } from "./use-diamonds-editing";
+import { useDiamondsEditing as importedDiamondsEditing } from "./use-diamonds-editing";
 
 // Diamond editing state interface
 export interface DiamondEditingState {
@@ -90,7 +90,7 @@ export const useCreatorStats = (role: string | null, username: string | null) =>
     handleSaveSchedule 
   } = useScheduleEditing(fetchCreators);
   
-  // Import the hook from the file directly instead of using the renamed import
+  // Using the locally defined hook, not the imported one
   const diamondEditingState = useDiamondsEditing(fetchCreators);
   
   const { 
