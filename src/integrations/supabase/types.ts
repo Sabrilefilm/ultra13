@@ -650,6 +650,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_global_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       user_role: "creator" | "manager" | "founder"
