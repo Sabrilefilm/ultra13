@@ -7,6 +7,7 @@ import { useCreatorRemoval } from "./use-creator-removal";
 import { useStatistics } from "./use-statistics";
 import { Creator } from "@/hooks/diamonds/use-diamond-fetch";
 import { useState as useStateEffect } from "react";
+import { useDiamondsEditing as useCreatorDiamondsEditing } from "./use-diamonds-editing";
 
 // Diamond editing state interface
 export interface DiamondEditingState {
@@ -89,7 +90,8 @@ export const useCreatorStats = (role: string | null, username: string | null) =>
     handleSaveSchedule 
   } = useScheduleEditing(fetchCreators);
   
-  const diamondEditingState = useDiamondsEditing(fetchCreators);
+  // Updated to use the correct function with the right arguments
+  const diamondEditingState = useCreatorDiamondsEditing(fetchCreators);
   
   const { 
     removeDialogOpen, 
