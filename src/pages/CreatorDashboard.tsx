@@ -32,6 +32,7 @@ const CreatorDashboard = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [showAnimation, setShowAnimation] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId");
@@ -83,7 +84,13 @@ const CreatorDashboard = () => {
             showAnimation ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
           }`}
         >
-          <WelcomeSection username={username} />
+          <WelcomeSection 
+            username={username} 
+            totalDiamonds={totalDiamonds} 
+            isLoading={isLoading} 
+            onShowGuide={() => setShowGuide(!showGuide)} 
+            showGuide={showGuide} 
+          />
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="col-span-1 md:col-span-2 bg-slate-800/40 border-slate-700/50 backdrop-blur-sm">
@@ -140,7 +147,7 @@ const CreatorDashboard = () => {
                   </div>
                 </div>
                 
-                <DiamondsSection totalDiamonds={totalDiamonds} />
+                <DiamondsSection totalDiamonds={totalDiamonds} isLoading={isLoading} />
               </CardContent>
             </Card>
             
@@ -181,7 +188,11 @@ const CreatorDashboard = () => {
                 </CardContent>
               </Card>
               
-              <NextMatchSection nextMatch={creatorData.nextMatch} formatMatchDate={formatMatchDate} />
+              <NextMatchSection 
+                nextMatch={creatorData.nextMatch} 
+                formatMatchDate={formatMatchDate} 
+                username={username} 
+              />
               
               <UpdatesInfo />
             </div>
@@ -197,7 +208,14 @@ const CreatorDashboard = () => {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="schedule">
-              <CreatorSchedule schedule={creatorData.schedule} />
+              <CreatorSchedule 
+                isLoading={isLoading}
+                hours={creatorData.schedule?.hours || 0}
+                days={creatorData.schedule?.days || 0}
+                weeklyHours={weeklyHours}
+                targetHours={targetHours}
+                targetDays={targetDays}
+              />
             </TabsContent>
             <TabsContent value="rewards">
               <Card className="bg-slate-800/40 border-slate-700/50 backdrop-blur-sm">
