@@ -7,7 +7,7 @@ import { useCreatorRemoval } from "./use-creator-removal";
 import { useStatistics } from "./use-statistics";
 import { Creator } from "@/hooks/diamonds/use-diamond-fetch";
 import { useState as useStateEffect } from "react";
-import { useDiamondsEditing as useCreatorDiamondsEditing } from "./use-diamonds-editing";
+import { useDiamondsEditing } from "./use-diamonds-editing";
 
 // Diamond editing state interface
 export interface DiamondEditingState {
@@ -90,8 +90,8 @@ export const useCreatorStats = (role: string | null, username: string | null) =>
     handleSaveSchedule 
   } = useScheduleEditing(fetchCreators);
   
-  // Just use the hook without passing extra arguments - the hook in use-diamonds-editing.ts only expects one parameter
-  const diamondEditingState = useCreatorDiamondsEditing(fetchCreators);
+  // Import the hook from the file directly instead of using the renamed import
+  const diamondEditingState = useDiamondsEditing(fetchCreators);
   
   const { 
     removeDialogOpen, 

@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 export function useAgencyGoal() {
   const [isEditing, setIsEditing] = useState(false);
 
+  // Updated to ensure it accepts agencyGoal parameter
   const handleUpdateAgencyGoal = async (agencyGoal: number) => {
     try {
       setIsEditing(true);

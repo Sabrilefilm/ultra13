@@ -11,7 +11,7 @@ interface AgencyOverviewProps {
   diamondValue: number;
   role: string;
   setAgencyGoal: (value: number) => void;
-  handleUpdateAgencyGoal: () => Promise<void>;
+  handleUpdateAgencyGoal: (agencyGoal: number) => Promise<void>;
   isEditing: boolean;
 }
 
@@ -50,7 +50,7 @@ export function AgencyOverview({
               <DiamondGoalForm
                 value={agencyGoal}
                 onChange={setAgencyGoal}
-                onSave={handleUpdateAgencyGoal}
+                onSave={() => handleUpdateAgencyGoal(agencyGoal)}
                 isEditing={isEditing}
               />
             ) : (
