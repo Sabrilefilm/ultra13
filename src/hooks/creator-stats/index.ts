@@ -93,12 +93,13 @@ export const useCreatorStats = (role: string | null, username: string | null) =>
   // Using the locally defined hook, not the imported one
   const diamondEditingState = useDiamondsEditing(fetchCreators);
   
+  // Fix: Adding all required arguments to the useCreatorRemoval hook
   const { 
     removeDialogOpen, 
     setRemoveDialogOpen, 
     handleRemoveCreator, 
     confirmRemoveCreator 
-  } = useCreatorRemoval(fetchCreators);
+  } = useCreatorRemoval(creators, setCreators, selectedCreator, setSelectedCreator, fetchCreators);
   
   const { 
     getTotalHours, 
