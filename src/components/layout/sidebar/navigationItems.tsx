@@ -1,3 +1,4 @@
+
 import { 
   Home, 
   Users, 
@@ -109,6 +110,13 @@ export const navigationItems: SidebarItem[] = [
     action: "navigateTo",
     data: "training",
     roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
+  },
+  {
+    icon: FileSpreadsheet,
+    label: "Importation Excel",
+    action: "navigateTo",
+    data: "creator-import",
+    roles: ["founder"]
   }
 ];
 
@@ -128,19 +136,5 @@ export const getAmbassadorItems = (items: SidebarItem[]): SidebarItem[] => {
 };
 
 export const getNavigationItems = (role: string | null, currentPage: string) => {
-  const items = [...navigationItems];
-
-  // Items spécifiques au rôle fondateur
-  if (role === "founder") {
-    items.push(
-      {
-        title: "Importation Excel",
-        icon: <FileSpreadsheet size={16} />,
-        href: "/creator-import",
-        active: currentPage === "creator-import"
-      }
-    );
-  }
-
-  return items;
+  return [...navigationItems];
 };
