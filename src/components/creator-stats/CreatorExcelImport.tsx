@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { FileSpreadsheet, Upload, Loader2, Check, AlertCircle, Search } from "lucide-react";
+import { FileSpreadsheet, Upload, Loader2, Check, AlertCircle, Search, AlertTriangle, RefreshCw } from "lucide-react";
 import { read, utils } from "xlsx";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -19,13 +19,22 @@ export const CreatorExcelImport = () => {
     totalRows: number;
     currentRow: number;
     notFoundCreators: string[];
+    ignoredCreators: string[];
+    updatedProfiles: {
+      username: string;
+      diamonds?: number;
+      hours?: number;
+      days?: number;
+    }[];
   }>({ 
     success: 0, 
     errors: 0, 
     details: [], 
     totalRows: 0, 
     currentRow: 0,
-    notFoundCreators: []
+    notFoundCreators: [],
+    ignoredCreators: [],
+    updatedProfiles: []
   });
   const [showResults, setShowResults] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -66,7 +75,9 @@ export const CreatorExcelImport = () => {
         details: [], 
         totalRows: 0, 
         currentRow: 0,
-        notFoundCreators: []
+        notFoundCreators: [],
+        ignoredCreators: [],
+        updatedProfiles: []
       });
       
       // Lire le fichier Excel
@@ -106,12 +117,19 @@ export const CreatorExcelImport = () => {
       let errorCount = 0;
       let detailsMessages: string[] = [];
       let notFoundCreators: string[] = [];
+      let ignoredCreators: string[] = [];
+      let updatedProfiles: {
+        username: string;
+        diamonds?: number;
+        hours?: number;
+        days?: number;
+      }[] = [];
       
-      // Identifier les colonnes importantes
-      const usernameColumn = findColumn(headers, ["Nom d'utilisateur du/de la créateur(trice)", "username", "nom d'utilisateur", "utilisateur", "creator", "créateur"]);
-      const diamondsColumn = findColumn(headers, ["Diamants", "diamonds", "total_diamonds", "diamant", "nombre de diamants"]);
-      const hoursColumn = findColumn(headers, ["Durée de LIVE", "Durée de LIVE (en heures)", "hours", "heures", "temps de live"]);
-      const daysColumn = findColumn(headers, ["Jours de passage en LIVE", "Jours", "days", "jours", "Jours de passage en LIVE valides"]);
+      // Identifier les colonnes importantes en utilisant une détection plus flexible
+      const usernameColumn = findColumn(headers, ["Nom d'utilisateur du/de la créateur(trice)", "username", "nom d'utilisateur", "utilisateur", "creator", "créateur", "nom", "name"]);
+      const diamondsColumn = findColumn(headers, ["Diamants", "diamonds", "total_diamonds", "diamant", "nombre de diamants", "💎"]);
+      const hoursColumn = findColumn(headers, ["Durée de LIVE", "Durée de LIVE (en heures)", "hours", "heures", "temps de live", "⏱️"]);
+      const daysColumn = findColumn(headers, ["Jours de passage en LIVE", "Jours", "days", "jours", "Jours de passage en LIVE valides", "📅"]);
       
       if (!usernameColumn) {
         toast.error("Aucune colonne pour le nom d'utilisateur du créateur n'a été trouvée");
@@ -124,7 +142,7 @@ export const CreatorExcelImport = () => {
       // Chargement préalable de tous les créateurs pour optimiser la recherche
       const { data: allCreators, error: creatorsError } = await supabase
         .from("user_accounts")
-        .select("id, username")
+        .select("id, username, role")
         .eq("role", "creator");
         
       if (creatorsError) {
@@ -149,9 +167,9 @@ export const CreatorExcelImport = () => {
         
         // Récupérer les valeurs en fonction des en-têtes identifiés
         const creatorUsername = row[usernameColumn];
-        const diamondValue = diamondsColumn ? Number(row[diamondsColumn]) || 0 : undefined;
-        const hoursValue = hoursColumn ? extractNumericValue(row[hoursColumn]) : undefined;
-        const daysValue = daysColumn ? Number(row[daysColumn]) || 0 : undefined;
+        const diamondValue = diamondsColumn && row[diamondsColumn] !== undefined ? Number(row[diamondsColumn]) || 0 : undefined;
+        const hoursValue = hoursColumn && row[hoursColumn] !== undefined ? extractNumericValue(row[hoursColumn]) : undefined;
+        const daysValue = daysColumn && row[daysColumn] !== undefined ? Number(row[daysColumn]) || 0 : undefined;
         
         if (!creatorUsername) {
           detailsMessages.push(`Ligne ${i + 2}: Nom d'utilisateur manquant`);
@@ -161,15 +179,42 @@ export const CreatorExcelImport = () => {
         
         try {
           // Recherche insensible à la casse
-          const normalizedUsername = creatorUsername.toLowerCase();
+          const normalizedUsername = creatorUsername.toLowerCase().trim();
           const creatorData = creatorMap.get(normalizedUsername);
           
+          // Essayer également avec des variantes du nom (sans espace, sans caractères spéciaux)
+          let alternativeCreatorData = null;
           if (!creatorData) {
+            // Essayer de trouver une correspondance approximative
+            for (const [storedUsername, data] of creatorMap.entries()) {
+              // Normaliser en supprimant les espaces et les caractères spéciaux
+              const normalizedStored = storedUsername.toLowerCase()
+                .replace(/[\s_.,-]/g, "")
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "");
+              
+              const normalizedInput = normalizedUsername
+                .replace(/[\s_.,-]/g, "")
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "");
+              
+              if (normalizedStored === normalizedInput) {
+                alternativeCreatorData = data;
+                detailsMessages.push(`Correspondance approximative trouvée pour "${creatorUsername}" → "${data.username}"`);
+                break;
+              }
+            }
+          }
+          
+          const finalCreatorData = creatorData || alternativeCreatorData;
+          
+          if (!finalCreatorData) {
             console.error(`Utilisateur non trouvé: ${creatorUsername}`);
             detailsMessages.push(`Erreur: Créateur "${creatorUsername}" non trouvé dans la base de données`);
             if (!notFoundCreators.includes(creatorUsername)) {
               notFoundCreators.push(creatorUsername);
             }
+            ignoredCreators.push(creatorUsername);
             errorCount++;
             continue;
           }
@@ -180,7 +225,7 @@ export const CreatorExcelImport = () => {
             const { data: existingSchedule, error: scheduleError } = await supabase
               .from("live_schedules")
               .select("id")
-              .eq("creator_id", creatorData.id)
+              .eq("creator_id", finalCreatorData.id)
               .maybeSingle();
               
             if (scheduleError && scheduleError.code !== "PGRST116") {
@@ -191,7 +236,7 @@ export const CreatorExcelImport = () => {
             }
             
             const scheduleData: any = {
-              creator_id: creatorData.id,
+              creator_id: finalCreatorData.id,
               is_active: true
             };
             
@@ -234,6 +279,13 @@ export const CreatorExcelImport = () => {
               if (daysValue !== undefined) creationMessage += `, jours: ${daysValue}j`;
               detailsMessages.push(creationMessage);
             }
+            
+            // Ajouter aux profils mis à jour
+            updatedProfiles.push({
+              username: creatorUsername,
+              hours: hoursValue,
+              days: daysValue
+            });
           }
           
           // Mise à jour des diamants si présent
@@ -243,20 +295,77 @@ export const CreatorExcelImport = () => {
               const { error: diamondsError } = await supabase.rpc(
                 'create_or_update_profile',
                 { 
-                  user_id: creatorData.id,
-                  user_username: creatorData.username,
+                  user_id: finalCreatorData.id,
+                  user_username: finalCreatorData.username,
                   diamonds_value: diamondValue
                 }
               );
                 
               if (diamondsError) {
                 console.error(`Erreur lors de la mise à jour des diamants via RPC: ${creatorUsername}`, diamondsError);
-                detailsMessages.push(`Erreur: Impossible de mettre à jour les diamants pour "${creatorUsername}"`);
-                errorCount++;
-                continue;
+                
+                // Essayer avec une méthode alternative si l'RPC échoue
+                try {
+                  const { data: profileData, error: profileCheckError } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .eq('id', finalCreatorData.id)
+                    .maybeSingle();
+                    
+                  if (profileCheckError) {
+                    throw profileCheckError;
+                  }
+                  
+                  if (profileData) {
+                    // Mettre à jour le profil existant
+                    const { error: updateError } = await supabase
+                      .from('profiles')
+                      .update({ 
+                        total_diamonds: diamondValue,
+                        updated_at: new Date()
+                      })
+                      .eq('id', finalCreatorData.id);
+                      
+                    if (updateError) {
+                      throw updateError;
+                    }
+                  } else {
+                    // Créer un nouveau profil
+                    const { error: insertError } = await supabase
+                      .from('profiles')
+                      .insert({
+                        id: finalCreatorData.id,
+                        username: finalCreatorData.username,
+                        role: finalCreatorData.role || 'creator',
+                        total_diamonds: diamondValue,
+                        created_at: new Date(),
+                        updated_at: new Date()
+                      });
+                      
+                    if (insertError) {
+                      throw insertError;
+                    }
+                  }
+                } catch (alternativeError) {
+                  console.error(`Erreur lors de la tentative alternative de mise à jour des diamants: ${creatorUsername}`, alternativeError);
+                  detailsMessages.push(`Erreur: Impossible de mettre à jour les diamants pour "${creatorUsername}"`);
+                  errorCount++;
+                  continue;
+                }
               }
               
               detailsMessages.push(`Diamants mis à jour pour "${creatorUsername}": ${diamondValue} 💎`);
+              
+              // Ajouter aux profils mis à jour
+              const existingProfileIndex = updatedProfiles.findIndex(p => p.username === creatorUsername);
+              if (existingProfileIndex >= 0) {
+                updatedProfiles[existingProfileIndex].diamonds = diamondValue;
+              } else {
+                updatedProfiles.push({
+                  username: creatorUsername,
+                  diamonds: diamondValue
+                });
+              }
             } catch (error) {
               console.error(`Erreur lors de la mise à jour des diamants: ${creatorUsername}`, error);
               detailsMessages.push(`Erreur: Impossible de mettre à jour les diamants pour "${creatorUsername}"`);
@@ -280,7 +389,9 @@ export const CreatorExcelImport = () => {
         details: detailsMessages,
         totalRows: rowsData.length,
         currentRow: rowsData.length,
-        notFoundCreators
+        notFoundCreators,
+        ignoredCreators,
+        updatedProfiles
       });
       setShowResults(true);
       
@@ -292,6 +403,18 @@ export const CreatorExcelImport = () => {
         toast.error(`Erreur sur ${errorCount} entrées`);
       }
       
+      // Mettre à jour les statistiques globales
+      try {
+        const { error: statsError } = await supabase.rpc('update_global_stats');
+        if (statsError) {
+          console.error("Erreur lors de la mise à jour des statistiques globales:", statsError);
+        } else {
+          console.log("Statistiques globales mises à jour avec succès");
+        }
+      } catch (error) {
+        console.error("Erreur lors de la mise à jour des statistiques:", error);
+      }
+      
     } catch (error) {
       console.error("Erreur lors du traitement du fichier:", error);
       toast.error("Une erreur est survenue lors du traitement du fichier Excel");
@@ -301,7 +424,9 @@ export const CreatorExcelImport = () => {
         details: [`Erreur globale: ${error instanceof Error ? error.message : String(error)}`],
         totalRows: 0,
         currentRow: 0,
-        notFoundCreators: []
+        notFoundCreators: [],
+        ignoredCreators: [],
+        updatedProfiles: []
       });
       setShowResults(true);
     } finally {
@@ -501,23 +626,59 @@ export const CreatorExcelImport = () => {
                 Erreurs: {importResults.errors}
               </div>
             )}
+            {importResults.ignoredCreators.length > 0 && (
+              <div className="bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 px-3 py-1 rounded-full">
+                Ignorés: {importResults.ignoredCreators.length}
+              </div>
+            )}
           </div>
           
+          {importResults.updatedProfiles.length > 0 && (
+            <Alert variant="success" className="mb-4">
+              <RefreshCw className="h-4 w-4" />
+              <AlertTitle>Profils mis à jour avec succès</AlertTitle>
+              <AlertDescription>
+                <div className="mt-2 text-sm max-h-40 overflow-y-auto bg-green-50/50 dark:bg-green-900/10 rounded-md p-2">
+                  {importResults.updatedProfiles.map((profile, index) => (
+                    <div key={index} className="flex flex-wrap gap-2 mb-1 items-center">
+                      <span className="font-medium">{profile.username}</span>
+                      {profile.diamonds !== undefined && (
+                        <span className="bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 px-2 py-0.5 text-xs rounded-full">
+                          💎 {profile.diamonds}
+                        </span>
+                      )}
+                      {profile.hours !== undefined && (
+                        <span className="bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 px-2 py-0.5 text-xs rounded-full">
+                          ⏱️ {profile.hours}h
+                        </span>
+                      )}
+                      {profile.days !== undefined && (
+                        <span className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 px-2 py-0.5 text-xs rounded-full">
+                          📅 {profile.days}j
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {importResults.notFoundCreators.length > 0 && (
-            <Alert className="mb-4 bg-amber-100/50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/30">
-              <Search className="h-4 w-4 text-amber-500" />
-              <AlertTitle className="text-amber-800 dark:text-amber-400">Créateurs non trouvés</AlertTitle>
-              <AlertDescription className="text-amber-700 dark:text-amber-300">
+            <Alert variant="warning" className="mb-4">
+              <Search className="h-4 w-4" />
+              <AlertTitle>Créateurs non trouvés et ignorés</AlertTitle>
+              <AlertDescription>
                 <p className="mb-2">
-                  Les créateurs suivants n'existent pas dans la base de données:
+                  Les créateurs suivants n'existent pas dans la base de données et ont été ignorés:
                 </p>
-                <ul className="list-disc pl-5 space-y-1">
+                <ul className="list-disc pl-5 space-y-1 max-h-40 overflow-y-auto">
                   {importResults.notFoundCreators.map((creator, index) => (
                     <li key={index}>{creator}</li>
                   ))}
                 </ul>
                 <p className="mt-2 text-sm">
-                  Assurez-vous que ces utilisateurs sont bien créés et que les noms correspondent exactement.
+                  Ces entrées ont été ignorées car les créateurs ne sont probablement plus affiliés à l'agence.
                 </p>
               </AlertDescription>
             </Alert>
@@ -530,6 +691,8 @@ export const CreatorExcelImport = () => {
                 className={`py-1 px-2 text-sm ${
                   detail.startsWith("Erreur") 
                     ? "text-red-600 dark:text-red-400" 
+                    : detail.includes("Correspondance approximative") 
+                    ? "text-amber-600 dark:text-amber-400"
                     : "text-green-600 dark:text-green-400"
                 }`}
               >
@@ -537,6 +700,26 @@ export const CreatorExcelImport = () => {
               </div>
             ))}
           </div>
+          
+          <Button 
+            variant="outline" 
+            className="mt-4 bg-slate-100 dark:bg-slate-800"
+            onClick={() => {
+              setShowResults(false);
+              setImportResults({ 
+                success: 0, 
+                errors: 0, 
+                details: [], 
+                totalRows: 0, 
+                currentRow: 0,
+                notFoundCreators: [],
+                ignoredCreators: [],
+                updatedProfiles: []
+              });
+            }}
+          >
+            Fermer
+          </Button>
         </div>
       )}
     </div>
