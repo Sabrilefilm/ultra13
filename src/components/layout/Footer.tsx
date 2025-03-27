@@ -10,15 +10,18 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useAppVersion } from "@/hooks/use-app-version";
 
-interface FooterProps {
+export interface FooterProps {
   role?: string;
   className?: string;
+  version?: string; // Add version prop
 }
 
-export const Footer = ({ role, className = "" }: FooterProps) => {
+export const Footer = ({ role, className = "", version: propVersion }: FooterProps) => {
   const currentYear = new Date().getFullYear();
   const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
-  const { version, updateVersion } = useAppVersion();
+  const { version: hookVersion, updateVersion } = useAppVersion();
+  // Use prop version if provided, otherwise use the version from the hook
+  const version = propVersion || hookVersion;
   const [newVersion, setNewVersion] = useState(version);
   
   const handleUpdateVersion = () => {

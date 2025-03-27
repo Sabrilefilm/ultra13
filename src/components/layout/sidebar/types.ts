@@ -22,3 +22,32 @@ export interface UltraSidebarProps {
   setMobileMenuOpen?: (isOpen: boolean) => void;
   version?: string;
 }
+
+// Add missing interfaces for the sidebar components
+export interface SidebarUserProfileProps {
+  username: string;
+  role: string;
+  collapsed: boolean;
+}
+
+export interface SidebarItem {
+  icon: React.ComponentType<any>;
+  label: string;
+  action: string;
+  data: string | ((role: string) => string);
+  roles: string[];
+  animated?: boolean;
+}
+
+export interface SidebarItemProps {
+  item: SidebarItem;
+  isActive: boolean;
+  onClick: (action: string, data?: any) => void;
+}
+
+export interface SidebarNavigationProps {
+  items: SidebarItem[];
+  currentPage?: string;
+  role: string;
+  onClick: (action: string, data?: any) => void;
+}
