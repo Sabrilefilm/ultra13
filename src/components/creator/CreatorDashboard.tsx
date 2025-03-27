@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserGuide } from "@/components/help/UserGuide";
 import { BarChart4 } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { FounderMessage } from "@/components/dashboard/FounderMessage";
 
 // Import refactored components
 import { WelcomeSection } from "./dashboard/WelcomeSection";
@@ -57,6 +58,8 @@ export const CreatorDashboard = ({
         </CardHeader>
         <CardContent className="pt-6">
           <div className="text-gray-300 space-y-6">
+            <FounderMessage className="mb-6" />
+            
             <div className="flex gap-4 flex-col md:flex-row">
               <WelcomeSection 
                 username={username}

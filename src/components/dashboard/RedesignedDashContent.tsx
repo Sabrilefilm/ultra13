@@ -6,6 +6,7 @@ import { DashboardHeader } from "@/components/dashboard/components/DashboardHead
 import { StandardDashboardContent } from "@/components/dashboard/components/StandardDashboardContent";
 import { PlaceholderPageContent } from "@/components/dashboard/components/PlaceholderPageContent";
 import { SocialCommunityLinks } from "@/components/layout/SocialCommunityLinks";
+import { FounderMessage } from "@/components/dashboard/FounderMessage";
 
 interface RedesignedDashContentProps {
   username: string;
@@ -35,13 +36,14 @@ export const RedesignedDashContent: React.FC<RedesignedDashContentProps> = ({
               username={username}
             />
             <div className="mt-6">
-              <SocialCommunityLinks />
+              <SocialCommunityLinks compact={true} />
             </div>
           </>
         );
       } else if (role === 'creator') {
         return (
           <>
+            <FounderMessage className="mb-6" />
             <CreatorDashboard 
               onOpenSponsorshipForm={() => onAction('openSponsorshipForm')}
               onOpenSponsorshipList={() => onAction('openSponsorshipList')}
@@ -49,17 +51,23 @@ export const RedesignedDashContent: React.FC<RedesignedDashContentProps> = ({
               role={role}
             />
             <div className="mt-6">
-              <SocialCommunityLinks />
+              <SocialCommunityLinks compact={true} />
             </div>
           </>
         );
       } else {
         return (
-          <StandardDashboardContent
-            username={username}
-            role={role}
-            onAction={onAction}
-          />
+          <>
+            <FounderMessage className="mb-6" />
+            <StandardDashboardContent
+              username={username}
+              role={role}
+              onAction={onAction}
+            />
+            <div className="mt-6">
+              <SocialCommunityLinks compact={true} />
+            </div>
+          </>
         );
       }
     } else {

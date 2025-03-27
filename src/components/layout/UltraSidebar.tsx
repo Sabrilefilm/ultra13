@@ -12,6 +12,7 @@ import { navigationItems, getAmbassadorItems } from "./sidebar/navigationItems";
 import { UltraSidebarProps } from "./sidebar/types";
 import { Users } from "lucide-react";
 import { LogoutButton } from "./LogoutButton";
+import { motion } from "framer-motion";
 
 export const UltraSidebar: React.FC<UltraSidebarProps> = ({
   username,
@@ -73,6 +74,24 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
         role={role} 
         collapsed={collapsed} 
       />
+
+      {/* Bouton de déconnexion animé juste après le profil utilisateur */}
+      {!isMobile && role === 'founder' && !collapsed && (
+        <motion.div 
+          className="mx-4 mb-2"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <LogoutButton 
+            onLogout={onLogout} 
+            variant="ghost" 
+            className="w-full justify-center bg-purple-900/20 text-purple-400 hover:bg-purple-900/30 border border-purple-800/30"
+          />
+        </motion.div>
+      )}
       
       <div className="flex-1 overflow-y-auto py-4 bg-sky-950">
         <SidebarNavigation 
