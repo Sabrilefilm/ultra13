@@ -5,6 +5,7 @@ import { useCreatorDashboardStats } from "@/hooks/use-creator-dashboard-stats";
 import { StatsCardGrid } from "./components/StatsCardGrid";
 import { UpdateNotice } from "./components/UpdateNotice";
 import { ObjectiveWarning } from "./components/ObjectiveWarning";
+import { PerformanceStats } from "./components/PerformanceStats";
 
 interface CreatorStatsProps {
   userId?: string;
@@ -20,7 +21,9 @@ const CreatorStats: React.FC<CreatorStatsProps> = ({ userId }) => {
     daysColor,
     diamondsText,
     showWarning,
-    navigate
+    navigate,
+    totalDiamonds,
+    performanceMetrics
   } = useCreatorDashboardStats(userId);
   
   return (
@@ -33,6 +36,15 @@ const CreatorStats: React.FC<CreatorStatsProps> = ({ userId }) => {
         diamondsText={diamondsText}
         hoursColor={hoursColor}
         daysColor={daysColor}
+      />
+      
+      <PerformanceStats 
+        performanceMetrics={performanceMetrics}
+        totalDiamonds={totalDiamonds}
+        requiredHours={requiredHours}
+        requiredDays={requiredDays}
+        currentHours={monthlyHours}
+        currentDays={liveSchedule?.days || 0}
       />
       
       <UpdateNotice />

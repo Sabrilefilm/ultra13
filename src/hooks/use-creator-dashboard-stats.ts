@@ -25,6 +25,12 @@ export const useCreatorDashboardStats = (userId?: string) => {
   const [totalDiamonds, setTotalDiamonds] = useState(0);
   const [diamondsText, setDiamondsText] = useState("Chargement...");
   const [username, setUsername] = useState("");
+  const [performanceMetrics, setPerformanceMetrics] = useState({
+    hoursCompletion: 0,
+    daysCompletion: 0,
+    diamondsRating: "Bon",
+    overallScore: 0
+  });
 
   // Target values for creator
   const requiredHours = 30;
@@ -76,7 +82,28 @@ export const useCreatorDashboardStats = (userId?: string) => {
           nextMatch: matchData || undefined
         });
 
-        setDiamondsText(`${totalDiamonds.toLocaleString()} 💎`);
+        // Calculate performance metrics
+        const hoursCompletion = Math.min(100, Math.round(((scheduleData?.hours || 0) / requiredHours) * 100));
+        const daysCompletion = Math.min(100, Math.round(((scheduleData?.days || 0) / requiredDays) * 100));
+        
+        // Determine diamonds rating
+        let diamondsRating = "Insuffisant";
+        if (profileData?.total_diamonds >= 5000) diamondsRating = "Excellent";
+        else if (profileData?.total_diamonds >= 2000) diamondsRating = "Très Bon";
+        else if (profileData?.total_diamonds >= 1000) diamondsRating = "Bon";
+        else if (profileData?.total_diamonds >= 500) diamondsRating = "Moyen";
+        
+        // Calculate overall score (0-100)
+        const overallScore = Math.round((hoursCompletion + daysCompletion + (profileData?.total_diamonds / 50 || 0)) / 3);
+        
+        setPerformanceMetrics({
+          hoursCompletion,
+          daysCompletion,
+          diamondsRating,
+          overallScore: Math.min(100, overallScore)
+        });
+
+        setDiamondsText(`${(profileData?.total_diamonds || 0).toLocaleString()} 💎`);
       } catch (error) {
         console.error("Error fetching creator stats:", error);
       } finally {
@@ -85,7 +112,7 @@ export const useCreatorDashboardStats = (userId?: string) => {
     };
 
     fetchCreatorData();
-  }, [userId]);
+  }, [userId, requiredHours, requiredDays]);
 
   const formatMatchDate = (dateString?: string) => {
     if (!dateString) return "";
@@ -113,6 +140,7 @@ export const useCreatorDashboardStats = (userId?: string) => {
     isLoading,
     totalDiamonds,
     username,
-    formatMatchDate
+    formatMatchDate,
+    performanceMetrics
   };
 };

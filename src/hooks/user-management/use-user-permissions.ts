@@ -6,9 +6,12 @@ export const useUserPermissions = (userRole: string) => {
     const isFounder = userRole === 'founder';
     const isManager = userRole === 'manager';
     const isAgent = userRole === 'agent';
+    const isCreator = userRole === 'creator';
+    const isAmbassadeur = userRole === 'ambassadeur';
     
     // Seul le fondateur peut voir et modifier les mots de passe
     const canSeePasswords = isFounder;
+    const canEditPasswords = isFounder;
     
     // Définit qui peut modifier les rôles et sous quelles conditions
     const canChangeRole = (userToChange: { role: string }, newRole: string): boolean => {
@@ -27,14 +30,25 @@ export const useUserPermissions = (userRole: string) => {
       return isFounder || (isManager && userToDelete.role !== 'manager');
     };
     
+    // Détermine qui peut voir les détails de performance
+    const canSeeDetailedPerformance = isFounder || isManager || (isCreator && userRole === 'creator');
+    
+    // Détermine qui peut voir le résumé de performance
+    const canSeeSummaryPerformance = isFounder || isManager || isAgent;
+    
     return {
       isFounder,
       isManager,
       isAgent,
+      isCreator,
+      isAmbassadeur,
       canSeePasswords,
+      canEditPasswords,
       canChangeRole,
       canEditUsername,
       canDeleteUser,
+      canSeeDetailedPerformance,
+      canSeeSummaryPerformance
     };
   }, [userRole]);
 };

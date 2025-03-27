@@ -5,9 +5,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
-import { format } from "date-fns";
+import { format, formatDistance, addDays, isAfter } from "date-fns";
 import { fr } from "date-fns/locale";
-import { AlertOctagon, CheckCircle, XCircle } from "lucide-react";
+import { AlertOctagon, CheckCircle, Calendar } from "lucide-react";
+import { useUserPermissions } from "@/hooks/user-management/use-user-permissions";
 
 interface PenaltyListProps {
   penalties: any[];
@@ -19,6 +20,7 @@ interface PenaltyListProps {
 export const PenaltyList = ({ penalties, loading, onRefresh, role }: PenaltyListProps) => {
   const { toast } = useToast();
   const [changingStatus, setChangingStatus] = useState<string | null>(null);
+  const permissions = useUserPermissions(role);
 
   const canManagePenalties = ['founder', 'manager', 'agent'].includes(role);
 
@@ -47,6 +49,28 @@ export const PenaltyList = ({ penalties, loading, onRefresh, role }: PenaltyList
     } finally {
       setChangingStatus(null);
     }
+  };
+
+  // Calcule la date de fin de suspension
+  const calculateSuspensionEndDate = (createdAt: string, durationDays: number) => {
+    const startDate = new Date(createdAt);
+    const endDate = addDays(startDate, durationDays);
+    return endDate;
+  };
+
+  // Vérifie si la pénalité est encore active dans le temps
+  const isPenaltyActive = (createdAt: string, durationDays: number) => {
+    const endDate = calculateSuspensionEndDate(createdAt, durationDays);
+    return isAfter(endDate, new Date());
+  };
+
+  // Formate pour afficher la durée restante
+  const formatRemainingDuration = (createdAt: string, durationDays: number) => {
+    const endDate = calculateSuspensionEndDate(createdAt, durationDays);
+    if (isAfter(endDate, new Date())) {
+      return formatDistance(endDate, new Date(), { addSuffix: true, locale: fr });
+    }
+    return "Terminée";
   };
 
   if (loading) {
@@ -85,63 +109,79 @@ export const PenaltyList = ({ penalties, loading, onRefresh, role }: PenaltyList
           <TableHead className="text-gray-400">Raison</TableHead>
           <TableHead className="text-gray-400">Durée</TableHead>
           <TableHead className="text-gray-400">Date</TableHead>
-          <TableHead className="text-gray-400">Statut</TableHead>
+          <TableHead className="text-gray-400">Status</TableHead>
+          <TableHead className="text-gray-400">Fin de suspension</TableHead>
           {canManagePenalties && <TableHead className="text-gray-400">Actions</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>
-        {penalties.map((penalty) => (
-          <TableRow key={penalty.id} className="border-gray-700 hover:bg-slate-800/50">
-            <TableCell className="text-white">
-              {penalty.user_accounts?.username || "Inconnu"}
-            </TableCell>
-            <TableCell className="text-white">{penalty.reason}</TableCell>
-            <TableCell className="text-white">
-              {penalty.duration_days} jour{penalty.duration_days > 1 ? 's' : ''}
-            </TableCell>
-            <TableCell className="text-white">
-              {format(new Date(penalty.created_at), 'dd MMM yyyy', { locale: fr })}
-            </TableCell>
-            <TableCell>
-              <div className={`px-2 py-1 rounded-full text-xs font-medium inline-flex items-center ${
-                penalty.active 
-                  ? 'bg-red-500/20 text-red-400 border border-red-600/30' 
-                  : 'bg-green-500/20 text-green-400 border border-green-600/30'
-              }`}>
-                {penalty.active ? (
-                  <>
-                    <AlertOctagon className="h-3 w-3 mr-1" />
-                    Active
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Inactif
-                  </>
-                )}
-              </div>
-            </TableCell>
-            {canManagePenalties && (
-              <TableCell>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => togglePenaltyActive(penalty.id, penalty.active)}
-                  disabled={changingStatus === penalty.id}
-                  className={penalty.active ? 'text-green-400' : 'text-red-400'}
-                >
-                  {changingStatus === penalty.id ? (
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  ) : penalty.active ? (
-                    'Désactiver'
-                  ) : (
-                    'Activer'
-                  )}
-                </Button>
+        {penalties.map((penalty) => {
+          const endDate = calculateSuspensionEndDate(penalty.created_at, penalty.duration_days);
+          const isTimeActive = isPenaltyActive(penalty.created_at, penalty.duration_days);
+          const remainingTime = formatRemainingDuration(penalty.created_at, penalty.duration_days);
+          
+          return (
+            <TableRow key={penalty.id} className="border-gray-700 hover:bg-slate-800/50">
+              <TableCell className="text-white">
+                {penalty.user_accounts?.username || "Inconnu"}
               </TableCell>
-            )}
-          </TableRow>
-        ))}
+              <TableCell className="text-white">{penalty.reason}</TableCell>
+              <TableCell className="text-white">
+                {penalty.duration_days} jour{penalty.duration_days > 1 ? 's' : ''}
+              </TableCell>
+              <TableCell className="text-white">
+                {format(new Date(penalty.created_at), 'dd MMM yyyy', { locale: fr })}
+              </TableCell>
+              <TableCell>
+                <div className={`px-2 py-1 rounded-full text-xs font-medium inline-flex items-center ${
+                  penalty.active && isTimeActive
+                    ? 'bg-red-500/20 text-red-400 border border-red-600/30' 
+                    : 'bg-green-500/20 text-green-400 border border-green-600/30'
+                }`}>
+                  {penalty.active && isTimeActive ? (
+                    <>
+                      <AlertOctagon className="h-3 w-3 mr-1" />
+                      Active
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Inactive
+                    </>
+                  )}
+                </div>
+              </TableCell>
+              <TableCell className="text-white">
+                <div className="flex items-center">
+                  <Calendar className="h-4 w-4 mr-2 text-blue-400" />
+                  <span>
+                    {format(endDate, 'dd MMM yyyy', { locale: fr })}
+                    <div className="text-xs text-gray-400">{remainingTime}</div>
+                  </span>
+                </div>
+              </TableCell>
+              {canManagePenalties && (
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => togglePenaltyActive(penalty.id, penalty.active)}
+                    disabled={changingStatus === penalty.id}
+                    className={penalty.active ? 'text-green-400' : 'text-red-400'}
+                  >
+                    {changingStatus === penalty.id ? (
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : penalty.active ? (
+                      'Désactiver'
+                    ) : (
+                      'Activer'
+                    )}
+                  </Button>
+                </TableCell>
+              )}
+            </TableRow>
+          );
+        })}
       </TableBody>
     </Table>
   );

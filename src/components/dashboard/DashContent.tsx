@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { RoleStats } from "@/components/dashboard/RoleStats";
 import { UpcomingMatches } from "@/components/dashboard/UpcomingMatches";
@@ -10,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { InternalRulesContent } from "@/components/rules/InternalRulesContent";
 import { CreatorRulesContent } from "@/components/rules/CreatorRulesContent";
 import { useNavigate } from "react-router-dom";
+import { useUserPermissions } from "@/hooks/user-management/use-user-permissions";
 
 interface DashContentProps {
   username: string;
@@ -25,6 +27,7 @@ export const DashContent = ({
   onAction
 }: DashContentProps) => {
   const navigate = useNavigate();
+  const permissions = useUserPermissions(role);
 
   const renderPageContent = () => {
     switch (currentPage) {
@@ -63,7 +66,7 @@ export const DashContent = ({
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <Card className="bg-[#1e1f2e]/90 backdrop-blur-sm border border-gray-800/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
                 <h3 className="text-xl font-semibold mb-4 text-white/90">Statistiques</h3>
-                <RoleStats role={role} userId={username} />
+                <RoleStats role={role} userId={localStorage.getItem('userId') || undefined} />
               </Card>
               <Card className="bg-[#1e1f2e]/90 backdrop-blur-sm border border-gray-800/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
                 <h3 className="text-xl font-semibold mb-4 text-white/90">Matchs à venir</h3>

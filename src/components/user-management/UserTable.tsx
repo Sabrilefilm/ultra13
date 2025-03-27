@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Account } from "@/types/accounts";
 import { UserTableRow } from "./UserTableRow";
 import { UserTableHeader } from "./UserTableHeader";
+import { useUserPermissions } from "@/hooks/user-management/use-user-permissions";
 
 interface UserTableProps {
   users: Account[];
@@ -44,9 +45,8 @@ export const UserTable: React.FC<UserTableProps> = ({
   onPasswordEdit,
   onPasswordSave
 }) => {
-  // Seul le fondateur peut voir et modifier les mots de passe
-  const isFounder = userRole === 'founder';
-  const canSeePasswords = isFounder;
+  const permissions = useUserPermissions(userRole);
+  const canSeePasswords = permissions.canSeePasswords;
 
   return (
     <Card>
@@ -56,7 +56,7 @@ export const UserTable: React.FC<UserTableProps> = ({
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <UserTableHeader canSeePasswords={canSeePasswords} />
+            <UserTableHeader canSeePasswords={canSeePasswords} userRole={userRole} />
             <tbody>
               {users.map((user) => (
                 <UserTableRow
@@ -78,6 +78,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                   onPasswordEdit={onPasswordEdit || (() => {})}
                   onPasswordSave={onPasswordSave || (() => {})}
                   canSeePasswords={canSeePasswords}
+                  canEditPasswords={permissions.canEditPasswords}
                 />
               ))}
             </tbody>
