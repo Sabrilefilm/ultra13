@@ -8,7 +8,6 @@ import { LiveStatistics } from "./LiveStatistics";
 import { SidebarContent } from "./SidebarContent";
 import { DashboardTabs } from "./DashboardTabs";
 import { UserGuide } from "@/components/help/UserGuide";
-import { FounderMessage } from "@/components/dashboard/FounderMessage";
 import useCreatorData from "./useCreatorData";
 
 interface DashboardProps {
@@ -69,8 +68,6 @@ export const Dashboard = ({ role }: DashboardProps) => {
         showAnimation ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       }`}
     >
-      <FounderMessage className="mb-6" />
-      
       <WelcomeSection 
         username={username} 
         totalDiamonds={totalDiamonds} 

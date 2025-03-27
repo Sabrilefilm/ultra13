@@ -6,10 +6,9 @@ import { CommunityLinkButton } from "./CommunityLinkButton";
 
 interface CommunityLinksProps {
   isVisible: boolean;
-  compact?: boolean;
 }
 
-export const CommunityLinks: React.FC<CommunityLinksProps> = ({ isVisible, compact = false }) => {
+export const CommunityLinks: React.FC<CommunityLinksProps> = ({ isVisible }) => {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const links = getCommunityLinks();
 
@@ -28,7 +27,7 @@ export const CommunityLinks: React.FC<CommunityLinksProps> = ({ isVisible, compa
   };
 
   return (
-    <div className={`grid grid-cols-1 ${compact ? 'gap-2' : 'gap-4'}`}>
+    <div className="grid grid-cols-1 gap-4">
       {links.map((link, index) => (
         <motion.div 
           key={index} 
@@ -40,7 +39,6 @@ export const CommunityLinks: React.FC<CommunityLinksProps> = ({ isVisible, compa
           <CommunityLinkButton 
             {...link}
             isHovered={hoverIndex === index}
-            compact={compact}
           />
         </motion.div>
       ))}
