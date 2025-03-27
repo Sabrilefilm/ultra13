@@ -3,12 +3,21 @@ import React from "react";
 import { motion, Variants } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface LogOutButtonProps {
   onLogout: () => void;
 }
 
 export const LogOutButton = ({ onLogout }: LogOutButtonProps) => {
+  const navigate = useNavigate();
+  
+  const handleLogout = () => {
+    onLogout();
+    // Rediriger vers la page d'authentification après la déconnexion
+    navigate("/");
+  };
+  
   const buttonVariants: Variants = {
     rest: { 
       scale: 1,
@@ -53,7 +62,7 @@ export const LogOutButton = ({ onLogout }: LogOutButtonProps) => {
       className="overflow-hidden"
     >
       <Button
-        onClick={onLogout}
+        onClick={handleLogout}
         variant="ghost"
         className="w-16 h-16 rounded-lg p-0 bg-gradient-to-r from-purple-800/20 to-indigo-800/20 border border-purple-500/30 hover:shadow-glow hover:shadow-purple-500/20"
       >

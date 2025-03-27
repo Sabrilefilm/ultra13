@@ -9,6 +9,7 @@ export const useUserEditing = (refetch: () => void) => {
   const [editingUser, setEditingUser] = useState<Account | null>(null);
   const [editedUsername, setEditedUsername] = useState("");
   const [showPasswords, setShowPasswords] = useState<{[key: string]: boolean}>({});
+  const [editingPassword, setEditingPassword] = useState<{userId: string, value: string} | null>(null);
 
   const handleUsernameEdit = (user: Account) => {
     setEditingUser(user);
@@ -49,6 +50,43 @@ export const useUserEditing = (refetch: () => void) => {
     }
   };
 
+  const handlePasswordEdit = (userId: string) => {
+    setEditingPassword({ userId, value: "" });
+  };
+
+  const handlePasswordSave = async () => {
+    if (!editingPassword) return;
+
+    try {
+      const { error } = await supabase
+        .from("user_accounts")
+        .update({ password: editingPassword.value })
+        .eq("id", editingPassword.userId);
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Erreur!",
+          description: "Impossible de modifier le mot de passe.",
+        });
+        return;
+      }
+
+      toast({
+        title: "Succès!",
+        description: "Mot de passe modifié avec succès.",
+      });
+      setEditingPassword(null);
+      refetch();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur!",
+        description: "Une erreur s'est produite lors de la modification du mot de passe.",
+      });
+    }
+  };
+
   const togglePasswordVisibility = (userId: string) => {
     setShowPasswords(prevState => ({
       ...prevState,
@@ -62,8 +100,12 @@ export const useUserEditing = (refetch: () => void) => {
     editedUsername, 
     setEditedUsername,
     showPasswords,
+    editingPassword,
+    setEditingPassword,
     handleUsernameEdit,
     handleUsernameSave,
+    handlePasswordEdit,
+    handlePasswordSave,
     togglePasswordVisibility
   };
 };

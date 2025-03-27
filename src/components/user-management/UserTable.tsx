@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Account } from "@/types/accounts";
-import { Eye, EyeOff, Edit, Check, X, Shield, Trash, UserRound, Users, Pen } from "lucide-react";
+import { Eye, EyeOff, Edit, Check, X, Shield, Trash, UserRound, Users, Pen, KeyRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface UserTableProps {
@@ -21,6 +21,10 @@ interface UserTableProps {
   showPasswords: { [key: string]: boolean };
   togglePasswordVisibility: (userId: string) => void;
   userRole?: string;
+  editingPassword?: {userId: string, value: string} | null;
+  setEditingPassword?: (value: {userId: string, value: string} | null) => void;
+  onPasswordEdit?: (userId: string) => void;
+  onPasswordSave?: () => void;
 }
 
 export const UserTable: React.FC<UserTableProps> = ({
@@ -36,13 +40,17 @@ export const UserTable: React.FC<UserTableProps> = ({
   setEditedUsername,
   showPasswords,
   togglePasswordVisibility,
-  userRole = 'creator'
+  userRole = 'creator',
+  editingPassword,
+  setEditingPassword,
+  onPasswordEdit,
+  onPasswordSave
 }) => {
   const navigate = useNavigate();
   const isFounder = userRole === 'founder';
   const isManager = userRole === 'manager';
   
-  // Seul le fondateur peut voir les mots de passe
+  // Seul le fondateur peut voir et modifier les mots de passe
   const canSeePasswords = isFounder;
   
   // Les managers ne peuvent attribuer que le rôle d'agent ou ambassadeur aux créateurs
@@ -138,21 +146,62 @@ export const UserTable: React.FC<UserTableProps> = ({
                   </td>
                   {canSeePasswords && (
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <span>{showPasswords[user.id] ? user.password : '••••••••'}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => togglePasswordVisibility(user.id)}
-                        >
-                          {showPasswords[user.id] ? (
-                            <EyeOff className="h-3 w-3" />
-                          ) : (
-                            <Eye className="h-3 w-3" />
+                      {editingPassword && editingPassword.userId === user.id ? (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="text"
+                            value={editingPassword.value}
+                            onChange={(e) => setEditingPassword && setEditingPassword({
+                              userId: user.id,
+                              value: e.target.value
+                            })}
+                            className="h-8 bg-background"
+                            placeholder="Nouveau mot de passe"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={onPasswordSave}
+                          >
+                            <Check className="h-4 w-4 text-green-500" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setEditingPassword && setEditingPassword(null)}
+                          >
+                            <X className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span>{showPasswords[user.id] ? user.password : '••••••••'}</span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => togglePasswordVisibility(user.id)}
+                          >
+                            {showPasswords[user.id] ? (
+                              <EyeOff className="h-3 w-3" />
+                            ) : (
+                              <Eye className="h-3 w-3" />
+                            )}
+                          </Button>
+                          {isFounder && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 opacity-50 hover:opacity-100"
+                              onClick={() => onPasswordEdit && onPasswordEdit(user.id)}
+                            >
+                              <KeyRound className="h-3 w-3" />
+                            </Button>
                           )}
-                        </Button>
-                      </div>
+                        </div>
+                      )}
                     </td>
                   )}
                   <td className="px-4 py-3">

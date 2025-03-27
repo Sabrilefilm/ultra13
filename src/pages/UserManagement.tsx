@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -37,11 +36,15 @@ const UserManagement = () => {
     pendingRoleChange,
     setPendingRoleChange,
     showPasswords,
+    editingPassword,
+    setEditingPassword,
     handleDeleteUser,
     handleRoleChangeConfirm,
     handleRoleChange,
     handleUsernameEdit,
     handleUsernameSave,
+    handlePasswordEdit,
+    handlePasswordSave,
     handleViewDetails,
     togglePasswordVisibility,
     resetAllSchedules
@@ -55,13 +58,11 @@ const UserManagement = () => {
       return;
     }
     
-    // Fix: Allow both founder and manager roles to access user management
     if (role !== 'founder' && role !== 'manager' && role !== 'agent') {
       navigate('/');
     }
   }, [role, navigate, isAuthenticated]);
 
-  // Username watermark
   const usernameWatermark = (
     <div className="fixed inset-0 pointer-events-none select-none z-0 flex items-center justify-center">
       <div className="w-full h-full flex items-center justify-center rotate-[-30deg]">
@@ -72,20 +73,16 @@ const UserManagement = () => {
     </div>
   );
 
-  // Only show loading or null if user isn't authenticated yet
   if (!isAuthenticated) {
     return null;
   }
 
-  // Define privileges based on role
   const isFounder = role === 'founder';
   const isManager = role === 'manager';
   const isAgent = role === 'agent';
   
-  // Only founder and manager can fully access this page
   const hasFullAccess = isFounder || isManager;
   
-  // Agents have limited access
   if (isAgent && !hasFullAccess) {
     return (
       <SidebarProvider defaultOpen={true}>
@@ -242,6 +239,10 @@ const UserManagement = () => {
                     showPasswords={showPasswords}
                     togglePasswordVisibility={togglePasswordVisibility}
                     userRole={role}
+                    editingPassword={editingPassword}
+                    setEditingPassword={setEditingPassword}
+                    onPasswordEdit={handlePasswordEdit}
+                    onPasswordSave={handlePasswordSave}
                   />
                 )}
                 {users.creator.length > 0 && (
@@ -259,6 +260,10 @@ const UserManagement = () => {
                     showPasswords={showPasswords}
                     togglePasswordVisibility={togglePasswordVisibility}
                     userRole={role}
+                    editingPassword={editingPassword}
+                    setEditingPassword={setEditingPassword}
+                    onPasswordEdit={handlePasswordEdit}
+                    onPasswordSave={handlePasswordSave}
                   />
                 )}
                 {users.agent.length > 0 && (
@@ -276,6 +281,10 @@ const UserManagement = () => {
                     showPasswords={showPasswords}
                     togglePasswordVisibility={togglePasswordVisibility}
                     userRole={role}
+                    editingPassword={editingPassword}
+                    setEditingPassword={setEditingPassword}
+                    onPasswordEdit={handlePasswordEdit}
+                    onPasswordSave={handlePasswordSave}
                   />
                 )}
               </div>

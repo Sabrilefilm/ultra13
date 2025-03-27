@@ -31,8 +31,12 @@ export const useUserManagement = () => {
     editedUsername,
     setEditedUsername,
     showPasswords,
+    editingPassword,
+    setEditingPassword,
     handleUsernameEdit,
     handleUsernameSave,
+    handlePasswordEdit,
+    handlePasswordSave,
     togglePasswordVisibility
   } = useUserEditing(refetch);
 
@@ -71,6 +75,12 @@ export const useUserManagement = () => {
     setEditedUsername,
     handleUsernameEdit,
     handleUsernameSave,
+    
+    // Password editing
+    editingPassword,
+    setEditingPassword,
+    handlePasswordEdit,
+    handlePasswordSave,
     
     // Password visibility
     showPasswords,
