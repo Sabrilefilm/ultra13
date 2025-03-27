@@ -47,6 +47,7 @@ export const UserTable: React.FC<UserTableProps> = ({
 }) => {
   const permissions = useUserPermissions(userRole);
   const canSeePasswords = permissions.canSeePasswords;
+  const canEditPasswords = permissions.canEditPasswords;
 
   return (
     <Card>
@@ -78,7 +79,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                   onPasswordEdit={onPasswordEdit || (() => {})}
                   onPasswordSave={onPasswordSave || (() => {})}
                   canSeePasswords={canSeePasswords}
-                  canEditPasswords={permissions.canEditPasswords}
+                  canEditPasswords={canEditPasswords}
                 />
               ))}
             </tbody>

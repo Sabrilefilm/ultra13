@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +23,7 @@ interface UserTableRowProps {
   onPasswordEdit: (userId: string) => void;
   onPasswordSave: () => void;
   canSeePasswords: boolean;
+  canEditPasswords: boolean;
 }
 
 export const UserTableRow: React.FC<UserTableRowProps> = ({
@@ -43,13 +43,13 @@ export const UserTableRow: React.FC<UserTableRowProps> = ({
   setEditingPassword,
   onPasswordEdit,
   onPasswordSave,
-  canSeePasswords
+  canSeePasswords,
+  canEditPasswords
 }) => {
   const navigate = useNavigate();
   const isFounder = userRole === 'founder';
   const isManager = userRole === 'manager';
   
-  // Les managers ne peuvent attribuer que le rôle d'agent ou ambassadeur aux créateurs
   const canChangeRole = (newRole: string) => {
     if (isFounder) return true;
     if (isManager && user.role === 'creator' && (newRole === 'agent' || newRole === 'ambassadeur')) return true;
@@ -168,7 +168,7 @@ export const UserTableRow: React.FC<UserTableRowProps> = ({
                   <Eye className="h-3 w-3" />
                 )}
               </Button>
-              {isFounder && (
+              {canEditPasswords && (
                 <Button
                   variant="ghost"
                   size="icon"
