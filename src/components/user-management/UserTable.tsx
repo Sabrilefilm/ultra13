@@ -1,11 +1,9 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Account } from "@/types/accounts";
-import { Eye, EyeOff, Edit, Check, X, Shield, Trash, UserRound, Users, Pen, KeyRound } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { UserTableRow } from "./UserTableRow";
+import { UserTableHeader } from "./UserTableHeader";
 
 interface UserTableProps {
   users: Account[];
@@ -46,19 +44,9 @@ export const UserTable: React.FC<UserTableProps> = ({
   onPasswordEdit,
   onPasswordSave
 }) => {
-  const navigate = useNavigate();
-  const isFounder = userRole === 'founder';
-  const isManager = userRole === 'manager';
-  
   // Seul le fondateur peut voir et modifier les mots de passe
+  const isFounder = userRole === 'founder';
   const canSeePasswords = isFounder;
-  
-  // Les managers ne peuvent attribuer que le rôle d'agent ou ambassadeur aux créateurs
-  const canChangeRole = (user: Account, newRole: string) => {
-    if (isFounder) return true;
-    if (isManager && user.role === 'creator' && (newRole === 'agent' || newRole === 'ambassadeur')) return true;
-    return false;
-  };
 
   return (
     <Card>
@@ -68,213 +56,29 @@ export const UserTable: React.FC<UserTableProps> = ({
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="px-4 py-2 text-left">Nom d'utilisateur</th>
-                <th className="px-4 py-2 text-left">Rôle</th>
-                {canSeePasswords && <th className="px-4 py-2 text-left">Mot de passe</th>}
-                <th className="px-4 py-2 text-left">Affiliation</th>
-                <th className="px-4 py-2 text-right">Actions</th>
-              </tr>
-            </thead>
+            <UserTableHeader canSeePasswords={canSeePasswords} />
             <tbody>
               {users.map((user) => (
-                <tr key={user.id} className="border-b last:border-b-0 hover:bg-secondary/10">
-                  <td className="px-4 py-3">
-                    {editingUser?.id === user.id ? (
-                      <div className="flex items-center gap-2">
-                        <Input
-                          value={editedUsername}
-                          onChange={(e) => setEditedUsername(e.target.value)}
-                          className="h-8 bg-background"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={onUsernameSave}
-                        >
-                          <Check className="h-4 w-4 text-green-500" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => onUsernameEdit(null as any)}
-                        >
-                          <X className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        {user.username}
-                        {(isFounder || (isManager && user.role === 'creator')) && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 opacity-50 hover:opacity-100"
-                            onClick={() => onUsernameEdit(user)}
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    {(isFounder || (isManager && user.role === 'creator')) ? (
-                      <select
-                        value={user.role}
-                        onChange={(e) => {
-                          if (canChangeRole(user, e.target.value)) {
-                            onRoleChange(user.id, e.target.value, user.username);
-                          }
-                        }}
-                        className="bg-secondary/20 rounded px-2 py-1 text-sm"
-                        disabled={!canChangeRole(user, 'agent')}
-                      >
-                        {isFounder && <option value="manager">Manager</option>}
-                        <option value="creator">Créateur</option>
-                        <option value="agent">Agent</option>
-                        <option value="ambassadeur">Ambassadeur</option>
-                      </select>
-                    ) : (
-                      <span className="bg-secondary/20 rounded px-2 py-1 text-sm">
-                        {user.role}
-                      </span>
-                    )}
-                  </td>
-                  {canSeePasswords && (
-                    <td className="px-4 py-3">
-                      {editingPassword && editingPassword.userId === user.id ? (
-                        <div className="flex items-center gap-2">
-                          <Input
-                            type="text"
-                            value={editingPassword.value}
-                            onChange={(e) => setEditingPassword && setEditingPassword({
-                              userId: user.id,
-                              value: e.target.value
-                            })}
-                            className="h-8 bg-background"
-                            placeholder="Nouveau mot de passe"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={onPasswordSave}
-                          >
-                            <Check className="h-4 w-4 text-green-500" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => setEditingPassword && setEditingPassword(null)}
-                          >
-                            <X className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <span>{showPasswords[user.id] ? user.password : '••••••••'}</span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => togglePasswordVisibility(user.id)}
-                          >
-                            {showPasswords[user.id] ? (
-                              <EyeOff className="h-3 w-3" />
-                            ) : (
-                              <Eye className="h-3 w-3" />
-                            )}
-                          </Button>
-                          {isFounder && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 opacity-50 hover:opacity-100"
-                              onClick={() => onPasswordEdit && onPasswordEdit(user.id)}
-                            >
-                              <KeyRound className="h-3 w-3" />
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                    </td>
-                  )}
-                  <td className="px-4 py-3">
-                    {user.role === 'creator' ? (
-                      <span>Créateur</span>
-                    ) : user.role === 'agent' ? (
-                      <span>Agent</span>
-                    ) : user.role === 'ambassadeur' ? (
-                      <span>Ambassadeur</span>
-                    ) : (
-                      <span>Manager</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onViewDetails(user.id)}
-                        title="Voir les détails"
-                      >
-                        <UserRound className="h-4 w-4" />
-                      </Button>
-                      
-                      {(isFounder || isManager) && user.role === 'creator' && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => navigate(`/live-schedule/${user.username}`)}
-                          title="Configurer les horaires"
-                        >
-                          <Shield className="h-4 w-4" />
-                        </Button>
-                      )}
-                      
-                      {(isFounder || (isManager && user.role !== 'manager')) && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-red-500 hover:text-red-700"
-                          onClick={() => onDeleteUser(user.id)}
-                          title="Supprimer"
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      )}
-                      
-                      {(isFounder || isManager) && (user.role === 'agent' || user.role === 'ambassadeur') && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="ml-2"
-                          onClick={() => navigate(`/agency-members/${user.id}`)}
-                        >
-                          <Users className="h-4 w-4 mr-1" />
-                          Membres de l'agence
-                        </Button>
-                      )}
-                      
-                      {(isFounder || isManager || userRole === 'agent') && (user.role === 'creator') && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="ml-2"
-                          onClick={() => navigate(`/creator-stats`)}
-                        >
-                          <Pen className="h-4 w-4 mr-1" />
-                          Mes créateurs
-                        </Button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
+                <UserTableRow
+                  key={user.id}
+                  user={user}
+                  onDeleteUser={onDeleteUser}
+                  onViewDetails={onViewDetails}
+                  onRoleChange={onRoleChange}
+                  onUsernameEdit={onUsernameEdit}
+                  onUsernameSave={onUsernameSave}
+                  editingUser={editingUser}
+                  editedUsername={editedUsername}
+                  setEditedUsername={setEditedUsername}
+                  showPasswords={showPasswords}
+                  togglePasswordVisibility={togglePasswordVisibility}
+                  userRole={userRole}
+                  editingPassword={editingPassword || null}
+                  setEditingPassword={setEditingPassword || (() => {})}
+                  onPasswordEdit={onPasswordEdit || (() => {})}
+                  onPasswordSave={onPasswordSave || (() => {})}
+                  canSeePasswords={canSeePasswords}
+                />
               ))}
             </tbody>
           </table>
