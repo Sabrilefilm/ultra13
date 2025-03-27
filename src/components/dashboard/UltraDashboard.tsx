@@ -6,6 +6,8 @@ import { MobileMenuButton } from "@/components/layout/MobileMenuButton";
 import { DashboardContent } from "@/components/layout/DashboardContent";
 import { DashboardModals } from "@/components/layout/DashboardModals";
 import { useDashboardActions } from "@/hooks/use-dashboard-actions";
+import { LogoutButton } from "@/components/layout/LogoutButton";
+import { useAppVersion } from "@/hooks/use-app-version";
 
 interface UltraDashboardProps {
   username: string;
@@ -42,10 +44,16 @@ export const UltraDashboard: React.FC<UltraDashboardProps> = ({
     selectedCreatorId,
     onAction
   } = useDashboardActions({ onLogout });
+  
+  const { version } = useAppVersion();
 
   return (
     <div className="flex flex-col h-screen w-full bg-gradient-to-br from-slate-900 to-slate-950 text-white overflow-hidden">
       <UsernameWatermark username={username} />
+      
+      <div className="fixed top-0 right-0 m-4 z-50 hidden md:block">
+        <LogoutButton onLogout={onLogout} username={username} />
+      </div>
       
       <MobileMenuButton onClick={() => onAction('toggleMobileMenu')} />
       
@@ -62,6 +70,7 @@ export const UltraDashboard: React.FC<UltraDashboardProps> = ({
               currentPage={currentPage}
               isMobileOpen={sidebarStates.mobileMenuOpen}
               setMobileMenuOpen={sidebarStates.setMobileMenuOpen}
+              version={version}
             />
           </div>
         </div>

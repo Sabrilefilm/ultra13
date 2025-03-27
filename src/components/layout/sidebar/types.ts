@@ -1,32 +1,14 @@
 
-import { ReactElement } from "react";
+import { ReactNode } from "react";
 
-export interface SidebarItem {
-  icon: React.ElementType;
-  label: string;
-  action: string;
-  data?: string | ((role: string) => string);
-  roles: string[];
-  animated?: boolean;
-}
-
-export interface SidebarItemProps {
-  item: SidebarItem;
-  isActive: boolean;
-  onClick: (action: string, data?: any) => void;
-}
-
-export interface SidebarNavigationProps {
-  items: SidebarItem[];
-  currentPage?: string;
-  role: string;
-  onClick: (action: string, data?: any) => void;
-}
-
-export interface SidebarUserProfileProps {
-  username: string;
-  role: string;
-  collapsed: boolean;
+export interface NavigationItem {
+  title: string;
+  icon: ReactNode;
+  href?: string;
+  onClick?: (role?: string) => void;
+  mobileFriendly?: boolean;
+  children?: NavigationItem[];
+  roles?: string[];
 }
 
 export interface UltraSidebarProps {
@@ -38,4 +20,5 @@ export interface UltraSidebarProps {
   currentPage?: string;
   isMobileOpen?: boolean;
   setMobileMenuOpen?: (isOpen: boolean) => void;
+  version?: string;
 }

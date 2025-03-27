@@ -11,6 +11,7 @@ import { SidebarMobileClose } from "./sidebar/SidebarMobileClose";
 import { navigationItems, getAmbassadorItems } from "./sidebar/navigationItems";
 import { UltraSidebarProps } from "./sidebar/types";
 import { Users } from "lucide-react";
+import { LogoutButton } from "./LogoutButton";
 
 export const UltraSidebar: React.FC<UltraSidebarProps> = ({
   username,
@@ -20,7 +21,8 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
   onAction,
   currentPage = 'dashboard',
   isMobileOpen,
-  setMobileMenuOpen
+  setMobileMenuOpen,
+  version = "1.0"
 }) => {
   const { collapsed, toggleSidebar } = useSidebar();
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -81,8 +83,23 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
           collapsed={collapsed}
         />
       </div>
+
+      {isMobile && (
+        <div className="p-4 bg-slate-800/50">
+          <LogoutButton 
+            onLogout={onLogout} 
+            username={username} 
+            variant="ghost"
+            className="w-full justify-center bg-red-900/20 text-red-400 hover:bg-red-900/30"
+          />
+        </div>
+      )}
       
-      <SidebarLogout onLogout={onLogout} collapsed={collapsed} />
+      {!collapsed && !isMobile && (
+        <div className="p-3 text-center border-t border-slate-700/50 text-xs text-slate-500">
+          <p>Version {version}</p>
+        </div>
+      )}
     </div>
   );
 };

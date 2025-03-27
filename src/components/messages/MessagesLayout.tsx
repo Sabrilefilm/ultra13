@@ -2,6 +2,7 @@
 import { ReactNode } from 'react';
 import { UltraSidebar } from '@/components/layout/UltraSidebar';
 import { Footer } from '@/components/layout/Footer';
+import { LogoutButton } from '@/components/layout/LogoutButton';
 
 interface MessagesLayoutProps {
   children: ReactNode;
@@ -36,11 +37,16 @@ export function MessagesLayout({
           <div className="absolute bottom-10 left-1/3 w-80 h-80 rounded-full bg-blue-200 dark:bg-blue-800 blur-3xl"></div>
         </div>
         
+        {/* Logout button dans le coin supérieur droit */}
+        <div className="absolute top-4 right-4 z-10">
+          <LogoutButton onLogout={onLogout} username={username} />
+        </div>
+        
         <div className="flex-1 p-4 z-10">
           {children}
         </div>
         
-        <Footer className="mt-auto z-10" />
+        <Footer className="mt-auto z-10" role={role} />
       </div>
     </div>
   );

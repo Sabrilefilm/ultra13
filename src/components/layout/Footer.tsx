@@ -8,18 +8,18 @@ import { Label } from "@/components/ui/label";
 import { Settings, Save } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { useAppVersion } from "@/hooks/use-app-version";
 
 interface FooterProps {
   role?: string;
-  version?: string;
   className?: string;
 }
 
-export const Footer = ({ role, version = "1.0", className = "" }: FooterProps) => {
+export const Footer = ({ role, className = "" }: FooterProps) => {
   const currentYear = new Date().getFullYear();
   const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
+  const { version, updateVersion } = useAppVersion();
   const [newVersion, setNewVersion] = useState(version);
-  const [currentVersion, setCurrentVersion] = useState(version);
   
   const handleUpdateVersion = () => {
     if (!newVersion.trim()) {
@@ -27,7 +27,7 @@ export const Footer = ({ role, version = "1.0", className = "" }: FooterProps) =
       return;
     }
     
-    setCurrentVersion(newVersion);
+    updateVersion(newVersion);
     toast.success(`Version mise à jour vers ${newVersion}`);
     setIsVersionDialogOpen(false);
   };
@@ -54,14 +54,14 @@ export const Footer = ({ role, version = "1.0", className = "" }: FooterProps) =
               onClick={() => setIsVersionDialogOpen(true)}
             >
               <span className="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
-                Version {currentVersion} 🚀
+                Version {version} 🚀
               </span>
               <Settings className="h-3 w-3 opacity-50" />
             </Button>
           </motion.div>
         ) : (
           <p className="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full text-xs">
-            Version {currentVersion} 🚀
+            Version {version} 🚀
           </p>
         )}
         

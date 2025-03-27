@@ -8,6 +8,7 @@ import { DocumentUploadDialog } from '@/components/documents/upload/DocumentUplo
 import { useDocuments } from '@/hooks/documents/use-documents';
 import { UserDocumentView } from '@/components/documents/UserDocumentView';
 import { AdminDocumentsView } from '@/components/documents/AdminDocumentsView';
+import { LogoutButton } from '@/components/layout/LogoutButton';
 
 const Documents = () => {
   const navigate = useNavigate();
@@ -57,15 +58,25 @@ const Documents = () => {
             <h1 className="text-xl font-bold">Gestion des Documents</h1>
           </div>
           
-          {role === 'creator' && (
-            <Button
-              onClick={() => setShowUploadDialog(true)}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              Télécharger document
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {role === 'creator' && (
+              <Button
+                onClick={() => setShowUploadDialog(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Télécharger document
+              </Button>
+            )}
+            
+            <LogoutButton 
+              onLogout={handleLogout} 
+              username={username}
+              variant="outline"
+              size="sm"
+              className="hidden sm:flex"
+            />
+          </div>
         </div>
         
         <div className="flex-1 p-4">

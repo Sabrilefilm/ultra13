@@ -11,10 +11,12 @@ import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
 import { Loader2, Rocket } from "lucide-react";
 import { SocialCommunityLinks } from "@/components/layout/SocialCommunityLinks";
 import { useEffect, useState } from "react";
+import { useAppVersion } from "@/hooks/use-app-version";
 
 const Index = () => {
   const { toast } = useToast();
   const [showAnimation, setShowAnimation] = useState(false);
+  const { version } = useAppVersion();
   
   const { 
     isAuthenticated, 

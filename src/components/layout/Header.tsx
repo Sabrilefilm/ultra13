@@ -2,13 +2,15 @@
 import { Rocket } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { LogoutButton } from "./LogoutButton";
 
 interface HeaderProps {
   role?: string;
   username?: string;
+  onLogout?: () => void;
 }
 
-export const Header = ({ role, username }: HeaderProps) => {
+export const Header = ({ role, username, onLogout }: HeaderProps) => {
   const [scrolled, setScrolled] = useState(false);
   
   useEffect(() => {
@@ -42,16 +44,28 @@ export const Header = ({ role, username }: HeaderProps) => {
           </div>
         </div>
         
-        {role && username && (
-          <div className={`transition-all duration-300 ${
-            scrolled 
-              ? "text-sm text-white/80 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full"
-              : "text-sm text-white/60"
-          }`}>
-            Connecté en tant que <span className="text-white font-medium">{username}</span>
-            {role && <span className="ml-1 text-purple-400">({role})</span>}
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          {role && username && (
+            <div className={`transition-all duration-300 ${
+              scrolled 
+                ? "text-sm text-white/80 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full"
+                : "text-sm text-white/60"
+            }`}>
+              Connecté en tant que <span className="text-white font-medium">{username}</span>
+              {role && <span className="ml-1 text-purple-400">({role})</span>}
+            </div>
+          )}
+          
+          {onLogout && (
+            <LogoutButton 
+              onLogout={onLogout} 
+              username={username}
+              variant="ghost"
+              size="sm"
+              className="bg-white/10 hover:bg-white/20 text-white"
+            />
+          )}
+        </div>
       </div>
     </div>
   );
