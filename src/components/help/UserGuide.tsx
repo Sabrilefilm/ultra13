@@ -51,90 +51,92 @@ export const UserGuide = () => {
           </TabsList>
 
           <ScrollArea className="h-[400px] p-4">
-            <TabsContent value="dashboard" className="mt-4 px-2">
-              <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Tableau de bord</h3>
-              <p className="mb-3 text-gray-700 dark:text-gray-300">Le tableau de bord est votre page d'accueil personnalisée qui affiche un résumé de vos informations importantes.</p>
-              
-              <div className="space-y-4 mt-6">
-                <div className="border-l-2 border-purple-500 pl-4 py-1">
-                  <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                    <BarChart4 className="h-4 w-4 text-purple-500" /> Statistiques
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Affiche vos statistiques principales comme les matchs, heures de live, jours streamés et objectifs.</p>
+            <div className="mt-4 px-2">
+              <TabsContent value="dashboard">
+                <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Tableau de bord</h3>
+                <p className="mb-3 text-gray-700 dark:text-gray-300">Le tableau de bord est votre page d'accueil personnalisée qui affiche un résumé de vos informations importantes.</p>
+                
+                <div className="space-y-4 mt-6">
+                  <div className="border-l-2 border-purple-500 pl-4 py-1">
+                    <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
+                      <BarChart4 className="h-4 w-4 text-purple-500" /> Statistiques
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Affiche vos statistiques principales comme les matchs, heures de live, jours streamés et objectifs.</p>
+                  </div>
+                  
+                  <div className="border-l-2 border-purple-500 pl-4 py-1">
+                    <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
+                      <Calendar className="h-4 w-4 text-purple-500" /> Matchs à venir
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Liste des prochains matchs programmés avec détails et minuteur.</p>
+                  </div>
+                  
+                  <div className="border-l-2 border-purple-500 pl-4 py-1">
+                    <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
+                      <Award className="h-4 w-4 text-purple-500" /> Objectifs
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Suivi de vos objectifs de streaming et autres objectifs personnalisés.</p>
+                  </div>
                 </div>
                 
-                <div className="border-l-2 border-purple-500 pl-4 py-1">
-                  <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                    <Calendar className="h-4 w-4 text-purple-500" /> Matchs à venir
+                <div className="mt-6 bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border border-purple-100 dark:border-purple-800/50">
+                  <h4 className="font-medium flex items-center gap-2 text-purple-800 dark:text-purple-300 mb-2">
+                    <Info className="h-4 w-4" /> Conseil
                   </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Liste des prochains matchs programmés avec détails et minuteur.</p>
+                  <p className="text-sm text-purple-700 dark:text-purple-200">Utilisez le tableau de bord quotidiennement pour garder un œil sur vos performances et les événements à venir.</p>
                 </div>
-                
-                <div className="border-l-2 border-purple-500 pl-4 py-1">
-                  <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                    <Award className="h-4 w-4 text-purple-500" /> Objectifs
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Suivi de vos objectifs de streaming et autres objectifs personnalisés.</p>
-                </div>
-              </div>
-              
-              <div className="mt-6 bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border border-purple-100 dark:border-purple-800/50">
-                <h4 className="font-medium flex items-center gap-2 text-purple-800 dark:text-purple-300 mb-2">
-                  <Info className="h-4 w-4" /> Conseil
-                </h4>
-                <p className="text-sm text-purple-700 dark:text-purple-200">Utilisez le tableau de bord quotidiennement pour garder un œil sur vos performances et les événements à venir.</p>
-              </div>
-            </TabsContent>
+              </TabsContent>
 
-            <TabsContent value="messages" className="mt-4 px-2">
-              <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Messagerie</h3>
-              <p className="mb-3 text-gray-700 dark:text-gray-300">La messagerie vous permet de communiquer avec tous les membres de l'agence de manière directe et privée.</p>
-              
-              <div className="space-y-4 mt-6">
-                <div className="border-l-2 border-purple-500 pl-4 py-1">
-                  <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                    <MessageSquare className="h-4 w-4 text-purple-500" /> Conversations
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Accédez à vos conversations existantes dans la liste à gauche. Les conversations avec des messages non lus sont mises en évidence.</p>
+              <TabsContent value="messages">
+                <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Messagerie</h3>
+                <p className="mb-3 text-gray-700 dark:text-gray-300">La messagerie vous permet de communiquer avec tous les membres de l'agence de manière directe et privée.</p>
+                
+                <div className="space-y-4 mt-6">
+                  <div className="border-l-2 border-purple-500 pl-4 py-1">
+                    <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
+                      <MessageSquare className="h-4 w-4 text-purple-500" /> Conversations
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Accédez à vos conversations existantes dans la liste à gauche. Les conversations avec des messages non lus sont mises en évidence.</p>
+                  </div>
+                  
+                  <div className="border-l-2 border-purple-500 pl-4 py-1">
+                    <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
+                      <ArrowRight className="h-4 w-4 text-purple-500" /> Nouvelle conversation
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Cliquez sur le bouton "Nouvelle conversation" pour démarrer une discussion avec un membre de l'agence.</p>
+                  </div>
+                  
+                  <div className="border-l-2 border-purple-500 pl-4 py-1">
+                    <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
+                      <Paperclip className="h-4 w-4 text-purple-500" /> Pièces jointes
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Envoyez des fichiers et images en utilisant le bouton trombone ou en glissant-déposant le fichier dans la zone de message.</p>
+                  </div>
                 </div>
                 
-                <div className="border-l-2 border-purple-500 pl-4 py-1">
-                  <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                    <ArrowRight className="h-4 w-4 text-purple-500" /> Nouvelle conversation
+                <div className="mt-6 bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border border-purple-100 dark:border-purple-800/50">
+                  <h4 className="font-medium flex items-center gap-2 text-purple-800 dark:text-purple-300 mb-2">
+                    <Shield className="h-4 w-4" /> Administration
                   </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Cliquez sur le bouton "Nouvelle conversation" pour démarrer une discussion avec un membre de l'agence.</p>
+                  <p className="text-sm text-purple-700 dark:text-purple-200">Les fondateurs peuvent archiver des conversations qui seront conservées dans l'historique mais ne seront plus accessibles pour les participants.</p>
                 </div>
-                
-                <div className="border-l-2 border-purple-500 pl-4 py-1">
-                  <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                    <Paperclip className="h-4 w-4 text-purple-500" /> Pièces jointes
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Envoyez des fichiers et images en utilisant le bouton trombone ou en glissant-déposant le fichier dans la zone de message.</p>
-                </div>
-              </div>
-              
-              <div className="mt-6 bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border border-purple-100 dark:border-purple-800/50">
-                <h4 className="font-medium flex items-center gap-2 text-purple-800 dark:text-purple-300 mb-2">
-                  <Shield className="h-4 w-4" /> Administration
-                </h4>
-                <p className="text-sm text-purple-700 dark:text-purple-200">Les fondateurs peuvent archiver des conversations qui seront conservées dans l'historique mais ne seront plus accessibles pour les participants.</p>
-              </div>
-            </TabsContent>
+              </TabsContent>
 
-            <TabsContent value="matches" className="mt-4 px-2">
-              <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Matchs</h3>
-              <p className="mb-3 text-gray-700 dark:text-gray-300">La page des matchs permet de gérer et suivre tous les événements sportifs de l'agence.</p>
-            </TabsContent>
-            
-            <TabsContent value="documents" className="mt-4 px-2">
-              <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Documents</h3>
-              <p className="mb-3 text-gray-700 dark:text-gray-300">La section documents permet d'accéder et de gérer tous les fichiers liés à l'agence.</p>
-            </TabsContent>
-            
-            <TabsContent value="penalties" className="mt-4 px-2">
-              <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Pénalités</h3>
-              <p className="mb-3 text-gray-700 dark:text-gray-300">La section pénalités vous permet de consulter les infractions aux règles et leurs conséquences.</p>
-            </TabsContent>
+              <TabsContent value="matches">
+                <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Matchs</h3>
+                <p className="mb-3 text-gray-700 dark:text-gray-300">La page des matchs permet de gérer et suivre tous les événements sportifs de l'agence.</p>
+              </TabsContent>
+              
+              <TabsContent value="documents">
+                <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Documents</h3>
+                <p className="mb-3 text-gray-700 dark:text-gray-300">La section documents permet d'accéder et de gérer tous les fichiers liés à l'agence.</p>
+              </TabsContent>
+              
+              <TabsContent value="penalties">
+                <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Pénalités</h3>
+                <p className="mb-3 text-gray-700 dark:text-gray-300">La section pénalités vous permet de consulter les infractions aux règles et leurs conséquences.</p>
+              </TabsContent>
+            </div>
           </ScrollArea>
         </Tabs>
       </CardContent>
