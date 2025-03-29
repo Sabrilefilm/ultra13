@@ -7,15 +7,17 @@ import { Users, ChevronRight, ChevronDown } from "lucide-react";
 
 interface SocialCommunityLinksProps {
   compact?: boolean;
+  className?: string; // Add className prop to the interface
 }
 
 export const SocialCommunityLinks: React.FC<SocialCommunityLinksProps> = ({ 
-  compact = false 
+  compact = false,
+  className = '' // Set default value for the className prop
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <Card className={`bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-100 dark:border-blue-900/20 overflow-hidden ${compact ? 'shadow-sm' : 'shadow-md'}`}>
+    <Card className={`bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-100 dark:border-blue-900/20 overflow-hidden ${compact ? 'shadow-sm' : 'shadow-md'} ${className}`}>
       <CardHeader 
         className={`pb-2 cursor-pointer ${compact ? 'py-2' : 'py-4'}`} 
         onClick={() => setIsExpanded(!isExpanded)}
