@@ -50,9 +50,10 @@ export const UserGuide = () => {
             </TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="h-[400px] p-4">
-            <div className="mt-4 px-2">
-              <TabsContent value="dashboard">
+          {/* Important fix: Move TabsContent components to be direct children of Tabs component */}
+          <TabsContent value="dashboard">
+            <ScrollArea className="h-[400px]">
+              <div className="mt-4 px-2">
                 <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Tableau de bord</h3>
                 <p className="mb-3 text-gray-700 dark:text-gray-300">Le tableau de bord est votre page d'accueil personnalisée qui affiche un résumé de vos informations importantes.</p>
                 
@@ -85,9 +86,13 @@ export const UserGuide = () => {
                   </h4>
                   <p className="text-sm text-purple-700 dark:text-purple-200">Utilisez le tableau de bord quotidiennement pour garder un œil sur vos performances et les événements à venir.</p>
                 </div>
-              </TabsContent>
+              </div>
+            </ScrollArea>
+          </TabsContent>
 
-              <TabsContent value="messages">
+          <TabsContent value="messages">
+            <ScrollArea className="h-[400px]">
+              <div className="mt-4 px-2">
                 <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Messagerie</h3>
                 <p className="mb-3 text-gray-700 dark:text-gray-300">La messagerie vous permet de communiquer avec tous les membres de l'agence de manière directe et privée.</p>
                 
@@ -120,24 +125,36 @@ export const UserGuide = () => {
                   </h4>
                   <p className="text-sm text-purple-700 dark:text-purple-200">Les fondateurs peuvent archiver des conversations qui seront conservées dans l'historique mais ne seront plus accessibles pour les participants.</p>
                 </div>
-              </TabsContent>
+              </div>
+            </ScrollArea>
+          </TabsContent>
 
-              <TabsContent value="matches">
+          <TabsContent value="matches">
+            <ScrollArea className="h-[400px]">
+              <div className="mt-4 px-2">
                 <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Matchs</h3>
                 <p className="mb-3 text-gray-700 dark:text-gray-300">La page des matchs permet de gérer et suivre tous les événements sportifs de l'agence.</p>
-              </TabsContent>
-              
-              <TabsContent value="documents">
+              </div>
+            </ScrollArea>
+          </TabsContent>
+          
+          <TabsContent value="documents">
+            <ScrollArea className="h-[400px]">
+              <div className="mt-4 px-2">
                 <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Documents</h3>
                 <p className="mb-3 text-gray-700 dark:text-gray-300">La section documents permet d'accéder et de gérer tous les fichiers liés à l'agence.</p>
-              </TabsContent>
-              
-              <TabsContent value="penalties">
+              </div>
+            </ScrollArea>
+          </TabsContent>
+          
+          <TabsContent value="penalties">
+            <ScrollArea className="h-[400px]">
+              <div className="mt-4 px-2">
                 <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Pénalités</h3>
                 <p className="mb-3 text-gray-700 dark:text-gray-300">La section pénalités vous permet de consulter les infractions aux règles et leurs conséquences.</p>
-              </TabsContent>
-            </div>
-          </ScrollArea>
+              </div>
+            </ScrollArea>
+          </TabsContent>
         </Tabs>
       </CardContent>
     </Card>
