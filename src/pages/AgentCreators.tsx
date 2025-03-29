@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -9,10 +8,10 @@ import { useAccountManagement } from "@/hooks/use-account-management";
 import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, ArrowLeft, Diamond, Clock, Star, Calendar, Search, Pencil, Trash2, Key, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/lib/supabase";
 import {
   Dialog,
@@ -429,307 +428,682 @@ const AgentCreators = () => {
             </CardHeader>
             
             <CardContent className="p-6">
-              {loading ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-                </div>
-              ) : filteredCreators.length === 0 ? (
-                <div className="p-8 text-center text-blue-400 bg-blue-900/20 rounded-lg border border-blue-800/30">
-                  <Users className="h-10 w-10 mx-auto mb-4 text-blue-500 opacity-50" />
-                  <h3 className="text-xl font-semibold mb-2">Aucun créateur trouvé</h3>
-                  <p className="mb-4">Aucun créateur ne correspond à votre recherche ou aucun créateur n'est assigné à cet agent.</p>
-                  <Button 
-                    className="bg-blue-700 hover:bg-blue-600"
-                    onClick={() => {
-                      fetchAvailableCreators();
-                      setIsAssignCreatorModalOpen(true);
-                    }}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Assigner un créateur
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredCreators.map(creator => (
-                    <Card key={creator.id} className="bg-blue-900/20 border-blue-800/30 hover:bg-blue-800/20 transition-colors">
-                      <CardHeader className="pb-2">
-                        <div className="flex justify-between">
-                          <CardTitle className="text-xl text-white flex items-center gap-2">
-                            {creator.username}
-                            {creator.status === "active" && (
-                              <span className="inline-block w-2.5 h-2.5 bg-green-500 rounded-full"></span>
-                            )}
-                            {creator.status === "warning" && (
-                              <span className="inline-block w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
-                            )}
-                            {creator.status === "inactive" && (
-                              <span className="inline-block w-2.5 h-2.5 bg-red-500 rounded-full"></span>
-                            )}
-                          </CardTitle>
-                          <div className="text-sm font-medium text-blue-400">
-                            {creator.followers.toLocaleString()} followers
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-blue-300">Performance</span>
-                          <span className="text-sm font-medium text-white">{creator.performance}%</span>
-                        </div>
-                        <div className="w-full bg-blue-950/50 rounded-full h-2">
-                          <div 
-                            className={`h-2 rounded-full ${
-                              creator.performance >= 80 ? 'bg-green-500' : 
-                              creator.performance >= 60 ? 'bg-amber-500' : 'bg-red-500'
-                            }`}
-                            style={{ width: `${creator.performance}%` }}
-                          ></div>
-                        </div>
-                        
-                        <div className="grid grid-cols-3 gap-4 pt-2">
-                          <div className="bg-blue-950/30 p-3 rounded-lg">
-                            <div className="text-sm text-blue-400 flex items-center">
-                              <Clock className="h-3 w-3 mr-1" />
-                              Heures
+              <TabsContent value="all">
+                {loading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+                  </div>
+                ) : filteredCreators.length === 0 ? (
+                  <div className="p-8 text-center text-blue-400 bg-blue-900/20 rounded-lg border border-blue-800/30">
+                    <Users className="h-10 w-10 mx-auto mb-4 text-blue-500 opacity-50" />
+                    <h3 className="text-xl font-semibold mb-2">Aucun créateur trouvé</h3>
+                    <p className="mb-4">Aucun créateur ne correspond à votre recherche ou aucun créateur n'est assigné à cet agent.</p>
+                    <Button 
+                      className="bg-blue-700 hover:bg-blue-600"
+                      onClick={() => {
+                        fetchAvailableCreators();
+                        setIsAssignCreatorModalOpen(true);
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Assigner un créateur
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {filteredCreators.map(creator => (
+                      <Card key={creator.id} className="bg-blue-900/20 border-blue-800/30 hover:bg-blue-800/20 transition-colors">
+                        <CardHeader className="pb-2">
+                          <div className="flex justify-between">
+                            <CardTitle className="text-xl text-white flex items-center gap-2">
+                              {creator.username}
+                              {creator.status === "active" && (
+                                <span className="inline-block w-2.5 h-2.5 bg-green-500 rounded-full"></span>
+                              )}
+                              {creator.status === "warning" && (
+                                <span className="inline-block w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
+                              )}
+                              {creator.status === "inactive" && (
+                                <span className="inline-block w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+                              )}
+                            </CardTitle>
+                            <div className="text-sm font-medium text-blue-400">
+                              {creator.followers.toLocaleString()} followers
                             </div>
-                            <div className="text-lg font-semibold text-white">{creator.hours}/{creator.target}h</div>
                           </div>
-                          <div className="bg-blue-950/30 p-3 rounded-lg">
-                            <div className="text-sm text-blue-400 flex items-center">
-                              <Diamond className="h-3 w-3 mr-1" />
-                              Diamants
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-blue-300">Performance</span>
+                            <span className="text-sm font-medium text-white">{creator.performance}%</span>
+                          </div>
+                          <div className="w-full bg-blue-950/50 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full ${
+                                creator.performance >= 80 ? 'bg-green-500' : 
+                                creator.performance >= 60 ? 'bg-amber-500' : 'bg-red-500'
+                              }`}
+                              style={{ width: `${creator.performance}%` }}
+                            ></div>
+                          </div>
+                          
+                          <div className="grid grid-cols-3 gap-4 pt-2">
+                            <div className="bg-blue-950/30 p-3 rounded-lg">
+                              <div className="text-sm text-blue-400 flex items-center">
+                                <Clock className="h-3 w-3 mr-1" />
+                                Heures
+                              </div>
+                              <div className="text-lg font-semibold text-white">{creator.hours}/{creator.target}h</div>
                             </div>
-                            <div className="text-lg font-semibold text-white">{creator.diamonds}</div>
-                          </div>
-                          <div className="bg-blue-950/30 p-3 rounded-lg">
-                            <div className="text-sm text-blue-400 flex items-center">
-                              <Star className="h-3 w-3 mr-1" />
-                              Likes
+                            <div className="bg-blue-950/30 p-3 rounded-lg">
+                              <div className="text-sm text-blue-400 flex items-center">
+                                <Diamond className="h-3 w-3 mr-1" />
+                                Diamants
+                              </div>
+                              <div className="text-lg font-semibold text-white">{creator.diamonds}</div>
                             </div>
-                            <div className="text-lg font-semibold text-white">{creator.likes.toLocaleString()}</div>
+                            <div className="bg-blue-950/30 p-3 rounded-lg">
+                              <div className="text-sm text-blue-400 flex items-center">
+                                <Star className="h-3 w-3 mr-1" />
+                                Likes
+                              </div>
+                              <div className="text-lg font-semibold text-white">{creator.likes.toLocaleString()}</div>
+                            </div>
                           </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-4 gap-2 pt-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
-                            title="Voir planning"
-                          >
-                            <Calendar className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
-                            onClick={() => {
-                              setCreatorToResetPassword(creator);
-                              setIsResetPasswordModalOpen(true);
-                            }}
-                            title="Réinitialiser mot de passe"
-                          >
-                            <Key className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
-                            onClick={() => handleUnassignCreator(creator.id)}
-                            title="Désassigner"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
-                            onClick={() => {
-                              setCreatorToDelete(creator);
-                              setIsDeleteModalOpen(true);
-                            }}
-                            title="Supprimer"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
+                          
+                          <div className="grid grid-cols-4 gap-2 pt-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
+                              title="Voir planning"
+                            >
+                              <Calendar className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
+                              onClick={() => {
+                                setCreatorToResetPassword(creator);
+                                setIsResetPasswordModalOpen(true);
+                              }}
+                              title="Réinitialiser mot de passe"
+                            >
+                              <Key className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
+                              onClick={() => handleUnassignCreator(creator.id)}
+                              title="Désassigner"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
+                              onClick={() => {
+                                setCreatorToDelete(creator);
+                                setIsDeleteModalOpen(true);
+                              }}
+                              title="Supprimer"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="active">
+                {loading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+                  </div>
+                ) : filteredCreators.filter(creator => creator.status === "active").length === 0 ? (
+                  <div className="p-8 text-center text-blue-400 bg-blue-900/20 rounded-lg border border-blue-800/30">
+                    <Users className="h-10 w-10 mx-auto mb-4 text-blue-500 opacity-50" />
+                    <h3 className="text-xl font-semibold mb-2">Aucun créateur actif trouvé</h3>
+                    <p className="mb-4">Aucun créateur actif ne correspond à votre recherche.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {filteredCreators.filter(creator => creator.status === "active").map(creator => (
+                      <Card key={creator.id} className="bg-blue-900/20 border-blue-800/30 hover:bg-blue-800/20 transition-colors">
+                        <CardHeader className="pb-2">
+                          <div className="flex justify-between">
+                            <CardTitle className="text-xl text-white flex items-center gap-2">
+                              {creator.username}
+                              {creator.status === "active" && (
+                                <span className="inline-block w-2.5 h-2.5 bg-green-500 rounded-full"></span>
+                              )}
+                              {creator.status === "warning" && (
+                                <span className="inline-block w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
+                              )}
+                              {creator.status === "inactive" && (
+                                <span className="inline-block w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+                              )}
+                            </CardTitle>
+                            <div className="text-sm font-medium text-blue-400">
+                              {creator.followers.toLocaleString()} followers
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-blue-300">Performance</span>
+                            <span className="text-sm font-medium text-white">{creator.performance}%</span>
+                          </div>
+                          <div className="w-full bg-blue-950/50 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full ${
+                                creator.performance >= 80 ? 'bg-green-500' : 
+                                creator.performance >= 60 ? 'bg-amber-500' : 'bg-red-500'
+                              }`}
+                              style={{ width: `${creator.performance}%` }}
+                            ></div>
+                          </div>
+                          
+                          <div className="grid grid-cols-3 gap-4 pt-2">
+                            <div className="bg-blue-950/30 p-3 rounded-lg">
+                              <div className="text-sm text-blue-400 flex items-center">
+                                <Clock className="h-3 w-3 mr-1" />
+                                Heures
+                              </div>
+                              <div className="text-lg font-semibold text-white">{creator.hours}/{creator.target}h</div>
+                            </div>
+                            <div className="bg-blue-950/30 p-3 rounded-lg">
+                              <div className="text-sm text-blue-400 flex items-center">
+                                <Diamond className="h-3 w-3 mr-1" />
+                                Diamants
+                              </div>
+                              <div className="text-lg font-semibold text-white">{creator.diamonds}</div>
+                            </div>
+                            <div className="bg-blue-950/30 p-3 rounded-lg">
+                              <div className="text-sm text-blue-400 flex items-center">
+                                <Star className="h-3 w-3 mr-1" />
+                                Likes
+                              </div>
+                              <div className="text-lg font-semibold text-white">{creator.likes.toLocaleString()}</div>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-4 gap-2 pt-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
+                              title="Voir planning"
+                            >
+                              <Calendar className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
+                              onClick={() => {
+                                setCreatorToResetPassword(creator);
+                                setIsResetPasswordModalOpen(true);
+                              }}
+                              title="Réinitialiser mot de passe"
+                            >
+                              <Key className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
+                              onClick={() => handleUnassignCreator(creator.id)}
+                              title="Désassigner"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
+                              onClick={() => {
+                                setCreatorToDelete(creator);
+                                setIsDeleteModalOpen(true);
+                              }}
+                              title="Supprimer"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="warning">
+                {loading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+                  </div>
+                ) : filteredCreators.filter(creator => creator.status === "warning").length === 0 ? (
+                  <div className="p-8 text-center text-blue-400 bg-blue-900/20 rounded-lg border border-blue-800/30">
+                    <Users className="h-10 w-10 mx-auto mb-4 text-blue-500 opacity-50" />
+                    <h3 className="text-xl font-semibold mb-2">Aucun créateur en alerte trouvé</h3>
+                    <p className="mb-4">Aucun créateur en alerte ne correspond à votre recherche.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {filteredCreators.filter(creator => creator.status === "warning").map(creator => (
+                      <Card key={creator.id} className="bg-blue-900/20 border-blue-800/30 hover:bg-blue-800/20 transition-colors">
+                        <CardHeader className="pb-2">
+                          <div className="flex justify-between">
+                            <CardTitle className="text-xl text-white flex items-center gap-2">
+                              {creator.username}
+                              {creator.status === "active" && (
+                                <span className="inline-block w-2.5 h-2.5 bg-green-500 rounded-full"></span>
+                              )}
+                              {creator.status === "warning" && (
+                                <span className="inline-block w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
+                              )}
+                              {creator.status === "inactive" && (
+                                <span className="inline-block w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+                              )}
+                            </CardTitle>
+                            <div className="text-sm font-medium text-blue-400">
+                              {creator.followers.toLocaleString()} followers
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-blue-300">Performance</span>
+                            <span className="text-sm font-medium text-white">{creator.performance}%</span>
+                          </div>
+                          <div className="w-full bg-blue-950/50 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full ${
+                                creator.performance >= 80 ? 'bg-green-500' : 
+                                creator.performance >= 60 ? 'bg-amber-500' : 'bg-red-500'
+                              }`}
+                              style={{ width: `${creator.performance}%` }}
+                            ></div>
+                          </div>
+                          
+                          <div className="grid grid-cols-3 gap-4 pt-2">
+                            <div className="bg-blue-950/30 p-3 rounded-lg">
+                              <div className="text-sm text-blue-400 flex items-center">
+                                <Clock className="h-3 w-3 mr-1" />
+                                Heures
+                              </div>
+                              <div className="text-lg font-semibold text-white">{creator.hours}/{creator.target}h</div>
+                            </div>
+                            <div className="bg-blue-950/30 p-3 rounded-lg">
+                              <div className="text-sm text-blue-400 flex items-center">
+                                <Diamond className="h-3 w-3 mr-1" />
+                                Diamants
+                              </div>
+                              <div className="text-lg font-semibold text-white">{creator.diamonds}</div>
+                            </div>
+                            <div className="bg-blue-950/30 p-3 rounded-lg">
+                              <div className="text-sm text-blue-400 flex items-center">
+                                <Star className="h-3 w-3 mr-1" />
+                                Likes
+                              </div>
+                              <div className="text-lg font-semibold text-white">{creator.likes.toLocaleString()}</div>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-4 gap-2 pt-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
+                              title="Voir planning"
+                            >
+                              <Calendar className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
+                              onClick={() => {
+                                setCreatorToResetPassword(creator);
+                                setIsResetPasswordModalOpen(true);
+                              }}
+                              title="Réinitialiser mot de passe"
+                            >
+                              <Key className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
+                              onClick={() => handleUnassignCreator(creator.id)}
+                              title="Désassigner"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
+                              onClick={() => {
+                                setCreatorToDelete(creator);
+                                setIsDeleteModalOpen(true);
+                              }}
+                              title="Supprimer"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="inactive">
+                {loading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+                  </div>
+                ) : filteredCreators.filter(creator => creator.status === "inactive").length === 0 ? (
+                  <div className="p-8 text-center text-blue-400 bg-blue-900/20 rounded-lg border border-blue-800/30">
+                    <Users className="h-10 w-10 mx-auto mb-4 text-blue-500 opacity-50" />
+                    <h3 className="text-xl font-semibold mb-2">Aucun créateur inactif trouvé</h3>
+                    <p className="mb-4">Aucun créateur inactif ne correspond à votre recherche.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {filteredCreators.filter(creator => creator.status === "inactive").map(creator => (
+                      <Card key={creator.id} className="bg-blue-900/20 border-blue-800/30 hover:bg-blue-800/20 transition-colors">
+                        <CardHeader className="pb-2">
+                          <div className="flex justify-between">
+                            <CardTitle className="text-xl text-white flex items-center gap-2">
+                              {creator.username}
+                              {creator.status === "active" && (
+                                <span className="inline-block w-2.5 h-2.5 bg-green-500 rounded-full"></span>
+                              )}
+                              {creator.status === "warning" && (
+                                <span className="inline-block w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
+                              )}
+                              {creator.status === "inactive" && (
+                                <span className="inline-block w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+                              )}
+                            </CardTitle>
+                            <div className="text-sm font-medium text-blue-400">
+                              {creator.followers.toLocaleString()} followers
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-blue-300">Performance</span>
+                            <span className="text-sm font-medium text-white">{creator.performance}%</span>
+                          </div>
+                          <div className="w-full bg-blue-950/50 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full ${
+                                creator.performance >= 80 ? 'bg-green-500' : 
+                                creator.performance >= 60 ? 'bg-amber-500' : 'bg-red-500'
+                              }`}
+                              style={{ width: `${creator.performance}%` }}
+                            ></div>
+                          </div>
+                          
+                          <div className="grid grid-cols-3 gap-4 pt-2">
+                            <div className="bg-blue-950/30 p-3 rounded-lg">
+                              <div className="text-sm text-blue-400 flex items-center">
+                                <Clock className="h-3 w-3 mr-1" />
+                                Heures
+                              </div>
+                              <div className="text-lg font-semibold text-white">{creator.hours}/{creator.target}h</div>
+                            </div>
+                            <div className="bg-blue-950/30 p-3 rounded-lg">
+                              <div className="text-sm text-blue-400 flex items-center">
+                                <Diamond className="h-3 w-3 mr-1" />
+                                Diamants
+                              </div>
+                              <div className="text-lg font-semibold text-white">{creator.diamonds}</div>
+                            </div>
+                            <div className="bg-blue-950/30 p-3 rounded-lg">
+                              <div className="text-sm text-blue-400 flex items-center">
+                                <Star className="h-3 w-3 mr-1" />
+                                Likes
+                              </div>
+                              <div className="text-lg font-semibold text-white">{creator.likes.toLocaleString()}</div>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-4 gap-2 pt-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
+                              title="Voir planning"
+                            >
+                              <Calendar className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
+                              onClick={() => {
+                                setCreatorToResetPassword(creator);
+                                setIsResetPasswordModalOpen(true);
+                              }}
+                              title="Réinitialiser mot de passe"
+                            >
+                              <Key className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
+                              onClick={() => handleUnassignCreator(creator.id)}
+                              title="Désassigner"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
+                              onClick={() => {
+                                setCreatorToDelete(creator);
+                                setIsDeleteModalOpen(true);
+                              }}
+                              title="Supprimer"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Modal de confirmation de suppression */}
-        <Dialog
-          open={isDeleteModalOpen}
-          onOpenChange={setIsDeleteModalOpen}
-        >
-          <DialogContent className="bg-slate-900 border border-slate-800">
-            <DialogHeader>
-              <DialogTitle className="text-xl text-white">Confirmer la suppression</DialogTitle>
-              <DialogDescription className="text-slate-400">
-                Êtes-vous sûr de vouloir supprimer le créateur <span className="font-semibold text-white">{creatorToDelete?.username}</span> ?
-                Cette action est irréversible.
-              </DialogDescription>
-            </DialogHeader>
-            <Alert className="bg-red-900/20 border border-red-800/30 text-red-300">
-              <AlertDescription>
-                Toutes les données associées à ce créateur seront définitivement supprimées.
-              </AlertDescription>
-            </Alert>
-            <DialogFooter className="flex gap-2 sm:justify-end">
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setIsDeleteModalOpen(false);
-                  setCreatorToDelete(null);
-                }}
-                className="border-slate-700 hover:bg-slate-800 text-slate-300"
-              >
-                Annuler
-              </Button>
-              <Button 
-                variant="destructive"
-                onClick={handleDeleteCreator}
-                className="bg-red-700 hover:bg-red-800 text-white"
-              >
-                Supprimer
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Modal de réinitialisation de mot de passe */}
-        <Dialog
-          open={isResetPasswordModalOpen}
-          onOpenChange={(open) => {
-            if (!open) closeResetPasswordModal();
-            else setIsResetPasswordModalOpen(open);
-          }}
-        >
-          <DialogContent className="bg-slate-900 border border-slate-800 max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-xl text-white">
-                {resetPasswordSuccess 
-                  ? "Mot de passe réinitialisé" 
-                  : `Réinitialiser le mot de passe de ${creatorToResetPassword?.username}`}
-              </DialogTitle>
-              <DialogDescription className="text-slate-400">
-                {resetPasswordSuccess 
-                  ? "Le mot de passe a été réinitialisé avec succès. Veuillez noter le nouveau mot de passe."
-                  : "Cette action générera un nouveau mot de passe aléatoire pour ce créateur."}
-              </DialogDescription>
-            </DialogHeader>
-            
-            {resetPasswordSuccess ? (
-              <div className="space-y-4">
-                <div className="p-3 bg-blue-900/20 border border-blue-800/30 rounded-md">
-                  <p className="text-sm text-blue-400 mb-1">Nouveau mot de passe:</p>
-                  <p className="font-mono text-white break-all">{newPassword}</p>
+          
+          {/* Reset Password Dialog */}
+          <Dialog open={isResetPasswordModalOpen} onOpenChange={setIsResetPasswordModalOpen}>
+            <DialogContent className="bg-blue-950 border-blue-900/50 text-white">
+              <DialogHeader>
+                <DialogTitle className="text-xl text-white">
+                  {resetPasswordSuccess ? "Mot de passe réinitialisé" : "Réinitialiser le mot de passe"}
+                </DialogTitle>
+                {!resetPasswordSuccess && (
+                  <DialogDescription className="text-blue-300">
+                    Voulez-vous réinitialiser le mot de passe de{" "}
+                    <span className="font-semibold text-blue-200">{creatorToResetPassword?.username}</span>?
+                  </DialogDescription>
+                )}
+              </DialogHeader>
+              
+              {resetPasswordSuccess ? (
+                <div className="space-y-4">
+                  <Alert className="bg-green-900/30 border-green-800">
+                    <AlertDescription className="text-green-300">
+                      Mot de passe réinitialisé avec succès.
+                    </AlertDescription>
+                  </Alert>
+                  
+                  <div className="bg-blue-900/30 p-4 rounded-lg border border-blue-800/50">
+                    <p className="text-blue-300 mb-2">Nouveau mot de passe :</p>
+                    <div className="flex">
+                      <Input 
+                        value={newPassword} 
+                        readOnly 
+                        className="bg-blue-900/50 border-blue-800/50 text-white"
+                      />
+                      <Button 
+                        className="ml-2 bg-blue-700 hover:bg-blue-600"
+                        onClick={() => {
+                          navigator.clipboard.writeText(newPassword);
+                          toast({
+                            title: "Copié!",
+                            description: "Mot de passe copié dans le presse-papier.",
+                          });
+                        }}
+                      >
+                        Copier
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <p className="text-blue-400 text-sm">
+                    Partagez ce mot de passe avec le créateur. Il sera demandé de le changer lors de la prochaine connexion.
+                  </p>
                 </div>
-                <Button 
-                  className="w-full bg-green-700 hover:bg-green-800"
-                  onClick={closeResetPasswordModal}
-                >
-                  Fermer
-                </Button>
-              </div>
-            ) : (
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-blue-300">
+                    Cette action va générer un nouveau mot de passe aléatoire pour ce créateur.
+                  </p>
+                  
+                  <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setIsResetPasswordModalOpen(false)}
+                      className="border-blue-700 text-blue-400 hover:bg-blue-900/50"
+                    >
+                      Annuler
+                    </Button>
+                    <Button 
+                      onClick={handleResetPassword}
+                      className="bg-blue-700 hover:bg-blue-600"
+                    >
+                      Réinitialiser
+                    </Button>
+                  </DialogFooter>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+          
+          {/* Delete Creator Dialog */}
+          <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+            <DialogContent className="bg-blue-950 border-blue-900/50 text-white">
+              <DialogHeader>
+                <DialogTitle className="text-xl text-white">Supprimer le créateur</DialogTitle>
+                <DialogDescription className="text-blue-300">
+                  Voulez-vous vraiment supprimer{" "}
+                  <span className="font-semibold text-blue-200">{creatorToDelete?.username}</span>?
+                </DialogDescription>
+              </DialogHeader>
+              
               <div className="space-y-4">
-                <Alert className="bg-yellow-900/20 border border-yellow-800/30 text-yellow-300">
-                  <AlertDescription>
-                    Assurez-vous de communiquer le nouveau mot de passe au créateur.
+                <Alert className="bg-red-900/30 border-red-800">
+                  <AlertDescription className="text-red-300">
+                    Cette action est irréversible. Toutes les données associées à ce créateur seront perdues.
                   </AlertDescription>
                 </Alert>
-                <div className="flex gap-2 justify-end">
-                  <Button 
-                    variant="outline" 
-                    onClick={closeResetPasswordModal}
-                    className="border-slate-700 hover:bg-slate-800 text-slate-300"
-                  >
-                    Annuler
-                  </Button>
-                  <Button 
-                    variant="default"
-                    onClick={handleResetPassword}
-                    className="bg-blue-700 hover:bg-blue-800 text-white"
-                  >
-                    Réinitialiser
-                  </Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-
-        {/* Modal d'assignation de créateur */}
-        <Dialog
-          open={isAssignCreatorModalOpen}
-          onOpenChange={setIsAssignCreatorModalOpen}
-        >
-          <DialogContent className="bg-slate-900 border border-slate-800">
-            <DialogHeader>
-              <DialogTitle className="text-xl text-white">Assigner un créateur</DialogTitle>
-              <DialogDescription className="text-slate-400">
-                Sélectionnez un créateur à assigner à {agent.username}.
-              </DialogDescription>
-            </DialogHeader>
-            
-            {availableCreators.length === 0 ? (
-              <div className="p-4 text-center">
-                <p className="text-blue-300">Aucun créateur disponible pour l'assignation.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="max-h-60 overflow-y-auto pr-2">
-                  {availableCreators.map(creator => (
-                    <div 
-                      key={creator.id} 
-                      className={`p-3 mb-2 rounded-md cursor-pointer transition-colors ${
-                        selectedCreator === creator.id
-                          ? 'bg-blue-700/50 border border-blue-500'
-                          : 'bg-blue-900/20 border border-blue-800/30 hover:bg-blue-800/30'
-                      }`}
-                      onClick={() => setSelectedCreator(creator.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="font-medium text-white">{creator.username}</div>
-                        {selectedCreator === creator.id && (
-                          <div className="w-4 h-4 rounded-full bg-blue-500"></div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
                 
-                <DialogFooter className="flex gap-2 sm:justify-end">
+                <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
                   <Button 
                     variant="outline" 
-                    onClick={() => {
-                      setIsAssignCreatorModalOpen(false);
-                      setSelectedCreator("");
-                    }}
-                    className="border-slate-700 hover:bg-slate-800 text-slate-300"
+                    onClick={() => setIsDeleteModalOpen(false)}
+                    className="border-blue-700 text-blue-400 hover:bg-blue-900/50"
                   >
                     Annuler
                   </Button>
                   <Button 
-                    variant="default"
+                    onClick={handleDeleteCreator}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    Supprimer
+                  </Button>
+                </DialogFooter>
+              </div>
+            </DialogContent>
+          </Dialog>
+          
+          {/* Assign Creator Dialog */}
+          <Dialog open={isAssignCreatorModalOpen} onOpenChange={setIsAssignCreatorModalOpen}>
+            <DialogContent className="bg-blue-950 border-blue-900/50 text-white">
+              <DialogHeader>
+                <DialogTitle className="text-xl text-white">Assigner un créateur</DialogTitle>
+                <DialogDescription className="text-blue-300">
+                  Choisissez un créateur à assigner à {agent.username}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                {availableCreators.length === 0 ? (
+                  <div className="p-4 text-center text-blue-300 bg-blue-900/30 rounded-lg border border-blue-800/50">
+                    <Users className="h-8 w-8 mx-auto mb-2 opacity-70" />
+                    <p>Aucun créateur disponible pour assignation</p>
+                  </div>
+                ) : (
+                  <div className="max-h-60 overflow-auto pr-2">
+                    {availableCreators.map(creator => (
+                      <div
+                        key={creator.id}
+                        className={`p-3 rounded-lg border mb-2 cursor-pointer transition-colors ${
+                          selectedCreator === creator.id
+                            ? "bg-blue-800/40 border-blue-700"
+                            : "bg-blue-900/20 border-blue-800/30 hover:bg-blue-800/20"
+                        }`}
+                        onClick={() => setSelectedCreator(creator.id)}
+                      >
+                        <div className="flex justify-between items-center">
+                          <div className="font-medium text-white">{creator.username}</div>
+                          {selectedCreator === creator.id && (
+                            <div className="w-4 h-4 rounded-full bg-blue-500"></div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsAssignCreatorModalOpen(false)}
+                    className="border-blue-700 text-blue-400 hover:bg-blue-900/50"
+                  >
+                    Annuler
+                  </Button>
+                  <Button 
                     onClick={handleAssignCreator}
-                    className="bg-blue-700 hover:bg-blue-800 text-white"
-                    disabled={!selectedCreator}
+                    className="bg-blue-700 hover:bg-blue-600"
+                    disabled={!selectedCreator || availableCreators.length === 0}
                   >
                     Assigner
                   </Button>
                 </DialogFooter>
               </div>
-            )}
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
       </UltraDashboard>
     </SidebarProvider>
   );

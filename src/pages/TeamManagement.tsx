@@ -94,45 +94,43 @@ const TeamManagement = () => {
                     Performance
                   </TabsTrigger>
                 </TabsList>
+              
+                <ScrollArea className="h-[600px]">
+                  <TabsContent value="members" className="mt-0 p-6">
+                    <div className="flex justify-center items-center h-64">
+                      <div className="text-center">
+                        <Users className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
+                        <p className="text-gray-500 dark:text-gray-400">
+                          Module des membres de l'équipe en cours de développement
+                        </p>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="schedule" className="mt-0 p-6">
+                    <div className="flex justify-center items-center h-64">
+                      <div className="text-center">
+                        <Calendar className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
+                        <p className="text-gray-500 dark:text-gray-400">
+                          Module de planning d'équipe en cours de développement
+                        </p>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="performance" className="mt-0 p-6">
+                    <div className="flex justify-center items-center h-64">
+                      <div className="text-center">
+                        <BarChart3 className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
+                        <p className="text-gray-500 dark:text-gray-400">
+                          Module de performance d'équipe en cours de développement
+                        </p>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </ScrollArea>
               </Tabs>
             </CardHeader>
-            
-            <CardContent className="p-0">
-              <ScrollArea className="h-[600px]">
-                <TabsContent value="members" className="mt-0 p-6">
-                  <div className="flex justify-center items-center h-64">
-                    <div className="text-center">
-                      <Users className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
-                      <p className="text-gray-500 dark:text-gray-400">
-                        Module des membres de l'équipe en cours de développement
-                      </p>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="schedule" className="mt-0 p-6">
-                  <div className="flex justify-center items-center h-64">
-                    <div className="text-center">
-                      <Calendar className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
-                      <p className="text-gray-500 dark:text-gray-400">
-                        Module de planning d'équipe en cours de développement
-                      </p>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="performance" className="mt-0 p-6">
-                  <div className="flex justify-center items-center h-64">
-                    <div className="text-center">
-                      <BarChart3 className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
-                      <p className="text-gray-500 dark:text-gray-400">
-                        Module de performance d'équipe en cours de développement
-                      </p>
-                    </div>
-                  </div>
-                </TabsContent>
-              </ScrollArea>
-            </CardContent>
           </Card>
         </div>
       </div>

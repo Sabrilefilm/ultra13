@@ -1,72 +1,27 @@
 
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { useAccountManagement } from "@/hooks/use-account-management";
 import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
-import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { 
-  Users, 
-  Search, 
-  UserPlus, 
-  ArrowRight, 
-  FileText,
-  ChevronRight, 
-  ArrowUpRight, 
-  Star,
-  Mail,
-  Key,
-  Trash2,
-  AlertCircle,
-  CheckCircle
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SocialCommunityLinks } from "@/components/layout/SocialCommunityLinks";
-import { AgentPerformanceChart } from "@/components/manager/AgentPerformanceChart";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { BarChart3, Calendar, MessageSquare, Star, Users, ClipboardCheck, UserCheck, PieChart, ArrowRight } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 
-// Génération de mot de passe aléatoire
-const generateRandomPassword = () => {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-  let password = "";
-  for (let i = 0; i < 12; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return password;
-};
-
 const ManagerDashboard = () => {
-  const { toast } = useToast();
   const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
   const { platformSettings, handleUpdateSettings } = usePlatformSettings(role);
   const { handleCreateAccount } = useAccountManagement();
-  const [activeTab, setActiveTab] = useState("overview");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [messageContent, setMessageContent] = useState("");
+  const { toast } = useToast();
   const [agents, setAgents] = useState([]);
+  const [selectedTab, setSelectedTab] = useState("performance");
   const [loading, setLoading] = useState(true);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [agentToDelete, setAgentToDelete] = useState(null);
-  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
-  const [agentToResetPassword, setAgentToResetPassword] = useState(null);
-  const [newPassword, setNewPassword] = useState("");
-  const [resetPasswordSuccess, setResetPasswordSuccess] = useState(false);
-  const navigate = useNavigate();
   
   // Inactivity timer for automatic logout
   const { showWarning, dismissWarning, formattedTime } = useInactivityTimer({
@@ -84,22 +39,23 @@ const ManagerDashboard = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/');
+      window.location.href = '/';
       return;
     }
     
-    // Restrict access to manager role
+    // Restrict access to manager and founder roles
     if (role !== 'manager' && role !== 'founder') {
-      navigate('/');
+      window.location.href = '/';
       return;
     }
-
+    
     fetchAgents();
-  }, [isAuthenticated, role, navigate]);
+  }, [isAuthenticated, role]);
 
   const fetchAgents = async () => {
     try {
       setLoading(true);
+      
       const { data, error } = await supabase
         .from("user_accounts")
         .select("*")
@@ -108,41 +64,29 @@ const ManagerDashboard = () => {
       if (error) {
         throw error;
       }
-
-      const enhancedAgents = await Promise.all(data.map(async (agent) => {
-        // Récupérer le nombre de créateurs assignés à cet agent
-        const { count, error: countError } = await supabase
-          .from("user_accounts")
-          .select("*", { count: 'exact', head: true })
-          .eq("agent_id", agent.id);
-        
-        if (countError) {
-          console.error("Erreur lors du comptage des créateurs:", countError);
-          return { ...agent, creatorCount: 0 };
-        }
-
-        // Calculer les performances aléatoires pour la démo
-        const performance = Math.floor(Math.random() * 60) + 40; // Entre 40 et 100
-        const status = performance >= 80 ? "active" : performance >= 60 ? "warning" : "inactive";
-        const liveHours = Math.floor(Math.random() * 20) + 5; // Entre 5 et 25 heures
-        const targetHours = 15;
-        const diamonds = Math.floor(Math.random() * 3000) + 500; // Entre 500 et 3500 diamants
+      
+      // Add random performance data for demo
+      const enhancedAgents = data.map(agent => {
+        const creatorsCount = Math.floor(Math.random() * 10) + 1;
+        const activeCreators = Math.floor(Math.random() * creatorsCount);
+        const performanceScore = Math.floor(Math.random() * 100);
+        const hoursLogged = Math.floor(Math.random() * 40) + 10;
+        const status = performanceScore >= 70 ? "active" : performanceScore >= 40 ? "moderate" : "inactive";
         
         return {
           ...agent,
-          creatorCount: count || 0,
-          performance,
-          status,
-          liveHours,
-          targetHours,
-          diamonds
+          creatorsCount,
+          activeCreators,
+          performanceScore,
+          hoursLogged,
+          status
         };
-      }));
-
+      });
+      
       setAgents(enhancedAgents);
       setLoading(false);
     } catch (error) {
-      console.error("Erreur lors de la récupération des agents:", error);
+      console.error("Error fetching agents:", error);
       toast({
         variant: "destructive",
         title: "Erreur!",
@@ -152,125 +96,9 @@ const ManagerDashboard = () => {
     }
   };
 
-  // Filtrer les agents en fonction de la recherche
-  const filteredAgents = agents.filter(agent => 
-    agent.username?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Supprimer un agent
-  const handleDeleteAgent = async () => {
-    if (!agentToDelete) return;
-
-    try {
-      // Mettre à jour les créateurs assignés à cet agent (les désassigner)
-      const { error: updateError } = await supabase
-        .from("user_accounts")
-        .update({ agent_id: null })
-        .eq("agent_id", agentToDelete.id);
-      
-      if (updateError) {
-        throw updateError;
-      }
-      
-      // Supprimer l'agent
-      const { error: deleteError } = await supabase
-        .from("user_accounts")
-        .delete()
-        .eq("id", agentToDelete.id);
-      
-      if (deleteError) {
-        throw deleteError;
-      }
-
-      toast({
-        title: "Succès!",
-        description: `L'agent ${agentToDelete.username} a été supprimé avec succès.`,
-      });
-      
-      setIsDeleteModalOpen(false);
-      setAgentToDelete(null);
-      fetchAgents(); // Rafraîchir la liste des agents
-    } catch (error) {
-      console.error("Erreur lors de la suppression de l'agent:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur!",
-        description: "Impossible de supprimer l'agent.",
-      });
-    }
-  };
-
-  // Réinitialiser le mot de passe d'un agent
-  const handleResetPassword = async () => {
-    if (!agentToResetPassword) return;
-
-    try {
-      const generatedPassword = generateRandomPassword();
-      setNewPassword(generatedPassword);
-      
-      const { error } = await supabase
-        .from("user_accounts")
-        .update({ password: generatedPassword })
-        .eq("id", agentToResetPassword.id);
-      
-      if (error) {
-        throw error;
-      }
-
-      setResetPasswordSuccess(true);
-    } catch (error) {
-      console.error("Erreur lors de la réinitialisation du mot de passe:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur!",
-        description: "Impossible de réinitialiser le mot de passe.",
-      });
-    }
-  };
-
-  const closeResetPasswordModal = () => {
-    setIsResetPasswordModalOpen(false);
-    setAgentToResetPassword(null);
-    setNewPassword("");
-    setResetPasswordSuccess(false);
-  };
-
-  // Gérer le contact avec un agent
-  const handleContactAgent = (agentId) => {
-    toast({
-      title: "Contact Agent",
-      description: `Contacter l'agent - fonctionnalité en développement`,
-    });
-  };
-
-  // Voir les créateurs d'un agent
-  const handleViewCreators = (agentId) => {
-    navigate(`/agent-creators/${agentId}`);
-  };
-  
-  // Envoyer un message
-  const handleSendMessage = () => {
-    if (!messageContent.trim()) return;
-    
-    toast({
-      title: "Message envoyé",
-      description: "Votre message a été envoyé avec succès",
-    });
-    
-    setMessageContent("");
-  };
-
   if (!isAuthenticated || (role !== 'manager' && role !== 'founder')) {
     return null;
   }
-
-  // Données pour le graphique de performance
-  const performanceData = filteredAgents.slice(0, 5).map(agent => ({
-    name: agent.username.split(' ')[0],
-    hours: agent.liveHours,
-    diamonds: agent.diamonds / 100, // Échelle pour le graphique
-    target: agent.targetHours
-  }));
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -290,250 +118,298 @@ const ManagerDashboard = () => {
         <div className="max-w-7xl mx-auto p-6 space-y-6">
           <Card className="bg-gradient-to-br from-blue-950 to-indigo-950 shadow-lg border-blue-900/30 overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-blue-900/30 to-indigo-900/30 border-b border-blue-800/30">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-3xl font-bold text-white flex items-center gap-2">
-                  <Users className="h-8 w-8 text-blue-400" />
-                  Espace Manager
-                </CardTitle>
-              </div>
+              <CardTitle className="text-3xl font-bold text-white flex items-center gap-2">
+                <BarChart3 className="h-8 w-8 text-blue-400" />
+                Espace Manager
+              </CardTitle>
+              <p className="text-blue-300">Gestion des agents et des performances</p>
               
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-6">
-                <TabsList className="grid grid-cols-3 bg-blue-900/30">
-                  <TabsTrigger value="overview" className="data-[state=active]:bg-blue-700 data-[state=active]:text-white">
-                    Vue d'ensemble
-                  </TabsTrigger>
-                  <TabsTrigger value="agents" className="data-[state=active]:bg-blue-700 data-[state=active]:text-white">
-                    Mes Agents
+              <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mt-6">
+                <TabsList className="bg-blue-900/30">
+                  <TabsTrigger value="performance" className="data-[state=active]:bg-blue-700 data-[state=active]:text-white">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Performance
                   </TabsTrigger>
                   <TabsTrigger value="communication" className="data-[state=active]:bg-blue-700 data-[state=active]:text-white">
+                    <MessageSquare className="h-4 w-4 mr-2" />
                     Communication
+                  </TabsTrigger>
+                  <TabsTrigger value="agents" className="data-[state=active]:bg-blue-700 data-[state=active]:text-white">
+                    <Users className="h-4 w-4 mr-2" />
+                    Mes Agents
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
             </CardHeader>
             
-            <CardContent className="p-6">
-              <TabsContent value="overview" className="mt-0">
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <Card className="bg-gradient-to-br from-blue-900/20 to-blue-800/20 border-blue-800/30">
+            <CardContent className="p-0">
+              <TabsContent value="performance" className="m-0">
+                <div className="p-6 bg-blue-900/10">
+                  <h2 className="text-xl font-bold text-white mb-4">Vue d'ensemble des performances</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card className="bg-blue-900/20 border-blue-800/30">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-lg text-blue-300">Total Agents</CardTitle>
+                        <CardTitle className="text-lg text-blue-100 flex items-center">
+                          <UserCheck className="h-5 w-5 mr-2 text-green-400" />
+                          Agents Actifs
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-3xl font-bold text-white">{agents.length}</div>
-                        <p className="text-sm text-blue-400 mt-1">Agents actifs</p>
+                        <div className="text-3xl font-bold text-white">{agents.filter(a => a.status === "active").length} / {agents.length}</div>
+                        <p className="text-blue-300 mt-1">Agents avec performance &gt; 70%</p>
                       </CardContent>
                     </Card>
-                    
-                    <Card className="bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border-indigo-800/30">
+                    <Card className="bg-blue-900/20 border-blue-800/30">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-lg text-indigo-300">Performances</CardTitle>
+                        <CardTitle className="text-lg text-blue-100 flex items-center">
+                          <Star className="h-5 w-5 mr-2 text-yellow-400" />
+                          Performance Moyenne
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="text-3xl font-bold text-white">
                           {agents.length > 0 
-                            ? `${Math.round(agents.reduce((sum, agent) => sum + agent.performance, 0) / agents.length)}%` 
-                            : "N/A"}
+                            ? Math.round(agents.reduce((acc, agent) => acc + agent.performanceScore, 0) / agents.length) 
+                            : 0}%
                         </div>
-                        <p className="text-sm text-indigo-400 mt-1">Objectifs atteints</p>
+                        <p className="text-blue-300 mt-1">Sur l'ensemble des agents</p>
                       </CardContent>
                     </Card>
-                    
-                    <Card className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border-red-800/30">
+                    <Card className="bg-blue-900/20 border-blue-800/30">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-lg text-red-300">Alertes</CardTitle>
+                        <CardTitle className="text-lg text-blue-100 flex items-center">
+                          <ClipboardCheck className="h-5 w-5 mr-2 text-purple-400" />
+                          Heures Totales
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="text-3xl font-bold text-white">
-                          {agents.filter(agent => agent.performance < 60).length}
+                          {agents.reduce((acc, agent) => acc + agent.hoursLogged, 0)}h
                         </div>
-                        <p className="text-sm text-red-400 mt-1">Agents en dessous des objectifs</p>
+                        <p className="text-blue-300 mt-1">Heures de travail enregistrées</p>
                       </CardContent>
                     </Card>
                   </div>
                   
-                  <Card className="mb-6 bg-blue-900/20 border-blue-800/30">
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2 text-white">
-                        <AlertCircle className="h-5 w-5 text-red-400" />
-                        Alertes récentes
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {agents
-                          .filter(agent => agent.performance < 60)
-                          .slice(0, 2)
-                          .map(agent => (
-                            <div key={agent.id} className="p-4 border border-red-900/30 rounded-lg bg-red-900/20">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h4 className="font-semibold text-red-300">{agent.username}</h4>
-                                  <p className="text-sm text-red-400">Moins de 10h de live cette semaine ({agent.liveHours}h/{agent.targetHours}h)</p>
-                                </div>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="border-red-800 text-red-400 hover:bg-red-900/20"
-                                  onClick={() => handleContactAgent(agent.id)}
-                                >
-                                  Contacter
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        
-                        {agents.filter(agent => agent.performance < 60).length === 0 && (
-                          <div className="p-4 border border-green-900/30 rounded-lg bg-green-900/20">
+                  <h3 className="text-xl font-bold text-white mt-8 mb-4">Analyse détaillée</h3>
+                  <div className="bg-blue-900/20 rounded-lg border border-blue-800/30 overflow-hidden">
+                    <div className="grid grid-cols-12 gap-2 p-4 border-b border-blue-800/30 bg-blue-900/40 text-blue-300 font-medium">
+                      <div className="col-span-3">Agent</div>
+                      <div className="col-span-2">Performance</div>
+                      <div className="col-span-2">Créateurs</div>
+                      <div className="col-span-2">Actifs</div>
+                      <div className="col-span-2">Heures</div>
+                      <div className="col-span-1 text-right">Action</div>
+                    </div>
+                    
+                    {loading ? (
+                      <div className="p-8 text-center text-blue-400">
+                        <div className="animate-spin h-8 w-8 border-4 border-current border-t-transparent rounded-full mx-auto mb-2"></div>
+                        Chargement des données...
+                      </div>
+                    ) : agents.length === 0 ? (
+                      <div className="p-8 text-center text-blue-400">
+                        <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                        Aucun agent trouvé
+                      </div>
+                    ) : (
+                      agents.map(agent => (
+                        <div 
+                          key={agent.id} 
+                          className="grid grid-cols-12 gap-2 p-4 border-b border-blue-800/10 text-white items-center hover:bg-blue-800/20 transition-colors"
+                        >
+                          <div className="col-span-3 font-medium">{agent.username}</div>
+                          <div className="col-span-2">
                             <div className="flex items-center">
-                              <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
-                              <p className="text-green-300">Aucune alerte à signaler</p>
+                              <div className="w-full bg-blue-950/50 rounded-full h-2 mr-2">
+                                <div 
+                                  className={`h-2 rounded-full ${
+                                    agent.performanceScore >= 70 ? 'bg-green-500' : 
+                                    agent.performanceScore >= 40 ? 'bg-amber-500' : 'bg-red-500'
+                                  }`}
+                                  style={{ width: `${agent.performanceScore}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-sm">{agent.performanceScore}%</span>
                             </div>
                           </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  {performanceData.length > 0 && (
-                    <Card className="bg-blue-900/20 border-blue-800/30">
-                      <CardHeader>
-                        <CardTitle className="text-lg text-white">Performance des agents</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <AgentPerformanceChart data={performanceData} />
-                      </CardContent>
-                    </Card>
-                  )}
-                  
-                  <div className="mt-6">
-                    <SocialCommunityLinks compact={true} className="mt-6" />
+                          <div className="col-span-2">{agent.creatorsCount}</div>
+                          <div className="col-span-2">
+                            <span className={`px-2 py-1 rounded-full text-xs ${
+                              agent.status === 'active' ? 'bg-green-900/40 text-green-300' :
+                              agent.status === 'moderate' ? 'bg-amber-900/40 text-amber-300' :
+                              'bg-red-900/40 text-red-300'
+                            }`}>
+                              {agent.activeCreators} / {agent.creatorsCount}
+                            </span>
+                          </div>
+                          <div className="col-span-2">{agent.hoursLogged}h</div>
+                          <div className="col-span-1 text-right">
+                            <Link to={`/agent-creators/${agent.id}`}>
+                              <Button size="sm" className="h-7 bg-blue-700 hover:bg-blue-600">
+                                <ArrowRight className="h-3.5 w-3.5" />
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </TabsContent>
               
-              <TabsContent value="agents" className="mt-0">
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <div className="relative w-full md:w-96">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input
-                        placeholder="Rechercher un agent..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 bg-blue-900/20 border-blue-800/30 text-white placeholder:text-blue-400"
-                      />
-                    </div>
+              <TabsContent value="communication" className="m-0">
+                <div className="p-6 bg-blue-900/10">
+                  <h2 className="text-xl font-bold text-white mb-4">Centre de communication</h2>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card className="bg-blue-900/20 border-blue-800/30 h-[400px] flex flex-col">
+                      <CardHeader>
+                        <CardTitle className="text-lg text-blue-100">Annonces</CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex-grow overflow-auto">
+                        <div className="space-y-4">
+                          <div className="bg-blue-950/40 p-4 rounded-lg border border-blue-800/30">
+                            <div className="flex justify-between items-center mb-2">
+                              <h4 className="font-medium text-white">Mise à jour du système</h4>
+                              <span className="text-xs text-blue-400">Il y a 2 jours</span>
+                            </div>
+                            <p className="text-blue-200 text-sm">Nous avons déployé une mise à jour majeure du tableau de bord. Découvrez les nouvelles fonctionnalités de suivi des performances!</p>
+                          </div>
+                          
+                          <div className="bg-blue-950/40 p-4 rounded-lg border border-blue-800/30">
+                            <div className="flex justify-between items-center mb-2">
+                              <h4 className="font-medium text-white">Rappel: Réunion mensuelle</h4>
+                              <span className="text-xs text-blue-400">Il y a 5 jours</span>
+                            </div>
+                            <p className="text-blue-200 text-sm">La réunion mensuelle des managers aura lieu ce vendredi à 14h. Préparez vos rapports d'activité.</p>
+                          </div>
+                          
+                          <div className="bg-blue-950/40 p-4 rounded-lg border border-blue-800/30">
+                            <div className="flex justify-between items-center mb-2">
+                              <h4 className="font-medium text-white">Nouveaux objectifs trimestriels</h4>
+                              <span className="text-xs text-blue-400">Il y a 1 semaine</span>
+                            </div>
+                            <p className="text-blue-200 text-sm">Les nouveaux objectifs pour le trimestre ont été définis. Consultez-les dans la section Performance de votre tableau de bord.</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                     
-                    <Button className="hidden md:flex items-center bg-blue-700 hover:bg-blue-600">
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      Ajouter un agent
-                    </Button>
+                    <Card className="bg-blue-900/20 border-blue-800/30 h-[400px] flex flex-col">
+                      <CardHeader>
+                        <CardTitle className="text-lg text-blue-100">Messages récents</CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex-grow overflow-auto">
+                        <div className="space-y-4">
+                          <div className="bg-blue-950/40 p-4 rounded-lg border border-blue-800/30">
+                            <div className="flex items-start gap-3">
+                              <div className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center text-white font-medium">
+                                S
+                              </div>
+                              <div className="flex-grow">
+                                <div className="flex justify-between items-center mb-1">
+                                  <h4 className="font-medium text-white">Sophie Martin</h4>
+                                  <span className="text-xs text-blue-400">10:25</span>
+                                </div>
+                                <p className="text-blue-200 text-sm">Bonjour, pourriez-vous valider les nouveaux créateurs que j'ai ajoutés hier?</p>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-blue-950/40 p-4 rounded-lg border border-blue-800/30">
+                            <div className="flex items-start gap-3">
+                              <div className="w-8 h-8 rounded-full bg-green-700 flex items-center justify-center text-white font-medium">
+                                T
+                              </div>
+                              <div className="flex-grow">
+                                <div className="flex justify-between items-center mb-1">
+                                  <h4 className="font-medium text-white">Thomas Dubois</h4>
+                                  <span className="text-xs text-blue-400">Hier</span>
+                                </div>
+                                <p className="text-blue-200 text-sm">J'ai besoin d'aide pour résoudre un conflit entre deux créateurs. Pouvons-nous en discuter?</p>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-blue-950/40 p-4 rounded-lg border border-blue-800/30">
+                            <div className="flex items-start gap-3">
+                              <div className="w-8 h-8 rounded-full bg-amber-700 flex items-center justify-center text-white font-medium">
+                                L
+                              </div>
+                              <div className="flex-grow">
+                                <div className="flex justify-between items-center mb-1">
+                                  <h4 className="font-medium text-white">Lucie Bernard</h4>
+                                  <span className="text-xs text-blue-400">2 jours</span>
+                                </div>
+                                <p className="text-blue-200 text-sm">Le rapport mensuel est prêt. Vous pouvez le consulter dans le dossier partagé.</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="agents" className="m-0">
+                <div className="p-6 bg-blue-900/10">
+                  <h2 className="text-xl font-bold text-white mb-4">Liste de mes agents</h2>
                   
                   {loading ? (
-                    <div className="flex justify-center py-8">
-                      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+                    <div className="p-8 text-center text-blue-400">
+                      <div className="animate-spin h-8 w-8 border-4 border-current border-t-transparent rounded-full mx-auto mb-2"></div>
+                      Chargement des agents...
                     </div>
-                  ) : filteredAgents.length === 0 ? (
+                  ) : agents.length === 0 ? (
                     <div className="p-8 text-center text-blue-400 bg-blue-900/20 rounded-lg border border-blue-800/30">
-                      <Users className="h-10 w-10 mx-auto mb-4 text-blue-500 opacity-50" />
+                      <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
                       <h3 className="text-xl font-semibold mb-2">Aucun agent trouvé</h3>
-                      <p>Aucun agent ne correspond à votre recherche ou aucun agent n'est enregistré.</p>
+                      <p>Vous n'avez pas encore d'agents sous votre supervision.</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                      {filteredAgents.map(agent => (
-                        <Card key={agent.id} className="bg-blue-900/20 border-blue-800/30 hover:bg-blue-800/20 transition-colors">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {agents.map(agent => (
+                        <Card key={agent.id} className="bg-blue-900/20 border-blue-800/30 hover:bg-blue-800/20 transition-colors overflow-hidden">
                           <CardHeader className="pb-2">
-                            <div className="flex justify-between">
-                              <CardTitle className="text-xl text-white flex items-center gap-2">
-                                {agent.username}
-                                {agent.status === "active" && (
-                                  <span className="inline-block w-2.5 h-2.5 bg-green-500 rounded-full"></span>
-                                )}
-                                {agent.status === "warning" && (
-                                  <span className="inline-block w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
-                                )}
-                                {agent.status === "inactive" && (
-                                  <span className="inline-block w-2.5 h-2.5 bg-red-500 rounded-full"></span>
-                                )}
-                              </CardTitle>
-                              <div className="text-sm font-medium text-blue-400">
-                                {agent.creatorCount} créateurs
-                              </div>
-                            </div>
+                            <CardTitle className="text-xl text-white">{agent.username}</CardTitle>
+                            <p className="text-blue-300">Agent</p>
                           </CardHeader>
                           <CardContent className="space-y-4">
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-blue-300">Performance</span>
-                              <span className="text-sm font-medium text-white">{agent.performance}%</span>
-                            </div>
-                            <div className="w-full bg-blue-950/50 rounded-full h-2">
-                              <div 
-                                className={`h-2 rounded-full ${
-                                  agent.performance >= 80 ? 'bg-green-500' : 
-                                  agent.performance >= 60 ? 'bg-amber-500' : 'bg-red-500'
-                                }`}
-                                style={{ width: `${agent.performance}%` }}
-                              ></div>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-4 pt-2">
-                              <div className="bg-blue-950/30 p-3 rounded-lg">
-                                <div className="text-sm text-blue-400">Heures Live</div>
-                                <div className="text-lg font-semibold text-white">{agent.liveHours}/{agent.targetHours}h</div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="bg-blue-950/40 p-3 rounded-lg">
+                                <div className="text-sm text-blue-400">Créateurs</div>
+                                <div className="text-2xl font-semibold text-white">{agent.creatorsCount}</div>
                               </div>
-                              <div className="bg-blue-950/30 p-3 rounded-lg">
-                                <div className="text-sm text-blue-400">Diamants</div>
-                                <div className="text-lg font-semibold text-white">{agent.diamonds}</div>
+                              <div className="bg-blue-950/40 p-3 rounded-lg">
+                                <div className="text-sm text-blue-400">Actifs</div>
+                                <div className="text-2xl font-semibold text-white">{agent.activeCreators}</div>
                               </div>
                             </div>
                             
-                            <div className="grid grid-cols-4 gap-2 pt-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
-                                onClick={() => handleContactAgent(agent.id)}
-                                title="Contacter l'agent"
-                              >
-                                <Mail className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
-                                onClick={() => {
-                                  setAgentToResetPassword(agent);
-                                  setIsResetPasswordModalOpen(true);
-                                }}
-                                title="Réinitialiser le mot de passe"
-                              >
-                                <Key className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
-                                onClick={() => {
-                                  setAgentToDelete(agent);
-                                  setIsDeleteModalOpen(true);
-                                }}
-                                title="Supprimer l'agent"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="w-full border-blue-800 text-blue-300 hover:bg-blue-800/30"
-                                onClick={() => handleViewCreators(agent.id)}
-                                title="Voir les créateurs"
-                              >
-                                <Users className="h-4 w-4" />
-                              </Button>
+                            <div>
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-sm text-blue-300">Performance</span>
+                                <span className="text-sm font-medium text-white">{agent.performanceScore}%</span>
+                              </div>
+                              <div className="w-full bg-blue-950/50 rounded-full h-2">
+                                <div 
+                                  className={`h-2 rounded-full ${
+                                    agent.performanceScore >= 70 ? 'bg-green-500' : 
+                                    agent.performanceScore >= 40 ? 'bg-amber-500' : 'bg-red-500'
+                                  }`}
+                                  style={{ width: `${agent.performanceScore}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                            
+                            <div className="pt-2">
+                              <Link to={`/agent-creators/${agent.id}`} className="w-full">
+                                <Button className="w-full bg-blue-700 hover:bg-blue-600">
+                                  Voir les créateurs
+                                  <ArrowRight className="ml-2 h-4 w-4" />
+                                </Button>
+                              </Link>
                             </div>
                           </CardContent>
                         </Card>
@@ -542,230 +418,9 @@ const ManagerDashboard = () => {
                   )}
                 </div>
               </TabsContent>
-              
-              <TabsContent value="communication" className="mt-0">
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-1">
-                      <Card className="bg-blue-900/20 border-blue-800/30 h-full">
-                        <CardHeader>
-                          <CardTitle className="text-lg text-white">Conversations</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2 max-h-[500px] overflow-auto">
-                          {[1, 2, 3, 4].map(item => (
-                            <div 
-                              key={item} 
-                              className={`p-3 rounded-lg cursor-pointer ${
-                                item === 1 
-                                  ? 'bg-blue-800/40 border-l-4 border-blue-500' 
-                                  : 'bg-blue-950/30 hover:bg-blue-900/30'
-                              }`}
-                            >
-                              <div className="flex justify-between">
-                                <h4 className="font-medium text-white">Agent {item}</h4>
-                                <span className="text-xs text-blue-400">{item === 1 ? "10:30" : item === 2 ? "Hier" : "Il y a 2 jours"}</span>
-                              </div>
-                              <p className="text-sm text-blue-300 truncate">
-                                {item === 1 ? "J'ai besoin d'aide pour mon créateur qui ne respecte pas les heures." : 
-                                 item === 2 ? "Nouveaux créateurs disponibles pour assignation" : 
-                                 item === 3 ? "Rapport hebdomadaire envoyé" : 
-                                 "Demande d'augmentation d'objectif pour créateur XYZ"}
-                              </p>
-                            </div>
-                          ))}
-                        </CardContent>
-                      </Card>
-                    </div>
-                    
-                    <div className="lg:col-span-2">
-                      <Card className="bg-blue-900/20 border-blue-800/30 h-full flex flex-col">
-                        <CardHeader>
-                          <CardTitle className="text-lg text-white">Messages</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex-grow space-y-4">
-                          <div className="bg-blue-950/30 p-4 rounded-lg max-h-[400px] overflow-auto">
-                            <div className="space-y-4">
-                              <div className="flex justify-end">
-                                <div className="bg-blue-700 text-white p-3 rounded-lg rounded-tr-none max-w-[80%]">
-                                  <p className="text-sm">Bonjour, avez-vous reçu mon rapport sur les performances des créateurs?</p>
-                                  <span className="text-xs text-blue-300 block text-right mt-1">10:15</span>
-                                </div>
-                              </div>
-                              
-                              <div className="flex">
-                                <div className="bg-blue-950/50 text-white p-3 rounded-lg rounded-tl-none max-w-[80%]">
-                                  <p className="text-sm">Oui, je l'ai bien reçu. J'ai besoin d'aide pour mon créateur qui ne respecte pas les heures.</p>
-                                  <span className="text-xs text-blue-400 block mt-1">10:30</span>
-                                </div>
-                              </div>
-                              
-                              <div className="flex justify-end">
-                                <div className="bg-blue-700 text-white p-3 rounded-lg rounded-tr-none max-w-[80%]">
-                                  <p className="text-sm">Je comprends. Pouvez-vous me donner plus de détails sur ce créateur? Combien d'heures manque-t-il?</p>
-                                  <span className="text-xs text-blue-300 block text-right mt-1">10:32</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex gap-2">
-                            <Input
-                              placeholder="Écrivez votre message..."
-                              value={messageContent}
-                              onChange={(e) => setMessageContent(e.target.value)}
-                              className="bg-blue-950/30 border-blue-800/30 text-white placeholder:text-blue-400"
-                            />
-                            <Button 
-                              className="bg-blue-700 hover:bg-blue-600"
-                              onClick={handleSendMessage}
-                            >
-                              Envoyer
-                              <ArrowRight className="h-4 w-4 ml-2" />
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
-                  
-                  <Card className="bg-blue-900/20 border-blue-800/30">
-                    <CardHeader>
-                      <CardTitle className="text-lg text-white">Documents partagés</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {[1, 2, 3].map(item => (
-                          <div key={item} className="bg-blue-950/30 p-4 rounded-lg border border-blue-800/30">
-                            <div className="flex items-start">
-                              <FileText className="h-8 w-8 text-blue-400 mr-3" />
-                              <div>
-                                <h4 className="font-medium text-white">Rapport performances_{item}.pdf</h4>
-                                <p className="text-xs text-blue-400 mt-1">Partagé il y a {item} jour{item > 1 ? 's' : ''}</p>
-                              </div>
-                            </div>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="w-full mt-3 border-blue-800 text-blue-300 hover:bg-blue-800/30"
-                            >
-                              Télécharger
-                              <ArrowUpRight className="h-4 w-4 ml-2" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
             </CardContent>
           </Card>
         </div>
-
-        {/* Modal de confirmation de suppression */}
-        <Dialog
-          open={isDeleteModalOpen}
-          onOpenChange={setIsDeleteModalOpen}
-        >
-          <DialogContent className="bg-slate-900 border border-slate-800">
-            <DialogHeader>
-              <DialogTitle className="text-xl text-white">Confirmer la suppression</DialogTitle>
-              <DialogDescription className="text-slate-400">
-                Êtes-vous sûr de vouloir supprimer l'agent <span className="font-semibold text-white">{agentToDelete?.username}</span> ?
-                Cette action est irréversible.
-              </DialogDescription>
-            </DialogHeader>
-            <Alert className="bg-red-900/20 border border-red-800/30 text-red-300">
-              <AlertCircle className="h-4 w-4 mr-2" />
-              <AlertDescription>
-                Les créateurs assignés à cet agent seront désassignés.
-              </AlertDescription>
-            </Alert>
-            <DialogFooter className="flex gap-2 sm:justify-end">
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setIsDeleteModalOpen(false);
-                  setAgentToDelete(null);
-                }}
-                className="border-slate-700 hover:bg-slate-800 text-slate-300"
-              >
-                Annuler
-              </Button>
-              <Button 
-                variant="destructive"
-                onClick={handleDeleteAgent}
-                className="bg-red-700 hover:bg-red-800 text-white"
-              >
-                Supprimer
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Modal de réinitialisation de mot de passe */}
-        <Dialog
-          open={isResetPasswordModalOpen}
-          onOpenChange={(open) => {
-            if (!open) closeResetPasswordModal();
-            else setIsResetPasswordModalOpen(open);
-          }}
-        >
-          <DialogContent className="bg-slate-900 border border-slate-800 max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-xl text-white">
-                {resetPasswordSuccess 
-                  ? "Mot de passe réinitialisé" 
-                  : `Réinitialiser le mot de passe de ${agentToResetPassword?.username}`}
-              </DialogTitle>
-              <DialogDescription className="text-slate-400">
-                {resetPasswordSuccess 
-                  ? "Le mot de passe a été réinitialisé avec succès. Veuillez noter le nouveau mot de passe."
-                  : "Cette action générera un nouveau mot de passe aléatoire pour cet utilisateur."}
-              </DialogDescription>
-            </DialogHeader>
-            
-            {resetPasswordSuccess ? (
-              <div className="space-y-4">
-                <div className="p-3 bg-blue-900/20 border border-blue-800/30 rounded-md">
-                  <p className="text-sm text-blue-400 mb-1">Nouveau mot de passe:</p>
-                  <p className="font-mono text-white break-all">{newPassword}</p>
-                </div>
-                <Button 
-                  className="w-full bg-green-700 hover:bg-green-800"
-                  onClick={closeResetPasswordModal}
-                >
-                  Fermer
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <Alert className="bg-yellow-900/20 border border-yellow-800/30 text-yellow-300">
-                  <AlertCircle className="h-4 w-4 mr-2" />
-                  <AlertDescription>
-                    Assurez-vous de communiquer le nouveau mot de passe à l'utilisateur.
-                  </AlertDescription>
-                </Alert>
-                <div className="flex gap-2 justify-end">
-                  <Button 
-                    variant="outline" 
-                    onClick={closeResetPasswordModal}
-                    className="border-slate-700 hover:bg-slate-800 text-slate-300"
-                  >
-                    Annuler
-                  </Button>
-                  <Button 
-                    variant="default"
-                    onClick={handleResetPassword}
-                    className="bg-blue-700 hover:bg-blue-800 text-white"
-                  >
-                    Réinitialiser
-                  </Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
       </UltraDashboard>
     </SidebarProvider>
   );
