@@ -1,11 +1,11 @@
 
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx';
 import './index.css';
-import { Toaster } from "@/components/ui/toaster";
 
-// Créer une instance de QueryClient
+// Create a QueryClient instance
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -17,7 +17,8 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
-    <App />
-    <Toaster />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </QueryClientProvider>
 );
