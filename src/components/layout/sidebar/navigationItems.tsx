@@ -45,13 +45,6 @@ export const navigationItems: SidebarItem[] = [
     roles: ["founder", "manager", "agent", "ambassadeur"]
   }, 
   {
-    icon: Calendar,
-    label: "Planning",
-    action: "navigateTo",
-    data: "schedule",
-    roles: ["founder", "manager"] // Restreint seulement aux fondateurs et managers
-  }, 
-  {
     icon: Trophy,
     label: "Matchs",
     action: "navigateTo",
@@ -77,7 +70,7 @@ export const navigationItems: SidebarItem[] = [
     label: "Diamants",
     action: "navigateTo",
     data: "creator-diamonds",
-    roles: ["founder", "manager", "agent"]
+    roles: ["founder"] // Modification: uniquement pour les fondateurs
   },
   {
     icon: MessageSquare,
@@ -106,7 +99,7 @@ export const navigationItems: SidebarItem[] = [
     label: "Mes Créateurs",
     action: "navigateTo",
     data: "creator-stats",
-    roles: ["agent", "founder", "manager"] // Restreint aux agents, fondateurs et managers
+    roles: ["founder"] // Modification: uniquement pour les fondateurs
   },
   {
     icon: BookOpen,

@@ -50,7 +50,6 @@ export const UserGuide = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* Important fix: Move TabsContent components to be direct children of Tabs component */}
           <TabsContent value="dashboard">
             <ScrollArea className="h-[400px]">
               <div className="mt-4 px-2">

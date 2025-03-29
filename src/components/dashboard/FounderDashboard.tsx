@@ -12,9 +12,11 @@ import {
   Users,
   BookOpen,
   Plus,
-  Diamond
+  Diamond,
+  UserCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AgentAssignment } from "./AgentAssignment";
 
 interface FounderDashboardProps {
   onCreateAccount: () => void;
@@ -121,34 +123,45 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {cards.map((card, index) => (
-        <div 
-          key={index} 
-          className="bg-[#1e1f2e]/90 backdrop-blur-sm border border-gray-800/50 rounded-xl p-4 space-y-8 shadow-lg relative overflow-hidden"
-        >
-          <div className={`absolute top-0 right-0 w-20 h-20 ${card.iconBgColor} rounded-full -mr-10 -mt-10 blur-xl`}></div>
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-white">{card.title}</h3>
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {cards.map((card, index) => (
+          <div 
+            key={index} 
+            className="bg-[#1e1f2e]/90 backdrop-blur-sm border border-gray-800/50 rounded-xl p-4 space-y-8 shadow-lg relative overflow-hidden"
+          >
+            <div className={`absolute top-0 right-0 w-20 h-20 ${card.iconBgColor} rounded-full -mr-10 -mt-10 blur-xl`}></div>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium text-white">{card.title}</h3>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={card.action} 
+                className="bg-white/10 hover:bg-white/20"
+              >
+                {card.icon}
+              </Button>
+            </div>
             <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={card.action} 
-              className="bg-white/10 hover:bg-white/20"
+              variant="outline" 
+              className="w-full border-white/10 hover:bg-white/10" 
+              onClick={card.buttonAction}
             >
-              {card.icon}
+              {card.title === "Gestion des Utilisateurs" && <Plus className="mr-2 h-4 w-4" />}
+              {card.buttonText}
             </Button>
           </div>
-          <Button 
-            variant="outline" 
-            className="w-full border-white/10 hover:bg-white/10" 
-            onClick={card.buttonAction}
-          >
-            {card.title === "Gestion des Utilisateurs" && <Plus className="mr-2 h-4 w-4" />}
-            {card.buttonText}
-          </Button>
-        </div>
-      ))}
+        ))}
+      </div>
+      
+      {/* Nouvelle section pour l'assignation d'agents aux managers */}
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+          <UserCheck className="h-5 w-5 text-purple-400" />
+          Attribution d'Agents aux Managers
+        </h2>
+        <AgentAssignment />
+      </div>
     </div>
   );
 };

@@ -9,9 +9,10 @@ import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Calendar, BarChart3, UserPlus } from "lucide-react";
+import { Users, BarChart3, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { AgentAssignment } from "@/components/dashboard/AgentAssignment";
 
 const TeamManagement = () => {
   const { toast } = useToast();
@@ -80,14 +81,10 @@ const TeamManagement = () => {
               </div>
               
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-4">
-                <TabsList className="grid grid-cols-3 bg-purple-100 dark:bg-purple-900/30">
+                <TabsList className="grid grid-cols-2 bg-purple-100 dark:bg-purple-900/30">
                   <TabsTrigger value="members" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
                     <Users className="h-4 w-4 mr-2" />
                     Membres
-                  </TabsTrigger>
-                  <TabsTrigger value="schedule" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Planning
                   </TabsTrigger>
                   <TabsTrigger value="performance" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
                     <BarChart3 className="h-4 w-4 mr-2" />
@@ -95,40 +92,42 @@ const TeamManagement = () => {
                   </TabsTrigger>
                 </TabsList>
               
-                <ScrollArea className="h-[600px]">
-                  <TabsContent value="members" className="mt-0 p-6">
-                    <div className="flex justify-center items-center h-64">
-                      <div className="text-center">
-                        <Users className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
-                        <p className="text-gray-500 dark:text-gray-400">
-                          Module des membres de l'équipe en cours de développement
-                        </p>
+                <TabsContent value="members" className="mt-4">
+                  <ScrollArea className="h-[600px]">
+                    <div className="p-6">
+                      <div className="flex justify-center items-center h-64">
+                        <div className="text-center">
+                          <Users className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
+                          <p className="text-gray-500 dark:text-gray-400">
+                            Module des membres de l'équipe en cours de développement
+                          </p>
+                        </div>
                       </div>
+                      
+                      {role === 'founder' && (
+                        <div className="mt-8">
+                          <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">Attribution d'agents aux managers</h3>
+                          <AgentAssignment />
+                        </div>
+                      )}
                     </div>
-                  </TabsContent>
+                  </ScrollArea>
+                </TabsContent>
                   
-                  <TabsContent value="schedule" className="mt-0 p-6">
-                    <div className="flex justify-center items-center h-64">
-                      <div className="text-center">
-                        <Calendar className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
-                        <p className="text-gray-500 dark:text-gray-400">
-                          Module de planning d'équipe en cours de développement
-                        </p>
+                <TabsContent value="performance" className="mt-4">
+                  <ScrollArea className="h-[600px]">
+                    <div className="p-6">
+                      <div className="flex justify-center items-center h-64">
+                        <div className="text-center">
+                          <BarChart3 className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
+                          <p className="text-gray-500 dark:text-gray-400">
+                            Module de performance d'équipe en cours de développement
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="performance" className="mt-0 p-6">
-                    <div className="flex justify-center items-center h-64">
-                      <div className="text-center">
-                        <BarChart3 className="h-16 w-16 text-purple-300 dark:text-purple-800 mx-auto mb-4" />
-                        <p className="text-gray-500 dark:text-gray-400">
-                          Module de performance d'équipe en cours de développement
-                        </p>
-                      </div>
-                    </div>
-                  </TabsContent>
-                </ScrollArea>
+                  </ScrollArea>
+                </TabsContent>
               </Tabs>
             </CardHeader>
           </Card>
