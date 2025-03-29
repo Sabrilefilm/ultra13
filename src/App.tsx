@@ -8,7 +8,6 @@ import UserManagement from "./pages/UserManagement";
 import InternalRules from "./pages/InternalRules";
 import CreatorRules from "./pages/CreatorRules";
 import Messages from "./pages/Messages";
-import Documents from "./pages/Documents";
 import Transfers from "./pages/Transfers";
 import CreatorStats from "./pages/CreatorStats";
 import CreatorImport from "./pages/CreatorImport";
@@ -55,7 +54,7 @@ function App() {
         <Route
           path="/schedule"
           element={
-            <RouteGuard>
+            <RouteGuard allowedRoles={["founder", "manager"]}>
               <Schedule />
             </RouteGuard>
           }
@@ -93,14 +92,6 @@ function App() {
           }
         />
         <Route
-          path="/documents"
-          element={
-            <RouteGuard>
-              <Documents />
-            </RouteGuard>
-          }
-        />
-        <Route
           path="/transfers"
           element={
             <RouteGuard allowedRoles={["founder", "manager", "creator"]}>
@@ -111,7 +102,7 @@ function App() {
         <Route
           path="/creator-stats"
           element={
-            <RouteGuard allowedRoles={["founder", "manager", "agent", "ambassadeur"]}>
+            <RouteGuard allowedRoles={["founder", "manager", "agent"]}>
               <CreatorStats />
             </RouteGuard>
           }

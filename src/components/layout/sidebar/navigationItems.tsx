@@ -15,7 +15,8 @@ import {
   Diamond,
   FileSpreadsheet,
   BarChart2,
-  UserPlus
+  UserPlus,
+  Key
 } from "lucide-react";
 import { SidebarItem } from "./types";
 
@@ -48,14 +49,14 @@ export const navigationItems: SidebarItem[] = [
     label: "Planning",
     action: "navigateTo",
     data: "schedule",
-    roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
+    roles: ["founder", "manager"] // Restreint seulement aux fondateurs et managers
   }, 
   {
     icon: Trophy,
     label: "Matchs",
     action: "navigateTo",
     data: "matches",
-    roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
+    roles: ["founder", "manager"]
   }, 
   {
     icon: Briefcase,
@@ -85,14 +86,7 @@ export const navigationItems: SidebarItem[] = [
     data: "messages",
     roles: ["founder", "manager", "agent", "creator", "ambassadeur"],
     animated: true
-  }, 
-  {
-    icon: FileText,
-    label: "Documents",
-    action: "navigateTo",
-    data: "documents",
-    roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
-  }, 
+  },
   {
     icon: Bookmark,
     label: "Sanctions",
@@ -112,7 +106,7 @@ export const navigationItems: SidebarItem[] = [
     label: "Mes Créateurs",
     action: "navigateTo",
     data: "creator-stats",
-    roles: ["agent", "manager", "founder", "ambassadeur"]
+    roles: ["agent", "founder", "manager"] // Restreint aux agents, fondateurs et managers
   },
   {
     icon: BookOpen,
