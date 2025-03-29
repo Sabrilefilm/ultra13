@@ -4,7 +4,7 @@ import { motion, Variants } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 
-interface CommunityLinkButtonProps {
+export interface CommunityLinkButtonProps {
   name: string;
   url: string;
   bgColor: string;
@@ -13,6 +13,8 @@ interface CommunityLinkButtonProps {
   shadowColor: string;
   hoverBg: string;
   isHovered: boolean;
+  compact?: boolean;
+  // Remove the unused properties causing the type error
 }
 
 export const CommunityLinkButton = ({
@@ -23,7 +25,8 @@ export const CommunityLinkButton = ({
   icon,
   shadowColor,
   hoverBg,
-  isHovered
+  isHovered,
+  compact = false
 }: CommunityLinkButtonProps) => {
   const buttonVariants: Variants = {
     rest: { scale: 1 },
@@ -99,13 +102,13 @@ export const CommunityLinkButton = ({
         >
           <Button 
             variant="outline"
-            className={`w-full py-6 bg-gradient-to-r ${bgColor} ${hoverBg} hover:shadow-lg transition-all duration-300 ${textColor} border-none rounded-full shadow-md ${shadowColor}`}
+            className={`w-full ${compact ? 'py-2' : 'py-6'} bg-gradient-to-r ${bgColor} ${hoverBg} hover:shadow-lg transition-all duration-300 ${textColor} border-none rounded-full shadow-md ${shadowColor}`}
           >
             <div className="flex items-center justify-center gap-4 z-10 relative">
               <motion.div variants={iconVariants}>
                 {icon}
               </motion.div>
-              <motion.span className="text-lg font-bold">{name}</motion.span>
+              <motion.span className={`${compact ? 'text-base' : 'text-lg'} font-bold`}>{name}</motion.span>
               <motion.div 
                 variants={textVariants}
                 className="flex items-center text-xs gap-1 opacity-90"

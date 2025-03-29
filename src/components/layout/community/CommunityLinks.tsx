@@ -6,9 +6,13 @@ import { CommunityLinkButton } from "./CommunityLinkButton";
 
 interface CommunityLinksProps {
   isVisible: boolean;
+  compact?: boolean;
 }
 
-export const CommunityLinks: React.FC<CommunityLinksProps> = ({ isVisible }) => {
+export const CommunityLinks: React.FC<CommunityLinksProps> = ({ 
+  isVisible,
+  compact = false 
+}) => {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const links = getCommunityLinks();
 
@@ -39,6 +43,7 @@ export const CommunityLinks: React.FC<CommunityLinksProps> = ({ isVisible }) => 
           <CommunityLinkButton 
             {...link}
             isHovered={hoverIndex === index}
+            compact={compact}
           />
         </motion.div>
       ))}
