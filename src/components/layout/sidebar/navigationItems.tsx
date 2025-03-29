@@ -13,7 +13,9 @@ import {
   Pen, 
   BookOpen,
   Diamond,
-  FileSpreadsheet
+  FileSpreadsheet,
+  BarChart2,
+  UserPlus
 } from "lucide-react";
 import { SidebarItem } from "./types";
 
@@ -26,6 +28,14 @@ export const navigationItems: SidebarItem[] = [
     roles: ["founder", "manager", "agent", "creator", "ambassadeur"],
     animated: true
   }, 
+  {
+    icon: BarChart2,
+    label: "Espace Manager",
+    action: "navigateTo",
+    data: "manager-dashboard",
+    roles: ["founder", "manager"],
+    animated: true
+  },
   {
     icon: Users,
     label: "Utilisateurs",
@@ -117,22 +127,19 @@ export const navigationItems: SidebarItem[] = [
     action: "navigateTo",
     data: "creator-import",
     roles: ["founder"]
+  },
+  {
+    icon: UserPlus,
+    label: "Espace Ambassadeur",
+    action: "navigateTo",
+    data: "ambassador",
+    roles: ["founder", "ambassadeur"],
+    animated: true
   }
 ];
 
 export const getAmbassadorItems = (items: SidebarItem[]): SidebarItem[] => {
-  const newItems = [...items];
-  
-  newItems.push({
-    icon: Users,
-    label: "Espace Ambassadeur",
-    action: "navigateTo",
-    data: "ambassador",
-    roles: ["ambassadeur"],
-    animated: true
-  });
-  
-  return newItems;
+  return [...items];
 };
 
 export const getNavigationItems = (role: string | null, currentPage: string) => {
