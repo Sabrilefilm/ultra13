@@ -180,147 +180,147 @@ const ManagerDashboard = () => {
                     Communication
                   </TabsTrigger>
                 </TabsList>
-              </Tabs>
-            </CardHeader>
-            
-            <CardContent className="p-6">
-              <TabsContent value="overview" className="mt-0">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <Card className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 border-indigo-100 dark:border-indigo-800/30">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg text-indigo-800 dark:text-indigo-300">Total Agents</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{sampleAgents.length}</div>
-                      <p className="text-sm text-indigo-600/70 dark:text-indigo-400/70 mt-1">Agents actifs</p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-purple-100 dark:border-purple-800/30">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg text-purple-800 dark:text-purple-300">Performances</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">87%</div>
-                      <p className="text-sm text-purple-600/70 dark:text-purple-400/70 mt-1">Objectifs atteints</p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-100 dark:border-amber-800/30">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg text-amber-800 dark:text-amber-300">Alertes</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">2</div>
-                      <p className="text-sm text-amber-600/70 dark:text-amber-400/70 mt-1">Agents en dessous des objectifs</p>
-                    </CardContent>
-                  </Card>
-                </div>
-                
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <AlertCircle className="h-5 w-5 text-red-500" />
-                      Alertes récentes
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="p-4 border border-red-100 dark:border-red-900/30 rounded-lg bg-red-50 dark:bg-red-900/20">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-semibold text-red-800 dark:text-red-300">Agent Delta</h4>
-                            <p className="text-sm text-red-700 dark:text-red-400">Moins de 10h de live cette semaine (5h/15h)</p>
-                          </div>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
-                            onClick={() => handleContactAgent("4")}
-                          >
-                            Contacter
-                          </Button>
-                        </div>
-                      </div>
+              
+                <CardContent className="p-6">
+                  <TabsContent value="overview" className="mt-0">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                      <Card className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 border-indigo-100 dark:border-indigo-800/30">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg text-indigo-800 dark:text-indigo-300">Total Agents</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{sampleAgents.length}</div>
+                          <p className="text-sm text-indigo-600/70 dark:text-indigo-400/70 mt-1">Agents actifs</p>
+                        </CardContent>
+                      </Card>
                       
-                      <div className="p-4 border border-amber-100 dark:border-amber-900/30 rounded-lg bg-amber-50 dark:bg-amber-900/20">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-semibold text-amber-800 dark:text-amber-300">Agent Beta</h4>
-                            <p className="text-sm text-amber-700 dark:text-amber-400">Objectifs de diamants non atteints (75%)</p>
+                      <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-purple-100 dark:border-purple-800/30">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg text-purple-800 dark:text-purple-300">Performances</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">87%</div>
+                          <p className="text-sm text-purple-600/70 dark:text-purple-400/70 mt-1">Objectifs atteints</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-100 dark:border-amber-800/30">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg text-amber-800 dark:text-amber-300">Alertes</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">2</div>
+                          <p className="text-sm text-amber-600/70 dark:text-amber-400/70 mt-1">Agents en dessous des objectifs</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                    
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <AlertCircle className="h-5 w-5 text-red-500" />
+                          Alertes récentes
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="p-4 border border-red-100 dark:border-red-900/30 rounded-lg bg-red-50 dark:bg-red-900/20">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h4 className="font-semibold text-red-800 dark:text-red-300">Agent Delta</h4>
+                                <p className="text-sm text-red-700 dark:text-red-400">Moins de 10h de live cette semaine (5h/15h)</p>
+                              </div>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+                                onClick={() => handleContactAgent("4")}
+                              >
+                                Contacter
+                              </Button>
+                            </div>
                           </div>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="border-amber-200 text-amber-600 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/20"
-                            onClick={() => handleContactAgent("2")}
-                          >
-                            Contacter
-                          </Button>
+                          
+                          <div className="p-4 border border-amber-100 dark:border-amber-900/30 rounded-lg bg-amber-50 dark:bg-amber-900/20">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h4 className="font-semibold text-amber-800 dark:text-amber-300">Agent Beta</h4>
+                                <p className="text-sm text-amber-700 dark:text-amber-400">Objectifs de diamants non atteints (75%)</p>
+                              </div>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="border-amber-200 text-amber-600 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/20"
+                                onClick={() => handleContactAgent("2")}
+                              >
+                                Contacter
+                              </Button>
+                            </div>
+                          </div>
                         </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <AgentPerformanceChart data={performanceData} />
+                    
+                    <div className="mt-6">
+                      <SocialCommunityLinks compact={true} className="mt-6" />
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="agents" className="mt-0">
+                    <div className="mb-6">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                          placeholder="Rechercher un agent..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="pl-10"
+                        />
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-                
-                <AgentPerformanceChart data={performanceData} />
-                
-                <div className="mt-6">
-                  <SocialCommunityLinks compact={true} className="mt-6" />
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="agents" className="mt-0">
-                <div className="mb-6">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <Input
-                      placeholder="Rechercher un agent..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredAgents.map(agent => (
-                    <AgentStatusCard
-                      key={agent.id}
-                      name={agent.name}
-                      status={agent.status}
-                      performance={agent.performance}
-                      liveHours={agent.liveHours}
-                      targetHours={agent.targetHours}
-                      onContact={() => handleContactAgent(agent.id)}
-                      onManage={() => handleManageAgent(agent.id)}
-                    />
-                  ))}
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="planning" className="mt-0">
-                <div className="flex justify-center items-center h-64">
-                  <div className="text-center">
-                    <Calendar className="h-16 w-16 text-indigo-300 dark:text-indigo-800 mx-auto mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400">
-                      Module de planning en cours de développement
-                    </p>
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="communication" className="mt-0">
-                <div className="flex justify-center items-center h-64">
-                  <div className="text-center">
-                    <MessageSquare className="h-16 w-16 text-indigo-300 dark:text-indigo-800 mx-auto mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400">
-                      Module de communication en cours de développement
-                    </p>
-                  </div>
-                </div>
-              </TabsContent>
-            </CardContent>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredAgents.map(agent => (
+                        <AgentStatusCard
+                          key={agent.id}
+                          name={agent.name}
+                          status={agent.status}
+                          performance={agent.performance}
+                          liveHours={agent.liveHours}
+                          targetHours={agent.targetHours}
+                          onContact={() => handleContactAgent(agent.id)}
+                          onManage={() => handleManageAgent(agent.id)}
+                        />
+                      ))}
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="planning" className="mt-0">
+                    <div className="flex justify-center items-center h-64">
+                      <div className="text-center">
+                        <Calendar className="h-16 w-16 text-indigo-300 dark:text-indigo-800 mx-auto mb-4" />
+                        <p className="text-gray-500 dark:text-gray-400">
+                          Module de planning en cours de développement
+                        </p>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="communication" className="mt-0">
+                    <div className="flex justify-center items-center h-64">
+                      <div className="text-center">
+                        <MessageSquare className="h-16 w-16 text-indigo-300 dark:text-indigo-800 mx-auto mb-4" />
+                        <p className="text-gray-500 dark:text-gray-400">
+                          Module de communication en cours de développement
+                        </p>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </CardContent>
+              </Tabs>
+            </CardHeader>
           </Card>
         </div>
       </UltraDashboard>
