@@ -13,11 +13,11 @@ import Transfers from "./pages/Transfers";
 import CreatorStats from "./pages/CreatorStats";
 import CreatorImport from "./pages/CreatorImport";
 import Training from "./pages/Training";
-import Matches from "./pages/Matches";
 import CreatorDiamonds from "./pages/CreatorDiamonds";
 import CreatorRewards from "./pages/CreatorRewards";
 import Ambassador from "./pages/Ambassador";
 import ManagerDashboard from "./pages/ManagerDashboard";
+import AgentCreators from "./pages/AgentCreators";
 import { RouteGuard } from "@/components/RouteGuard";
 import { DashboardView } from "@/components/dashboard/DashboardView";
 
@@ -133,14 +133,6 @@ function App() {
           }
         />
         <Route
-          path="/matches"
-          element={
-            <RouteGuard>
-              <Matches />
-            </RouteGuard>
-          }
-        />
-        <Route
           path="/creator-diamonds"
           element={
             <RouteGuard allowedRoles={["founder", "manager", "agent"]}>
@@ -169,6 +161,14 @@ function App() {
           element={
             <RouteGuard allowedRoles={["founder", "manager"]}>
               <ManagerDashboard />
+            </RouteGuard>
+          }
+        />
+        <Route
+          path="/agent-creators/:agentId"
+          element={
+            <RouteGuard allowedRoles={["founder", "manager"]}>
+              <AgentCreators />
             </RouteGuard>
           }
         />
