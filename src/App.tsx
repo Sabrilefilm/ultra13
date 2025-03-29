@@ -2,9 +2,7 @@
 import { Route, Routes, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
 import Penalties from "./pages/Penalties";
-import Team from "./pages/Team";
 import Schedule from "./pages/Schedule";
 import UserManagement from "./pages/UserManagement";
 import InternalRules from "./pages/InternalRules";
@@ -21,6 +19,7 @@ import CreatorRewards from "./pages/CreatorRewards";
 import Ambassador from "./pages/Ambassador";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import { RouteGuard } from "@/components/RouteGuard";
+import { DashboardView } from "@/components/dashboard/DashboardView";
 
 function App() {
   return (
@@ -31,7 +30,17 @@ function App() {
           path="/dashboard"
           element={
             <RouteGuard>
-              <Dashboard />
+              <DashboardView 
+                username=""
+                role=""
+                onLogout={() => {}}
+                platformSettings={null}
+                handleCreateAccount={async () => {}}
+                handleUpdateSettings={async () => {}}
+                showWarning={false}
+                dismissWarning={() => {}}
+                formattedTime=""
+              />
             </RouteGuard>
           }
         />
@@ -40,14 +49,6 @@ function App() {
           element={
             <RouteGuard allowedRoles={["founder", "manager", "ambassadeur"]}>
               <Penalties />
-            </RouteGuard>
-          }
-        />
-        <Route
-          path="/team"
-          element={
-            <RouteGuard allowedRoles={["founder", "manager", "agent"]}>
-              <Team />
             </RouteGuard>
           }
         />
