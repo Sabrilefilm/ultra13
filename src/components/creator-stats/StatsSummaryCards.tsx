@@ -14,6 +14,16 @@ export const StatsSummaryCards: React.FC<StatsSummaryCardsProps> = ({
   totalDays,
   totalDiamonds,
 }) => {
+  // Format number to one decimal place, remove trailing zeros
+  const formatNumber = (value: number): string => {
+    return Number(value.toFixed(1)).toString();
+  };
+
+  // Format diamonds to integer with thousands separators
+  const formatDiamonds = (value: number): string => {
+    return Math.floor(value).toLocaleString('fr-FR');
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <Card>
@@ -24,7 +34,7 @@ export const StatsSummaryCards: React.FC<StatsSummaryCardsProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-3xl font-bold">{totalHours}h</p>
+          <p className="text-3xl font-bold">{formatNumber(totalHours)}h</p>
         </CardContent>
       </Card>
       
@@ -36,7 +46,7 @@ export const StatsSummaryCards: React.FC<StatsSummaryCardsProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-3xl font-bold">{totalDays}j</p>
+          <p className="text-3xl font-bold">{formatNumber(totalDays)}j</p>
         </CardContent>
       </Card>
       
@@ -48,7 +58,7 @@ export const StatsSummaryCards: React.FC<StatsSummaryCardsProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-3xl font-bold">{totalDiamonds.toLocaleString()}</p>
+          <p className="text-3xl font-bold">{formatDiamonds(totalDiamonds)}</p>
         </CardContent>
       </Card>
     </div>

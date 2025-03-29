@@ -20,6 +20,11 @@ export const CreatorSchedule = ({
   targetHours,
   targetDays
 }: CreatorScheduleProps) => {
+  // Format number to one decimal place, remove trailing zeros
+  const formatNumber = (value: number): string => {
+    return Number(value.toFixed(1)).toString();
+  };
+
   return (
     <div className="p-4 bg-purple-900/20 border border-purple-700/30 rounded-lg">
       <div className="flex items-center justify-between mb-3">
@@ -35,13 +40,13 @@ export const CreatorSchedule = ({
       <div className="grid grid-cols-2 gap-2 mb-3">
         <div className="bg-purple-800/20 border border-purple-700/20 rounded-md p-2 text-center">
           <span className="block text-2xl font-bold text-purple-300">
-            {isLoading ? <span className="h-8 w-16 bg-purple-800/40 animate-pulse rounded inline-block"></span> : hours || 0}
+            {isLoading ? <span className="h-8 w-16 bg-purple-800/40 animate-pulse rounded inline-block"></span> : formatNumber(hours || 0)}
           </span>
           <span className="text-xs text-purple-200/70">heures/jour</span>
         </div>
         <div className="bg-purple-800/20 border border-purple-700/20 rounded-md p-2 text-center">
           <span className="block text-2xl font-bold text-purple-300">
-            {isLoading ? <span className="h-8 w-16 bg-purple-800/40 animate-pulse rounded inline-block"></span> : days || 0}
+            {isLoading ? <span className="h-8 w-16 bg-purple-800/40 animate-pulse rounded inline-block"></span> : formatNumber(days || 0)}
           </span>
           <span className="text-xs text-purple-200/70">jours/semaine</span>
         </div>
@@ -49,7 +54,7 @@ export const CreatorSchedule = ({
       
       <div className="flex justify-between items-center mb-1">
         <span className="text-xs text-purple-300">Total hebdomadaire:</span>
-        <span className="text-lg font-semibold text-purple-300">{weeklyHours}h</span>
+        <span className="text-lg font-semibold text-purple-300">{formatNumber(weeklyHours)}h</span>
       </div>
       
       <div className="flex justify-between items-center mb-1">

@@ -49,7 +49,7 @@ export const RedesignedDashContent: React.FC<RedesignedDashContentProps> = ({
               role={role}
             />
             <div className="mt-6">
-              <SocialCommunityLinks />
+              <SocialCommunityLinks compact={true} />
             </div>
           </>
         );

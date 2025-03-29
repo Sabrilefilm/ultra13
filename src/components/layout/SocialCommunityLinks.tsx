@@ -1,74 +1,50 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AnimatedTitle } from "./community/AnimatedTitle";
 import { CommunityLinks } from "./community/CommunityLinks";
-import { LogOutButton } from "./community/LogOutButton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, ChevronRight, ChevronDown } from "lucide-react";
 
-interface SocialCommunityProps {
-  className?: string;
-  onLogout?: () => void;
+interface SocialCommunityLinksProps {
+  compact?: boolean;
 }
 
-export const SocialCommunityLinks = ({ className = "", onLogout }: SocialCommunityProps) => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    // Add a small delay for the animation to start
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { 
-        staggerChildren: 0.15,
-        delayChildren: 0.2
-      }
-    }
-  };
+export const SocialCommunityLinks: React.FC<SocialCommunityLinksProps> = ({ 
+  compact = false 
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <Card className={`rounded-xl overflow-hidden shadow-xl bg-gradient-to-br from-indigo-950 via-violet-950 to-purple-950 border-purple-800/30 ${className}`}>
-      <CardHeader className="pb-2 pt-6 px-6 bg-gradient-to-r from-purple-900/20 to-indigo-900/20 border-b border-purple-800/20">
-        <CardTitle className="text-xl flex items-center gap-2 text-white">
-          <AnimatedTitle text="Rejoindre notre communauté" />
+    <Card className={`bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-100 dark:border-blue-900/20 overflow-hidden ${compact ? 'shadow-sm' : 'shadow-md'}`}>
+      <CardHeader 
+        className={`pb-2 cursor-pointer ${compact ? 'py-2' : 'py-4'}`} 
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <CardTitle className={`flex items-center justify-between ${compact ? 'text-base' : 'text-lg'}`}>
+          <div className="flex items-center gap-2">
+            <Users className={`${compact ? 'h-4 w-4' : 'h-5 w-5'} text-blue-500`} />
+            <span className="text-blue-800 dark:text-blue-300">
+              {compact ? 'Rejoindre la communauté' : 'Rejoindre notre communauté'}
+            </span>
+          </div>
+          {isExpanded ? (
+            <ChevronDown className="h-4 w-4 text-blue-500" />
+          ) : (
+            <ChevronRight className="h-4 w-4 text-blue-500" />
+          )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
+      <CardContent className={`${compact ? 'p-3' : 'p-5'} overflow-hidden`}>
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={isVisible ? "visible" : "hidden"}
-          className="space-y-6"
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ 
+            height: isExpanded ? 'auto' : 0,
+            opacity: isExpanded ? 1 : 0
+          }}
+          transition={{ duration: 0.3 }}
+          className="overflow-hidden"
         >
-          <CommunityLinks isVisible={isVisible} />
-          
-          <motion.p 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: isVisible ? 1 : 0 }}
-            transition={{ delay: 1 }}
-            className="text-center mt-4 text-purple-300/90 text-sm"
-          >
-            Rejoignez-nous sur nos réseaux pour ne manquer aucune information importante et participer à notre communauté !
-          </motion.p>
-          
-          {onLogout && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
-              transition={{ delay: 1.5 }}
-              className="flex justify-center mt-8"
-            >
-              <LogOutButton onLogout={onLogout} />
-            </motion.div>
-          )}
+          <CommunityLinks isVisible={isExpanded} compact={compact} />
         </motion.div>
       </CardContent>
     </Card>

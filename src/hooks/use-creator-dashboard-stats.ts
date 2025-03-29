@@ -41,6 +41,11 @@ export const useCreatorDashboardStats = (userId?: string) => {
   const daysColor = (liveSchedule?.days || 0) >= requiredDays ? "text-green-500" : "text-red-500";
   const showWarning = (liveSchedule?.hours || 0) < requiredHours || (liveSchedule?.days || 0) < requiredDays;
 
+  // Format number to one decimal place
+  const formatNumber = (value: number): string => {
+    return Number(value.toFixed(1)).toString();
+  };
+
   useEffect(() => {
     const fetchCreatorData = async () => {
       setIsLoading(true);
@@ -72,19 +77,25 @@ export const useCreatorDashboardStats = (userId?: string) => {
           .limit(1)
           .maybeSingle();
 
-        setLiveSchedule(scheduleData || { hours: 0, days: 0 });
-        setMonthlyHours(scheduleData?.hours || 0);
+        // Format schedule data with one decimal place
+        const formattedSchedule = scheduleData ? {
+          hours: Number(Number(scheduleData.hours).toFixed(1)),
+          days: Number(Number(scheduleData.days).toFixed(1))
+        } : { hours: 0, days: 0 };
+
+        setLiveSchedule(formattedSchedule);
+        setMonthlyHours(formattedSchedule.hours);
         setTotalDiamonds(profileData?.total_diamonds || 0);
         setUsername(profileData?.username || "");
         
         setCreatorData({
-          schedule: scheduleData || { hours: 0, days: 0 },
+          schedule: formattedSchedule,
           nextMatch: matchData || undefined
         });
 
         // Calculate performance metrics
-        const hoursCompletion = Math.min(100, Math.round(((scheduleData?.hours || 0) / requiredHours) * 100));
-        const daysCompletion = Math.min(100, Math.round(((scheduleData?.days || 0) / requiredDays) * 100));
+        const hoursCompletion = Math.min(100, Math.round(((formattedSchedule.hours) / requiredHours) * 100));
+        const daysCompletion = Math.min(100, Math.round(((formattedSchedule.days) / requiredDays) * 100));
         
         // Determine diamonds rating
         let diamondsRating = "Insuffisant";
@@ -103,7 +114,8 @@ export const useCreatorDashboardStats = (userId?: string) => {
           overallScore: Math.min(100, overallScore)
         });
 
-        setDiamondsText(`${(profileData?.total_diamonds || 0).toLocaleString()} 💎`);
+        // Format diamonds with thousands separator
+        setDiamondsText(`${Math.floor(profileData?.total_diamonds || 0).toLocaleString('fr-FR')} 💎`);
       } catch (error) {
         console.error("Error fetching creator stats:", error);
       } finally {

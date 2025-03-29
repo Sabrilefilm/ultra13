@@ -58,11 +58,17 @@ export const useCreatorData = () => {
           console.error("Error fetching match:", matchError);
         }
         
+        // Format schedule data with fixed one decimal place
+        const formattedSchedule = scheduleData ? {
+          hours: Number(Number(scheduleData.hours).toFixed(1)),
+          days: Number(Number(scheduleData.days).toFixed(1))
+        } : {
+          hours: 0,
+          days: 0
+        };
+        
         return {
-          schedule: scheduleData || {
-            hours: 0,
-            days: 0
-          },
+          schedule: formattedSchedule,
           diamonds: profileData?.total_diamonds || 0,
           nextMatch: matchData || null
         };
@@ -99,7 +105,9 @@ export const useCreatorData = () => {
     });
   };
   
-  const weeklyHours = creatorData?.schedule ? creatorData.schedule.hours * creatorData.schedule.days : 0;
+  // Format weekly hours with fixed one decimal place
+  const weeklyHours = creatorData?.schedule ? 
+    Number((creatorData.schedule.hours * creatorData.schedule.days).toFixed(1)) : 0;
   const targetHours = 15;
   const targetDays = 7;
 

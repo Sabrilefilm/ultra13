@@ -13,6 +13,11 @@ interface DiamondsSectionProps {
 export const DiamondsSection = ({ totalDiamonds, isLoading }: DiamondsSectionProps) => {
   const navigate = useNavigate();
   
+  // Formater les diamants avec séparateurs de milliers mais sans décimales
+  const formatDiamonds = (value: number): string => {
+    return Math.floor(value).toLocaleString('fr-FR');
+  };
+  
   return (
     <div className="mt-4 p-4 bg-indigo-900/20 border border-indigo-700/30 rounded-lg">
       <div className="flex items-center justify-between mb-3">
@@ -32,7 +37,7 @@ export const DiamondsSection = ({ totalDiamonds, isLoading }: DiamondsSectionPro
           {isLoading ? (
             <span className="h-10 w-24 bg-indigo-800/40 animate-pulse rounded inline-block"></span>
           ) : (
-            totalDiamonds.toLocaleString()
+            formatDiamonds(totalDiamonds)
           )}
         </motion.span>
       </div>

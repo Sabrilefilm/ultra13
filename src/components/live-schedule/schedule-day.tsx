@@ -20,13 +20,18 @@ export const ScheduleDay = ({
   creatorName,
   disabled = false
 }: ScheduleDayProps) => {
+  // Format number to one decimal place, remove trailing zeros
+  const formatNumber = (value: number): string => {
+    return Number(value.toFixed(1)).toString();
+  };
+
   // Labels for the sliders
   const getHoursLabel = (value: number) => {
-    return `${value} heures/jour`;
+    return `${formatNumber(value)} heures/jour`;
   };
 
   const getDaysLabel = (value: number) => {
-    return `${value} jours/semaine`;
+    return `${formatNumber(value)} jours/semaine`;
   };
 
   // Get percentage of required weekly hours
@@ -45,6 +50,9 @@ export const ScheduleDay = ({
 
   const percentage = getRequiredPercentage();
   const colorClass = getPercentageColor(percentage);
+
+  // Calculate weekly hours with correct formatting
+  const weeklyHours = Number((schedule.hours * schedule.days).toFixed(1));
 
   return (
     <div className={cn(
@@ -71,7 +79,7 @@ export const ScheduleDay = ({
               "text-sm font-medium",
               colorClass
             )}>
-              {schedule.hours * schedule.days} heures/semaine
+              {weeklyHours} heures/semaine
             </span>
             <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
               ({Math.round(percentage)}% de l'objectif)
