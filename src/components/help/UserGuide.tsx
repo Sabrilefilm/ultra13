@@ -124,85 +124,16 @@ export const UserGuide = () => {
             <TabsContent value="matches" className="mt-4 px-2">
               <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Matchs</h3>
               <p className="mb-3 text-gray-700 dark:text-gray-300">La page des matchs permet de gérer et suivre tous les événements sportifs de l'agence.</p>
-              
-              <div className="space-y-4 mt-6">
-                <div className="border-l-2 border-purple-500 pl-4 py-1">
-                  <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                    <Calendar className="h-4 w-4 text-purple-500" /> Calendrier
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Visualisez tous les matchs planifiés dans un format de calendrier avec des détails sur les équipes et les horaires.</p>
-                </div>
-                
-                <div className="border-l-2 border-purple-500 pl-4 py-1">
-                  <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                    <Users className="h-4 w-4 text-purple-500" /> Participants
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Voyez quels créateurs sont assignés à quel match et leurs rôles respectifs.</p>
-                </div>
-              </div>
-              
-              <div className="mt-6 bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border border-purple-100 dark:border-purple-800/50">
-                <h4 className="font-medium flex items-center gap-2 text-purple-800 dark:text-purple-300 mb-2">
-                  <Info className="h-4 w-4" /> Fonctionnalités
-                </h4>
-                <p className="text-sm text-purple-700 dark:text-purple-200">Les fondateurs et managers peuvent créer des affiches pour les matchs et programmer de nouveaux événements dans le calendrier.</p>
-              </div>
             </TabsContent>
-
+            
             <TabsContent value="documents" className="mt-4 px-2">
               <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Documents</h3>
-              <p className="mb-3 text-gray-700 dark:text-gray-300">La section Documents permet de gérer tous les fichiers importants de l'agence.</p>
-              
-              <div className="space-y-4 mt-6">
-                <div className="border-l-2 border-purple-500 pl-4 py-1">
-                  <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                    <FileText className="h-4 w-4 text-purple-500" /> Dépôt de documents
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Téléversez vos documents importants pour les conserver et les partager avec l'équipe de direction.</p>
-                </div>
-                
-                <div className="border-l-2 border-purple-500 pl-4 py-1">
-                  <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                    <ArrowRight className="h-4 w-4 text-purple-500" /> Transfert
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Les documents peuvent être transférés directement au fondateur pour examen et approbation.</p>
-                </div>
-              </div>
-              
-              <div className="mt-6 bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border border-purple-100 dark:border-purple-800/50">
-                <h4 className="font-medium flex items-center gap-2 text-purple-800 dark:text-purple-300 mb-2">
-                  <Shield className="h-4 w-4" /> Sécurité
-                </h4>
-                <p className="text-sm text-purple-700 dark:text-purple-200">Tous les documents sont stockés de manière sécurisée et ne sont accessibles qu'aux personnes autorisées selon leur rôle dans l'agence.</p>
-              </div>
+              <p className="mb-3 text-gray-700 dark:text-gray-300">La section documents permet d'accéder et de gérer tous les fichiers liés à l'agence.</p>
             </TabsContent>
-
+            
             <TabsContent value="penalties" className="mt-4 px-2">
               <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Pénalités</h3>
-              <p className="mb-3 text-gray-700 dark:text-gray-300">La section Pénalités permet de suivre et gérer les infractions au règlement de l'agence.</p>
-              
-              <div className="space-y-4 mt-6">
-                <div className="border-l-2 border-purple-500 pl-4 py-1">
-                  <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                    <AlertTriangle className="h-4 w-4 text-purple-500" /> Historique
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Consultez l'historique de vos pénalités ou, si vous êtes manager ou fondateur, celles de toute l'agence.</p>
-                </div>
-                
-                <div className="border-l-2 border-purple-500 pl-4 py-1">
-                  <h4 className="font-medium mb-1 flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                    <Shield className="h-4 w-4 text-purple-500" /> Administration
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Les managers et fondateurs peuvent ajouter des pénalités aux créateurs qui ne respectent pas le règlement.</p>
-                </div>
-              </div>
-              
-              <div className="mt-6 bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border border-purple-100 dark:border-purple-800/50">
-                <h4 className="font-medium flex items-center gap-2 text-purple-800 dark:text-purple-300 mb-2">
-                  <Info className="h-4 w-4" /> Règlement
-                </h4>
-                <p className="text-sm text-purple-700 dark:text-purple-200">Consultez le règlement interne de l'agence pour connaître les règles à respecter et éviter les pénalités.</p>
-              </div>
+              <p className="mb-3 text-gray-700 dark:text-gray-300">La section pénalités vous permet de consulter les infractions aux règles et leurs conséquences.</p>
             </TabsContent>
           </ScrollArea>
         </Tabs>

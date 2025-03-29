@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUpcomingMatches } from "@/hooks/use-upcoming-matches";
 import { downloadImage } from "@/utils/download";
@@ -13,6 +14,7 @@ import { toast } from "sonner";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Loading } from "@/components/ui/loading";
+
 export const UpcomingMatches = ({
   role,
   creatorId
@@ -35,6 +37,7 @@ export const UpcomingMatches = ({
   const canManageMatch = ['agent', 'manager', 'founder'].includes(role);
   const canDeleteMatch = ['founder', 'manager'].includes(role);
   const canEditMatch = ['agent', 'manager', 'founder'].includes(role);
+  
   const generatePDF = () => {
     try {
       setGeneratingPdf(true);
@@ -164,76 +167,159 @@ export const UpcomingMatches = ({
       setGeneratingPdf(false);
     }
   };
-  if (isLoading) return <Card className="elegant-card">
+  
+  if (isLoading) return (
+    <Card className="elegant-card">
       <CardContent className="p-8">
         <Loading size="large" text="Chargement des matchs..." />
       </CardContent>
-    </Card>;
+    </Card>
+  );
+  
   const currentDate = new Date();
   const allMatches = matches || [];
-  const filteredMatches = searchQuery.trim() ? allMatches.filter(match => match.creator_id.toLowerCase().includes(searchQuery.toLowerCase()) || match.opponent_id.toLowerCase().includes(searchQuery.toLowerCase())) : allMatches;
-  const upcomingMatches = filteredMatches.filter(match => new Date(match.match_date) >= currentDate).sort((a, b) => new Date(a.match_date).getTime() - new Date(b.match_date).getTime());
-  const pastMatches = filteredMatches.filter(match => new Date(match.match_date) < currentDate).sort((a, b) => new Date(b.match_date).getTime() - new Date(a.match_date).getTime());
+  const filteredMatches = searchQuery.trim() 
+    ? allMatches.filter(match => 
+        match.creator_id.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        match.opponent_id.toLowerCase().includes(searchQuery.toLowerCase())
+      ) 
+    : allMatches;
+  
+  const upcomingMatches = filteredMatches
+    .filter(match => new Date(match.match_date) >= currentDate)
+    .sort((a, b) => new Date(a.match_date).getTime() - new Date(b.match_date).getTime());
+  
+  const pastMatches = filteredMatches
+    .filter(match => new Date(match.match_date) < currentDate)
+    .sort((a, b) => new Date(b.match_date).getTime() - new Date(a.match_date).getTime());
+  
   const INITIAL_MATCH_COUNT = 5;
   const upcomingToShow = showAllUpcoming ? upcomingMatches : upcomingMatches.slice(0, INITIAL_MATCH_COUNT);
   const pastToShow = showAllPast ? pastMatches : pastMatches.slice(0, INITIAL_MATCH_COUNT);
-  return <Card className="elegant-card">
+  
+  return (
+    <Card className="elegant-card">
       <CardHeader className="elegant-header bg-teal-950">
         <div className="flex justify-between items-center">
           <CardTitle className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-700 to-indigo-600 dark:from-purple-400 dark:to-indigo-300">
             Matchs
           </CardTitle>
-          
         </div>
       </CardHeader>
       <CardContent className="p-6 bg-violet-950">
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
-          <Input placeholder="Rechercher un match..." className="pl-10 elegant-input" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+          <Input 
+            placeholder="Rechercher un match..." 
+            className="pl-10 elegant-input" 
+            value={searchQuery} 
+            onChange={e => setSearchQuery(e.target.value)} 
+          />
         </div>
 
         <Tabs defaultValue="upcoming" className="w-full">
           <TabsList className="w-full grid grid-cols-2 mb-6 bg-gray-100 dark:bg-slate-800 p-1 rounded-lg">
-            <TabsTrigger value="upcoming" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-purple-700 dark:data-[state=active]:text-purple-300 data-[state=active]:shadow-sm rounded-md text-gray-600 dark:text-gray-300">
+            <TabsTrigger 
+              value="upcoming" 
+              className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-purple-700 dark:data-[state=active]:text-purple-300 data-[state=active]:shadow-sm rounded-md text-gray-600 dark:text-gray-300"
+            >
               À venir ({upcomingMatches.length})
             </TabsTrigger>
-            <TabsTrigger value="past" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-purple-700 dark:data-[state=active]:text-purple-300 data-[state=active]:shadow-sm rounded-md text-gray-600 dark:text-gray-300">
+            <TabsTrigger 
+              value="past" 
+              className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-purple-700 dark:data-[state=active]:text-purple-300 data-[state=active]:shadow-sm rounded-md text-gray-600 dark:text-gray-300"
+            >
               Passés ({pastMatches.length})
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="upcoming">
-            {upcomingMatches.length > 0 ? <div className="space-y-4">
-                {upcomingToShow.map(match => <MatchCard key={match.id} match={match} canManageMatch={canManageMatch} canDeleteMatch={canDeleteMatch} role={role} onSetWinner={setWinner} onClearWinner={clearWinner} onDelete={handleDelete} onDownload={downloadImage} onUpdateMatch={canEditMatch ? updateMatchDetails : undefined} />)}
+            {upcomingMatches.length > 0 ? (
+              <div className="space-y-4">
+                {upcomingToShow.map(match => (
+                  <MatchCard 
+                    key={match.id} 
+                    match={match} 
+                    canManageMatch={canManageMatch} 
+                    canDeleteMatch={canDeleteMatch} 
+                    role={role} 
+                    onSetWinner={setWinner} 
+                    onClearWinner={clearWinner} 
+                    onDelete={handleDelete} 
+                    onDownload={downloadImage} 
+                    onUpdateMatch={canEditMatch ? updateMatchDetails : undefined} 
+                  />
+                ))}
                 
-                {upcomingMatches.length > INITIAL_MATCH_COUNT && <Button variant="ghost" onClick={() => setShowAllUpcoming(!showAllUpcoming)} className="w-full mt-4 text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/30 flex items-center justify-center">
-                    {showAllUpcoming ? <>Afficher moins <ChevronUp className="ml-2 h-4 w-4" /></> : <>Afficher plus ({upcomingMatches.length - INITIAL_MATCH_COUNT}) <ChevronDown className="ml-2 h-4 w-4" /></>}
-                  </Button>}
-              </div> : <div className="flex flex-col items-center justify-center py-10 text-center">
+                {upcomingMatches.length > INITIAL_MATCH_COUNT && (
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setShowAllUpcoming(!showAllUpcoming)} 
+                    className="w-full mt-4 text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/30 flex items-center justify-center"
+                  >
+                    {showAllUpcoming ? (
+                      <>Afficher moins <ChevronUp className="ml-2 h-4 w-4" /></>
+                    ) : (
+                      <>Afficher plus ({upcomingMatches.length - INITIAL_MATCH_COUNT}) <ChevronDown className="ml-2 h-4 w-4" /></>
+                    )}
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
                 <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mb-4">
                   <span className="text-purple-600 dark:text-purple-400 text-2xl">📅</span>
                 </div>
                 <p className="text-gray-600 dark:text-gray-300 mb-2">Aucun match à venir</p>
                 <p className="text-gray-400 dark:text-gray-500 text-sm">Les nouveaux matchs apparaîtront ici</p>
-              </div>}
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="past">
-            {pastMatches.length > 0 ? <div className="space-y-4">
-                {pastToShow.map(match => <MatchCard key={match.id} match={match} canManageMatch={canManageMatch} canDeleteMatch={canDeleteMatch} role={role} onSetWinner={setWinner} onClearWinner={clearWinner} onDelete={handleDelete} onDownload={downloadImage} onUpdateMatch={canEditMatch ? updateMatchDetails : undefined} />)}
+            {pastMatches.length > 0 ? (
+              <div className="space-y-4">
+                {pastToShow.map(match => (
+                  <MatchCard 
+                    key={match.id} 
+                    match={match} 
+                    canManageMatch={canManageMatch} 
+                    canDeleteMatch={canDeleteMatch} 
+                    role={role} 
+                    onSetWinner={setWinner} 
+                    onClearWinner={clearWinner} 
+                    onDelete={handleDelete} 
+                    onDownload={downloadImage} 
+                    onUpdateMatch={canEditMatch ? updateMatchDetails : undefined} 
+                  />
+                ))}
                 
-                {pastMatches.length > INITIAL_MATCH_COUNT && <Button variant="ghost" onClick={() => setShowAllPast(!showAllPast)} className="w-full mt-4 text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/30 flex items-center justify-center">
-                    {showAllPast ? <>Afficher moins <ChevronUp className="ml-2 h-4 w-4" /></> : <>Afficher plus ({pastMatches.length - INITIAL_MATCH_COUNT}) <ChevronDown className="ml-2 h-4 w-4" /></>}
-                  </Button>}
-              </div> : <div className="flex flex-col items-center justify-center py-10 text-center">
+                {pastMatches.length > INITIAL_MATCH_COUNT && (
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setShowAllPast(!showAllPast)} 
+                    className="w-full mt-4 text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/30 flex items-center justify-center"
+                  >
+                    {showAllPast ? (
+                      <>Afficher moins <ChevronUp className="ml-2 h-4 w-4" /></>
+                    ) : (
+                      <>Afficher plus ({pastMatches.length - INITIAL_MATCH_COUNT}) <ChevronDown className="ml-2 h-4 w-4" /></>
+                    )}
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
                 <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mb-4">
                   <span className="text-purple-600 dark:text-purple-400 text-2xl">🏆</span>
                 </div>
                 <p className="text-gray-600 dark:text-gray-300 mb-2">Aucun match passé</p>
                 <p className="text-gray-400 dark:text-gray-500 text-sm">L'historique des matchs apparaîtra ici</p>
-              </div>}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
