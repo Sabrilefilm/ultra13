@@ -18,9 +18,15 @@ interface StatCardsProps {
   role: string;
   onOpenSponsorshipForm: () => void;
   onOpenSponsorshipList: () => void;
+  onCreatePoster?: () => void; // Added this prop as optional
 }
 
-export const StatCards = ({ role, onOpenSponsorshipForm, onOpenSponsorshipList }: StatCardsProps) => {
+export const StatCards = ({ 
+  role, 
+  onOpenSponsorshipForm, 
+  onOpenSponsorshipList,
+  onCreatePoster 
+}: StatCardsProps) => {
   const { creatorCount, diamondCount, totalEvents } = useAgentStats(role);
   
   return (

@@ -1,171 +1,120 @@
 
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useEffect, useState } from "react";
 import { useIndexAuth } from "@/hooks/use-index-auth";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { UltraSidebar } from "@/components/layout/UltraSidebar";
-import { UsernameWatermark } from "@/components/layout/UsernameWatermark";
-import { Footer } from "@/components/layout/Footer";
-import { useCreatorStats } from "@/hooks/creator-stats";
-
+import UltraSidebar from "@/components/layout/UltraSidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { useCreatorsData } from "@/hooks/creator-stats/use-creators-data";
+import { CreatorsTable } from "@/components/creator-stats/CreatorsTable";
+import { SearchBar } from "@/components/accounts/SearchBar";
 import { StatsHeader } from "@/components/creator-stats/StatsHeader";
 import { StatsSummaryCards } from "@/components/creator-stats/StatsSummaryCards";
-import { RewardsNotification } from "@/components/creator-stats/RewardsNotification";
-import { CreatorsTable } from "@/components/creator-stats/CreatorsTable";
-import { EditScheduleDialog } from "@/components/creator-stats/EditScheduleDialog";
-import { EditDiamondsDialog } from "@/components/creator-stats/EditDiamondsDialog";
-import { RemoveCreatorDialog } from "@/components/creator-stats/RemoveCreatorDialog";
 import { ResetActionsCard } from "@/components/creator-stats/ResetActionsCard";
-import { QuickDiamondsMenu } from "@/components/creator-stats/QuickDiamondsMenu";
+
+const pageSize = 10;
 
 const CreatorStats = () => {
-  const { role, username, userId } = useIndexAuth();
-  const isMobile = useIsMobile();
+  const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [viewType, setViewType] = useState<"all" | "week" | "month">("all");
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  
   const {
     creators,
-    loading,
-    fetchCreators,
-    selectedCreator,
-    setSelectedCreator,
-    isEditingSchedule,
-    setIsEditingSchedule,
-    hours,
-    setHours,
-    days,
-    setDays,
-    isEditingDiamonds,
-    setIsEditingDiamonds,
-    diamondAmount,
-    setDiamondAmount,
-    operationType,
-    setOperationType,
-    isSaving,
-    removeDialogOpen,
-    setRemoveDialogOpen,
-    rewardThreshold,
-    platformSettings,
-    getTotalHours,
-    getTotalDays,
-    getTotalDiamonds,
-    getCreatorsWithRewards,
-    handleEditSchedule,
-    handleSaveSchedule,
-    handleEditDiamonds,
-    handleSaveDiamonds,
+    isLoading,
+    totalCreators,
+    totalActiveCreators,
+    resetAllSchedules,
+    resetAllDiamonds,
     handleRemoveCreator,
-    confirmRemoveCreator
-  } = useCreatorStats(role, username);
+    handleEditSchedule,
+    handleEditDiamonds,
+    fetchCreators
+  } = useCreatorsData(currentPage, pageSize, search, viewType);
   
-  const [showQuickDiamonds, setShowQuickDiamonds] = useState(false);
-  const [quickDiamondsCreator, setQuickDiamondsCreator] = useState<any>(null);
+  useEffect(() => {
+    if (!isAuthenticated || !["founder", "manager", "agent"].includes(role || "")) {
+      window.location.href = '/';
+    }
+  }, [isAuthenticated, role]);
 
-  const handleShowQuickDiamonds = (creator: any) => {
-    setQuickDiamondsCreator(creator);
-    setShowQuickDiamonds(true);
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen p-4 flex justify-center items-center">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-      </div>
-    );
+  if (!isAuthenticated) {
+    return null;
   }
 
+  const totalPages = Math.ceil(totalCreators / pageSize);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleSearch = (query: string) => {
+    setSearch(query);
+    setCurrentPage(1);
+  };
+  
+  const handleViewTypeChange = (type: "all" | "week" | "month") => {
+    setViewType(type);
+    setCurrentPage(1);
+  };
+  
+  const showNotification = (message: string) => {
+    setToastMessage(message);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
-      {username && <UsernameWatermark username={username} />}
-      
-      <UltraSidebar 
-        username={username || ''}
-        role={role || ''}
-        onLogout={() => {
-          localStorage.clear();
-          window.location.href = '/';
-        }}
+    <SidebarProvider>
+      <UltraSidebar
+        username={username}
+        role={role}
+        userId={userId || ''}  {/* Added userId prop */}
+        onLogout={handleLogout}
         currentPage="creator-stats"
-      />
-      
-      <div className="flex-1 p-4 max-w-full md:max-w-6xl mx-auto space-y-6 overflow-x-auto">
-        <StatsHeader />
-
-        <StatsSummaryCards 
-          totalHours={getTotalHours()}
-          totalDays={getTotalDays()}
-          totalDiamonds={getTotalDiamonds()}
-        />
-
-        <RewardsNotification 
-          creatorsWithRewards={getCreatorsWithRewards()} 
-          rewardThreshold={rewardThreshold} 
-        />
-        
-        {/* Affichage du menu rapide pour les diamants */}
-        {showQuickDiamonds && quickDiamondsCreator && (
-          <QuickDiamondsMenu
-            creatorId={quickDiamondsCreator.id}
-            creatorUsername={quickDiamondsCreator.username}
-            currentDiamonds={quickDiamondsCreator.profiles?.[0]?.total_diamonds || 0}
-            onSuccess={async () => {
-              await fetchCreators();
-              setShowQuickDiamonds(false);
-              setQuickDiamondsCreator(null);
-            }}
+      >
+        <div className="p-6 max-w-7xl mx-auto">
+          <StatsHeader
+            totalCreators={totalCreators}
+            totalActiveCreators={totalActiveCreators}
+            onViewTypeChange={handleViewTypeChange}
+            viewType={viewType}
           />
-        )}
-        
-        <ResetActionsCard onReset={fetchCreators} role={role} />
 
-        <Card className="w-full overflow-hidden">
-          <CardHeader>
-            <CardTitle>Détails des Créateurs ({creators.length}) 📊</CardTitle>
-          </CardHeader>
-          <CardContent className="overflow-x-auto">
-            <CreatorsTable 
-              creators={creators}
-              isMobile={isMobile}
-              rewardThreshold={rewardThreshold}
-              onEditSchedule={handleEditSchedule}
-              onEditDiamonds={handleShowQuickDiamonds}
-              onRemoveCreator={handleRemoveCreator}
+          <div className="my-6">
+            <StatsSummaryCards creators={creators} />
+          </div>
+
+          <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
+            <SearchBar onSearch={handleSearch} />
+            <ResetActionsCard
+              onResetSchedules={resetAllSchedules}
+              onResetDiamonds={resetAllDiamonds}
             />
-          </CardContent>
-        </Card>
+          </div>
 
-        <EditScheduleDialog 
-          isOpen={isEditingSchedule}
-          onOpenChange={setIsEditingSchedule}
-          creatorUsername={selectedCreator?.username}
-          hours={hours}
-          days={days}
-          setHours={setHours}
-          setDays={setDays}
-          onSave={handleSaveSchedule}
-        />
+          <CreatorsTable
+            creators={creators}
+            isLoading={isLoading}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            onRemoveCreator={handleRemoveCreator}
+            onEditSchedule={handleEditSchedule}
+            onEditDiamonds={handleEditDiamonds}
+            onRefreshData={fetchCreators}
+            role={role}
+          />
 
-        <EditDiamondsDialog 
-          isOpen={isEditingDiamonds}
-          onOpenChange={setIsEditingDiamonds}
-          creatorUsername={selectedCreator?.username}
-          currentDiamonds={selectedCreator?.profiles?.[0]?.total_diamonds || 0}
-          diamondAmount={diamondAmount}
-          setDiamondAmount={setDiamondAmount}
-          operationType={operationType}
-          setOperationType={setOperationType}
-          onSave={handleSaveDiamonds}
-          isSaving={isSaving}
-        />
-
-        <RemoveCreatorDialog 
-          isOpen={removeDialogOpen}
-          onOpenChange={setRemoveDialogOpen}
-          creatorUsername={selectedCreator?.username}
-          onConfirm={confirmRemoveCreator}
-        />
-        
-        <Footer role={role} version="1.3" />
-      </div>
-    </div>
+          {showToast && (
+            <div className="fixed bottom-4 right-4 bg-green-600 text-white p-4 rounded shadow-lg">
+              {toastMessage}
+            </div>
+          )}
+        </div>
+      </UltraSidebar>
+    </SidebarProvider>
   );
 };
 

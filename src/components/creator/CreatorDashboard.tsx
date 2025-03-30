@@ -98,8 +98,8 @@ export const CreatorDashboard = ({
       <StatCards 
         role={role} 
         onOpenSponsorshipForm={onOpenSponsorshipForm} 
-        onOpenSponsorshipList={onOpenSponsorshipList} 
-        onCreatePoster={onCreatePoster} 
+        onOpenSponsorshipList={onOpenSponsorshipList}
+        onCreatePoster={onCreatePoster}
       />
       
       {showGuide && (
