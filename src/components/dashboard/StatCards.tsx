@@ -18,7 +18,7 @@ interface StatCardsProps {
   role: string;
   onOpenSponsorshipForm: () => void;
   onOpenSponsorshipList: () => void;
-  onCreatePoster?: () => void; // Added this prop as optional
+  onCreatePoster?: () => void; // Added this prop
 }
 
 export const StatCards = ({ 

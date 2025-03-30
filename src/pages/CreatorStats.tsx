@@ -70,41 +70,39 @@ const CreatorStats = () => {
       <UltraSidebar
         username={username}
         role={role}
-        userId={userId || ''}  {/* Added userId prop */}
+        userId={userId || ''}
         onLogout={handleLogout}
         currentPage="creator-stats"
       >
         <div className="p-6 max-w-7xl mx-auto">
-          <StatsHeader
-            totalCreators={totalCreators}
-            totalActiveCreators={totalActiveCreators}
-            onViewTypeChange={handleViewTypeChange}
-            viewType={viewType}
-          />
+          <StatsHeader />
 
           <div className="my-6">
-            <StatsSummaryCards creators={creators} />
+            <StatsSummaryCards 
+              totalHours={0} 
+              totalDays={0} 
+              totalDiamonds={0} 
+            />
           </div>
 
           <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
-            <SearchBar onSearch={handleSearch} />
+            <SearchBar 
+              value={search} 
+              onChange={handleSearch} 
+            />
             <ResetActionsCard
-              onResetSchedules={resetAllSchedules}
-              onResetDiamonds={resetAllDiamonds}
+              onReset={fetchCreators}
+              role={role}
             />
           </div>
 
           <CreatorsTable
             creators={creators}
-            isLoading={isLoading}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            onRemoveCreator={handleRemoveCreator}
+            isMobile={false}
+            rewardThreshold={1000}
             onEditSchedule={handleEditSchedule}
             onEditDiamonds={handleEditDiamonds}
-            onRefreshData={fetchCreators}
-            role={role}
+            onRemoveCreator={handleRemoveCreator}
           />
 
           {showToast && (

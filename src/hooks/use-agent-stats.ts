@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
-export const useAgentStats = (role: string) => {
+export const useAgentStats = (role: string | null) => {
   const [creatorCount, setCreatorCount] = useState<number>(0);
   const [diamondCount, setDiamondCount] = useState<number>(0);
   const [totalEvents, setTotalEvents] = useState<number>(0);

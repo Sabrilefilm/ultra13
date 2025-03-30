@@ -39,7 +39,7 @@ const Documents = () => {
       <UltraSidebar
         username={username}
         role={role as Role}
-        userId={userId || ''}  {/* Added userId prop */}
+        userId={userId || ''}
         onLogout={handleLogout}
         currentPage="documents"
       >
