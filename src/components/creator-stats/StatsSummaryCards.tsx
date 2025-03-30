@@ -2,18 +2,28 @@
 import React from "react";
 import { Clock, Calendar, Diamond } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Creator } from "@/hooks/creator-stats/types";
 
 interface StatsSummaryCardsProps {
-  totalHours: number;
-  totalDays: number;
-  totalDiamonds: number;
+  creators: Creator[];
 }
 
 export const StatsSummaryCards: React.FC<StatsSummaryCardsProps> = ({
-  totalHours,
-  totalDays,
-  totalDiamonds,
+  creators,
 }) => {
+  // Calculate totals from creators array
+  const totalHours = creators.reduce((sum, creator) => {
+    return sum + (creator.live_schedules?.[0]?.hours || 0);
+  }, 0);
+  
+  const totalDays = creators.reduce((sum, creator) => {
+    return sum + (creator.live_schedules?.[0]?.days || 0);
+  }, 0);
+  
+  const totalDiamonds = creators.reduce((sum, creator) => {
+    return sum + (creator.diamonds || 0);
+  }, 0);
+
   // Format number to one decimal place, remove trailing zeros
   const formatNumber = (value: number): string => {
     return Number(value.toFixed(1)).toString();

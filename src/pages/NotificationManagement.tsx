@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { useIndexAuth } from "@/hooks/use-index-auth";
-import UltraSidebar from "@/components/layout/UltraSidebar";
+import { UltraSidebar } from "@/components/layout/UltraSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

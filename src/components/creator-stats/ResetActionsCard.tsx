@@ -4,31 +4,24 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { RotateCcw, RefreshCcw, Diamond, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { creatorStatsService } from "@/services/creator-stats-service";
 
 interface ResetActionsCardProps {
-  onReset: () => Promise<void>;
-  role: string | null;
+  onResetSchedules: () => Promise<void>;
+  onResetDiamonds: () => Promise<void>;
 }
 
 export const ResetActionsCard: React.FC<ResetActionsCardProps> = ({
-  onReset,
-  role
+  onResetSchedules,
+  onResetDiamonds
 }) => {
-  // Seulement autoriser les fondateurs et managers à réinitialiser
-  const canReset = role === "founder" || role === "manager";
-  
-  if (!canReset) return null;
-
   const handleResetSchedules = async () => {
     if (!confirm("Êtes-vous sûr de vouloir réinitialiser tous les horaires à zéro?")) {
       return;
     }
     
     try {
-      await creatorStatsService.resetAllSchedules();
+      await onResetSchedules();
       toast.success("Tous les horaires ont été réinitialisés à zéro");
-      await onReset();
     } catch (error) {
       console.error("Error resetting schedules:", error);
       toast.error("Une erreur est survenue lors de la réinitialisation des horaires");
@@ -45,9 +38,8 @@ export const ResetActionsCard: React.FC<ResetActionsCardProps> = ({
     }
     
     try {
-      await creatorStatsService.resetAllDiamonds();
+      await onResetDiamonds();
       toast.success("Tous les diamants ont été réinitialisés à zéro");
-      await onReset();
     } catch (error) {
       console.error("Error resetting diamonds:", error);
       toast.error("Une erreur est survenue lors de la réinitialisation des diamants");

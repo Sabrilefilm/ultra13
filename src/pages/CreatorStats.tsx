@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useIndexAuth } from "@/hooks/use-index-auth";
-import UltraSidebar from "@/components/layout/UltraSidebar";
+import { UltraSidebar } from "@/components/layout/UltraSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useCreatorsData } from "@/hooks/creator-stats/use-creators-data";
 import { CreatorsTable } from "@/components/creator-stats/CreatorsTable";

@@ -1,75 +1,32 @@
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { useDocumentUpload } from './useDocumentUpload';
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DocumentUploadForm } from './DocumentUploadForm';
-import { DialogActions } from './DialogActions';
 
-interface DocumentUploadDialogProps {
+export interface DocumentUploadDialogProps {
   isOpen: boolean;
-  onClose: () => void;
-  userId: string;
-  existingDocument?: any;
+  onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
-  documentType: 'identity' | 'other';
+  documentType: string;
 }
 
-export const DocumentUploadDialog = ({
+export const DocumentUploadDialog: React.FC<DocumentUploadDialogProps> = ({
   isOpen,
-  onClose,
-  userId,
-  existingDocument,
+  onOpenChange,
   onSuccess,
   documentType
-}: DocumentUploadDialogProps) => {
-  const {
-    frontFile,
-    backFile,
-    frontPreview,
-    backPreview,
-    uploading,
-    errors,
-    fileError,
-    selectedDocType,
-    handleFileChange,
-    clearFile,
-    getDocumentTitle,
-    handleSubmit,
-    setSelectedDocType
-  } = useDocumentUpload({ 
-    userId, 
-    existingDocument, 
-    onSuccess, 
-    onClose,
-    initialDocType: documentType
-  });
-
+}) => {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-slate-800 border-slate-700">
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-white">{getDocumentTitle()}</DialogTitle>
+          <DialogTitle>Upload Document</DialogTitle>
         </DialogHeader>
-        
-        <DocumentUploadForm
-          selectedDocType={selectedDocType}
-          setSelectedDocType={setSelectedDocType}
-          frontFile={frontFile}
-          backFile={backFile}
-          frontPreview={frontPreview}
-          backPreview={backPreview}
-          errors={errors}
-          fileError={fileError}
-          handleFileChange={handleFileChange}
-          clearFile={clearFile}
+        <DocumentUploadForm 
+          onSuccess={onSuccess}
+          onCancel={() => onOpenChange(false)}
+          documentType={documentType}
         />
-        
-        <DialogFooter>
-          <DialogActions 
-            onCancel={onClose} 
-            onSubmit={handleSubmit} 
-            uploading={uploading} 
-          />
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
