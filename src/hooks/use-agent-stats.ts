@@ -20,15 +20,15 @@ export const useAgentStats = (role: string) => {
         }
         
         // Fetch creator count
-        let query = supabase.from('user_accounts');
+        const creatorQuery = {
+          ...(role === 'agent' && { agent_id: userId }),
+          role: 'creator'
+        };
         
-        if (role === 'agent') {
-          query = query.eq('agent_id', userId);
-        }
-        
-        query = query.eq('role', 'creator');
-        
-        const { data: creators, error: creatorsError } = await query;
+        const { data: creators, error: creatorsError } = await supabase
+          .from('user_accounts')
+          .select('*')
+          .match(creatorQuery);
         
         if (creatorsError) {
           throw creatorsError;
@@ -54,10 +54,12 @@ export const useAgentStats = (role: string) => {
         }
         
         // Fetch sponsorship events
+        const agentName = localStorage.getItem('username') || '';
+        
         const { data: sponsorships, error: sponsorshipsError } = await supabase
           .from('sponsorships')
           .select('*')
-          .eq('agent_name', username);
+          .eq('agent_name', agentName);
           
         if (sponsorshipsError) {
           throw sponsorshipsError;

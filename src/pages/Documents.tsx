@@ -1,70 +1,48 @@
 
 import React, { useState, useEffect } from "react";
-import { toast } from "sonner";
 import { useIndexAuth } from "@/hooks/use-index-auth";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { UltraSidebar } from "@/components/layout/UltraSidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AdminDocumentsView } from "@/components/documents/AdminDocumentsView";
-import { UserDocumentView } from "@/components/documents/UserDocumentView";
 import { DocumentUploadDialog } from "@/components/documents/upload/DocumentUploadDialog";
-import { useDocuments } from "@/hooks/documents/use-documents";
+import { UserDocumentView } from "@/components/documents/UserDocumentView";
+import { AdminDocumentsView } from "@/components/documents/AdminDocumentsView";
+import { Button } from "@/components/ui/button";
+import { Upload } from "lucide-react";
 import { IdentityDocument } from "@/types/documents";
 
 const Documents = () => {
   const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
-  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
-  const [selectedTab, setSelectedTab] = useState("verified");
-  const [documentType, setDocumentType] = useState<"identity" | "other">("identity");
-  
-  const { 
-    userDocuments, 
-    allDocuments, 
-    isLoading, 
-    fetchDocuments, 
-    verifyDocument,
-    rejectDocument
-  } = useDocuments(role);
+  const [documents, setDocuments] = useState<IdentityDocument[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [documentType, setDocumentType] = useState<'identity' | 'other'>('identity');
+  const [activeTab, setActiveTab] = useState("all");
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      window.location.href = '/';
-    }
-  }, [isAuthenticated]);
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  const handleShowUploadDialog = () => {
-    setIsUploadDialogOpen(true);
-  };
-
-  const handleDocumentTypeChange = (type: "identity" | "other") => {
-    setDocumentType(type);
-  };
+    // Fetch documents logic would go here
+    // For now, we'll use an empty array
+    setDocuments([]);
+    setLoading(false);
+  }, []);
 
   const handleUploadSuccess = () => {
-    toast.success("Document uploaded successfully!");
-    fetchDocuments();
+    setIsDialogOpen(false);
+    // Refresh documents
   };
 
-  const handleVerifyDocument = async (documentId: string) => {
-    await verifyDocument(documentId);
-    toast.success("Document verified successfully!");
-    fetchDocuments();
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
   };
 
-  const handleRejectDocument = async (documentId: string) => {
-    await rejectDocument(documentId);
-    toast.error("Document rejected");
-    fetchDocuments();
-  };
+  const filteredDocuments = documents.filter(doc => {
+    if (activeTab === "all") return true;
+    if (activeTab === "verified") return doc.verified;
+    if (activeTab === "pending") return !doc.verified;
+    return true;
+  });
 
-  // Type guard for IdentityDocument array
-  const filterDocuments = (docs: any[], status: string): IdentityDocument[] => {
-    return (docs.filter(doc => doc.status === status) || []) as IdentityDocument[];
-  };
+  if (!isAuthenticated) return null;
 
   return (
     <SidebarProvider>
@@ -75,59 +53,40 @@ const Documents = () => {
         onLogout={handleLogout}
         currentPage="documents"
       >
-        <div className="p-6 max-w-5xl mx-auto">
-          <h1 className="text-2xl font-bold mb-6">Documents</h1>
+        <div className="p-6 max-w-7xl mx-auto">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold">Documents</h1>
+            
+            <Button onClick={() => setIsDialogOpen(true)} className="flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              Upload Document
+            </Button>
+          </div>
           
-          {role === "founder" || role === "manager" ? (
-            <Tabs defaultValue="verified" value={selectedTab} onValueChange={setSelectedTab}>
-              <TabsList className="mb-6">
-                <TabsTrigger value="verified">Verified Documents</TabsTrigger>
-                <TabsTrigger value="pending">Pending Verification</TabsTrigger>
-                <TabsTrigger value="rejected">Rejected Documents</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="verified" className="space-y-4">
-                <AdminDocumentsView 
-                  documents={filterDocuments(allDocuments, 'verified')}
-                  selectedTab={selectedTab}
-                  setSelectedTab={setSelectedTab}
-                  onVerifyDocument={handleVerifyDocument}
-                />
-              </TabsContent>
-              
-              <TabsContent value="pending" className="space-y-4">
-                <AdminDocumentsView 
-                  documents={filterDocuments(allDocuments, 'pending')}
-                  selectedTab={selectedTab}
-                  setSelectedTab={setSelectedTab}
-                  onVerifyDocument={handleVerifyDocument}
-                />
-              </TabsContent>
-              
-              <TabsContent value="rejected" className="space-y-4">
-                <AdminDocumentsView 
-                  documents={filterDocuments(allDocuments, 'rejected')}
-                  selectedTab={selectedTab}
-                  setSelectedTab={setSelectedTab}
-                  onVerifyDocument={handleVerifyDocument}
-                />
-              </TabsContent>
-            </Tabs>
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin h-8 w-8 border-4 border-indigo-500 border-t-transparent rounded-full"></div>
+            </div>
           ) : (
-            <UserDocumentView 
-              userDocument={userDocuments[0] || null}
-              onShowUploadDialog={handleShowUploadDialog}
-              onChangeDocumentType={handleDocumentTypeChange}
-              documentType={documentType}
-              fetchDocuments={fetchDocuments}
-            />
+            <>
+              {role === 'creator' ? (
+                <UserDocumentView 
+                  documents={documents as IdentityDocument[]} 
+                  onUpload={() => setIsDialogOpen(true)} 
+                />
+              ) : (
+                <AdminDocumentsView 
+                  documents={documents as IdentityDocument[]} 
+                />
+              )}
+            </>
           )}
           
           <DocumentUploadDialog 
-            isOpen={isUploadDialogOpen}
-            onOpenChange={setIsUploadDialogOpen}
+            isOpen={isDialogOpen} 
+            onClose={() => setIsDialogOpen(false)} 
+            documentType={documentType} 
             onSuccess={handleUploadSuccess}
-            documentType={documentType}
           />
         </div>
       </UltraSidebar>

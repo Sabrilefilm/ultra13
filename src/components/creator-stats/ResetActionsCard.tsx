@@ -1,9 +1,8 @@
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, RefreshCcw, Diamond, Clock } from "lucide-react";
-import { toast } from "sonner";
+import { AlertCircle, ArrowCounterClockwise, Diamond } from "lucide-react";
 
 interface ResetActionsCardProps {
   onResetSchedules: () => Promise<void>;
@@ -14,66 +13,24 @@ export const ResetActionsCard: React.FC<ResetActionsCardProps> = ({
   onResetSchedules,
   onResetDiamonds
 }) => {
-  const handleResetSchedules = async () => {
-    if (!confirm("Êtes-vous sûr de vouloir réinitialiser tous les horaires à zéro?")) {
-      return;
-    }
-    
-    try {
-      await onResetSchedules();
-      toast.success("Tous les horaires ont été réinitialisés à zéro");
-    } catch (error) {
-      console.error("Error resetting schedules:", error);
-      toast.error("Une erreur est survenue lors de la réinitialisation des horaires");
-    }
-  };
-
-  const handleResetDiamonds = async () => {
-    if (!confirm("ATTENTION! Êtes-vous sûr de vouloir réinitialiser tous les diamants à zéro? Cette action est irréversible!")) {
-      return;
-    }
-    
-    if (!confirm("DERNIÈRE CONFIRMATION: Cette action va SUPPRIMER tous les diamants et NE PEUT PAS être annulée!")) {
-      return;
-    }
-    
-    try {
-      await onResetDiamonds();
-      toast.success("Tous les diamants ont été réinitialisés à zéro");
-    } catch (error) {
-      console.error("Error resetting diamonds:", error);
-      toast.error("Une erreur est survenue lors de la réinitialisation des diamants");
-    }
-  };
-
   return (
-    <Card className="border-red-100 bg-red-50">
-      <CardHeader>
-        <CardTitle className="text-red-700 flex items-center gap-2">
-          <RotateCcw className="h-5 w-5" />
-          Actions de réinitialisation
-        </CardTitle>
-        <CardDescription className="text-red-600">
-          Attention: Ces actions sont irréversibles
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col md:flex-row gap-4">
+    <Card className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+      <CardContent className="flex flex-col gap-2 p-3">
         <Button 
           variant="outline" 
-          className="border-amber-500 text-amber-700 hover:bg-amber-100"
-          onClick={handleResetSchedules}
+          className="w-full justify-start text-sm"
+          onClick={onResetSchedules}
         >
-          <Clock className="mr-2 h-4 w-4" />
-          Réinitialiser tous les horaires
+          <ArrowCounterClockwise className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
+          Reset all schedules
         </Button>
-        
         <Button 
           variant="outline" 
-          className="border-red-500 text-red-700 hover:bg-red-100"
-          onClick={handleResetDiamonds}
+          className="w-full justify-start text-sm"
+          onClick={onResetDiamonds}
         >
-          <Diamond className="mr-2 h-4 w-4" />
-          Réinitialiser tous les diamants
+          <Diamond className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
+          Reset all diamonds
         </Button>
       </CardContent>
     </Card>

@@ -1,31 +1,34 @@
 
-import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { DocumentUploadForm } from './DocumentUploadForm';
+import React from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DocumentUploadForm } from "./DocumentUploadForm";
 
-export interface DocumentUploadDialogProps {
+interface DocumentUploadDialogProps {
   isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSuccess: () => void;
+  onClose: () => void;
   documentType: string;
+  onSuccess: () => void;
 }
 
 export const DocumentUploadDialog: React.FC<DocumentUploadDialogProps> = ({
   isOpen,
-  onOpenChange,
-  onSuccess,
-  documentType
+  onClose,
+  documentType,
+  onSuccess
 }) => {
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[725px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Upload Document</DialogTitle>
+          <DialogTitle className="text-xl">
+            {documentType === 'identity' ? 'Upload Identity Document' : 'Upload Document'}
+          </DialogTitle>
         </DialogHeader>
+        
         <DocumentUploadForm 
+          documentType={documentType} 
+          onCancel={onClose} 
           onSuccess={onSuccess}
-          onCancel={() => onOpenChange(false)}
-          documentType={documentType}
         />
       </DialogContent>
     </Dialog>
