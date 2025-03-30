@@ -1,105 +1,78 @@
 
-import React from "react";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { useSidebar } from "@/hooks/use-sidebar";
-import { SidebarLogo } from "./SidebarLogo";
-import { SidebarUserProfile } from "./sidebar/SidebarUserProfile";
+import React, { useState } from "react";
 import { SidebarNavigation } from "./sidebar/SidebarNavigation";
-import { SidebarLogout } from "./sidebar/SidebarLogout";
+import { SidebarUserProfile } from "./sidebar/SidebarUserProfile";
 import { SidebarToggle } from "./sidebar/SidebarToggle";
+import { Sidebar } from "@/components/ui/sidebar";
 import { SidebarMobileClose } from "./sidebar/SidebarMobileClose";
-import { navigationItems, getAmbassadorItems } from "./sidebar/navigationItems";
-import { UltraSidebarProps } from "./sidebar/types";
-import { Users } from "lucide-react";
-import { LogoutButton } from "./LogoutButton";
+import { SidebarLogo } from "./SidebarLogo";
+import { SidebarLogout } from "./sidebar/SidebarLogout";
+import { getNavigationItems } from "./sidebar/navigationItems";
 
-export const UltraSidebar: React.FC<UltraSidebarProps> = ({
-  username,
-  role,
+interface UltraSidebarProps {
+  username: string;
+  role: string;
+  userId: string;
+  onLogout: () => void;
+  currentPage?: string;
+}
+
+export const UltraSidebar = ({ 
+  username, 
+  role, 
   userId,
-  onLogout,
-  onAction,
-  currentPage = 'dashboard',
-  isMobileOpen,
-  setMobileMenuOpen,
-  version = "1.0"
-}) => {
-  const { collapsed, toggleSidebar } = useSidebar();
-  const isMobile = useMediaQuery("(max-width: 768px)");
-
-  const handleItemClick = (action: string, data?: any) => {
-    if (onAction) {
-      // Handle special cases where data is a function
-      if (typeof data === 'function') {
-        data = data(role);
-      }
-      
-      onAction(action, data);
-    }
-
-    if (isMobile && setMobileMenuOpen) {
-      setMobileMenuOpen(false);
-    }
+  onLogout, 
+  currentPage = "" 
+}: UltraSidebarProps) => {
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobile, setMobile] = useState(false);
+  
+  const handleToggle = () => {
+    setCollapsed(!collapsed);
   };
-
-  const handleToggleSidebar = () => {
-    toggleSidebar();
-    if (onAction) {
-      onAction('toggleSidebar');
-    }
+  
+  const handleMobileToggle = () => {
+    setMobile(!mobile);
   };
-
-  // Get navigation items based on role
-  const items = role === 'ambassadeur' 
-    ? getAmbassadorItems(navigationItems)
-    : navigationItems;
+  
+  const navigationItems = getNavigationItems(role, currentPage);
 
   return (
-    <div className={`h-full flex flex-col bg-slate-800/80 backdrop-blur-sm border-r border-slate-700/50 transition-all duration-300 ${collapsed ? "w-20" : "w-64"} ${isMobile ? "w-full md:w-auto" : ""}`}>
-      {isMobile && (
-        <SidebarMobileClose onClose={() => setMobileMenuOpen && setMobileMenuOpen(false)} />
-      )}
-      
-      <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"} p-4`}>
-        <SidebarLogo collapsed={collapsed} />
-        
-        {!isMobile && (
-          <SidebarToggle collapsed={collapsed} onToggle={handleToggleSidebar} />
-        )}
+    <Sidebar 
+      className={`fixed h-full bg-slate-900 text-white shadow-lg z-50 flex flex-col border-r border-slate-700/50 transition-all duration-300 ${
+        collapsed ? "w-16" : "w-64"
+      } ${
+        mobile ? "left-0" : "-left-64 md:left-0"
+      }`}
+    >
+      <div className="flex justify-between items-center p-4 border-b border-slate-700/50">
+        {!collapsed && <SidebarLogo />}
+        <SidebarToggle onClick={handleToggle} collapsed={collapsed} />
+        <SidebarMobileClose onClick={handleMobileToggle} className="md:hidden" />
       </div>
       
       <SidebarUserProfile 
-        username={username} 
+        username={username}
         role={role} 
-        collapsed={collapsed} 
+        collapsed={collapsed}
       />
       
-      <div className="flex-1 overflow-y-auto py-4 bg-sky-950">
+      <div className="flex-1 overflow-y-auto py-4">
         <SidebarNavigation 
-          items={items}
+          items={navigationItems}
           currentPage={currentPage}
           role={role}
-          onClick={handleItemClick}
+          onClick={() => mobile && handleMobileToggle()}
           collapsed={collapsed}
         />
       </div>
-
-      {isMobile && (
-        <div className="p-4 bg-slate-800/50">
-          <LogoutButton 
-            onLogout={onLogout} 
-            username={username} 
-            variant="ghost"
-            className="w-full justify-center bg-red-900/20 text-red-400 hover:bg-red-900/30"
-          />
-        </div>
-      )}
       
-      {!collapsed && !isMobile && (
-        <div className="p-3 text-center border-t border-slate-700/50 text-xs text-slate-500">
-          <p>Version {version}</p>
-        </div>
-      )}
-    </div>
+      <SidebarLogout 
+        onLogout={onLogout} 
+        collapsed={collapsed}
+        username={username}
+        role={role}
+      />
+    </Sidebar>
   );
 };

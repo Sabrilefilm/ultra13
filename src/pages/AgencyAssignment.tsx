@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Check, UserPlus, UserMinus, Plus } from "lucide-react";
 import { useIndexAuth } from "@/hooks/use-index-auth";
@@ -20,15 +20,36 @@ import { CreatorSelect } from "@/components/live-schedule/creator-select";
 import { Account } from "@/types/accounts";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UltraSidebar } from "@/components/layout/UltraSidebar";
+import { usePlatformSettings } from "@/hooks/use-platform-settings";
+import { useAccountManagement } from "@/hooks/use-account-management";
+import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
+import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
 
 const AgencyAssignment = () => {
   const navigate = useNavigate();
-  const { role, username, userId, handleLogout } = useIndexAuth();
-  const [agents, setAgents] = useState<Account[]>([]);
-  const [selectedAgentId, setSelectedAgentId] = useState<string>("");
+  const { agentId } = useParams();
   const { toast } = useToast();
+  const { isAuthenticated, role, username, userId, handleLogout } = useIndexAuth();
+  const { platformSettings, handleUpdateSettings } = usePlatformSettings(role);
+  const { handleCreateAccount } = useAccountManagement();
+  const [agents, setAgents] = useState<Account[]>([]);
+  const [selectedAgentId, setSelectedAgentId] = useState<string>(agentId || "");
   const [isAddCreatorOpen, setIsAddCreatorOpen] = useState(false);
   const [newCreatorUsername, setNewCreatorUsername] = useState("");
+  
+  // Inactivity timer for automatic logout
+  const { showWarning, dismissWarning, formattedTime } = useInactivityTimer({
+    timeout: 120000, // 2 minutes
+    onTimeout: () => {
+      handleLogout();
+      toast({
+        title: "Déconnexion automatique",
+        description: "Vous avez été déconnecté en raison d'inactivité.",
+      });
+    },
+    warningTime: 30000,
+    onWarning: () => {}
+  });
   
   const {
     assignedCreators,
@@ -40,9 +61,9 @@ const AgencyAssignment = () => {
   } = useAgencyMembers(selectedAgentId);
 
   useEffect(() => {
-    // Only founders should be able to access this page
-    if (role !== 'founder') {
-      navigate('/');
+    // Only founders and managers should be able to access this page
+    if (!isAuthenticated || (role !== 'founder' && role !== 'manager')) {
+      navigate('/dashboard');
       return;
     }
 
@@ -59,7 +80,7 @@ const AgencyAssignment = () => {
         }
 
         setAgents(data || []);
-        if (data && data.length > 0) {
+        if (!selectedAgentId && data && data.length > 0) {
           setSelectedAgentId(data[0].id);
         }
       } catch (error) {
@@ -68,7 +89,7 @@ const AgencyAssignment = () => {
     };
 
     fetchAgents();
-  }, [navigate, role]);
+  }, [navigate, role, selectedAgentId]);
 
   const handleAssignCreator = async (creatorId: string) => {
     if (!selectedAgentId) {
@@ -183,7 +204,7 @@ const AgencyAssignment = () => {
   const usernameWatermark = (
     <div className="fixed inset-0 pointer-events-none select-none z-0 flex items-center justify-center">
       <div className="w-full h-full flex items-center justify-center rotate-[-30deg]">
-        <p className="text-slate-200/30 text-[6vw] font-bold whitespace-nowrap">
+        <p className="text-slate-200/10 text-[6vw] font-bold whitespace-nowrap">
           {username?.toUpperCase()}
         </p>
       </div>
@@ -195,33 +216,39 @@ const AgencyAssignment = () => {
       <div className="min-h-screen flex w-full">
         {usernameWatermark}
         
-        <UltraSidebar 
+        <UltraDashboard
           username={username || ''}
           role={role || ''}
           userId={userId || ''}
           onLogout={handleLogout}
-          currentPage="user-management"
+          platformSettings={platformSettings}
+          handleCreateAccount={handleCreateAccount}
+          handleUpdateSettings={handleUpdateSettings}
+          showWarning={showWarning}
+          dismissWarning={dismissWarning}
+          formattedTime={formattedTime}
+          currentPage="agency-assignment"
         />
         
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-4 md:ml-64">
           <div className="max-w-6xl mx-auto space-y-6">
             <div className="flex items-center gap-4 mb-6">
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate("/users")}
+                onClick={() => navigate("/dashboard")}
                 className="h-10 w-10"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              <h1 className="text-2xl font-bold">
+              <h1 className="text-2xl font-bold text-white">
                 Gestion des équipes d'agence
               </h1>
             </div>
 
-            <Card className="mb-6">
+            <Card className="mb-6 bg-slate-800/90 backdrop-blur-sm border-purple-900/30">
               <CardHeader>
-                <CardTitle>Sélectionner un agent</CardTitle>
+                <CardTitle className="text-white">Sélectionner un agent</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="max-w-xs">
@@ -229,12 +256,12 @@ const AgencyAssignment = () => {
                     value={selectedAgentId} 
                     onValueChange={(value) => setSelectedAgentId(value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-slate-700 border-purple-900/50 text-white">
                       <SelectValue placeholder="Sélectionner un agent" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-slate-800 border-purple-900/50 text-white">
                       {agents.map((agent) => (
-                        <SelectItem key={agent.id} value={agent.id}>
+                        <SelectItem key={agent.id} value={agent.id} className="text-white hover:bg-slate-700 focus:bg-slate-700">
                           {agent.username}
                         </SelectItem>
                       ))}
@@ -246,30 +273,30 @@ const AgencyAssignment = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Unassigned Creators */}
-              <Card>
+              <Card className="bg-slate-800/90 backdrop-blur-sm border-purple-900/30">
                 <CardHeader>
-                  <CardTitle className="flex justify-between items-center">
+                  <CardTitle className="flex justify-between items-center text-white">
                     <span>Créateurs non assignés ({unassignedCreators.length})</span>
                     <Dialog open={isAddCreatorOpen} onOpenChange={setIsAddCreatorOpen}>
                       <DialogTrigger asChild>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" className="bg-purple-800/30 border-purple-500/30 hover:bg-purple-700/50 text-white">
                           <Plus className="h-4 w-4 mr-1" />
                           Ajouter un créateur
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="bg-slate-800 border-purple-900/50 text-white">
                         <DialogHeader>
-                          <DialogTitle>Assigner un créateur</DialogTitle>
+                          <DialogTitle className="text-white">Assigner un créateur</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                           <div className="space-y-2">
-                            <label htmlFor="creator">Sélectionner un créateur</label>
+                            <label htmlFor="creator" className="text-white">Sélectionner un créateur</label>
                             <CreatorSelect 
                               onSelect={handleSelectCreator}
                               value={newCreatorUsername}
                             />
                           </div>
-                          <Button onClick={handleAddCreator} className="w-full">
+                          <Button onClick={handleAddCreator} className="w-full bg-purple-600 hover:bg-purple-700 text-white">
                             Assigner
                           </Button>
                         </div>
@@ -283,22 +310,23 @@ const AgencyAssignment = () => {
                       <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
                     </div>
                   ) : unassignedCreators.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
+                    <div className="text-center py-8 text-gray-400">
                       Tous les créateurs sont assignés
                     </div>
                   ) : (
                     <div className="space-y-2">
                       {unassignedCreators.map((creator) => (
-                        <Card key={creator.id} className="p-4">
+                        <Card key={creator.id} className="p-4 bg-slate-700/70 border-purple-800/30">
                           <div className="flex justify-between items-center">
                             <div>
-                              <p className="font-medium">{creator.username}</p>
-                              <p className="text-sm text-muted-foreground">Créateur</p>
+                              <p className="font-medium text-white">{creator.username}</p>
+                              <p className="text-sm text-gray-400">Créateur</p>
                             </div>
                             <Button
                               size="sm"
                               onClick={() => handleAssignCreator(creator.id)}
                               disabled={!selectedAgentId || isLoading}
+                              className="bg-purple-600 hover:bg-purple-700 text-white"
                             >
                               <UserPlus className="h-4 w-4 mr-1" />
                               Assigner
@@ -312,9 +340,9 @@ const AgencyAssignment = () => {
               </Card>
 
               {/* Assigned Creators */}
-              <Card>
+              <Card className="bg-slate-800/90 backdrop-blur-sm border-purple-900/30">
                 <CardHeader>
-                  <CardTitle className="flex justify-between items-center">
+                  <CardTitle className="flex justify-between items-center text-white">
                     <span>Créateurs assignés ({assignedCreators.length})</span>
                   </CardTitle>
                 </CardHeader>
@@ -324,23 +352,24 @@ const AgencyAssignment = () => {
                       <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
                     </div>
                   ) : assignedCreators.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
+                    <div className="text-center py-8 text-gray-400">
                       Aucun créateur assigné à cet agent
                     </div>
                   ) : (
                     <div className="space-y-2">
                       {assignedCreators.map((creator) => (
-                        <Card key={creator.id} className="p-4">
+                        <Card key={creator.id} className="p-4 bg-slate-700/70 border-purple-800/30">
                           <div className="flex justify-between items-center">
                             <div>
-                              <p className="font-medium">{creator.username}</p>
-                              <p className="text-sm text-muted-foreground">Créateur</p>
+                              <p className="font-medium text-white">{creator.username}</p>
+                              <p className="text-sm text-gray-400">Créateur</p>
                             </div>
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleRemoveCreator(creator.id)}
                               disabled={isLoading}
+                              className="border-red-800/50 bg-red-950/30 hover:bg-red-900/50 text-white"
                             >
                               <UserMinus className="h-4 w-4 mr-1" />
                               Retirer

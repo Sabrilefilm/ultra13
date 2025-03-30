@@ -19,8 +19,10 @@ import ManagerDashboard from "./pages/ManagerDashboard";
 import AgentCreators from "./pages/AgentCreators";
 import TeamManagement from "./pages/TeamManagement";
 import RewardsManagement from "./pages/RewardsManagement";
+import AgencyAssignment from "./pages/AgencyAssignment";
 import { RouteGuard } from "@/components/RouteGuard";
 import { DashboardView } from "@/components/dashboard/DashboardView";
+import Matches from "./pages/Matches";
 
 function App() {
   return (
@@ -166,10 +168,26 @@ function App() {
           }
         />
         <Route
+          path="/matches"
+          element={
+            <RouteGuard allowedRoles={["founder", "manager"]}>
+              <Matches />
+            </RouteGuard>
+          }
+        />
+        <Route
           path="/agency-assignment"
           element={
             <RouteGuard allowedRoles={["founder", "manager"]}>
-              <TeamManagement />
+              <AgencyAssignment />
+            </RouteGuard>
+          }
+        />
+        <Route
+          path="/agency-assignment/:agentId"
+          element={
+            <RouteGuard allowedRoles={["founder", "manager"]}>
+              <AgencyAssignment />
             </RouteGuard>
           }
         />

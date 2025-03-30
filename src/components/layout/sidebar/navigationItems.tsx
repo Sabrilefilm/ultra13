@@ -69,7 +69,7 @@ export const navigationItems: SidebarItem[] = [
     label: "Mes Créateurs",
     action: "navigateTo",
     data: "creator-stats",
-    roles: ["founder"] // Only for founders
+    roles: ["founder", "manager", "agent"] // Added manager and agent roles
   },
   {
     icon: MessageSquare,
@@ -113,6 +113,14 @@ export const navigationItems: SidebarItem[] = [
     action: "navigateTo",
     data: "ambassador",
     roles: ["founder", "ambassadeur"],
+    animated: true
+  },
+  {
+    icon: Users,
+    label: "Gestion Agence",
+    action: "navigateTo",
+    data: "agency-assignment",
+    roles: ["founder", "manager"],
     animated: true
   }
 ];

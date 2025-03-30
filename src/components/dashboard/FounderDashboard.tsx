@@ -12,7 +12,8 @@ import {
   Users,
   BookOpen,
   Plus,
-  UserCheck
+  UserCheck,
+  Trophy
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -41,7 +42,7 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({
     {
       title: "Gestion des Utilisateurs",
       icon: <UserRound className="w-5 h-5" />,
-      action: () => navigate("/users"),
+      action: () => navigate("/user-management"),
       buttonText: "Créer un compte",
       buttonAction: onCreateAccount,
       iconBgColor: "bg-purple-500/10"
@@ -117,6 +118,14 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({
       buttonText: "Gérer les assignations",
       buttonAction: () => navigate("/agency-assignment"),
       iconBgColor: "bg-amber-500/10"
+    },
+    {
+      title: "Matchs",
+      icon: <Trophy className="w-5 h-5" />,
+      action: () => navigate("/matches"),
+      buttonText: "Gérer les matchs",
+      buttonAction: () => navigate("/matches"),
+      iconBgColor: "bg-purple-500/10"
     }
   ];
 
@@ -126,7 +135,7 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({
         {cards.map((card, index) => (
           <div 
             key={index} 
-            className="bg-[#1e1f2e]/90 backdrop-blur-sm border border-gray-800/50 rounded-xl p-4 space-y-8 shadow-lg relative overflow-hidden"
+            className="bg-slate-800/90 backdrop-blur-sm border border-gray-800/50 rounded-xl p-4 space-y-8 shadow-lg relative overflow-hidden"
           >
             <div className={`absolute top-0 right-0 w-20 h-20 ${card.iconBgColor} rounded-full -mr-10 -mt-10 blur-xl`}></div>
             <div className="flex items-center justify-between">
@@ -142,7 +151,7 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({
             </div>
             <Button 
               variant="outline" 
-              className="w-full border-white/10 hover:bg-white/10" 
+              className="w-full border-white/10 hover:bg-white/10 text-white" 
               onClick={card.buttonAction}
             >
               {card.title === "Gestion des Utilisateurs" && <Plus className="mr-2 h-4 w-4" />}
