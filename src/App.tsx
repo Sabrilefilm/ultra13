@@ -17,6 +17,8 @@ import CreatorRewards from "./pages/CreatorRewards";
 import Ambassador from "./pages/Ambassador";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import AgentCreators from "./pages/AgentCreators";
+import TeamManagement from "./pages/TeamManagement";
+import RewardsManagement from "./pages/RewardsManagement";
 import { RouteGuard } from "@/components/RouteGuard";
 import { DashboardView } from "@/components/dashboard/DashboardView";
 
@@ -140,6 +142,14 @@ function App() {
           }
         />
         <Route
+          path="/rewards-management"
+          element={
+            <RouteGuard allowedRoles={["founder", "manager", "agent", "creator", "ambassadeur"]}>
+              <RewardsManagement />
+            </RouteGuard>
+          }
+        />
+        <Route
           path="/ambassador"
           element={
             <RouteGuard allowedRoles={["founder", "ambassadeur"]}>
@@ -152,6 +162,14 @@ function App() {
           element={
             <RouteGuard allowedRoles={["founder", "manager"]}>
               <ManagerDashboard />
+            </RouteGuard>
+          }
+        />
+        <Route
+          path="/agency-assignment"
+          element={
+            <RouteGuard allowedRoles={["founder", "manager"]}>
+              <TeamManagement />
             </RouteGuard>
           }
         />

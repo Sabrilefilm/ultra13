@@ -107,7 +107,7 @@ const TeamManagement = () => {
                       {role === 'founder' && (
                         <div className="mt-8">
                           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">Attribution d'agents aux managers</h3>
-                          <AgentAssignment />
+                          <AgentAssignment onPageView={true} />
                         </div>
                       )}
                     </div>

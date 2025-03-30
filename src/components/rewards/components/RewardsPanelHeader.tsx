@@ -23,12 +23,13 @@ export function RewardsPanelHeader({
 }: RewardsPanelHeaderProps) {
   // Only founder can manage rewards
   const canManageRewards = role === 'founder';
+  const canManageDiamonds = ['founder', 'manager'].includes(role);
 
   return (
     <div className="flex flex-row items-center justify-between">
       <CardTitle className="flex items-center gap-2">
         <Diamond className="w-5 h-5 text-purple-500" />
-        Récompenses 💎
+        Programme de Récompenses 💎
       </CardTitle>
       {canManageRewards && (
         <div className="flex items-center gap-2">
@@ -70,17 +71,18 @@ export function RewardsPanelHeader({
           >
             Programme de récompenses
           </Button>
-          <Button
-            variant="default"
-            className="bg-indigo-600 hover:bg-indigo-700 flex items-center gap-2"
-            onClick={onOpenDiamondsPage}
-          >
-            <TrendingUp className="h-4 w-4" />
-            Gestion des Diamants
-          </Button>
+          {canManageDiamonds && (
+            <Button
+              variant="default"
+              className="bg-indigo-600 hover:bg-indigo-700 flex items-center gap-2"
+              onClick={onOpenDiamondsPage}
+            >
+              <TrendingUp className="h-4 w-4" />
+              Gestion des Diamants
+            </Button>
+          )}
         </div>
       )}
-      {/* Remove creator buttons for adding diamonds/settings */}
     </div>
   );
 }

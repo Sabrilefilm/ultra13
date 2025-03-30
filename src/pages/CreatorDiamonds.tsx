@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UltraSidebar } from '@/components/layout/UltraSidebar';
@@ -13,6 +14,7 @@ import { AgencyOverview } from '@/components/diamonds/AgencyOverview';
 import { EditGoalDialog } from '@/components/diamonds/EditGoalDialog';
 import { DiamondManagementDialog } from '@/components/diamonds/DiamondManagementDialog';
 import { Creator } from '@/hooks/diamonds/use-diamond-fetch';
+import { UsernameWatermark } from '@/components/layout/UsernameWatermark';
 
 const CreatorDiamonds = () => {
   const navigate = useNavigate();
@@ -60,6 +62,8 @@ const CreatorDiamonds = () => {
   
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex">
+      <UsernameWatermark username={username} />
+      
       <UltraSidebar 
         username={username}
         role={role}
@@ -75,7 +79,7 @@ const CreatorDiamonds = () => {
             <div className="flex items-center gap-2">
               <Button 
                 variant="outline" 
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/dashboard')}
                 className="flex items-center gap-2"
               >
                 <HomeIcon className="h-4 w-4" />
@@ -102,7 +106,7 @@ const CreatorDiamonds = () => {
             isEditing={isEditing}
           />
           
-          <Tabs defaultValue="creators" onValueChange={setActiveTab}>
+          <Tabs defaultValue="creators" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-3 mb-4">
               <TabsTrigger value="creators">Créateurs</TabsTrigger>
               <TabsTrigger value="managers">Managers</TabsTrigger>
@@ -150,26 +154,30 @@ const CreatorDiamonds = () => {
         </div>
       </div>
       
-      <EditGoalDialog
-        isOpen={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        selectedCreator={selectedCreator as Creator}
-        newDiamondGoal={newDiamondGoal}
-        setNewDiamondGoal={setNewDiamondGoal}
-        onSave={handleUpdateDiamondGoal}
-        isEditing={isEditing}
-      />
-      
-      <DiamondManagementDialog
-        isOpen={isDiamondModalOpen}
-        onOpenChange={setIsDiamondModalOpen}
-        selectedCreator={selectedCreator as Creator}
-        diamondAmount={diamondAmount}
-        setDiamondAmount={setDiamondAmount}
-        operationType={operationType}
-        onSave={handleUpdateDiamonds}
-        isEditing={isEditing}
-      />
+      {selectedCreator && (
+        <>
+          <EditGoalDialog
+            isOpen={isDialogOpen}
+            onOpenChange={setIsDialogOpen}
+            selectedCreator={selectedCreator as Creator}
+            newDiamondGoal={newDiamondGoal}
+            setNewDiamondGoal={setNewDiamondGoal}
+            onSave={handleUpdateDiamondGoal}
+            isEditing={isEditing}
+          />
+          
+          <DiamondManagementDialog
+            isOpen={isDiamondModalOpen}
+            onOpenChange={setIsDiamondModalOpen}
+            selectedCreator={selectedCreator as Creator}
+            diamondAmount={diamondAmount}
+            setDiamondAmount={setDiamondAmount}
+            operationType={operationType}
+            onSave={handleUpdateDiamonds}
+            isEditing={isEditing}
+          />
+        </>
+      )}
     </div>
   );
 };

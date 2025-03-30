@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -11,11 +12,9 @@ import {
   Users,
   BookOpen,
   Plus,
-  Diamond,
   UserCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AgentAssignment } from "./AgentAssignment";
 
 interface FounderDashboardProps {
   onCreateAccount: () => void;
@@ -112,11 +111,11 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({
       iconBgColor: "bg-cyan-500/10"
     },
     {
-      title: "Diamants des créateurs",
-      icon: <Diamond className="w-5 h-5" />,
-      action: () => navigate("/creator-diamonds"),
-      buttonText: "Gérer les diamants",
-      buttonAction: () => navigate("/creator-diamonds"),
+      title: "Gestion d'Agence",
+      icon: <UserCheck className="w-5 h-5" />,
+      action: () => navigate("/agency-assignment"),
+      buttonText: "Gérer les assignations",
+      buttonAction: () => navigate("/agency-assignment"),
       iconBgColor: "bg-amber-500/10"
     }
   ];
@@ -151,10 +150,6 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({
             </Button>
           </div>
         ))}
-      </div>
-      
-      <div className="mt-8">
-        <AgentAssignment />
       </div>
     </div>
   );

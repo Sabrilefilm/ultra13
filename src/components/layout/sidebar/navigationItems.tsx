@@ -12,7 +12,6 @@ import {
   Trophy, 
   Pen, 
   BookOpen,
-  Diamond,
   FileSpreadsheet,
   BarChart2,
   UserPlus,
@@ -63,13 +62,13 @@ export const navigationItems: SidebarItem[] = [
     label: "Récompenses",
     action: "navigateTo",
     data: role => role === "creator" ? "creator-rewards" : "rewards-management",
-    roles: ["founder", "manager", "creator"]
+    roles: ["founder", "manager", "creator", "agent", "ambassadeur"]
   },
   {
-    icon: Diamond,
-    label: "Diamants",
+    icon: Pen,
+    label: "Mes Créateurs",
     action: "navigateTo",
-    data: "creator-diamonds",
+    data: "creator-stats",
     roles: ["founder"] // Only for founders
   },
   {
@@ -94,13 +93,6 @@ export const navigationItems: SidebarItem[] = [
     data: role => role === "creator" ? "creator-rules" : "internal-rules",
     roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
   }, 
-  {
-    icon: Pen,
-    label: "Mes Créateurs",
-    action: "navigateTo",
-    data: "creator-stats",
-    roles: ["founder"] // Only for founders
-  },
   {
     icon: BookOpen,
     label: "Nos Formations",
@@ -130,5 +122,5 @@ export const getAmbassadorItems = (items: SidebarItem[]): SidebarItem[] => {
 };
 
 export const getNavigationItems = (role: string | null, currentPage: string) => {
-  return [...navigationItems];
+  return navigationItems.filter(item => item.roles.includes(role || ''));
 };

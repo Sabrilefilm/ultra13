@@ -14,7 +14,7 @@ interface User {
   role: string;
 }
 
-export const AgentAssignment = () => {
+export const AgentAssignment = ({ onPageView = false }) => {
   const [managers, setManagers] = useState<User[]>([]);
   const [agents, setAgents] = useState<User[]>([]);
   const [selectedManager, setSelectedManager] = useState<string>('');
@@ -33,7 +33,7 @@ export const AgentAssignment = () => {
       
       // Fetch managers
       const { data: managersData, error: managersError } = await supabase
-        .from('users')
+        .from('user_accounts')
         .select('id, username, role')
         .eq('role', 'manager');
         
@@ -41,11 +41,13 @@ export const AgentAssignment = () => {
       
       // Fetch agents
       const { data: agentsData, error: agentsError } = await supabase
-        .from('users')
+        .from('user_accounts')
         .select('id, username, role')
         .eq('role', 'agent');
         
       if (agentsError) throw agentsError;
+      
+      console.log('Fetched users:', managersData?.length + agentsData?.length);
       
       setManagers(managersData || []);
       setAgents(agentsData || []);
@@ -75,22 +77,17 @@ export const AgentAssignment = () => {
     try {
       setIsLoading(true);
       
-      // Here you would update your database to assign the agent to the manager
-      // This is a placeholder for the actual implementation
+      // Update the agent's profile to assign them to the manager
       const { error } = await supabase
-        .from('manager_agents')
-        .upsert([
-          {
-            manager_id: selectedManager,
-            agent_id: selectedAgent,
-          }
-        ]);
+        .from('user_accounts')
+        .update({ agent_id: selectedManager })
+        .eq('id', selectedAgent);
         
       if (error) throw error;
       
       toast({
         title: 'Succès',
-        description: 'Agent assigné avec succès',
+        description: 'Agent assigné avec succès au manager',
         variant: 'default',
       });
       
@@ -121,13 +118,15 @@ export const AgentAssignment = () => {
           <UserCheck className="h-5 w-5 text-purple-400" />
           Attribution d'Agents aux Managers
         </CardTitle>
-        <Button 
-          onClick={handleNavigateToFullManagement} 
-          variant="outline" 
-          className="border-white/10 hover:bg-white/10"
-        >
-          Gestion agence/créateurs complète
-        </Button>
+        {!onPageView && (
+          <Button 
+            onClick={handleNavigateToFullManagement} 
+            variant="outline" 
+            className="border-white/10 hover:bg-white/10"
+          >
+            Gestion agence/créateurs complète
+          </Button>
+        )}
       </CardHeader>
       <CardContent className="pt-0">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
