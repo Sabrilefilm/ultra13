@@ -2,12 +2,48 @@
 import React, { useState } from "react";
 import { SidebarNavigation } from "./sidebar/SidebarNavigation";
 import { SidebarUserProfile } from "./sidebar/SidebarUserProfile";
-import { SidebarToggle } from "./sidebar/SidebarToggle";
-import { Sidebar } from "@/components/ui/sidebar";
-import { SidebarMobileClose } from "./sidebar/SidebarMobileClose";
-import { SidebarLogo } from "./SidebarLogo";
 import { SidebarLogout } from "./sidebar/SidebarLogout";
+import { SidebarLogo } from "./SidebarLogo";
+import { Sidebar } from "@/components/ui/sidebar";
 import { getNavigationItems } from "./sidebar/navigationItems";
+import { Menu, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+interface SidebarToggleProps {
+  collapsed: boolean;
+  onToggle: () => void;
+}
+
+export const SidebarToggle: React.FC<SidebarToggleProps> = ({ collapsed, onToggle }) => {
+  return (
+    <Button 
+      variant="ghost" 
+      size="icon" 
+      onClick={onToggle} 
+      className="h-8 w-8 p-0 text-white hover:bg-slate-800"
+    >
+      <Menu className="h-5 w-5" />
+    </Button>
+  );
+};
+
+interface SidebarMobileCloseProps {
+  onClose: () => void;
+  className?: string;
+}
+
+export const SidebarMobileClose: React.FC<SidebarMobileCloseProps> = ({ onClose, className }) => {
+  return (
+    <Button 
+      variant="ghost" 
+      size="icon" 
+      onClick={onClose} 
+      className={`h-8 w-8 p-0 text-white hover:bg-slate-800 ${className}`}
+    >
+      <X className="h-5 w-5" />
+    </Button>
+  );
+};
 
 interface UltraSidebarProps {
   username: string;
@@ -15,6 +51,10 @@ interface UltraSidebarProps {
   userId: string;
   onLogout: () => void;
   currentPage?: string;
+  onAction?: (action: string, data?: any) => void;
+  isMobileOpen?: boolean;
+  setMobileMenuOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  version?: string;
 }
 
 export const UltraSidebar = ({ 
@@ -22,33 +62,40 @@ export const UltraSidebar = ({
   role, 
   userId,
   onLogout, 
-  currentPage = "" 
+  currentPage = "",
+  onAction,
+  isMobileOpen,
+  setMobileMenuOpen,
+  version
 }: UltraSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
-  const [mobile, setMobile] = useState(false);
   
   const handleToggle = () => {
     setCollapsed(!collapsed);
   };
   
-  const handleMobileToggle = () => {
-    setMobile(!mobile);
+  const handleMobileClose = () => {
+    if (setMobileMenuOpen) {
+      setMobileMenuOpen(false);
+    }
   };
   
   const navigationItems = getNavigationItems(role, currentPage);
 
   return (
     <Sidebar 
-      className={`fixed h-full bg-slate-900 text-white shadow-lg z-50 flex flex-col border-r border-slate-700/50 transition-all duration-300 ${
+      className={`fixed h-full bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-lg z-50 flex flex-col border-r border-purple-800/50 transition-all duration-300 ${
         collapsed ? "w-16" : "w-64"
-      } ${
-        mobile ? "left-0" : "-left-64 md:left-0"
       }`}
     >
-      <div className="flex justify-between items-center p-4 border-b border-slate-700/50">
+      <div className="flex justify-between items-center p-4 border-b border-purple-800/30">
         {!collapsed && <SidebarLogo />}
-        <SidebarToggle onClick={handleToggle} collapsed={collapsed} />
-        <SidebarMobileClose onClick={handleMobileToggle} className="md:hidden" />
+        <div className="flex items-center">
+          <SidebarToggle collapsed={collapsed} onToggle={handleToggle} />
+          {isMobileOpen && (
+            <SidebarMobileClose onClose={handleMobileClose} className="md:hidden ml-2" />
+          )}
+        </div>
       </div>
       
       <SidebarUserProfile 
@@ -62,7 +109,7 @@ export const UltraSidebar = ({
           items={navigationItems}
           currentPage={currentPage}
           role={role}
-          onClick={() => mobile && handleMobileToggle()}
+          onClick={() => setMobileMenuOpen && setMobileMenuOpen(false)}
           collapsed={collapsed}
         />
       </div>

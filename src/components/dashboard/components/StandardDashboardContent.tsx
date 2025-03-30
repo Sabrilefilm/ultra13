@@ -5,7 +5,7 @@ import { StatCards } from "@/components/dashboard/StatCards";
 import { UserGuide } from "@/components/help/UserGuide";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, BookOpen, Shield, BarChart4, ArrowRight } from "lucide-react";
+import { HelpCircle, BookOpen, Shield, BarChart4, ArrowRight, Users } from "lucide-react";
 import { RoleStats } from "@/components/dashboard/RoleStats";
 import { SocialCommunityLinks } from "@/components/layout/SocialCommunityLinks";
 import { motion } from "framer-motion";
@@ -95,6 +95,15 @@ export const StandardDashboardContent: React.FC<StandardDashboardContentProps> =
                     >
                       <BookOpen className="h-4 w-4" />
                       Formations
+                    </Button>
+                    
+                    <Button
+                      onClick={() => navigate('/rewards-management')}
+                      variant="outline"
+                      className="bg-indigo-900/40 hover:bg-indigo-800/60 text-indigo-300 border-indigo-700/50 hover:border-indigo-600 flex gap-2 items-center"
+                    >
+                      <Users className="h-4 w-4" />
+                      Parrainages
                     </Button>
                   </div>
                 </div>

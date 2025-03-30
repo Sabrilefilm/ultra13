@@ -66,7 +66,6 @@ export const UltraDashboard: React.FC<UltraDashboardProps> = ({
               role={role}
               userId={userId}
               onLogout={onLogout}
-              onAction={onAction}
               currentPage={currentPage}
               isMobileOpen={sidebarStates.mobileMenuOpen}
               setMobileMenuOpen={sidebarStates.setMobileMenuOpen}

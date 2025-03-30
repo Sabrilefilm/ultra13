@@ -10,6 +10,7 @@ interface RewardsPanelHeaderProps {
   onOpenAddReward: () => void;
   onOpenDiamondModal: (type: 'add' | 'subtract') => void;
   onOpenCreatorRewards: () => void;
+  onOpenDiamondsPage?: () => void; // Make this optional
 }
 
 export function RewardsPanelHeader({
@@ -17,7 +18,8 @@ export function RewardsPanelHeader({
   onOpenSettings,
   onOpenAddReward,
   onOpenDiamondModal,
-  onOpenCreatorRewards
+  onOpenCreatorRewards,
+  onOpenDiamondsPage
 }: RewardsPanelHeaderProps) {
   // Only founder can manage rewards
   const canManageRewards = role === 'founder';
@@ -29,7 +31,7 @@ export function RewardsPanelHeader({
         Programme de Récompenses 💎
       </CardTitle>
       {canManageRewards && (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="outline"
             size="icon"
@@ -68,6 +70,16 @@ export function RewardsPanelHeader({
           >
             Programme de récompenses
           </Button>
+          {onOpenDiamondsPage && (
+            <Button
+              variant="outline"
+              className="flex items-center gap-2 border-purple-700/30 bg-purple-900/20 hover:bg-purple-800/30 text-white"
+              onClick={onOpenDiamondsPage}
+            >
+              <Diamond className="h-4 w-4 text-blue-400" />
+              Voir les diamants
+            </Button>
+          )}
         </div>
       )}
     </div>

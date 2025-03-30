@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,7 +48,6 @@ const AmbassadorDashboard = () => {
   const [isAddRecruitDialogOpen, setIsAddRecruitDialogOpen] = useState(false);
   const [newRecruit, setNewRecruit] = useState({ username: '', email: '', notes: '' });
   
-  // Animation class for blue elements
   const animatedBlueClass = "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 animate-pulse";
 
   useEffect(() => {
@@ -72,10 +70,8 @@ const AmbassadorDashboard = () => {
       setRole(storedRole);
       setLoading(false);
       
-      // Fetch creators
       fetchCreators();
       
-      // Fetch recruits (simulated for now)
       fetchRecruits();
     };
     
@@ -84,7 +80,6 @@ const AmbassadorDashboard = () => {
   
   const fetchCreators = async () => {
     try {
-      // Get creators
       const { data: creatorData, error: creatorError } = await supabase
         .from('user_accounts')
         .select(`
@@ -111,8 +106,6 @@ const AmbassadorDashboard = () => {
   };
   
   const fetchRecruits = async () => {
-    // This would be replaced with a real API call to fetch recruits
-    // For now, using dummy data
     const dummyRecruits: Recruit[] = [
       {
         id: '1',
@@ -147,7 +140,6 @@ const AmbassadorDashboard = () => {
     if (!selectedCreator) return;
     
     try {
-      // Check if schedule exists for creator
       const { data: existingSchedule, error: checkError } = await supabase
         .from('live_schedules')
         .select('id')
@@ -157,7 +149,6 @@ const AmbassadorDashboard = () => {
       if (checkError) throw checkError;
       
       if (existingSchedule) {
-        // Update existing schedule
         const { error: updateError } = await supabase
           .from('live_schedules')
           .update({
@@ -169,7 +160,6 @@ const AmbassadorDashboard = () => {
         
         if (updateError) throw updateError;
       } else {
-        // Create new schedule
         const { error: insertError } = await supabase
           .from('live_schedules')
           .insert({
@@ -188,7 +178,7 @@ const AmbassadorDashboard = () => {
       });
       
       setIsScheduleDialogOpen(false);
-      fetchCreators(); // Refresh data
+      fetchCreators();
     } catch (error) {
       console.error('Error updating schedule:', error);
       toast({
@@ -203,14 +193,13 @@ const AmbassadorDashboard = () => {
     if (!selectedCreator) return;
     
     try {
-      // In a real app, this would update the creator's status or move them to a different table
       toast({
         title: "Créateur retiré",
         description: `${selectedCreator.username} a été retiré de l'agence avec succès`,
       });
       
       setIsRemoveDialogOpen(false);
-      fetchCreators(); // Refresh data
+      fetchCreators();
     } catch (error) {
       console.error('Error removing creator:', error);
       toast({
@@ -222,7 +211,6 @@ const AmbassadorDashboard = () => {
   };
   
   const handleAddRecruit = () => {
-    // In a real app, this would add the recruit to the database
     const newId = (recruits.length + 1).toString();
     const newRecruitEntry: Recruit = {
       id: newId,
@@ -277,6 +265,7 @@ const AmbassadorDashboard = () => {
       <UltraSidebar 
         username={username}
         role={role}
+        userId={localStorage.getItem('userId') || '0'}
         onLogout={() => navigate('/')}
         currentPage="ambassador"
       />
@@ -553,7 +542,6 @@ const AmbassadorDashboard = () => {
         </div>
       </div>
       
-      {/* Schedule Dialog */}
       <Dialog open={isScheduleDialogOpen} onOpenChange={setIsScheduleDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -608,7 +596,6 @@ const AmbassadorDashboard = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Remove Creator Dialog */}
       <Dialog open={isRemoveDialogOpen} onOpenChange={setIsRemoveDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -643,7 +630,6 @@ const AmbassadorDashboard = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Add Recruit Dialog */}
       <Dialog open={isAddRecruitDialogOpen} onOpenChange={setIsAddRecruitDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

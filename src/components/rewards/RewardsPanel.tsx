@@ -61,9 +61,9 @@ export function RewardsPanel({ role, userId }: RewardsPanelProps) {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="bg-slate-800 border-purple-900/30">
         <CardHeader>
-          <div className="text-xl font-bold">Chargement des récompenses...</div>
+          <div className="text-xl font-bold text-white">Chargement des récompenses...</div>
         </CardHeader>
       </Card>
     );
@@ -77,7 +77,7 @@ export function RewardsPanel({ role, userId }: RewardsPanelProps) {
   const canViewRewards = ['founder', 'manager'].includes(role);
 
   return (
-    <Card className="bg-white dark:bg-slate-800 shadow-md border-purple-100 dark:border-purple-900/30">
+    <Card className="bg-slate-800 shadow-md border-purple-900/30">
       <CardHeader>
         <RewardsPanelHeader 
           role={role}

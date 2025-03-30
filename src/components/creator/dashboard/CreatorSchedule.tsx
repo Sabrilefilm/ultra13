@@ -25,6 +25,14 @@ export const CreatorSchedule = ({
     return Number(value.toFixed(1)).toString();
   };
 
+  const timeUpdate = () => {
+    // Get current time
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
   return (
     <div className="p-4 bg-purple-900/20 border border-purple-700/30 rounded-lg">
       <div className="flex items-center justify-between mb-3">
@@ -52,9 +60,18 @@ export const CreatorSchedule = ({
         </div>
       </div>
       
-      <div className="flex justify-between items-center mb-1">
-        <span className="text-xs text-purple-300">Total hebdomadaire:</span>
-        <span className="text-lg font-semibold text-purple-300">{formatNumber(weeklyHours)}h</span>
+      {/* Adding update indicators */}
+      <div className="flex flex-col gap-2 mb-3">
+        <div className="bg-purple-800/10 border border-purple-700/20 rounded-md p-2">
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-purple-300">Dernière mise à jour:</span>
+            <span className="text-xs font-semibold text-purple-300">{timeUpdate()}</span>
+          </div>
+          <div className="flex justify-between items-center mt-1">
+            <span className="text-xs text-purple-300">Prochaine mise à jour:</span>
+            <span className="text-xs font-semibold text-purple-300">24h</span>
+          </div>
+        </div>
       </div>
       
       <div className="flex justify-between items-center mb-1">

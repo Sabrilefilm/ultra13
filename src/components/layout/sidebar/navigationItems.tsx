@@ -15,7 +15,8 @@ import {
   FileSpreadsheet,
   BarChart2,
   UserPlus,
-  Key
+  Key,
+  Diamond
 } from "lucide-react";
 import { SidebarItem } from "./types";
 
@@ -37,6 +38,14 @@ export const navigationItems: SidebarItem[] = [
     animated: true
   },
   {
+    icon: UserPlus,
+    label: "Espace Ambassadeur",
+    action: "navigateTo",
+    data: "ambassador",
+    roles: ["founder", "ambassadeur"],
+    animated: true
+  },
+  {
     icon: Users,
     label: "Utilisateurs",
     action: "navigateTo",
@@ -48,7 +57,7 @@ export const navigationItems: SidebarItem[] = [
     label: "Matchs",
     action: "navigateTo",
     data: "matches",
-    roles: ["founder", "manager"] // Only managers and founders can see matches
+    roles: ["founder", "manager", "agent", "creator"] 
   }, 
   {
     icon: Briefcase,
@@ -59,7 +68,7 @@ export const navigationItems: SidebarItem[] = [
   }, 
   {
     icon: Award,
-    label: "Récompenses",
+    label: "Programme de Récompenses",
     action: "navigateTo",
     data: role => role === "creator" ? "creator-rewards" : "rewards-management",
     roles: ["founder", "manager", "creator", "agent", "ambassadeur"]
@@ -69,7 +78,7 @@ export const navigationItems: SidebarItem[] = [
     label: "Mes Créateurs",
     action: "navigateTo",
     data: "creator-stats",
-    roles: ["founder", "manager", "agent"] // Added manager and agent roles
+    roles: ["founder", "manager", "agent"] 
   },
   {
     icon: MessageSquare,
@@ -106,14 +115,6 @@ export const navigationItems: SidebarItem[] = [
     action: "navigateTo",
     data: "creator-import",
     roles: ["founder"]
-  },
-  {
-    icon: UserPlus,
-    label: "Espace Ambassadeur",
-    action: "navigateTo",
-    data: "ambassador",
-    roles: ["founder", "ambassadeur"],
-    animated: true
   },
   {
     icon: Users,
