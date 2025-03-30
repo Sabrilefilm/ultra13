@@ -2,39 +2,85 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
-export const useAgentStats = (role: string | null) => {
-  const [creatorCount, setCreatorCount] = useState<number>(0);
-  const [diamondCount, setDiamondCount] = useState<number>(0);
-  const [totalEvents, setTotalEvents] = useState<number>(0);
-  
+export const useAgentStats = (role: string) => {
+  const [creatorCount, setCreatorCount] = useState(0);
+  const [diamondCount, setDiamondCount] = useState(0);
+  const [totalEvents, setTotalEvents] = useState(0);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const fetchStats = async () => {
+      setLoading(true);
       try {
-        // Fetch creator count depending on role
-        const creatorCountQuery = await supabase
-          .from('user_accounts')
-          .select('id')
-          .eq('role', 'creator');
+        const userId = localStorage.getItem('userId');
         
-        if (creatorCountQuery.data) {
-          setCreatorCount(creatorCountQuery.data.length);
+        if (!userId) {
+          console.error("No user ID found");
+          return;
         }
         
-        // Fetch diamond count (simulated data for now)
-        // In a real app, this would fetch from profiles table
-        setDiamondCount(Math.floor(Math.random() * 100) * 10);
+        // Fetch creator count
+        let query = supabase.from('user_accounts');
         
-        // Fetch sponsorship events (simulated data for now)
-        // In a real app, this would fetch from sponsorships table  
-        setTotalEvents(Math.floor(Math.random() * 10) + 1);
+        if (role === 'agent') {
+          query = query.eq('agent_id', userId);
+        }
+        
+        query = query.eq('role', 'creator');
+        
+        const { data: creators, error: creatorsError } = await query;
+        
+        if (creatorsError) {
+          throw creatorsError;
+        }
+        
+        setCreatorCount(creators?.length || 0);
+        
+        // Fetch total diamonds
+        const creatorIds = creators?.map(creator => creator.id) || [];
+        
+        if (creatorIds.length > 0) {
+          const { data: profiles, error: profilesError } = await supabase
+            .from('profiles')
+            .select('total_diamonds')
+            .in('id', creatorIds);
+            
+          if (profilesError) {
+            throw profilesError;
+          }
+          
+          const totalDiamonds = profiles?.reduce((sum, profile) => sum + (profile.total_diamonds || 0), 0) || 0;
+          setDiamondCount(totalDiamonds);
+        }
+        
+        // Fetch sponsorship events
+        const { data: sponsorships, error: sponsorshipsError } = await supabase
+          .from('sponsorships')
+          .select('*')
+          .eq('agent_name', username);
+          
+        if (sponsorshipsError) {
+          throw sponsorshipsError;
+        }
+        
+        setTotalEvents(sponsorships?.length || 0);
         
       } catch (error) {
         console.error('Error fetching agent stats:', error);
+      } finally {
+        setLoading(false);
       }
     };
-    
-    fetchStats();
+
+    if (role) {
+      fetchStats();
+    }
   }, [role]);
-  
-  return { creatorCount, diamondCount, totalEvents };
+
+  return {
+    creatorCount,
+    diamondCount,
+    totalEvents,
+    loading
+  };
 };

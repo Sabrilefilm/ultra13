@@ -75,14 +75,15 @@ const CreatorStats = () => {
         currentPage="creator-stats"
       >
         <div className="p-6 max-w-7xl mx-auto">
-          <StatsHeader />
+          <StatsHeader 
+            totalCreators={totalCreators}
+            totalActiveCreators={totalActiveCreators}
+            onViewTypeChange={handleViewTypeChange}
+            viewType={viewType}
+          />
 
           <div className="my-6">
-            <StatsSummaryCards 
-              totalHours={0} 
-              totalDays={0} 
-              totalDiamonds={0} 
-            />
+            <StatsSummaryCards creators={creators} />
           </div>
 
           <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
@@ -91,18 +92,22 @@ const CreatorStats = () => {
               onChange={handleSearch} 
             />
             <ResetActionsCard
-              onReset={fetchCreators}
-              role={role}
+              onResetSchedules={resetAllSchedules}
+              onResetDiamonds={resetAllDiamonds}
             />
           </div>
 
           <CreatorsTable
             creators={creators}
-            isMobile={false}
-            rewardThreshold={1000}
+            isLoading={isLoading}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            onRemoveCreator={handleRemoveCreator}
             onEditSchedule={handleEditSchedule}
             onEditDiamonds={handleEditDiamonds}
-            onRemoveCreator={handleRemoveCreator}
+            onRefreshData={fetchCreators}
+            role={role}
           />
 
           {showToast && (

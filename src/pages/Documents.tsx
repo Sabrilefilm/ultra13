@@ -9,12 +9,13 @@ import { AdminDocumentsView } from "@/components/documents/AdminDocumentsView";
 import { UserDocumentView } from "@/components/documents/UserDocumentView";
 import { DocumentUploadDialog } from "@/components/documents/upload/DocumentUploadDialog";
 import { useDocuments } from "@/hooks/documents/use-documents";
+import { IdentityDocument } from "@/types/documents";
 
 const Documents = () => {
   const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState("verified");
-  const [documentType, setDocumentType] = useState("id");
+  const [documentType, setDocumentType] = useState<"identity" | "other">("identity");
   
   const { 
     userDocuments, 
@@ -39,7 +40,7 @@ const Documents = () => {
     setIsUploadDialogOpen(true);
   };
 
-  const handleDocumentTypeChange = (type: string) => {
+  const handleDocumentTypeChange = (type: "identity" | "other") => {
     setDocumentType(type);
   };
 
@@ -58,6 +59,11 @@ const Documents = () => {
     await rejectDocument(documentId);
     toast.error("Document rejected");
     fetchDocuments();
+  };
+
+  // Type guard for IdentityDocument array
+  const filterDocuments = (docs: any[], status: string): IdentityDocument[] => {
+    return (docs.filter(doc => doc.status === status) || []) as IdentityDocument[];
   };
 
   return (
@@ -82,7 +88,7 @@ const Documents = () => {
               
               <TabsContent value="verified" className="space-y-4">
                 <AdminDocumentsView 
-                  documents={allDocuments.filter(doc => doc.status === 'verified')}
+                  documents={filterDocuments(allDocuments, 'verified')}
                   selectedTab={selectedTab}
                   setSelectedTab={setSelectedTab}
                   onVerifyDocument={handleVerifyDocument}
@@ -91,7 +97,7 @@ const Documents = () => {
               
               <TabsContent value="pending" className="space-y-4">
                 <AdminDocumentsView 
-                  documents={allDocuments.filter(doc => doc.status === 'pending')}
+                  documents={filterDocuments(allDocuments, 'pending')}
                   selectedTab={selectedTab}
                   setSelectedTab={setSelectedTab}
                   onVerifyDocument={handleVerifyDocument}
@@ -100,7 +106,7 @@ const Documents = () => {
               
               <TabsContent value="rejected" className="space-y-4">
                 <AdminDocumentsView 
-                  documents={allDocuments.filter(doc => doc.status === 'rejected')}
+                  documents={filterDocuments(allDocuments, 'rejected')}
                   selectedTab={selectedTab}
                   setSelectedTab={setSelectedTab}
                   onVerifyDocument={handleVerifyDocument}
@@ -109,7 +115,7 @@ const Documents = () => {
             </Tabs>
           ) : (
             <UserDocumentView 
-              userDocument={userDocuments}
+              userDocument={userDocuments[0] || null}
               onShowUploadDialog={handleShowUploadDialog}
               onChangeDocumentType={handleDocumentTypeChange}
               documentType={documentType}

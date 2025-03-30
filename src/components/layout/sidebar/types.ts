@@ -14,13 +14,14 @@ export interface NavigationItem {
 export interface UltraSidebarProps {
   username: string;
   role: string;
-  userId?: string;
+  userId: string;
   onLogout: () => void;
   onAction?: (action: string, data?: any) => void;
   currentPage?: string;
   isMobileOpen?: boolean;
   setMobileMenuOpen?: (isOpen: boolean) => void;
   version?: string;
+  children?: React.ReactNode;
 }
 
 // Add missing interfaces for the sidebar components

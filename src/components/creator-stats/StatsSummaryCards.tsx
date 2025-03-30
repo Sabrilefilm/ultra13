@@ -21,7 +21,7 @@ export const StatsSummaryCards: React.FC<StatsSummaryCardsProps> = ({
   }, 0);
   
   const totalDiamonds = creators.reduce((sum, creator) => {
-    return sum + (creator.diamonds || 0);
+    return sum + (creator.profiles?.[0]?.total_diamonds || creator.diamonds || 0);
   }, 0);
 
   // Format number to one decimal place, remove trailing zeros

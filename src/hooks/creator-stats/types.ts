@@ -6,6 +6,7 @@ export interface Creator {
   username: string;
   live_schedules?: Array<{ hours: number; days: number }>;
   profiles?: Array<{ total_diamonds: number }>;
+  diamonds?: number; // Add this field for backward compatibility
 }
 
 export interface UseCreatorStatsReturn {
