@@ -1,10 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+import { UserCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
   id: string;
@@ -19,6 +21,7 @@ export const AgentAssignment = () => {
   const [selectedAgent, setSelectedAgent] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUsers();
@@ -107,9 +110,26 @@ export const AgentAssignment = () => {
     }
   };
 
+  const handleNavigateToFullManagement = () => {
+    navigate('/agency-assignment');
+  };
+
   return (
     <Card className="bg-white/10 backdrop-blur-sm border-purple-200/20 dark:bg-slate-900/50 dark:border-purple-900/30">
-      <CardContent className="pt-6">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="text-xl font-semibold text-white flex items-center gap-2">
+          <UserCheck className="h-5 w-5 text-purple-400" />
+          Attribution d'Agents aux Managers
+        </CardTitle>
+        <Button 
+          onClick={handleNavigateToFullManagement} 
+          variant="outline" 
+          className="border-white/10 hover:bg-white/10"
+        >
+          Gestion agence/créateurs complète
+        </Button>
+      </CardHeader>
+      <CardContent className="pt-0">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">

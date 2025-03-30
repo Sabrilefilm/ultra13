@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -154,12 +153,7 @@ export const FounderDashboard: React.FC<FounderDashboardProps> = ({
         ))}
       </div>
       
-      {/* Nouvelle section pour l'assignation d'agents aux managers */}
       <div className="mt-8">
-        <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-          <UserCheck className="h-5 w-5 text-purple-400" />
-          Attribution d'Agents aux Managers
-        </h2>
         <AgentAssignment />
       </div>
     </div>

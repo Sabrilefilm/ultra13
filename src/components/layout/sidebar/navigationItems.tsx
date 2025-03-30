@@ -34,7 +34,7 @@ export const navigationItems: SidebarItem[] = [
     label: "Espace Manager",
     action: "navigateTo",
     data: "manager-dashboard",
-    roles: ["founder", "manager"],
+    roles: ["founder", "manager"], // Only manager and founder can access
     animated: true
   },
   {
@@ -49,7 +49,7 @@ export const navigationItems: SidebarItem[] = [
     label: "Matchs",
     action: "navigateTo",
     data: "matches",
-    roles: ["founder", "manager"]
+    roles: ["founder", "manager"] // Only managers and founders can see matches
   }, 
   {
     icon: Briefcase,
@@ -70,7 +70,7 @@ export const navigationItems: SidebarItem[] = [
     label: "Diamants",
     action: "navigateTo",
     data: "creator-diamonds",
-    roles: ["founder"] // Modification: uniquement pour les fondateurs
+    roles: ["founder"] // Only for founders
   },
   {
     icon: MessageSquare,
@@ -99,7 +99,7 @@ export const navigationItems: SidebarItem[] = [
     label: "Mes Créateurs",
     action: "navigateTo",
     data: "creator-stats",
-    roles: ["founder"] // Modification: uniquement pour les fondateurs
+    roles: ["founder"] // Only for founders
   },
   {
     icon: BookOpen,
