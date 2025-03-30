@@ -1,12 +1,10 @@
 
-import React, { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { UserCheck, UserPlus, Users } from "lucide-react";
-import { supabase } from "@/lib/supabase";
-import { toast } from "sonner";
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
 
 interface User {
   id: string;
@@ -17,136 +15,156 @@ interface User {
 export const AgentAssignment = () => {
   const [managers, setManagers] = useState<User[]>([]);
   const [agents, setAgents] = useState<User[]>([]);
-  const [selectedManager, setSelectedManager] = useState<string>("");
-  const [selectedAgent, setSelectedAgent] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [selectedManager, setSelectedManager] = useState<string>('');
+  const [selectedAgent, setSelectedAgent] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        // Fetch managers
-        const { data: managersData, error: managersError } = await supabase
-          .from("user_accounts")
-          .select("id, username")
-          .eq("role", "manager");
-
-        if (managersError) throw managersError;
-        
-        // Fetch agents
-        const { data: agentsData, error: agentsError } = await supabase
-          .from("user_accounts")
-          .select("id, username")
-          .eq("role", "agent");
-
-        if (agentsError) throw agentsError;
-
-        setManagers(managersData || []);
-        setAgents(agentsData || []);
-      } catch (error) {
-        console.error("Erreur lors de la récupération des utilisateurs:", error);
-      }
-    };
-
     fetchUsers();
   }, []);
 
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Fetch managers
+      const { data: managersData, error: managersError } = await supabase
+        .from('users')
+        .select('id, username, role')
+        .eq('role', 'manager');
+        
+      if (managersError) throw managersError;
+      
+      // Fetch agents
+      const { data: agentsData, error: agentsError } = await supabase
+        .from('users')
+        .select('id, username, role')
+        .eq('role', 'agent');
+        
+      if (agentsError) throw agentsError;
+      
+      setManagers(managersData || []);
+      setAgents(agentsData || []);
+      
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de récupérer les utilisateurs',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleAssignAgent = async () => {
     if (!selectedManager || !selectedAgent) {
-      toast.error("Veuillez sélectionner un manager et un agent");
+      toast({
+        title: 'Information requise',
+        description: 'Veuillez sélectionner un manager et un agent',
+        variant: 'default',
+      });
       return;
     }
 
-    setIsLoading(true);
     try {
-      // Mettre à jour l'agent_id du manager sélectionné
+      setIsLoading(true);
+      
+      // Here you would update your database to assign the agent to the manager
+      // This is a placeholder for the actual implementation
       const { error } = await supabase
-        .from("user_accounts")
-        .update({ agent_id: selectedAgent })
-        .eq("id", selectedManager);
-
+        .from('manager_agents')
+        .upsert([
+          {
+            manager_id: selectedManager,
+            agent_id: selectedAgent,
+          }
+        ]);
+        
       if (error) throw error;
-
-      toast.success("Agent assigné avec succès au manager");
-      setSelectedManager("");
-      setSelectedAgent("");
+      
+      toast({
+        title: 'Succès',
+        description: 'Agent assigné avec succès',
+        variant: 'default',
+      });
+      
+      // Reset selections
+      setSelectedManager('');
+      setSelectedAgent('');
+      
     } catch (error) {
-      console.error("Erreur lors de l'assignation de l'agent:", error);
-      toast.error("Erreur lors de l'assignation de l'agent");
+      console.error('Error assigning agent:', error);
+      toast({
+        title: 'Erreur',
+        description: 'Impossible d\'assigner l\'agent',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Card className="bg-[#1e1f2e]/90 backdrop-blur-sm border border-gray-800/50 rounded-xl shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-white flex items-center gap-2">
-          <UserCheck className="h-5 w-5 text-purple-400" />
-          Assigner un Agent à un Manager
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="manager" className="text-gray-300">Sélectionner un Manager</Label>
-          <Select value={selectedManager} onValueChange={setSelectedManager}>
-            <SelectTrigger id="manager" className="bg-[#2a2b3d] border-gray-700 text-white">
-              <SelectValue placeholder="Sélectionner un manager" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#2a2b3d] border-gray-700">
-              {managers.length > 0 ? (
-                managers.map(manager => (
-                  <SelectItem key={manager.id} value={manager.id} className="text-white">
+    <Card className="bg-white/10 backdrop-blur-sm border-purple-200/20 dark:bg-slate-900/50 dark:border-purple-900/30">
+      <CardContent className="pt-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Sélectionner un Manager
+            </label>
+            <Select 
+              value={selectedManager} 
+              onValueChange={setSelectedManager}
+              disabled={isLoading}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choisir un manager" />
+              </SelectTrigger>
+              <SelectContent>
+                {managers.map((manager) => (
+                  <SelectItem key={manager.id} value={manager.id}>
                     {manager.username}
                   </SelectItem>
-                ))
-              ) : (
-                <SelectItem value="none" disabled className="text-gray-400">
-                  Aucun manager disponible
-                </SelectItem>
-              )}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="agent" className="text-gray-300">Sélectionner un Agent</Label>
-          <Select value={selectedAgent} onValueChange={setSelectedAgent}>
-            <SelectTrigger id="agent" className="bg-[#2a2b3d] border-gray-700 text-white">
-              <SelectValue placeholder="Sélectionner un agent" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#2a2b3d] border-gray-700">
-              {agents.length > 0 ? (
-                agents.map(agent => (
-                  <SelectItem key={agent.id} value={agent.id} className="text-white">
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Sélectionner un Agent
+            </label>
+            <Select 
+              value={selectedAgent} 
+              onValueChange={setSelectedAgent}
+              disabled={isLoading}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choisir un agent" />
+              </SelectTrigger>
+              <SelectContent>
+                {agents.map((agent) => (
+                  <SelectItem key={agent.id} value={agent.id}>
                     {agent.username}
                   </SelectItem>
-                ))
-              ) : (
-                <SelectItem value="none" disabled className="text-gray-400">
-                  Aucun agent disponible
-                </SelectItem>
-              )}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <Button 
-          className="w-full bg-purple-600 hover:bg-purple-700 mt-4"
-          onClick={handleAssignAgent}
-          disabled={isLoading || !selectedManager || !selectedAgent}
-        >
-          {isLoading ? (
-            <span className="flex items-center">
-              <span className="animate-spin mr-2 h-4 w-4 border-2 border-white border-opacity-50 border-t-transparent rounded-full"></span>
-              Assignation...
-            </span>
-          ) : (
-            <span className="flex items-center">
-              <UserPlus className="mr-2 h-4 w-4" />
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="flex items-end">
+            <Button 
+              onClick={handleAssignAgent} 
+              disabled={isLoading || !selectedManager || !selectedAgent}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+            >
               Assigner l'agent au manager
-            </span>
-          )}
-        </Button>
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
