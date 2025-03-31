@@ -70,6 +70,7 @@ export const UltraDashboard: React.FC<UltraDashboardProps> = ({
               isMobileOpen={sidebarStates.mobileMenuOpen}
               setMobileMenuOpen={sidebarStates.setMobileMenuOpen}
               version={version}
+              onAction={onAction}
             />
           </div>
         </div>
@@ -80,8 +81,9 @@ export const UltraDashboard: React.FC<UltraDashboardProps> = ({
           currentPage={currentPage}
           onAction={onAction}
           onLogout={onLogout}
-          children={children}
-        />
+        >
+          {children}
+        </DashboardContent>
       </div>
       
       <DashboardModals

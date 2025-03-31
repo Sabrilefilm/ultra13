@@ -23,6 +23,7 @@ import AgencyAssignment from "./pages/AgencyAssignment";
 import { RouteGuard } from "@/components/RouteGuard";
 import { DashboardView } from "@/components/dashboard/DashboardView";
 import Matches from "./pages/Matches";
+import ExternalMatches from "./pages/ExternalMatches";
 
 function App() {
   return (
@@ -170,10 +171,14 @@ function App() {
         <Route
           path="/matches"
           element={
-            <RouteGuard allowedRoles={["founder", "manager"]}>
+            <RouteGuard allowedRoles={["founder", "manager", "agent", "creator"]}>
               <Matches />
             </RouteGuard>
           }
+        />
+        <Route
+          path="/external-matches"
+          element={<ExternalMatches />}
         />
         <Route
           path="/agency-assignment"

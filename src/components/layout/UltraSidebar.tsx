@@ -55,7 +55,7 @@ interface UltraSidebarProps {
   isMobileOpen?: boolean;
   setMobileMenuOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   version?: string;
-  children?: React.ReactNode; // Added children prop
+  children?: React.ReactNode;
 }
 
 export const UltraSidebar: React.FC<UltraSidebarProps> = ({ 
@@ -77,6 +77,15 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
   };
   
   const handleMobileClose = () => {
+    if (setMobileMenuOpen) {
+      setMobileMenuOpen(false);
+    }
+  };
+  
+  const handleSidebarItemClick = (action: string, data?: any) => {
+    if (onAction) {
+      onAction(action, data);
+    }
     if (setMobileMenuOpen) {
       setMobileMenuOpen(false);
     }
@@ -112,7 +121,7 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
             items={navigationItems}
             currentPage={currentPage}
             role={role}
-            onClick={() => setMobileMenuOpen && setMobileMenuOpen(false)}
+            onClick={handleSidebarItemClick}
             collapsed={collapsed}
           />
         </div>

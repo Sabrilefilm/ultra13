@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { Match } from "@/types/matches";
 
 export const useFetchMatches = (creatorId: string) => {
   const { data: matches, isLoading, error } = useQuery({
@@ -22,7 +23,7 @@ export const useFetchMatches = (creatorId: string) => {
   });
 
   return {
-    matches: matches || [],
+    matches: matches as Match[] || [],
     isLoading,
     error
   };

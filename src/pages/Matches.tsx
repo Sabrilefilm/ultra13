@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
 import { useIndexAuth } from "@/hooks/use-index-auth";
@@ -8,7 +8,13 @@ import { useAccountManagement } from "@/hooks/use-account-management";
 import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trophy } from "lucide-react";
+import { Trophy, CalendarDays, Users, Clock } from "lucide-react";
+import { useUpcomingMatches } from "@/hooks/use-upcoming-matches";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Button } from "@/components/ui/button";
+import { MatchCard } from "@/components/dashboard/MatchCard";
+import { downloadImage } from "@/utils/download";
 
 const Matches = () => {
   const { toast } = useToast();
@@ -30,16 +36,27 @@ const Matches = () => {
     onWarning: () => {}
   });
 
+  const [activeTab, setActiveTab] = useState('upcoming');
+  const { matches, isLoading, handleDelete, setWinner, clearWinner, updateMatchDetails } = useUpcomingMatches(role || '', userId || '');
+
   if (!isAuthenticated) {
     window.location.href = '/';
     return null;
   }
 
   // Restrict access to authorized roles
-  if (!['founder', 'manager'].includes(role || '')) {
+  if (!['founder', 'manager', 'agent', 'creator'].includes(role || '')) {
     window.location.href = '/dashboard';
     return null;
   }
+
+  const currentDate = new Date();
+  const upcomingMatches = matches?.filter(match => new Date(match.match_date) >= currentDate) || [];
+  const pastMatches = matches?.filter(match => new Date(match.match_date) < currentDate) || [];
+
+  const formatMatchDate = (dateString: string) => {
+    return format(new Date(dateString), "dd MMMM yyyy 'à' HH:mm", { locale: fr });
+  };
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -55,38 +72,96 @@ const Matches = () => {
         dismissWarning={dismissWarning}
         formattedTime={formattedTime}
         currentPage="matches"
-      />
-      
-      <div className="flex justify-center w-full p-6 md:ml-64">
-        <div className="w-full max-w-6xl space-y-6">
-          <Card className="bg-slate-900/90 shadow-lg border-purple-900/30">
-            <CardHeader className="bg-gradient-to-r from-purple-950/50 to-slate-900/50">
-              <CardTitle className="text-2xl font-bold text-white flex items-center gap-2">
-                <Trophy className="h-6 w-6 text-purple-500" />
-                Gestion des Matchs
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 text-white">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="bg-slate-800/90 backdrop-blur-sm border border-purple-700/20 rounded-xl p-6 shadow-lg relative overflow-hidden">
-                  <h3 className="text-xl font-medium mb-4 text-white">Matchs à venir</h3>
-                  <p className="text-gray-300">Aucun match à venir pour le moment.</p>
+      >
+        <div className="flex justify-center w-full p-6 md:ml-0">
+          <div className="w-full max-w-6xl space-y-6">
+            <Card className="bg-slate-900/90 shadow-lg border-purple-900/30">
+              <CardHeader className="bg-gradient-to-r from-purple-950/50 to-slate-900/50">
+                <CardTitle className="text-2xl font-bold text-white flex items-center gap-2">
+                  <Trophy className="h-6 w-6 text-purple-500" />
+                  Gestion des Matchs
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 text-white">
+                <div className="flex border-b border-slate-700 mb-6">
+                  <Button
+                    variant={activeTab === 'upcoming' ? 'default' : 'ghost'}
+                    className={`relative rounded-none ${activeTab === 'upcoming' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white' : 'text-gray-400 hover:text-white'}`}
+                    onClick={() => setActiveTab('upcoming')}
+                  >
+                    <CalendarDays className="mr-2 h-4 w-4" />
+                    Matchs à venir ({upcomingMatches.length})
+                  </Button>
+                  <Button
+                    variant={activeTab === 'past' ? 'default' : 'ghost'}
+                    className={`relative rounded-none ${activeTab === 'past' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white' : 'text-gray-400 hover:text-white'}`}
+                    onClick={() => setActiveTab('past')}
+                  >
+                    <Clock className="mr-2 h-4 w-4" />
+                    Matchs passés ({pastMatches.length})
+                  </Button>
                 </div>
                 
-                <div className="bg-slate-800/90 backdrop-blur-sm border border-purple-700/20 rounded-xl p-6 shadow-lg relative overflow-hidden">
-                  <h3 className="text-xl font-medium mb-4 text-white">Matchs passés</h3>
-                  <p className="text-gray-300">Aucun match passé pour le moment.</p>
-                </div>
-                
-                <div className="bg-slate-800/90 backdrop-blur-sm border border-purple-700/20 rounded-xl p-6 shadow-lg relative overflow-hidden">
-                  <h3 className="text-xl font-medium mb-4 text-white">Statistiques</h3>
-                  <p className="text-gray-300">Aucune statistique disponible.</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                {isLoading ? (
+                  <div className="flex justify-center p-8">
+                    <div className="animate-spin h-8 w-8 border-4 border-purple-500 rounded-full border-t-transparent"></div>
+                  </div>
+                ) : activeTab === 'upcoming' ? (
+                  <div className="space-y-4">
+                    {upcomingMatches.length > 0 ? (
+                      upcomingMatches.map(match => (
+                        <MatchCard 
+                          key={match.id} 
+                          match={match}
+                          canManageMatch={['founder', 'manager', 'agent'].includes(role || '')}
+                          canDeleteMatch={['founder', 'manager'].includes(role || '')}
+                          role={role || ''}
+                          onSetWinner={setWinner}
+                          onClearWinner={clearWinner}
+                          onDelete={handleDelete}
+                          onDownload={downloadImage}
+                          onUpdateMatch={updateMatchDetails}
+                        />
+                      ))
+                    ) : (
+                      <div className="bg-slate-800/90 backdrop-blur-sm border border-purple-700/20 rounded-xl p-6 text-center">
+                        <Users className="h-12 w-12 mx-auto mb-3 text-purple-500 opacity-70" />
+                        <h3 className="text-xl font-medium mb-2 text-white">Aucun match à venir</h3>
+                        <p className="text-gray-400">Aucun match n'est prévu pour le moment.</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {pastMatches.length > 0 ? (
+                      pastMatches.map(match => (
+                        <MatchCard 
+                          key={match.id} 
+                          match={match}
+                          canManageMatch={['founder', 'manager', 'agent'].includes(role || '')}
+                          canDeleteMatch={['founder', 'manager'].includes(role || '')}
+                          role={role || ''}
+                          onSetWinner={setWinner}
+                          onClearWinner={clearWinner}
+                          onDelete={handleDelete}
+                          onDownload={downloadImage}
+                          onUpdateMatch={updateMatchDetails}
+                        />
+                      ))
+                    ) : (
+                      <div className="bg-slate-800/90 backdrop-blur-sm border border-purple-700/20 rounded-xl p-6 text-center">
+                        <Clock className="h-12 w-12 mx-auto mb-3 text-purple-500 opacity-70" />
+                        <h3 className="text-xl font-medium mb-2 text-white">Aucun match passé</h3>
+                        <p className="text-gray-400">L'historique des matchs apparaîtra ici.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      </UltraDashboard>
     </SidebarProvider>
   );
 };
