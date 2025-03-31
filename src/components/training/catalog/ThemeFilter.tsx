@@ -12,7 +12,7 @@ export const ThemeFilter: React.FC<ThemeFilterProps> = ({
   return (
     <div className="mb-4">
       <h3 className="text-sm font-medium mb-2">Filtrer par thème:</h3>
-      <ScrollArea className="w-full whitespace-nowrap pb-2" orientation="horizontal">
+      <ScrollArea className="w-full whitespace-nowrap pb-2">
         <div className="flex gap-2">
           {themes.map(theme => (
             <Button

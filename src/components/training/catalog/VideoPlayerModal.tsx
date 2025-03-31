@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { VideoPlayerModalProps } from "./types";
 import { YoutubePlayer } from "@/components/ui/youtube-player";
-import { CalendarClock, ExternalLink } from "lucide-react";
+import { CalendarClock, ExternalLink, Play } from "lucide-react";
 
 export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
   isOpen,
@@ -22,9 +22,10 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950 border-blue-200 dark:border-blue-900/50">
         <DialogHeader>
-          <DialogTitle className="text-xl flex items-center gap-2">
+          <DialogTitle className="text-xl flex items-center gap-2 text-blue-700 dark:text-blue-400">
+            <Play className="h-5 w-5 text-blue-600 dark:text-blue-500" />
             {course.title}
             {course.duration && (
               <span className="flex items-center text-sm font-normal text-muted-foreground ml-2">
@@ -38,12 +39,14 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
         </DialogHeader>
         
         <div className="py-4">
-          <YoutubePlayer 
-            videoUrl={course.url}
-            title={course.title}
-            description={course.description}
-            autoplay={true}
-          />
+          <div className="rounded-lg overflow-hidden shadow-lg border border-blue-100 dark:border-blue-900/20">
+            <YoutubePlayer 
+              videoUrl={course.url}
+              title={course.title}
+              description={course.description}
+              autoplay={true}
+            />
+          </div>
         </div>
         
         <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
@@ -57,7 +60,7 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
           <Button 
             variant="outline" 
             onClick={() => window.open(course.url, '_blank')}
-            className="sm:ml-auto"
+            className="sm:ml-auto border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/30"
           >
             <ExternalLink className="h-4 w-4 mr-2" />
             Voir sur la plateforme d'origine
