@@ -24,14 +24,16 @@ export const DocumentSideForm = ({
       <label className="block text-sm font-medium mb-2">{label}</label>
       {preview ? (
         <DocumentPreview 
-          previewUrl={preview} 
-          onClear={onClearFile} 
+          url={preview} 
+          onRemove={onClearFile} 
           alt={label} 
         />
       ) : (
         <FileDropzone 
           onFileSelect={onFileChange} 
-          error={error} 
+          accept="image/*" 
+          label={label}
+          error={error}
         />
       )}
     </div>

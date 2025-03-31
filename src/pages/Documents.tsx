@@ -18,29 +18,44 @@ const Documents = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [documentType, setDocumentType] = useState<'identity' | 'other'>('identity');
   const [activeTab, setActiveTab] = useState("all");
+  const [userDocument, setUserDocument] = useState<IdentityDocument | null>(null);
 
   useEffect(() => {
     // Fetch documents logic would go here
-    // For now, we'll use an empty array
-    setDocuments([]);
-    setLoading(false);
-  }, []);
+    fetchDocuments();
+  }, [documentType]);
+
+  const fetchDocuments = async () => {
+    // Mock implementation - would be replaced with actual API call
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setDocuments([]);
+      
+      // For user role, find a specific document to display
+      if (role === 'creator') {
+        setUserDocument(null); // No document found for this type
+      }
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleUploadSuccess = () => {
     setIsDialogOpen(false);
-    // Refresh documents
+    fetchDocuments();
   };
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
   };
 
-  const filteredDocuments = documents.filter(doc => {
-    if (activeTab === "all") return true;
-    if (activeTab === "verified") return doc.verified;
-    if (activeTab === "pending") return !doc.verified;
-    return true;
-  });
+  const handleChangeDocumentType = (type: 'identity' | 'other') => {
+    setDocumentType(type);
+  };
 
   if (!isAuthenticated) return null;
 
@@ -71,12 +86,15 @@ const Documents = () => {
             <>
               {role === 'creator' ? (
                 <UserDocumentView 
-                  documents={documents as IdentityDocument[]} 
-                  onUpload={() => setIsDialogOpen(true)} 
+                  userDocument={userDocument}
+                  onShowUploadDialog={() => setIsDialogOpen(true)}
+                  onChangeDocumentType={handleChangeDocumentType}
+                  documentType={documentType}
+                  fetchDocuments={fetchDocuments}
                 />
               ) : (
                 <AdminDocumentsView 
-                  documents={documents as IdentityDocument[]} 
+                  documents={documents}
                 />
               )}
             </>

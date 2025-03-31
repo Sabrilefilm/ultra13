@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { IdentityDocument } from '@/types/documents';
 
 interface UserDocumentViewProps {
   userDocument: {
@@ -18,6 +19,8 @@ interface UserDocumentViewProps {
   onChangeDocumentType: (type: 'identity' | 'other') => void;
   documentType: 'identity' | 'other';
   fetchDocuments: () => Promise<void>;
+  documents?: IdentityDocument[]; // Added for compatibility
+  onUpload?: () => void; // Added for compatibility
 }
 
 export const UserDocumentView = ({ 
@@ -25,8 +28,12 @@ export const UserDocumentView = ({
   onShowUploadDialog, 
   onChangeDocumentType,
   documentType,
-  fetchDocuments
-}: UserDocumentViewProps) => {
+  fetchDocuments,
+  documents,
+  onUpload
+}) => {
+  // Use the appropriate handler based on what's provided
+  const handleShowUploadDialog = onUpload || onShowUploadDialog;
 
   const handleTabChange = (value: string) => {
     onChangeDocumentType(value as 'identity' | 'other');
@@ -36,6 +43,11 @@ export const UserDocumentView = ({
   const getDocumentTitle = () => {
     return documentType === 'identity' ? "Carte d'identité" : "Autre document";
   };
+
+  // If documents is provided, find the relevant document based on documentType
+  const currentDocument = userDocument || (documents && documents.find(
+    doc => doc.document_type === documentType
+  )) || null;
 
   return (
     <Card>
@@ -55,19 +67,19 @@ export const UserDocumentView = ({
           <h2 className="text-xl font-semibold mb-2">{getDocumentTitle()}</h2>
         </div>
 
-        {userDocument ? (
+        {currentDocument ? (
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 pb-4">
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Document téléchargé le {new Date(userDocument.uploaded_at).toLocaleDateString('fr-FR')}
+                  Document téléchargé le {new Date(currentDocument.uploaded_at).toLocaleDateString('fr-FR')}
                 </p>
               </div>
               <Badge 
-                variant={userDocument.verified ? "secondary" : "outline"} 
-                className={userDocument.verified ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100"}
+                variant={currentDocument.verified ? "secondary" : "outline"} 
+                className={currentDocument.verified ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100"}
               >
-                {userDocument.verified ? 'Vérifié' : 'En attente de vérification'}
+                {currentDocument.verified ? 'Vérifié' : 'En attente de vérification'}
               </Badge>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -75,10 +87,10 @@ export const UserDocumentView = ({
                 <h3 className="font-medium mb-2">
                   {documentType === 'identity' ? 'Recto' : 'Première page'}
                 </h3>
-                {userDocument.document_front ? (
+                {currentDocument.document_front ? (
                   <div className="border border-gray-200 dark:border-gray-800 rounded-md overflow-hidden">
                     <img 
-                      src={userDocument.document_front} 
+                      src={currentDocument.document_front} 
                       alt={documentType === 'identity' ? 'Recto' : 'Première page'} 
                       className="w-full object-contain"
                     />
@@ -93,10 +105,10 @@ export const UserDocumentView = ({
                 <h3 className="font-medium mb-2">
                   {documentType === 'identity' ? 'Verso' : 'Deuxième page'}
                 </h3>
-                {userDocument.document_back ? (
+                {currentDocument.document_back ? (
                   <div className="border border-gray-200 dark:border-gray-800 rounded-md overflow-hidden">
                     <img 
-                      src={userDocument.document_back} 
+                      src={currentDocument.document_back} 
                       alt={documentType === 'identity' ? 'Verso' : 'Deuxième page'} 
                       className="w-full object-contain"
                     />
@@ -111,7 +123,7 @@ export const UserDocumentView = ({
             <div className="flex justify-center mt-4">
               <Button 
                 onClick={() => {
-                  onShowUploadDialog();
+                  handleShowUploadDialog();
                 }}
                 variant="outline"
               >
@@ -133,7 +145,7 @@ export const UserDocumentView = ({
             </p>
             <Button 
               onClick={() => {
-                onShowUploadDialog();
+                handleShowUploadDialog();
               }}
               className="bg-purple-600 hover:bg-purple-700 text-white"
             >

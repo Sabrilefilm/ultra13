@@ -1,36 +1,35 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, HomeIcon } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export const StatsHeader: React.FC = () => {
-  const navigate = useNavigate();
-  
+interface StatsHeaderProps {
+  totalCreators: number;
+  totalActiveCreators: number;
+  onViewTypeChange: (type: "all" | "week" | "month") => void;
+  viewType: "all" | "week" | "month";
+}
+
+export const StatsHeader: React.FC<StatsHeaderProps> = ({
+  totalCreators,
+  totalActiveCreators,
+  onViewTypeChange,
+  viewType
+}) => {
   return (
-    <div className="flex items-center justify-between mb-6">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate("/")}
-          className="h-10 w-10"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-2xl font-bold">
-          Mes Créateurs 👨‍💻
-        </h1>
+    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+      <div>
+        <h1 className="text-2xl font-bold">Statistiques des créateurs</h1>
+        <p className="text-gray-500 dark:text-gray-400">
+          {totalCreators} créateurs au total, {totalActiveCreators} actifs
+        </p>
       </div>
-      
-      <Button
-        variant="outline"
-        onClick={() => navigate("/")}
-        className="flex items-center gap-2"
-      >
-        <HomeIcon className="h-4 w-4" />
-        Retour au tableau de bord
-      </Button>
+      <Tabs value={viewType} onValueChange={onViewTypeChange as (value: string) => void}>
+        <TabsList>
+          <TabsTrigger value="all">Tous</TabsTrigger>
+          <TabsTrigger value="week">Cette semaine</TabsTrigger>
+          <TabsTrigger value="month">Ce mois</TabsTrigger>
+        </TabsList>
+      </Tabs>
     </div>
   );
 };
