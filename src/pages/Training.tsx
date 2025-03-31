@@ -88,30 +88,30 @@ const Training = () => {
       currentPage="training"
     >
       <motion.div 
-        className="p-6 space-y-6"
+        className="p-6 space-y-6 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-950"
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
       >
-        <motion.div variants={fadeInUp} className="max-w-5xl mx-auto">
+        <motion.div variants={fadeInUp} className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold tracking-tight flex items-center">
+            <h1 className="text-3xl font-bold tracking-tight flex items-center bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
               <BookOpen className="h-8 w-8 mr-2 text-blue-500" />
               Centre de Formation
             </h1>
           </div>
           
           <Tabs defaultValue="catalog" className="w-full">
-            <TabsList className="bg-slate-100 dark:bg-slate-800 p-0.5 flex mb-6">
-              <TabsTrigger value="catalog" className="flex-1">
+            <TabsList className="bg-slate-100 dark:bg-slate-800/80 p-1 flex mb-6 rounded-lg border border-blue-100 dark:border-blue-900/30">
+              <TabsTrigger value="catalog" className="flex-1 rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
                 <GraduationCap className="h-4 w-4 mr-2" />
                 Catalogue
               </TabsTrigger>
-              <TabsTrigger value="equipment" className="flex-1">
+              <TabsTrigger value="equipment" className="flex-1 rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
                 <Lightbulb className="h-4 w-4 mr-2" />
                 Matériel Recommandé
               </TabsTrigger>
-              <TabsTrigger value="certifications" className="flex-1">
+              <TabsTrigger value="certifications" className="flex-1 rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
                 <Award className="h-4 w-4 mr-2" />
                 Certifications
               </TabsTrigger>
@@ -126,7 +126,7 @@ const Training = () => {
             </TabsContent>
             
             <TabsContent value="certifications" className="pt-2 space-y-6">
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-8 rounded-xl shadow-sm text-center">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-8 rounded-xl shadow-sm text-center border border-blue-100 dark:border-blue-900/30">
                 <Award className="h-16 w-16 mx-auto mb-4 text-blue-500" />
                 <h3 className="text-xl font-bold mb-2">Certifications Ultra à venir</h3>
                 <p className="text-gray-600 dark:text-gray-300 max-w-lg mx-auto">

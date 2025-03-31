@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, Plus } from "lucide-react";
 import { CourseTabs } from "./catalog/CourseTabs";
 import { CourseEditModal } from "./catalog/CourseEditModal";
+import { VideoPlayerModal } from "./catalog/VideoPlayerModal";
 import { useCourseData } from "./catalog/useCourseData";
 import { TrainingCatalogProps } from "./catalog/types";
 
@@ -18,26 +19,30 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
     setSelectedTheme,
     isEditModalOpen,
     setIsEditModalOpen,
+    isVideoPlayerOpen,
+    setIsVideoPlayerOpen,
     editingCourse,
+    selectedCourse,
     handleCourseChange,
     handleAddCourse,
     handleEditCourse,
     handleDeleteCourse,
-    handleSaveCourse
+    handleSaveCourse,
+    handleViewCourse
   } = useCourseData();
 
   return (
-    <Card className="border-blue-200 dark:border-blue-900/30 overflow-hidden max-w-5xl mx-auto">
-      <CardHeader className="bg-gradient-to-r from-blue-50 to-white dark:from-blue-950/30 dark:to-slate-950">
+    <Card className="border-blue-200 dark:border-blue-900/30 shadow-md overflow-hidden max-w-5xl mx-auto bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-950">
+      <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-slate-900 pb-6">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <BookOpen className="h-5 w-5 text-blue-500" />
-            <span>Catalogue de Formations</span>
+            <span className="text-xl md:text-2xl font-bold">Catalogue de Formations</span>
           </div>
           {role === 'founder' && (
             <Button 
               onClick={handleAddCourse} 
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md"
               size="sm"
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -45,12 +50,13 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
             </Button>
           )}
         </CardTitle>
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground mt-2">
           Nos formations sont régulièrement mises à jour pour vous proposer le meilleur contenu.
+          Explorez les différentes catégories pour améliorer vos compétences.
         </div>
       </CardHeader>
       
-      <CardContent className="p-4">
+      <CardContent className="p-6">
         <CourseTabs 
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -61,6 +67,7 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
           role={role}
           onEditCourse={handleEditCourse}
           onDeleteCourse={handleDeleteCourse}
+          onViewCourse={handleViewCourse}
         />
       </CardContent>
       
@@ -70,6 +77,12 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
         editingCourse={editingCourse}
         onCourseChange={handleCourseChange}
         onSave={handleSaveCourse}
+      />
+
+      <VideoPlayerModal
+        isOpen={isVideoPlayerOpen}
+        onOpenChange={setIsVideoPlayerOpen}
+        course={selectedCourse}
       />
     </Card>
   );

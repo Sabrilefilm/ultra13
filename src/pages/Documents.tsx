@@ -1,114 +1,145 @@
-
 import React, { useState, useEffect } from "react";
+import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
 import { useIndexAuth } from "@/hooks/use-index-auth";
-import { UltraSidebar } from "@/components/layout/UltraSidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DocumentUploadDialog } from "@/components/documents/upload/DocumentUploadDialog";
-import { UserDocumentView } from "@/components/documents/UserDocumentView";
-import { AdminDocumentsView } from "@/components/documents/AdminDocumentsView";
-import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
-import { IdentityDocument } from "@/types/documents";
+import { useAccountManagement } from "@/hooks/use-account-management";
+import { usePlatformSettings } from "@/hooks/use-platform-settings";
+import { useToast } from "@/hooks/use-toast";
+import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
+import { motion } from "framer-motion";
+import {
+  AdminDocumentsView,
+  UserDocumentView,
+  DocumentUploadDialog,
+} from "@/components/documents";
+import { useDocuments } from "@/hooks/use-documents";
 
 const Documents = () => {
-  const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
-  const [documents, setDocuments] = useState<IdentityDocument[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [documentType, setDocumentType] = useState<'identity' | 'other'>('identity');
-  const [activeTab, setActiveTab] = useState("all");
-  const [userDocument, setUserDocument] = useState<IdentityDocument | null>(null);
+  const {
+    isAuthenticated,
+    username,
+    role,
+    userId,
+    handleLogout,
+  } = useIndexAuth();
+
+  const { toast } = useToast();
+  const { handleCreateAccount } = useAccountManagement();
+
+  // Inactivity timer setup
+  const { showWarning, dismissWarning, formattedTime } = useInactivityTimer({
+    timeout: 120000, // 2 minutes
+    onTimeout: () => {
+      handleLogout();
+      toast({
+        title: "Déconnexion automatique",
+        description: "Vous avez été déconnecté en raison d'inactivité.",
+      });
+    },
+    warningTime: 30000, // Show warning 30 seconds before timeout
+    onWarning: () => {
+      // Warning is handled by the hook and displayed via showWarning
+    }
+  });
+
+  const { platformSettings, handleUpdateSettings } = usePlatformSettings(role);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const { documents, uploadDocument } = useDocuments();
 
   useEffect(() => {
-    // Fetch documents logic would go here
-    fetchDocuments();
-  }, [documentType]);
+    document.title = "Documents | Ultra";
+  }, []);
 
-  const fetchDocuments = async () => {
-    // Mock implementation - would be replaced with actual API call
-    setLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setDocuments([]);
-      
-      // For user role, find a specific document to display
-      if (role === 'creator') {
-        setUserDocument(null); // No document found for this type
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { 
+        duration: 0.5,
+        ease: "easeOut"
       }
-    } catch (error) {
-      console.error("Error fetching documents:", error);
-    } finally {
-      setLoading(false);
+    }
+  };
+  
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15
+      }
     }
   };
 
-  const handleUploadSuccess = () => {
-    setIsDialogOpen(false);
-    fetchDocuments();
+  const handleShowUploadDialog = () => {
+    setIsUploadDialogOpen(true);
   };
 
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
+  const handleCloseUploadDialog = () => {
+    setIsUploadDialogOpen(false);
   };
 
-  const handleChangeDocumentType = (type: 'identity' | 'other') => {
-    setDocumentType(type);
+  const handleDocumentUpload = async (file: File) => {
+    try {
+      await uploadDocument(file);
+      toast({
+        title: "Succès",
+        description: "Document téléversé avec succès.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: `Erreur lors du téléversement du document: ${error.message || error}`,
+      });
+    } finally {
+      handleCloseUploadDialog();
+    }
   };
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated) {
+    return <p>Vous n'êtes pas connecté.</p>;
+  }
 
   return (
-    <SidebarProvider>
-      <UltraSidebar
-        username={username}
-        role={role}
-        userId={userId || ''}
-        onLogout={handleLogout}
-        currentPage="documents"
+    <UltraDashboard
+      username={username}
+      role={role || ''}
+      userId={userId || ''}
+      onLogout={handleLogout}
+      platformSettings={platformSettings}
+      handleCreateAccount={handleCreateAccount}
+      handleUpdateSettings={handleUpdateSettings}
+      showWarning={showWarning}
+      dismissWarning={dismissWarning}
+      formattedTime={formattedTime}
+      currentPage="documents"
+    >
+      <motion.div 
+        className="p-6 space-y-6"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
       >
-        <div className="p-6 max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Documents</h1>
-            
-            <Button onClick={() => setIsDialogOpen(true)} className="flex items-center gap-2">
-              <Upload className="h-4 w-4" />
-              Upload Document
-            </Button>
-          </div>
-          
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin h-8 w-8 border-4 border-indigo-500 border-t-transparent rounded-full"></div>
-            </div>
-          ) : (
-            <>
-              {role === 'creator' ? (
-                <UserDocumentView 
-                  userDocument={userDocument}
-                  onShowUploadDialog={() => setIsDialogOpen(true)}
-                  onChangeDocumentType={handleChangeDocumentType}
-                  documentType={documentType}
-                  fetchDocuments={fetchDocuments}
-                />
-              ) : (
-                <AdminDocumentsView 
-                  documents={documents}
-                />
-              )}
-            </>
-          )}
-          
-          <DocumentUploadDialog 
-            isOpen={isDialogOpen} 
-            onClose={() => setIsDialogOpen(false)} 
-            documentType={documentType} 
-            onSuccess={handleUploadSuccess}
+        <h1 className="text-3xl font-bold mb-4">Documents</h1>
+        
+        {role === 'creator' ? (
+          <UserDocumentView 
+            documents={documents as any[]} 
+            onUpload={handleShowUploadDialog} 
           />
-        </div>
-      </UltraSidebar>
-    </SidebarProvider>
+        ) : (
+          <AdminDocumentsView 
+            documents={documents as any[]} 
+          />
+        )}
+
+        <DocumentUploadDialog 
+          isOpen={isUploadDialogOpen}
+          onClose={handleCloseUploadDialog}
+          onUpload={handleDocumentUpload}
+        />
+      </motion.div>
+    </UltraDashboard>
   );
 };
 

@@ -20,6 +20,7 @@ interface CourseTabsProps {
   role: string;
   onEditCourse: (course: TrainingCourse) => void;
   onDeleteCourse: (id: string) => void;
+  onViewCourse: (course: TrainingCourse) => void;
 }
 
 export const CourseTabs: React.FC<CourseTabsProps> = ({
@@ -31,20 +32,21 @@ export const CourseTabs: React.FC<CourseTabsProps> = ({
   setSelectedTheme,
   role,
   onEditCourse,
-  onDeleteCourse
+  onDeleteCourse,
+  onViewCourse
 }) => {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid grid-cols-3 mb-4">
-        <TabsTrigger value="video" className="flex items-center gap-1">
+      <TabsList className="grid grid-cols-3 mb-6 bg-slate-100/70 dark:bg-slate-800/70 p-1">
+        <TabsTrigger value="video" className="flex items-center gap-1 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
           <Video className="h-4 w-4" />
           Vidéos
         </TabsTrigger>
-        <TabsTrigger value="document" className="flex items-center gap-1">
+        <TabsTrigger value="document" className="flex items-center gap-1 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
           <BookOpen className="h-4 w-4" />
           Documents
         </TabsTrigger>
-        <TabsTrigger value="external" className="flex items-center gap-1">
+        <TabsTrigger value="external" className="flex items-center gap-1 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
           <Link className="h-4 w-4" />
           Ressources Externes
         </TabsTrigger>
@@ -59,8 +61,8 @@ export const CourseTabs: React.FC<CourseTabsProps> = ({
       )}
       
       <TabsContent value="video" className="pt-2">
-        <ScrollArea className="h-[450px]">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <ScrollArea className="h-[500px] pr-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredCourses.length > 0 ? (
               filteredCourses.map(course => (
                 <VideoCourseCard 
@@ -69,6 +71,7 @@ export const CourseTabs: React.FC<CourseTabsProps> = ({
                   role={role}
                   onEdit={onEditCourse}
                   onDelete={onDeleteCourse}
+                  onView={onViewCourse}
                 />
               ))
             ) : (
@@ -79,8 +82,8 @@ export const CourseTabs: React.FC<CourseTabsProps> = ({
       </TabsContent>
       
       <TabsContent value="document" className="pt-2">
-        <ScrollArea className="h-[450px]">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <ScrollArea className="h-[500px] pr-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {filteredCourses.map(course => (
               <DocumentCourseCard 
                 key={course.id}
@@ -88,6 +91,7 @@ export const CourseTabs: React.FC<CourseTabsProps> = ({
                 role={role}
                 onEdit={onEditCourse}
                 onDelete={onDeleteCourse}
+                onView={onViewCourse}
               />
             ))}
           </div>
@@ -95,8 +99,8 @@ export const CourseTabs: React.FC<CourseTabsProps> = ({
       </TabsContent>
       
       <TabsContent value="external" className="pt-2">
-        <ScrollArea className="h-[450px]">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <ScrollArea className="h-[500px] pr-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {filteredCourses.map(course => (
               <ExternalCourseCard 
                 key={course.id}
@@ -104,6 +108,7 @@ export const CourseTabs: React.FC<CourseTabsProps> = ({
                 role={role}
                 onEdit={onEditCourse}
                 onDelete={onDeleteCourse}
+                onView={onViewCourse}
               />
             ))}
           </div>

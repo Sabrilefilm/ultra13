@@ -23,6 +23,7 @@ export interface TrainingCardProps {
   role: string;
   onEdit: (course: TrainingCourse) => void;
   onDelete: (id: string) => void;
+  onView: (course: TrainingCourse) => void;
 }
 
 export interface ThemeFilterProps {
@@ -33,6 +34,12 @@ export interface ThemeFilterProps {
 
 export interface TrainingCatalogProps {
   role: string;
+}
+
+export interface VideoPlayerModalProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  course: TrainingCourse | null;
 }
 
 export interface Creator {

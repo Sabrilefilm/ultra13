@@ -2,28 +2,31 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { TrainingCourse } from "./types";
+import { getYoutubeVideoId } from "@/utils/videoHelpers";
 
 export const useCourseData = (initialActiveTab: string = "video") => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(initialActiveTab);
   const [editingCourse, setEditingCourse] = useState<TrainingCourse | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<TrainingCourse | null>(null);
   const [selectedTheme, setSelectedTheme] = useState<string>("all");
   
   const [courses, setCourses] = useState<TrainingCourse[]>([
     {
       id: "1",
       title: "Les bases du live streaming",
-      description: "Apprenez comment configurer votre équipement et optimiser votre stream.",
+      description: "Apprenez comment configurer votre équipement et optimiser votre stream pour une meilleure qualité et stabilité.",
       category: "video",
-      url: "https://example.com/video1",
-      thumbnail: "/placeholder.svg",
+      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
       duration: "15 min",
       theme: "Live TikTok"
     },
     {
       id: "2",
       title: "Guide de l'interface TikTok Live",
-      description: "Comprendre et maîtriser l'interface de streaming de TikTok.",
+      description: "Comprendre et maîtriser l'interface de streaming de TikTok pour des performances optimales.",
       category: "document",
       url: "https://example.com/doc1",
       theme: "Live TikTok"
@@ -31,17 +34,17 @@ export const useCourseData = (initialActiveTab: string = "video") => {
     {
       id: "3",
       title: "Interaction avec l'audience",
-      description: "Techniques pour engager efficacement votre audience pendant les lives.",
+      description: "Techniques pour engager efficacement votre audience pendant les lives et augmenter votre rétention.",
       category: "video",
-      url: "https://example.com/video2",
-      thumbnail: "/placeholder.svg",
+      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
       duration: "22 min",
       theme: "Engagement"
     },
     {
       id: "4",
       title: "Ressources d'auto-formation",
-      description: "Liste de ressources externes pour continuer à vous former.",
+      description: "Liste de ressources externes pour continuer à vous former et améliorer vos compétences.",
       category: "external",
       url: "https://www.tiktok.com/creator-center/",
       theme: "Ressources"
@@ -49,20 +52,20 @@ export const useCourseData = (initialActiveTab: string = "video") => {
     {
       id: "5",
       title: "Optimiser votre contenu TikTok",
-      description: "Techniques pour augmenter la visibilité de vos vidéos TikTok.",
+      description: "Techniques pour augmenter la visibilité de vos vidéos TikTok et atteindre plus d'utilisateurs.",
       category: "video",
-      url: "https://example.com/video3",
-      thumbnail: "/placeholder.svg",
+      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
       duration: "18 min",
       theme: "Contenu"
     },
     {
       id: "6",
       title: "Utiliser les effets TikTok efficacement",
-      description: "Guide complet sur l'utilisation des filtres et effets lors des lives.",
+      description: "Guide complet sur l'utilisation des filtres et effets lors des lives pour un contenu plus engageant.",
       category: "video",
-      url: "https://example.com/video4",
-      thumbnail: "/placeholder.svg",
+      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
       duration: "12 min",
       theme: "Live TikTok"
     }
@@ -92,6 +95,15 @@ export const useCourseData = (initialActiveTab: string = "video") => {
 
   const handleCourseChange = (updatedCourse: TrainingCourse) => {
     setEditingCourse(updatedCourse);
+    
+    // Si c'est une vidéo YouTube, on essaie d'extraire l'ID pour la vignette
+    if (updatedCourse.category === "video" && !updatedCourse.thumbnail) {
+      const videoId = getYoutubeVideoId(updatedCourse.url);
+      if (videoId) {
+        const thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+        setEditingCourse({...updatedCourse, thumbnail});
+      }
+    }
   };
 
   const handleSaveCourse = () => {
@@ -102,20 +114,39 @@ export const useCourseData = (initialActiveTab: string = "video") => {
       return;
     }
 
-    const existingIndex = courses.findIndex(course => course.id === editingCourse.id);
+    // Pour les vidéos YouTube, essayons d'obtenir une vignette si elle n'est pas définie
+    let courseToSave = { ...editingCourse };
+    
+    if (courseToSave.category === "video" && !courseToSave.thumbnail) {
+      const videoId = getYoutubeVideoId(courseToSave.url);
+      if (videoId) {
+        courseToSave.thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+      }
+    }
+
+    const existingIndex = courses.findIndex(course => course.id === courseToSave.id);
     
     if (existingIndex !== -1) {
       const updatedCourses = [...courses];
-      updatedCourses[existingIndex] = editingCourse;
+      updatedCourses[existingIndex] = courseToSave;
       setCourses(updatedCourses);
       toast.success("Formation mise à jour avec succès");
     } else {
-      setCourses([...courses, editingCourse]);
+      setCourses([...courses, courseToSave]);
       toast.success("Formation ajoutée avec succès");
     }
     
     setIsEditModalOpen(false);
     setEditingCourse(null);
+  };
+
+  const handleViewCourse = (course: TrainingCourse) => {
+    setSelectedCourse(course);
+    if (course.category === "video") {
+      setIsVideoPlayerOpen(true);
+    } else if (course.category === "document" || course.category === "external") {
+      window.open(course.url, '_blank');
+    }
   };
 
   // Extract unique themes from courses
@@ -138,12 +169,16 @@ export const useCourseData = (initialActiveTab: string = "video") => {
     setSelectedTheme,
     isEditModalOpen,
     setIsEditModalOpen,
+    isVideoPlayerOpen,
+    setIsVideoPlayerOpen,
     editingCourse,
+    selectedCourse,
     setEditingCourse,
     handleCourseChange,
     handleAddCourse,
     handleEditCourse,
     handleDeleteCourse,
-    handleSaveCourse
+    handleSaveCourse,
+    handleViewCourse
   };
 };

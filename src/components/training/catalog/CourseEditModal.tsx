@@ -3,9 +3,10 @@ import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { CourseEditModalProps } from "./types";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CourseEditModalProps, TrainingCourse } from "./types";
 
 export const CourseEditModal: React.FC<CourseEditModalProps> = ({
   isOpen,
@@ -14,15 +15,23 @@ export const CourseEditModal: React.FC<CourseEditModalProps> = ({
   onCourseChange,
   onSave
 }) => {
-  const handleFieldChange = (field: string, value: string) => {
-    if (!editingCourse) return;
-    
-    const updatedCourse = {
+  if (!editingCourse) return null;
+  
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    onCourseChange({
       ...editingCourse,
-      [field]: value
-    };
-    
-    onCourseChange(updatedCourse);
+      [name]: value
+    });
+  };
+  
+  const handleSelectChange = (name: keyof TrainingCourse, value: string) => {
+    onCourseChange({
+      ...editingCourse,
+      [name]: value
+    });
   };
   
   return (
@@ -30,7 +39,7 @@ export const CourseEditModal: React.FC<CourseEditModalProps> = ({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {editingCourse?.id ? "Modifier la formation" : "Ajouter une formation"}
+            {editingCourse.id ? "Modifier une formation" : "Ajouter une formation"}
           </DialogTitle>
         </DialogHeader>
         
@@ -39,8 +48,9 @@ export const CourseEditModal: React.FC<CourseEditModalProps> = ({
             <Label htmlFor="title">Titre*</Label>
             <Input
               id="title"
-              value={editingCourse?.title || ''}
-              onChange={(e) => handleFieldChange('title', e.target.value)}
+              name="title"
+              value={editingCourse.title}
+              onChange={handleInputChange}
               placeholder="Titre de la formation"
             />
           </div>
@@ -49,85 +59,93 @@ export const CourseEditModal: React.FC<CourseEditModalProps> = ({
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              value={editingCourse?.description || ''}
-              onChange={(e) => handleFieldChange('description', e.target.value)}
+              name="description"
+              value={editingCourse.description}
+              onChange={handleInputChange}
               placeholder="Description de la formation"
-              rows={3}
             />
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="category">Catégorie</Label>
-            <select
-              id="category"
-              value={editingCourse?.category || 'video'}
-              onChange={(e) => handleFieldChange('category', e.target.value as "video" | "document" | "external")}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            <Label htmlFor="category">Catégorie*</Label>
+            <Select
+              value={editingCourse.category}
+              onValueChange={(value) => handleSelectChange("category", value)}
             >
-              <option value="video">Vidéo</option>
-              <option value="document">Document</option>
-              <option value="external">Ressource externe</option>
-            </select>
-          </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="theme">Thématique</Label>
-            <select
-              id="theme"
-              value={editingCourse?.theme || ''}
-              onChange={(e) => handleFieldChange('theme', e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              <option value="">Sélectionner une thématique</option>
-              <option value="Live TikTok">Live TikTok</option>
-              <option value="Contenu">Contenu</option>
-              <option value="Engagement">Engagement</option>
-              <option value="Ressources">Ressources</option>
-              <option value="Marketing">Marketing</option>
-            </select>
+              <SelectTrigger id="category">
+                <SelectValue placeholder="Sélectionner une catégorie" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="video">Vidéo</SelectItem>
+                <SelectItem value="document">Document</SelectItem>
+                <SelectItem value="external">Ressource externe</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="grid gap-2">
             <Label htmlFor="url">URL*</Label>
             <Input
               id="url"
-              value={editingCourse?.url || ''}
-              onChange={(e) => handleFieldChange('url', e.target.value)}
-              placeholder="https://example.com/course"
+              name="url"
+              value={editingCourse.url}
+              onChange={handleInputChange}
+              placeholder="Lien vers la formation"
             />
           </div>
           
-          {editingCourse?.category === 'video' && (
-            <>
-              <div className="grid gap-2">
-                <Label htmlFor="thumbnail">URL de vignette</Label>
-                <Input
-                  id="thumbnail"
-                  value={editingCourse?.thumbnail || ''}
-                  onChange={(e) => handleFieldChange('thumbnail', e.target.value)}
-                  placeholder="https://example.com/thumbnail.jpg"
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="duration">Durée</Label>
-                <Input
-                  id="duration"
-                  value={editingCourse?.duration || ''}
-                  onChange={(e) => handleFieldChange('duration', e.target.value)}
-                  placeholder="15 min"
-                />
-              </div>
-            </>
+          {editingCourse.category === "video" && (
+            <div className="grid gap-2">
+              <Label htmlFor="duration">Durée</Label>
+              <Input
+                id="duration"
+                name="duration"
+                value={editingCourse.duration || ""}
+                onChange={handleInputChange}
+                placeholder="Ex: 15 min"
+              />
+            </div>
+          )}
+          
+          <div className="grid gap-2">
+            <Label htmlFor="theme">Thème</Label>
+            <Input
+              id="theme"
+              name="theme"
+              value={editingCourse.theme || ""}
+              onChange={handleInputChange}
+              placeholder="Ex: Live TikTok"
+            />
+          </div>
+          
+          {editingCourse.category === "video" && (
+            <div className="grid gap-2">
+              <Label htmlFor="thumbnail">Vignette (URL)</Label>
+              <Input
+                id="thumbnail"
+                name="thumbnail"
+                value={editingCourse.thumbnail || ""}
+                onChange={handleInputChange}
+                placeholder="URL de la vignette"
+              />
+              <p className="text-xs text-muted-foreground">
+                Laissez vide pour les vidéos YouTube (générée automatiquement)
+              </p>
+            </div>
           )}
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
             Annuler
           </Button>
-          <Button onClick={onSave}>
-            Enregistrer
+          <Button 
+            onClick={onSave}
+          >
+            Sauvegarder
           </Button>
         </DialogFooter>
       </DialogContent>

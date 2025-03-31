@@ -3,37 +3,38 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Link, Edit, Trash } from "lucide-react";
+import { Link, Edit, Trash, ExternalLink } from "lucide-react";
 import { TrainingCardProps } from "./types";
 
-export const ExternalCourseCard: React.FC<TrainingCardProps> = ({ course, role, onEdit, onDelete }) => {
+export const ExternalCourseCard: React.FC<TrainingCardProps> = ({ course, role, onEdit, onDelete, onView }) => {
   return (
-    <Card className="overflow-hidden border-blue-100 dark:border-blue-900/20">
-      <CardContent className="p-3">
-        <div className="flex items-start gap-2">
-          <div className="bg-blue-100 dark:bg-blue-900/20 p-1.5 rounded-lg">
-            <Link className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+    <Card className="overflow-hidden border-blue-100 dark:border-blue-900/20 hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex items-start gap-3">
+          <div className="bg-gradient-to-br from-indigo-100 to-purple-50 dark:from-indigo-900/30 dark:to-purple-800/20 p-3 rounded-lg">
+            <Link className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
           </div>
           <div className="flex-1">
-            <div className="flex items-start justify-between gap-1">
-              <h3 className="font-medium text-sm line-clamp-1">{course.title}</h3>
+            <div className="flex items-start justify-between gap-1 mb-2">
+              <h3 className="font-medium text-base line-clamp-1">{course.title}</h3>
               {course.theme && (
                 <Badge variant="outline" className="text-xs whitespace-nowrap">
                   {course.theme}
                 </Badge>
               )}
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 mb-2 line-clamp-2 h-8">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
               {course.description}
             </p>
             <div className="flex justify-between items-center">
               <Button 
-                variant="outline" 
+                variant="secondary" 
                 size="sm" 
-                className="text-xs py-0 h-7"
+                className="text-xs py-0 h-8"
                 onClick={() => window.open(course.url, '_blank')}
               >
-                Visiter
+                <ExternalLink className="h-3 w-3 mr-2" />
+                Visiter le site
               </Button>
               
               {role === 'founder' && (
@@ -41,7 +42,7 @@ export const ExternalCourseCard: React.FC<TrainingCardProps> = ({ course, role, 
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    className="h-6 w-6 p-0"
+                    className="h-7 w-7 p-0"
                     onClick={() => onEdit(course)}
                   >
                     <Edit className="h-3 w-3" />
@@ -49,7 +50,7 @@ export const ExternalCourseCard: React.FC<TrainingCardProps> = ({ course, role, 
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
+                    className="text-red-500 hover:text-red-700 h-7 w-7 p-0"
                     onClick={() => onDelete(course.id)}
                   >
                     <Trash className="h-3 w-3" />

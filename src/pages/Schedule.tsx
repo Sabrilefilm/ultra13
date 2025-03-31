@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
@@ -35,7 +34,6 @@ const Schedule = () => {
   const [selectedCreator, setSelectedCreator] = useState("");
   const [viewMode, setViewMode] = useState<'matches' | 'creators'>('matches');
   
-  // Inactivity timer for automatic logout
   const { showWarning, dismissWarning, formattedTime } = useInactivityTimer({
     timeout: 120000, // 2 minutes
     onTimeout: () => {
@@ -65,11 +63,9 @@ const Schedule = () => {
   };
 
   const downloadSchedule = () => {
-    // Create the workbook
     const wb = XLSX.utils.book_new();
     
     try {
-      // Format the matches data for export
       const scheduleData = matches.map((match, index) => ({
         'ID': index + 1,
         'Créateur 1': match.creator1_name || 'Non spécifié',
@@ -81,30 +77,25 @@ const Schedule = () => {
         'Statut': match.winner ? 'Terminé' : 'À venir'
       }));
       
-      // Create worksheet
       const ws = XLSX.utils.json_to_sheet(scheduleData);
       
-      // Set column widths
       const wscols = [
-        { wch: 5 }, // ID
-        { wch: 20 }, // Créateur 1
-        { wch: 20 }, // Créateur 2
-        { wch: 15 }, // Date
-        { wch: 10 }, // Heure
-        { wch: 8 }, // Boost
-        { wch: 20 }, // Agent
-        { wch: 10 }, // Statut
+        { wch: 5 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 15 },
+        { wch: 10 },
+        { wch: 8 },
+        { wch: 20 },
+        { wch: 10 },
       ];
       ws['!cols'] = wscols;
       
-      // Add worksheet to workbook
       XLSX.utils.book_append_sheet(wb, ws, "Planning");
       
-      // Generate the Excel file
       const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       
-      // Save the file
       saveAs(blob, `Planning_Ultra_${new Date().toISOString().split('T')[0]}.xlsx`);
       
       toastHook({
@@ -164,7 +155,7 @@ const Schedule = () => {
         hours: schedule.hours || 0,
         days: schedule.days || 0,
         totalHours: (schedule.hours || 0) * (schedule.days || 0),
-        requiredHours: 15, // 7 days * 2 hours per day
+        requiredHours: 15,
       };
     })
     .sort((a, b) => b.totalHours - a.totalHours);
@@ -172,6 +163,39 @@ const Schedule = () => {
   const canAccessCreatorView = ['founder', 'manager', 'agent'].includes(role || '');
   const canCreateMatch = ['founder', 'manager', 'agent'].includes(role || '');
   const canModifySchedule = role === 'founder';
+
+  const renderMatch = (match: Match) => {
+    const winnerValue = match.winner_id || null;
+    
+    return (
+      <div className="border rounded-lg p-4 mb-4">
+        <h3 className="text-xl font-bold">{match.match_name || "Match sans titre"}</h3>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle className="text-base font-medium">
+              {match.title || `Match #${match.id.substring(0, 4)}`}
+            </CardTitle>
+            <Badge className={winnerValue === null ? "bg-gray-500" : winnerValue === match.creator1_id ? "bg-green-500" : "bg-red-500"}>
+              {winnerValue === null ? "À venir" : winnerValue === match.creator1_id ? "Gagnant" : "Perdant"}
+            </Badge>
+          </div>
+          <CardDescription>
+            {format(new Date(match.match_date), "EEEE d MMMM yyyy", { locale: fr })} à {format(new Date(match.match_date), "HH:mm", { locale: fr })}
+          </CardDescription>
+        </div>
+        <div className="mt-3 pt-3 border-t border-dashed border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400 flex justify-between">
+          <span>
+            Agent: {match.agent_name || "Non assigné"}
+          </span>
+          {match.with_boost && (
+            <Badge variant="outline" className="border-yellow-300 dark:border-yellow-700 text-yellow-600 dark:text-yellow-400">
+              Boost activé
+            </Badge>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <SidebarProvider defaultOpen={true}>
