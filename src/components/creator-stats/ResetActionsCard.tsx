@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, ArrowCounterClockwise, Diamond } from "lucide-react";
+import { AlertCircle, RotateCcw, Diamond } from "lucide-react";
 
 interface ResetActionsCardProps {
   onResetSchedules: () => Promise<void>;
@@ -21,7 +21,7 @@ export const ResetActionsCard: React.FC<ResetActionsCardProps> = ({
           className="w-full justify-start text-sm"
           onClick={onResetSchedules}
         >
-          <ArrowCounterClockwise className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
+          <RotateCcw className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
           Reset all schedules
         </Button>
         <Button 

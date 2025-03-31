@@ -1,39 +1,40 @@
 
+import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
-interface DialogActionsProps {
+export interface DialogActionsProps {
   onCancel: () => void;
-  onSubmit: () => void;
-  uploading: boolean;
+  isLoading?: boolean;
 }
 
-export const DialogActions = ({ onCancel, onSubmit, uploading }: DialogActionsProps) => {
+export const DialogActions: React.FC<DialogActionsProps> = ({ 
+  onCancel, 
+  isLoading = false 
+}) => {
   return (
-    <>
-      <Button 
-        type="button" 
-        variant="outline" 
-        onClick={onCancel} 
-        disabled={uploading}
-        className="bg-slate-700 hover:bg-slate-600 border-slate-600 text-white"
+    <div className="flex justify-end space-x-2 pt-4">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onCancel}
+        disabled={isLoading}
       >
-        Annuler
+        Cancel
       </Button>
       <Button 
-        type="button" 
-        onClick={onSubmit} 
-        disabled={uploading}
-        className="bg-purple-600 hover:bg-purple-700 text-white"
+        type="submit"
+        disabled={isLoading}
       >
-        {uploading ? (
+        {isLoading ? (
           <>
-            <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-transparent border-t-current"></div>
-            Téléchargement...
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Uploading...
           </>
         ) : (
-          'Télécharger'
+          'Upload Document'
         )}
       </Button>
-    </>
+    </div>
   );
 };

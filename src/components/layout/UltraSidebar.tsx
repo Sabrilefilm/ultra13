@@ -55,9 +55,10 @@ interface UltraSidebarProps {
   isMobileOpen?: boolean;
   setMobileMenuOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   version?: string;
+  children?: React.ReactNode; // Added children prop
 }
 
-export const UltraSidebar = ({ 
+export const UltraSidebar: React.FC<UltraSidebarProps> = ({ 
   username, 
   role, 
   userId,
@@ -66,7 +67,8 @@ export const UltraSidebar = ({
   onAction,
   isMobileOpen,
   setMobileMenuOpen,
-  version
+  version,
+  children
 }: UltraSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   
@@ -83,43 +85,48 @@ export const UltraSidebar = ({
   const navigationItems = getNavigationItems(role, currentPage);
 
   return (
-    <Sidebar 
-      className={`fixed h-full bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-lg z-50 flex flex-col border-r border-purple-800/50 transition-all duration-300 ${
-        collapsed ? "w-16" : "w-64"
-      }`}
-    >
-      <div className="flex justify-between items-center p-4 border-b border-purple-800/30">
-        {!collapsed && <SidebarLogo />}
-        <div className="flex items-center">
-          <SidebarToggle collapsed={collapsed} onToggle={handleToggle} />
-          {isMobileOpen && (
-            <SidebarMobileClose onClose={handleMobileClose} className="md:hidden ml-2" />
-          )}
+    <div className="flex">
+      <Sidebar 
+        className={`fixed h-full bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-lg z-50 flex flex-col border-r border-purple-800/50 transition-all duration-300 ${
+          collapsed ? "w-16" : "w-64"
+        }`}
+      >
+        <div className="flex justify-between items-center p-4 border-b border-purple-800/30">
+          {!collapsed && <SidebarLogo />}
+          <div className="flex items-center">
+            <SidebarToggle collapsed={collapsed} onToggle={handleToggle} />
+            {isMobileOpen && (
+              <SidebarMobileClose onClose={handleMobileClose} className="md:hidden ml-2" />
+            )}
+          </div>
         </div>
-      </div>
-      
-      <SidebarUserProfile 
-        username={username}
-        role={role} 
-        collapsed={collapsed}
-      />
-      
-      <div className="flex-1 overflow-y-auto py-4">
-        <SidebarNavigation 
-          items={navigationItems}
-          currentPage={currentPage}
-          role={role}
-          onClick={() => setMobileMenuOpen && setMobileMenuOpen(false)}
+        
+        <SidebarUserProfile 
+          username={username}
+          role={role} 
           collapsed={collapsed}
         />
+        
+        <div className="flex-1 overflow-y-auto py-4">
+          <SidebarNavigation 
+            items={navigationItems}
+            currentPage={currentPage}
+            role={role}
+            onClick={() => setMobileMenuOpen && setMobileMenuOpen(false)}
+            collapsed={collapsed}
+          />
+        </div>
+        
+        <SidebarLogout 
+          onLogout={onLogout} 
+          collapsed={collapsed}
+          username={username}
+          role={role}
+        />
+      </Sidebar>
+      <div className={`flex-1 transition-all duration-300 ml-${collapsed ? '16' : '64'}`}>
+        {children}
       </div>
-      
-      <SidebarLogout 
-        onLogout={onLogout} 
-        collapsed={collapsed}
-        username={username}
-        role={role}
-      />
-    </Sidebar>
+    </div>
   );
 };

@@ -1,27 +1,34 @@
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import React from 'react';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
-interface DocumentTypeSelectorProps {
-  selectedDocType: 'identity' | 'other';
-  onTypeChange: (value: 'identity' | 'other') => void;
+export interface DocumentTypeSelectorProps {
+  selectedDocType: string;
+  onChange: (value: string) => void;
 }
 
-export const DocumentTypeSelector = ({ selectedDocType, onTypeChange }: DocumentTypeSelectorProps) => {
+export const DocumentTypeSelector: React.FC<DocumentTypeSelectorProps> = ({ 
+  selectedDocType, 
+  onChange 
+}) => {
   return (
-    <div>
-      <label className="block text-sm font-medium mb-2 text-white/90">Type de document</label>
-      <Select 
-        value={selectedDocType} 
-        onValueChange={(value) => onTypeChange(value as 'identity' | 'other')}
+    <div className="space-y-3">
+      <Label>Document Type</Label>
+      <RadioGroup
+        value={selectedDocType}
+        onValueChange={onChange}
+        className="flex flex-col space-y-2"
       >
-        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-          <SelectValue placeholder="Sélectionner un type de document" />
-        </SelectTrigger>
-        <SelectContent className="bg-slate-800 border-slate-700 text-white">
-          <SelectItem value="identity" className="text-white hover:bg-slate-700">Carte d'identité</SelectItem>
-          <SelectItem value="other" className="text-white hover:bg-slate-700">Autre document</SelectItem>
-        </SelectContent>
-      </Select>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="identity" id="identity" />
+          <Label htmlFor="identity" className="cursor-pointer">Identity Card/Passport</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="other" id="other" />
+          <Label htmlFor="other" className="cursor-pointer">Other Document</Label>
+        </div>
+      </RadioGroup>
     </div>
   );
 };
