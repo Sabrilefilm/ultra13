@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Check, UserPlus, UserMinus, Plus } from "lucide-react";
+import { ArrowLeft, Check, UserPlus, UserMinus, Plus, HomeIcon } from "lucide-react";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -32,7 +31,7 @@ const AgencyAssignment = () => {
   const { isAuthenticated, role, username, userId, handleLogout } = useIndexAuth();
   const { platformSettings, handleUpdateSettings } = usePlatformSettings(role);
   const { handleCreateAccount } = useAccountManagement();
-  const [agents, setAgents] = useState<Account[]>([]);
+  const [agents, setAgents] = useState([]);
   const [selectedAgentId, setSelectedAgentId] = useState<string>(agentId || "");
   const [isAddCreatorOpen, setIsAddCreatorOpen] = useState(false);
   const [newCreatorUsername, setNewCreatorUsername] = useState("");
@@ -201,6 +200,45 @@ const AgencyAssignment = () => {
     }
   };
 
+  // If the user is not founder or manager, show a coming soon page
+  if (isAuthenticated && role !== 'founder' && role !== 'manager') {
+    return (
+      <SidebarProvider defaultOpen={true}>
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-950 text-white flex">
+          <UltraSidebar 
+            username={username || ''}
+            role={role || ''}
+            userId={userId || ''}
+            onLogout={handleLogout}
+            currentPage="agency-assignment"
+          />
+          
+          <div className="flex-1 p-4 md:p-6 flex justify-center items-center">
+            <Card className="max-w-lg w-full bg-slate-800/90 backdrop-blur-sm border-purple-900/30 text-center">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-2xl font-bold text-white">✨ Bientôt Disponible ✨</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6 p-6">
+                <p className="text-slate-300">
+                  La gestion des agences sera bientôt disponible pour votre rôle.
+                </p>
+                <div className="flex justify-center">
+                  <Button 
+                    onClick={() => navigate("/")} 
+                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                  >
+                    <HomeIcon className="mr-2 h-4 w-4" />
+                    Retour à l'accueil
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </SidebarProvider>
+    );
+  }
+
   const usernameWatermark = (
     <div className="fixed inset-0 pointer-events-none select-none z-0 flex items-center justify-center">
       <div className="w-full h-full flex items-center justify-center rotate-[-30deg]">
@@ -213,42 +251,36 @@ const AgencyAssignment = () => {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-950 text-white flex">
         {usernameWatermark}
         
-        <UltraDashboard
+        <UltraSidebar 
           username={username || ''}
           role={role || ''}
           userId={userId || ''}
           onLogout={handleLogout}
-          platformSettings={platformSettings}
-          handleCreateAccount={handleCreateAccount}
-          handleUpdateSettings={handleUpdateSettings}
-          showWarning={showWarning}
-          dismissWarning={dismissWarning}
-          formattedTime={formattedTime}
           currentPage="agency-assignment"
         />
         
-        <div className="flex-1 p-4 md:ml-64">
+        <div className="flex-1 p-4 md:p-6 overflow-y-auto">
           <div className="max-w-6xl mx-auto space-y-6">
             <div className="flex items-center gap-4 mb-6">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => navigate("/dashboard")}
-                className="h-10 w-10"
+                className="h-10 w-10 bg-white/5 hover:bg-white/10 text-white"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <h1 className="text-2xl font-bold text-white">
-                Gestion des équipes d'agence
+                👥 Gestion des équipes d'agence
               </h1>
             </div>
 
             <Card className="mb-6 bg-slate-800/90 backdrop-blur-sm border-purple-900/30">
               <CardHeader>
-                <CardTitle className="text-white">Sélectionner un agent</CardTitle>
+                <CardTitle className="text-white">🔍 Sélectionner un agent</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="max-w-xs">
@@ -276,7 +308,7 @@ const AgencyAssignment = () => {
               <Card className="bg-slate-800/90 backdrop-blur-sm border-purple-900/30">
                 <CardHeader>
                   <CardTitle className="flex justify-between items-center text-white">
-                    <span>Créateurs non assignés ({unassignedCreators.length})</span>
+                    <span>🆓 Créateurs non assignés ({unassignedCreators.length})</span>
                     <Dialog open={isAddCreatorOpen} onOpenChange={setIsAddCreatorOpen}>
                       <DialogTrigger asChild>
                         <Button size="sm" variant="outline" className="bg-purple-800/30 border-purple-500/30 hover:bg-purple-700/50 text-white">
@@ -343,7 +375,7 @@ const AgencyAssignment = () => {
               <Card className="bg-slate-800/90 backdrop-blur-sm border-purple-900/30">
                 <CardHeader>
                   <CardTitle className="flex justify-between items-center text-white">
-                    <span>Créateurs assignés ({assignedCreators.length})</span>
+                    <span>👤 Créateurs assignés ({assignedCreators.length})</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>

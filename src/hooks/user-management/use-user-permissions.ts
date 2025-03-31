@@ -16,13 +16,14 @@ export const useUserPermissions = (userRole: string) => {
     // Définit qui peut modifier les rôles et sous quelles conditions
     const canChangeRole = (userToChange: { role: string }, newRole: string): boolean => {
       if (isFounder) return true;
-      if (isManager && userToChange.role === 'creator' && (newRole === 'agent' || newRole === 'ambassadeur')) return true;
+      // Managers can only change users to 'agent' role
+      if (isManager && userToChange.role === 'creator' && newRole === 'agent') return true;
       return false;
     };
     
-    // Détermine qui peut modifier les noms d'utilisateur
+    // Détermine qui peut modifier les noms d'utilisateur - now only founders can edit usernames
     const canEditUsername = (userToEdit: { role: string }): boolean => {
-      return isFounder || (isManager && (userToEdit.role === 'creator' || userToEdit.role === 'agent' || userToEdit.role === 'ambassadeur'));
+      return isFounder;
     };
     
     // Détermine qui peut supprimer des utilisateurs

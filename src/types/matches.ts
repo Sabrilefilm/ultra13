@@ -19,4 +19,7 @@ export interface Match {
   title?: string;
   creator1_id?: string; // For clarity when referencing the first creator
   match_name?: string;
+  
+  // Added for compatibility with winner marking
+  winner?: string;
 }
