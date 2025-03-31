@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { Match } from "@/types/matches";
 
 const Schedule = () => {
   const { toast: toastHook } = useToast();

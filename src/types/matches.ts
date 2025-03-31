@@ -14,4 +14,9 @@ export interface Match {
   creator2_name?: string;
   agent_name?: string;
   with_boost?: boolean;
+  
+  // Adding missing properties referenced in Schedule.tsx
+  title?: string;
+  creator1_id?: string; // For clarity when referencing the first creator
+  match_name?: string;
 }
