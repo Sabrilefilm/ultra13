@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
@@ -75,7 +76,7 @@ const Schedule = () => {
         'Heure': new Date(match.match_date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
         'Boost': match.with_boost ? 'Oui' : 'Non',
         'Agent': match.agent_name || 'Non spécifié',
-        'Statut': match.winner ? 'Terminé' : 'À venir'
+        'Statut': match.winner_id ? 'Terminé' : 'À venir'
       }));
       
       const ws = XLSX.utils.json_to_sheet(scheduleData);
@@ -214,23 +215,23 @@ const Schedule = () => {
         currentPage="schedule"
       />
       
-      <div className="p-6 md:ml-64 space-y-6">
-        <Card className="bg-white dark:bg-slate-900 shadow-lg border-purple-100 dark:border-purple-900/30">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <div className="p-6 md:ml-64 space-y-6 bg-slate-900">
+        <Card className="bg-slate-900 dark:bg-slate-900 shadow-lg border-purple-800/30">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 bg-gradient-to-r from-purple-950/50 to-slate-900/50 border-b border-purple-800/20">
             <div>
               <CardTitle className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
-                Planning des Matchs et Horaires
+                Planning des Matchs et Horaires ✨
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-indigo-300/70">
                 Gérez les matchs à venir et consultez les horaires des créateurs
               </CardDescription>
             </div>
             <div className="flex gap-2">
               {canAccessCreatorView && (
-                <div className="flex rounded-md overflow-hidden border border-purple-200 dark:border-purple-800">
+                <div className="flex rounded-md overflow-hidden border border-purple-800 dark:border-purple-800">
                   <Button 
                     variant={viewMode === 'matches' ? 'default' : 'outline'}
-                    className={`rounded-none ${viewMode === 'matches' ? 'bg-purple-600' : 'bg-transparent'}`}
+                    className={`rounded-none ${viewMode === 'matches' ? 'bg-purple-600' : 'bg-transparent border-purple-800 text-purple-300'}`}
                     onClick={() => setViewMode('matches')}
                   >
                     <CalendarIcon className="h-4 w-4 mr-2" />
@@ -238,7 +239,7 @@ const Schedule = () => {
                   </Button>
                   <Button 
                     variant={viewMode === 'creators' ? 'default' : 'outline'}
-                    className={`rounded-none ${viewMode === 'creators' ? 'bg-purple-600' : 'bg-transparent'}`}
+                    className={`rounded-none ${viewMode === 'creators' ? 'bg-purple-600' : 'bg-transparent border-purple-800 text-purple-300'}`}
                     onClick={() => setViewMode('creators')}
                   >
                     <Users className="h-4 w-4 mr-2" />
@@ -249,7 +250,7 @@ const Schedule = () => {
               
               <Button 
                 variant="outline" 
-                className="border-purple-200 dark:border-purple-800 flex items-center gap-2"
+                className="border-purple-800 dark:border-purple-800 text-purple-300 flex items-center gap-2"
                 onClick={downloadSchedule}
               >
                 <Download className="h-4 w-4" />
@@ -262,7 +263,7 @@ const Schedule = () => {
                   onClick={openMatchDialog}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  <span>Nouveau match</span>
+                  <span>Nouveau match 🎮</span>
                 </Button>
               )}
               
@@ -272,13 +273,13 @@ const Schedule = () => {
                   onClick={() => openScheduleModal(selectedCreator)}
                 >
                   <Calendar className="h-4 w-4 mr-2" />
-                  <span>Configurer horaires</span>
+                  <span>Configurer horaires 📝</span>
                 </Button>
               )}
             </div>
           </CardHeader>
           
-          <CardContent>
+          <CardContent className="p-6">
             {viewMode === 'matches' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {isLoadingMatches ? (
@@ -286,15 +287,16 @@ const Schedule = () => {
                     <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
                   </div>
                 ) : matches.length === 0 ? (
-                  <div className="col-span-full text-center p-8">
-                    <CalendarDays className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                    <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400">Aucun match planifié</h3>
+                  <div className="col-span-full text-center p-8 bg-slate-800/50 rounded-xl border border-purple-800/20">
+                    <CalendarDays className="h-12 w-12 mx-auto text-purple-500 mb-4" />
+                    <h3 className="text-lg font-medium text-purple-300 mb-2">Aucun match planifié 📅</h3>
                     {canCreateMatch && (
                       <Button 
                         className="mt-4 bg-purple-600 hover:bg-purple-700"
                         onClick={openMatchDialog}
                       >
-                        Planifier un match
+                        <Plus className="h-4 w-4 mr-2" />
+                        Planifier un match 🎮
                       </Button>
                     )}
                   </div>
@@ -307,51 +309,55 @@ const Schedule = () => {
                     return (
                       <Card 
                         key={match.id}
-                        className={`overflow-hidden transition-all duration-300 hover:shadow-md ${colorClass}`}
+                        className={`overflow-hidden transition-all duration-300 hover:shadow-md bg-slate-800 border-purple-800/30`}
                       >
-                        <CardHeader className="p-4 pb-2 space-y-1">
+                        <CardHeader className="p-4 pb-2 space-y-1 bg-gradient-to-r from-slate-800/80 to-slate-900/80">
                           <div className="flex justify-between items-start">
-                            <CardTitle className="text-base font-medium">
+                            <CardTitle className="text-base font-medium text-white">
                               {match.title || `Match #${match.id.substring(0, 4)}`}
                             </CardTitle>
                             <Badge className={daysUntil < 0 ? "bg-gray-500" : daysUntil === 0 ? "bg-red-500 animate-pulse" : daysUntil <= 2 ? "bg-orange-500" : "bg-blue-500"}>
                               {daysUntil < 0 ? "Terminé" : daysUntil === 0 ? "Aujourd'hui" : daysUntil === 1 ? "Demain" : `Dans ${daysUntil} jours`}
                             </Badge>
                           </div>
-                          <CardDescription>
+                          <CardDescription className="text-indigo-300/70">
                             {format(matchDate, "EEEE d MMMM yyyy", { locale: fr })} à {format(matchDate, "HH:mm", { locale: fr })}
                           </CardDescription>
                         </CardHeader>
                         <CardContent className="p-4">
                           <div className="flex justify-between items-center">
                             <div className="text-center">
-                              <Avatar className="h-10 w-10 mx-auto mb-1">
-                                <AvatarFallback className="bg-red-500 text-white">
+                              <Avatar className="h-10 w-10 mx-auto mb-1 border-2 border-red-700/30">
+                                <AvatarFallback className="bg-red-500/80 text-white">
                                   {match.creator1_name?.substring(0, 2).toUpperCase() || "C1"}
                                 </AvatarFallback>
                               </Avatar>
-                              <p className="text-sm font-medium">{match.creator1_name || "Inconnu"}</p>
+                              <p className="text-sm font-medium text-red-300">{match.creator1_name || "Inconnu"}</p>
                             </div>
                             
-                            <div className="text-xl font-bold text-gray-500">VS</div>
+                            <div className="text-xl font-bold text-purple-400">VS</div>
                             
                             <div className="text-center">
-                              <Avatar className="h-10 w-10 mx-auto mb-1">
-                                <AvatarFallback className="bg-blue-500 text-white">
+                              <Avatar className="h-10 w-10 mx-auto mb-1 border-2 border-blue-700/30">
+                                <AvatarFallback className="bg-blue-500/80 text-white">
                                   {match.creator2_name?.substring(0, 2).toUpperCase() || "C2"}
                                 </AvatarFallback>
                               </Avatar>
-                              <p className="text-sm font-medium">{match.creator2_name || "Inconnu"}</p>
+                              <p className="text-sm font-medium text-blue-300">{match.creator2_name || "Inconnu"}</p>
                             </div>
                           </div>
                           
-                          <div className="mt-3 pt-3 border-t border-dashed border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400 flex justify-between">
+                          <div className="mt-3 pt-3 border-t border-dashed border-slate-700 text-sm text-gray-400 flex justify-between">
                             <span>
                               Agent: {match.agent_name || "Non assigné"}
                             </span>
-                            {match.with_boost && (
-                              <Badge variant="outline" className="border-yellow-300 dark:border-yellow-700 text-yellow-600 dark:text-yellow-400">
-                                Boost activé
+                            {match.with_boost ? (
+                              <Badge variant="outline" className="border-yellow-700 text-yellow-400">
+                                ⚡ Boost activé
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="border-gray-700 text-gray-400">
+                                🔄 Sans Boost
                               </Badge>
                             )}
                           </div>
@@ -363,10 +369,10 @@ const Schedule = () => {
               </div>
             ) : (
               <div>
-                <h3 className="font-medium text-lg mb-4">Horaires des Créateurs</h3>
-                <Card className="border border-blue-100 dark:border-blue-900/30">
-                  <CardHeader className="p-4 pb-2">
-                    <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
+                <h3 className="font-medium text-lg mb-4 text-purple-300">Horaires des Créateurs 📅</h3>
+                <Card className="border border-blue-900/30 bg-slate-800">
+                  <CardHeader className="p-4 pb-2 bg-gradient-to-r from-blue-950/40 to-slate-900/60 border-b border-blue-900/20">
+                    <div className="flex justify-between items-center text-sm text-indigo-300/80">
                       <span className="w-1/3">Créateur</span>
                       <span className="w-1/5 text-center">Heures / jour</span>
                       <span className="w-1/5 text-center">Jours / semaine</span>
@@ -382,19 +388,19 @@ const Schedule = () => {
                         </div>
                       ) : creatorSchedules.length === 0 ? (
                         <div className="text-center p-8">
-                          <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                          <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400">Aucun créateur trouvé</h3>
+                          <Users className="h-12 w-12 mx-auto text-blue-500 mb-4" />
+                          <h3 className="text-lg font-medium text-blue-300">Aucun créateur trouvé</h3>
                         </div>
                       ) : (
                         creatorSchedules.map((creator) => {
                           const percentComplete = Math.min(Math.round((creator.totalHours / creator.requiredHours) * 100), 100);
-                          const statusColor = percentComplete >= 100 ? "text-green-500" : 
-                                             percentComplete >= 70 ? "text-yellow-500" : "text-red-500";
+                          const statusColor = percentComplete >= 100 ? "text-green-400" : 
+                                             percentComplete >= 70 ? "text-yellow-400" : "text-red-400";
                           
                           return (
                             <div 
                               key={creator.id}
-                              className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800/30 rounded-lg transition-colors cursor-pointer mb-2"
+                              className="flex items-center justify-between p-3 hover:bg-slate-700/50 rounded-lg transition-colors cursor-pointer mb-2"
                               onClick={() => {
                                 if (canModifySchedule) {
                                   openScheduleModal(creator.username);
@@ -404,20 +410,20 @@ const Schedule = () => {
                               }}
                             >
                               <div className="w-1/3 flex items-center gap-3">
-                                <Avatar className="h-8 w-8">
+                                <Avatar className="h-8 w-8 border border-blue-800/50">
                                   <AvatarFallback className={`${getRoleColor('creator')} text-white`}>
                                     {creator.username.substring(0, 2).toUpperCase()}
                                   </AvatarFallback>
                                 </Avatar>
-                                <span className="font-medium truncate">{creator.username}</span>
+                                <span className="font-medium truncate text-white">{creator.username}</span>
                               </div>
-                              <div className="w-1/5 text-center">
+                              <div className="w-1/5 text-center text-indigo-300">
                                 {creator.hours}h
                               </div>
-                              <div className="w-1/5 text-center">
+                              <div className="w-1/5 text-center text-indigo-300">
                                 {creator.days}j
                               </div>
-                              <div className="w-1/5 text-center font-medium">
+                              <div className="w-1/5 text-center font-medium text-blue-300">
                                 {creator.totalHours}h
                               </div>
                               <div className={`w-1/5 text-center font-medium ${statusColor}`}>

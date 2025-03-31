@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Plus } from "lucide-react";
+import { BookOpen, Plus, Sparkles } from "lucide-react";
 import { CourseTabs } from "./catalog/CourseTabs";
 import { CourseEditModal } from "./catalog/CourseEditModal";
 import { VideoPlayerModal } from "./catalog/VideoPlayerModal";
@@ -32,25 +32,26 @@ export const TrainingCatalog: React.FC<TrainingCatalogProps> = ({ role }) => {
   } = useCourseData();
 
   return (
-    <Card className="border-blue-200 dark:border-blue-900/30 shadow-md overflow-hidden max-w-5xl mx-auto bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-950">
-      <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-slate-900 pb-6">
+    <Card className="border-indigo-800/30 shadow-lg overflow-hidden max-w-5xl mx-auto bg-gradient-to-br from-slate-900 to-slate-950">
+      <CardHeader className="bg-gradient-to-r from-indigo-950/50 to-slate-950/70 pb-6 border-b border-indigo-900/20">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-blue-500" />
-            <span className="text-xl md:text-2xl font-bold">Catalogue de Formations</span>
+            <BookOpen className="h-5 w-5 text-indigo-400" />
+            <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-indigo-300 to-blue-300 bg-clip-text text-transparent">Catalogue de Formations ✨</span>
           </div>
           {role === 'founder' && (
             <Button 
               onClick={handleAddCourse} 
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md"
+              className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-md text-white"
               size="sm"
             >
               <Plus className="mr-2 h-4 w-4" />
-              Ajouter une formation
+              Ajouter une formation 📚
             </Button>
           )}
         </CardTitle>
-        <div className="text-sm text-muted-foreground mt-2">
+        <div className="text-sm text-indigo-300/70 mt-2 flex items-center">
+          <Sparkles className="h-4 w-4 mr-2 text-yellow-400" />
           Nos formations sont régulièrement mises à jour pour vous proposer le meilleur contenu.
           Explorez les différentes catégories pour améliorer vos compétences.
         </div>
