@@ -22,16 +22,16 @@ export const useUserPermissions = (userRole: string) => {
     
     // Détermine qui peut modifier les noms d'utilisateur
     const canEditUsername = (userToEdit: { role: string }): boolean => {
-      return isFounder || (isManager && userToEdit.role === 'creator');
+      return isFounder || (isManager && (userToEdit.role === 'creator' || userToEdit.role === 'agent' || userToEdit.role === 'ambassadeur'));
     };
     
     // Détermine qui peut supprimer des utilisateurs
     const canDeleteUser = (userToDelete: { role: string }): boolean => {
-      return isFounder || (isManager && userToDelete.role !== 'manager');
+      return isFounder || (isManager && userToDelete.role !== 'manager' && userToDelete.role !== 'founder');
     };
     
     // Détermine qui peut voir les détails de performance
-    const canSeeDetailedPerformance = isFounder || isManager || (isCreator && userRole === 'creator');
+    const canSeeDetailedPerformance = isFounder || isManager || isCreator;
     
     // Détermine qui peut voir le résumé de performance
     const canSeeSummaryPerformance = isFounder || isManager || isAgent;
