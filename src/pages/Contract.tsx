@@ -36,7 +36,7 @@ const Contract = () => {
     alert("Le téléchargement du contrat sera disponible prochainement.");
   };
   return <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex bg-gradient-to-br from-slate-900 to-slate-950 text-white">
+      <div className="min-h-screen flex bg-gradient-to-br from-slate-300 to-slate-300text-white">
         <UltraSidebar username={username} role={role || ''} userId={userId || ''} onLogout={handleLogout} currentPage="contract" />
 
         <div className="flex-1 p-4 overflow-y-auto px-[71px]">
