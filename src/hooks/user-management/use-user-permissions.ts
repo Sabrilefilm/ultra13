@@ -17,7 +17,7 @@ export const useUserPermissions = (userRole: string) => {
     const canChangeRole = (userToChange: { role: string }, newRole: string): boolean => {
       if (isFounder) return true; // Founder can change to any role
       
-      // Managers can change users to 'agent', 'creator', or 'ambassadeur' roles
+      // Managers can change users to 'agent', 'creator', 'ambassadeur' roles
       if (isManager && (newRole === 'agent' || newRole === 'creator' || newRole === 'ambassadeur')) {
         return true;
       }
@@ -40,6 +40,9 @@ export const useUserPermissions = (userRole: string) => {
     
     // Détermine qui peut voir le résumé de performance
     const canSeeSummaryPerformance = isFounder || isManager || isAgent;
+
+    // Détermine qui peut accéder à l'espace ambassadeur
+    const canAccessAmbassadorSpace = isFounder || isManager || isAgent || isAmbassadeur;
     
     return {
       isFounder,
@@ -53,7 +56,8 @@ export const useUserPermissions = (userRole: string) => {
       canEditUsername,
       canDeleteUser,
       canSeeDetailedPerformance,
-      canSeeSummaryPerformance
+      canSeeSummaryPerformance,
+      canAccessAmbassadorSpace
     };
   }, [userRole]);
 };

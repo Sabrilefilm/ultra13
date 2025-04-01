@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ const AgencyAssignment = () => {
       toast({
         title: "Déconnexion automatique",
         description: "Vous avez été déconnecté en raison d'inactivité.",
+        variant: "destructive",
       });
     },
     warningTime: 30000,
@@ -88,7 +90,7 @@ const AgencyAssignment = () => {
     };
 
     fetchAgents();
-  }, [navigate, role, selectedAgentId]);
+  }, [navigate, role, isAuthenticated, selectedAgentId]);
 
   const handleAssignCreator = async (creatorId: string) => {
     if (!selectedAgentId) {
@@ -106,6 +108,7 @@ const AgencyAssignment = () => {
       toast({
         title: "Succès",
         description: "Le créateur a été assigné à l'agent",
+        variant: "success",
       });
     } else {
       toast({
@@ -123,6 +126,7 @@ const AgencyAssignment = () => {
       toast({
         title: "Succès",
         description: "Le créateur a été retiré de l'agent",
+        variant: "success",
       });
     } else {
       toast({
@@ -172,6 +176,7 @@ const AgencyAssignment = () => {
           toast({
             title: "Succès",
             description: "Le créateur a été assigné à l'agent",
+            variant: "success",
           });
           
           setNewCreatorUsername("");

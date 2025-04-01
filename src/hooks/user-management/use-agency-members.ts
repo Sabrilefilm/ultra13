@@ -96,7 +96,7 @@ export const useAgencyMembers = (agentId: string) => {
     console.log("useAgencyMembers hook called with agentId:", agentId);
     fetchAssignedCreators();
     fetchUnassignedCreators();
-  }, [agentId]);
+  }, [agentId]); // Properly including agentId in the dependency array
 
   const assignCreatorToAgent = async (creatorId: string, agentId: string) => {
     try {
