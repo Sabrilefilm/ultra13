@@ -1,4 +1,3 @@
-
 import React from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UltraSidebar } from "@/components/layout/UltraSidebar";
@@ -6,53 +5,48 @@ import { useIndexAuth } from "@/hooks/use-index-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shell, Download, FileText, Diamond, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
 const Contract = () => {
-  const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
-
+  const {
+    isAuthenticated,
+    username,
+    role,
+    userId,
+    handleLogout
+  } = useIndexAuth();
   if (!isAuthenticated) {
     window.location.href = '/';
     return null;
   }
-
   const roleText = () => {
-    switch(role) {
-      case 'creator': return "Créateur";
-      case 'agent': return "Agent";
-      case 'manager': return "Manager";
-      case 'ambassadeur': return "Ambassadeur";
-      default: return "Utilisateur";
+    switch (role) {
+      case 'creator':
+        return "Créateur";
+      case 'agent':
+        return "Agent";
+      case 'manager':
+        return "Manager";
+      case 'ambassadeur':
+        return "Ambassadeur";
+      default:
+        return "Utilisateur";
     }
   };
-
   const handleDownloadContract = () => {
     // In the future, this could generate a PDF
     alert("Le téléchargement du contrat sera disponible prochainement.");
   };
-
-  return (
-    <SidebarProvider defaultOpen={true}>
+  return <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex bg-gradient-to-br from-slate-900 to-slate-950 text-white">
-        <UltraSidebar
-          username={username}
-          role={role || ''}
-          userId={userId || ''}
-          onLogout={handleLogout}
-          currentPage="contract"
-        />
+        <UltraSidebar username={username} role={role || ''} userId={userId || ''} onLogout={handleLogout} currentPage="contract" />
 
-        <div className="flex-1 p-4 overflow-y-auto">
+        <div className="flex-1 p-4 overflow-y-auto px-[71px]">
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-bold text-white flex items-center">
                 <Shell className="h-6 w-6 mr-2 text-purple-400" />
                 Mon Contrat
               </h1>
-              <Button
-                variant="outline"
-                onClick={handleDownloadContract}
-                className="flex items-center gap-2 bg-slate-800/80 border-slate-700/50 hover:bg-slate-700 text-white"
-              >
+              <Button variant="outline" onClick={handleDownloadContract} className="flex items-center gap-2 bg-slate-800/80 border-slate-700/50 hover:bg-slate-700 text-white">
                 <Download className="h-4 w-4" />
                 Télécharger le contrat
               </Button>
@@ -139,8 +133,6 @@ const Contract = () => {
           </div>
         </div>
       </div>
-    </SidebarProvider>
-  );
+    </SidebarProvider>;
 };
-
 export default Contract;
