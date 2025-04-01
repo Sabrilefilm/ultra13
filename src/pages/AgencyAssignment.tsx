@@ -17,48 +17,26 @@ import { useAgencyMembers } from "@/hooks/user-management/use-agency-members";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CreatorSelect } from "@/components/live-schedule/creator-select";
-import { Account } from "@/types/accounts";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UltraSidebar } from "@/components/layout/UltraSidebar";
-import { usePlatformSettings } from "@/hooks/use-platform-settings";
-import { useAccountManagement } from "@/hooks/use-account-management";
-import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
-import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
+import { Footer } from "@/components/layout/Footer";
 
 const AgencyAssignment = () => {
   const navigate = useNavigate();
   const { agentId } = useParams();
   const { toast } = useToast();
   const { isAuthenticated, role, username, userId, handleLogout } = useIndexAuth();
-  const { platformSettings, handleUpdateSettings } = usePlatformSettings(role);
-  const { handleCreateAccount } = useAccountManagement();
   const [agents, setAgents] = useState([]);
   const [selectedAgentId, setSelectedAgentId] = useState<string>(agentId || "");
   const [isAddCreatorOpen, setIsAddCreatorOpen] = useState(false);
   const [newCreatorUsername, setNewCreatorUsername] = useState("");
-  
-  // Inactivity timer for automatic logout
-  const { showWarning, dismissWarning, formattedTime } = useInactivityTimer({
-    timeout: 120000, // 2 minutes
-    onTimeout: () => {
-      handleLogout();
-      toast({
-        title: "Déconnexion automatique",
-        description: "Vous avez été déconnecté en raison d'inactivité.",
-        variant: "destructive",
-      });
-    },
-    warningTime: 30000,
-    onWarning: () => {}
-  });
   
   const {
     assignedCreators,
     unassignedCreators,
     isLoading,
     assignCreatorToAgent,
-    removeCreatorFromAgent,
-    fetchUnassignedCreators
+    removeCreatorFromAgent
   } = useAgencyMembers(selectedAgentId);
 
   useEffect(() => {
@@ -229,7 +207,7 @@ const AgencyAssignment = () => {
                 </p>
                 <div className="flex justify-center">
                   <Button 
-                    onClick={() => navigate("/")} 
+                    onClick={() => navigate("/dashboard")} 
                     className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
                   >
                     <HomeIcon className="mr-2 h-4 w-4" />
@@ -269,25 +247,38 @@ const AgencyAssignment = () => {
         
         <div className="flex-1 p-4 md:p-6 overflow-y-auto">
           <div className="max-w-6xl mx-auto space-y-6">
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate("/dashboard")}
+                  className="h-10 w-10 bg-white/5 hover:bg-white/10 text-white"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <h1 className="text-2xl font-bold text-white">
+                  👥 Gestion des équipes d'agence
+                </h1>
+              </div>
+              
               <Button
-                variant="ghost"
-                size="icon"
+                variant="outline"
                 onClick={() => navigate("/dashboard")}
-                className="h-10 w-10 bg-white/5 hover:bg-white/10 text-white"
+                className="flex items-center gap-2 bg-slate-800/80 border-slate-700/50 hover:bg-slate-700 text-white"
               >
-                <ArrowLeft className="h-5 w-5" />
+                <HomeIcon className="h-4 w-4" />
+                Retour au tableau de bord
               </Button>
-              <h1 className="text-2xl font-bold text-white">
-                👥 Gestion des équipes d'agence
-              </h1>
             </div>
 
-            <Card className="mb-6 bg-slate-800/90 backdrop-blur-sm border-purple-900/30">
-              <CardHeader>
-                <CardTitle className="text-white">🔍 Sélectionner un agent</CardTitle>
+            <Card className="border-indigo-800/30 shadow-lg overflow-hidden bg-gradient-to-br from-slate-900 to-slate-950">
+              <CardHeader className="bg-gradient-to-r from-indigo-950/50 to-slate-950/70 pb-6 border-b border-indigo-900/20">
+                <CardTitle className="text-xl md:text-2xl font-bold bg-gradient-to-r from-indigo-300 to-blue-300 bg-clip-text text-transparent">
+                  🔍 Sélection d'agent
+                </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 <div className="max-w-xs">
                   <Select 
                     value={selectedAgentId} 
@@ -308,117 +299,126 @@ const AgencyAssignment = () => {
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Unassigned Creators */}
-              <Card className="bg-slate-800/90 backdrop-blur-sm border-purple-900/30">
-                <CardHeader>
-                  <CardTitle className="flex justify-between items-center text-white">
-                    <span>🆓 Créateurs non assignés ({unassignedCreators.length})</span>
-                    <Dialog open={isAddCreatorOpen} onOpenChange={setIsAddCreatorOpen}>
-                      <DialogTrigger asChild>
-                        <Button size="sm" variant="outline" className="bg-purple-800/30 border-purple-500/30 hover:bg-purple-700/50 text-white">
-                          <Plus className="h-4 w-4 mr-1" />
-                          Ajouter un créateur
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="bg-slate-800 border-purple-900/50 text-white">
-                        <DialogHeader>
-                          <DialogTitle className="text-white">Assigner un créateur</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                          <div className="space-y-2">
-                            <label htmlFor="creator" className="text-white">Sélectionner un créateur</label>
-                            <CreatorSelect 
-                              onSelect={handleSelectCreator}
-                              value={newCreatorUsername}
-                            />
-                          </div>
-                          <Button onClick={handleAddCreator} className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-                            Assigner
-                          </Button>
+            <Card className="border-indigo-800/30 shadow-lg overflow-hidden bg-gradient-to-br from-slate-900 to-slate-950">
+              <CardHeader className="bg-gradient-to-r from-indigo-950/50 to-slate-950/70 pb-6 border-b border-indigo-900/20">
+                <CardTitle className="flex justify-between items-center">
+                  <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-indigo-300 to-blue-300 bg-clip-text text-transparent">
+                    Attribution des créateurs
+                  </span>
+                  <Dialog open={isAddCreatorOpen} onOpenChange={setIsAddCreatorOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700">
+                        <Plus className="h-4 w-4 mr-1" />
+                        Ajouter un créateur
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-slate-800 border-purple-900/50 text-white">
+                      <DialogHeader>
+                        <DialogTitle className="text-white">Assigner un créateur</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <label htmlFor="creator" className="text-white">Sélectionner un créateur</label>
+                          <CreatorSelect 
+                            onSelect={handleSelectCreator}
+                            value={newCreatorUsername}
+                          />
                         </div>
-                      </DialogContent>
-                    </Dialog>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <div className="flex justify-center py-8">
-                      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-                    </div>
-                  ) : unassignedCreators.length === 0 ? (
-                    <div className="text-center py-8 text-gray-400">
-                      Tous les créateurs sont assignés
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {unassignedCreators.map((creator) => (
-                        <Card key={creator.id} className="p-4 bg-slate-700/70 border-purple-800/30">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <p className="font-medium text-white">{creator.username}</p>
-                              <p className="text-sm text-gray-400">Créateur</p>
+                        <Button onClick={handleAddCreator} className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                          Assigner
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 gap-6">
+                  {/* Assigned Creators */}
+                  <div>
+                    <h3 className="text-lg font-medium text-white mb-4 flex items-center">
+                      <Check className="h-5 w-5 text-green-500 mr-2" /> 
+                      Créateurs assignés ({assignedCreators.length})
+                    </h3>
+                    
+                    {isLoading ? (
+                      <div className="flex justify-center py-8">
+                        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+                      </div>
+                    ) : assignedCreators.length === 0 ? (
+                      <div className="text-center py-8 text-gray-400 bg-slate-800/50 rounded-lg border border-slate-700/30 p-6">
+                        Aucun créateur assigné à cet agent
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {assignedCreators.map((creator) => (
+                          <Card key={creator.id} className="p-4 bg-slate-700/70 border-purple-800/30">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="font-medium text-white">{creator.username}</p>
+                                <p className="text-sm text-gray-400">Créateur</p>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleRemoveCreator(creator.id)}
+                                disabled={isLoading}
+                                className="border-red-800/50 bg-red-950/30 hover:bg-red-900/50 text-white"
+                              >
+                                <UserMinus className="h-4 w-4 mr-1" />
+                                Retirer
+                              </Button>
                             </div>
-                            <Button
-                              size="sm"
-                              onClick={() => handleAssignCreator(creator.id)}
-                              disabled={!selectedAgentId || isLoading}
-                              className="bg-purple-600 hover:bg-purple-700 text-white"
-                            >
-                              <UserPlus className="h-4 w-4 mr-1" />
-                              Assigner
-                            </Button>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Assigned Creators */}
-              <Card className="bg-slate-800/90 backdrop-blur-sm border-purple-900/30">
-                <CardHeader>
-                  <CardTitle className="flex justify-between items-center text-white">
-                    <span>👤 Créateurs assignés ({assignedCreators.length})</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <div className="flex justify-center py-8">
-                      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-                    </div>
-                  ) : assignedCreators.length === 0 ? (
-                    <div className="text-center py-8 text-gray-400">
-                      Aucun créateur assigné à cet agent
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {assignedCreators.map((creator) => (
-                        <Card key={creator.id} className="p-4 bg-slate-700/70 border-purple-800/30">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <p className="font-medium text-white">{creator.username}</p>
-                              <p className="text-sm text-gray-400">Créateur</p>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Unassigned Creators */}
+                  <div>
+                    <h3 className="text-lg font-medium text-white mb-4 flex items-center">
+                      <UserPlus className="h-5 w-5 text-blue-500 mr-2" /> 
+                      Créateurs disponibles ({unassignedCreators.length})
+                    </h3>
+                    
+                    {isLoading ? (
+                      <div className="flex justify-center py-8">
+                        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+                      </div>
+                    ) : unassignedCreators.length === 0 ? (
+                      <div className="text-center py-8 text-gray-400 bg-slate-800/50 rounded-lg border border-slate-700/30 p-6">
+                        Tous les créateurs sont assignés
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {unassignedCreators.map((creator) => (
+                          <Card key={creator.id} className="p-4 bg-slate-700/70 border-purple-800/30">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="font-medium text-white">{creator.username}</p>
+                                <p className="text-sm text-gray-400">Créateur</p>
+                              </div>
+                              <Button
+                                size="sm"
+                                onClick={() => handleAssignCreator(creator.id)}
+                                disabled={!selectedAgentId || isLoading}
+                                className="bg-purple-600 hover:bg-purple-700 text-white"
+                              >
+                                <UserPlus className="h-4 w-4 mr-1" />
+                                Assigner
+                              </Button>
                             </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleRemoveCreator(creator.id)}
-                              disabled={isLoading}
-                              className="border-red-800/50 bg-red-950/30 hover:bg-red-900/50 text-white"
-                            >
-                              <UserMinus className="h-4 w-4 mr-1" />
-                              Retirer
-                            </Button>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Footer role={role} />
           </div>
         </div>
       </div>

@@ -95,7 +95,7 @@ const UserManagement = () => {
             role={role || ''}
             userId={userId || ''}
             onLogout={handleLogout}
-            currentPage="users"
+            currentPage="user-management"
           />
           
           <div className="flex-1 p-4">
@@ -105,7 +105,7 @@ const UserManagement = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => navigate("/")}
+                    onClick={() => navigate("/dashboard")}
                     className="h-10 w-10 bg-white/5 hover:bg-white/10 text-white"
                   >
                     <ArrowLeft className="h-5 w-5" />
@@ -115,7 +115,7 @@ const UserManagement = () => {
                 
                 <Button
                   variant="outline"
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/dashboard")}
                   className="flex items-center gap-2 bg-slate-800/80 border-slate-700/50 hover:bg-slate-700 text-white"
                 >
                   <HomeIcon className="h-4 w-4" />
@@ -126,7 +126,7 @@ const UserManagement = () => {
               <div className="bg-slate-800/90 p-8 rounded-lg border border-slate-700/50 shadow-lg text-center">
                 <h2 className="text-xl font-semibold mb-4 text-white">Accès limité 🔒</h2>
                 <p className="text-slate-300 mb-6">En tant qu'agent, vous avez un accès limité à cette page.</p>
-                <Button onClick={() => navigate("/")} className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">
+                <Button onClick={() => navigate("/dashboard")} className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">
                   Retourner au tableau de bord
                 </Button>
               </div>
@@ -149,7 +149,7 @@ const UserManagement = () => {
           role={role || ''}
           userId={userId || ''}
           onLogout={handleLogout}
-          currentPage="users"
+          currentPage="user-management"
         />
         
         <div className="flex-1 p-4 overflow-y-auto">
@@ -159,7 +159,7 @@ const UserManagement = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/dashboard")}
                   className="h-10 w-10 bg-white/5 hover:bg-white/10 text-white"
                 >
                   <ArrowLeft className="h-5 w-5" />
@@ -170,7 +170,7 @@ const UserManagement = () => {
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/dashboard")}
                   className="flex items-center gap-2 bg-slate-800/80 border-slate-700/50 hover:bg-slate-700 text-white"
                 >
                   <HomeIcon className="h-4 w-4" />
@@ -217,9 +217,18 @@ const UserManagement = () => {
               </div>
             </div>
 
-            <div className="w-full max-w-sm mx-auto mb-6">
-              <UserSearchBar onSearch={setSearchQuery} />
-            </div>
+            <Card className="border-indigo-800/30 shadow-lg overflow-hidden bg-gradient-to-br from-slate-900 to-slate-950 mb-6">
+              <CardHeader className="bg-gradient-to-r from-indigo-950/50 to-slate-950/70 pb-4 border-b border-indigo-900/20">
+                <CardTitle className="text-xl md:text-xl font-bold bg-gradient-to-r from-indigo-300 to-blue-300 bg-clip-text text-transparent">
+                  Rechercher un utilisateur
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="w-full max-w-md mx-auto">
+                  <UserSearchBar onSearch={setSearchQuery} />
+                </div>
+              </CardContent>
+            </Card>
 
             {isLoading ? (
               <div className="flex justify-center py-8">
@@ -273,6 +282,27 @@ const UserManagement = () => {
                   <UserTable
                     users={users.agent}
                     title="Agents 🕵️‍♂️"
+                    onDeleteUser={handleDeleteUser}
+                    onViewDetails={handleViewDetails}
+                    onRoleChange={handleRoleChange}
+                    onUsernameEdit={handleUsernameEdit}
+                    onUsernameSave={() => handleUsernameSave(editingUser?.id || '')}
+                    editingUser={editingUser}
+                    editedUsername={editedUsername}
+                    setEditedUsername={setEditedUsername}
+                    showPasswords={showPasswords}
+                    togglePasswordVisibility={togglePasswordVisibility}
+                    userRole={role}
+                    editingPassword={editingPassword}
+                    setEditingPassword={setEditingPassword}
+                    onPasswordEdit={handlePasswordEdit}
+                    onPasswordSave={handlePasswordSave}
+                  />
+                )}
+                {users.ambassadeur.length > 0 && (
+                  <UserTable
+                    users={users.ambassadeur}
+                    title="Ambassadeurs 🎭"
                     onDeleteUser={handleDeleteUser}
                     onViewDetails={handleViewDetails}
                     onRoleChange={handleRoleChange}
