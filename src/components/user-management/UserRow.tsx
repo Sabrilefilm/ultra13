@@ -103,7 +103,7 @@ export const UserRow: React.FC<UserRowProps> = ({
               onRoleChange(user.id, value, user.username);
             }
           }}
-          disabled={!canChangeRoles('agent') && !canChangeRoles('creator') && !canChangeRoles('manager')}
+          disabled={!canChangeRoles('agent') && !canChangeRoles('creator') && !canChangeRoles('manager') && !canChangeRoles('ambassadeur')}
         >
           <SelectTrigger className="w-[120px] bg-slate-700 border-slate-600 text-white">
             <SelectValue />
@@ -112,7 +112,7 @@ export const UserRow: React.FC<UserRowProps> = ({
             <SelectItem value="creator" className="text-white hover:bg-slate-700">Créateur</SelectItem>
             {permissions.isFounder && <SelectItem value="manager" className="text-white hover:bg-slate-700">Manager</SelectItem>}
             <SelectItem value="agent" className="text-white hover:bg-slate-700">Agent</SelectItem>
-            {permissions.isFounder && <SelectItem value="ambassadeur" className="text-white hover:bg-slate-700">Ambassadeur</SelectItem>}
+            <SelectItem value="ambassadeur" className="text-white hover:bg-slate-700">Ambassadeur</SelectItem>
           </SelectContent>
         </Select>
       </TableCell>

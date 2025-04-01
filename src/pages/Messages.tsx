@@ -1,75 +1,18 @@
 
-import { useState } from 'react';
-import { useMessages } from '@/hooks/use-messages';
-import { Loading } from '@/components/ui/loading';
-import { MessageContainer } from '@/components/messages/MessageContainer';
-import { NewMessageDialog } from '@/components/messages/NewMessageDialog';
-import { toast } from 'sonner';
-import { MessagesHeader } from '@/components/messages/MessagesHeader';
-import { MessagesLayout } from '@/components/messages/MessagesLayout';
-import { useMessagesAuth } from '@/hooks/use-messages-auth';
+import React from "react";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { ComingSoonPage } from "@/components/coming-soon/ComingSoonPage";
+import { MessageSquare } from "lucide-react";
 
 const Messages = () => {
-  const { userId, role, username, loading, handleLogout } = useMessagesAuth();
-  const [isNewMessageDialogOpen, setIsNewMessageDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<string>('');
-  
-  // Use the hook for managing messages
-  const messageHook = useMessages(userId);
-  const { allUsers, loadingUsers } = messageHook;
-
-  const handleStartNewConversation = async () => {
-    if (!selectedUser) {
-      toast.error('Veuillez sélectionner un destinataire');
-      return;
-    }
-
-    try {
-      // Use the messageHook defined at the top level to refetch conversations
-      await messageHook.refetch();
-      
-      setIsNewMessageDialogOpen(false);
-      setSelectedUser('');
-      toast.success('Conversation démarrée');
-    } catch (error) {
-      console.error('Error starting conversation:', error);
-      toast.error('Erreur lors du démarrage de la conversation');
-    }
-  };
-
-  if (loading) {
-    return <Loading fullScreen size="large" text="Chargement de la messagerie..." />;
-  }
-
   return (
-    <MessagesLayout 
-      username={username} 
-      role={role} 
-      userId={userId} 
-      onLogout={handleLogout}
-    >
-      <MessagesHeader onNewMessage={() => setIsNewMessageDialogOpen(true)} />
-      
-      <div className="flex-1">
-        <MessageContainer 
-          username={username}
-          role={role}
-          userId={userId}
-        />
-      </div>
-      
-      <NewMessageDialog 
-        isOpen={isNewMessageDialogOpen}
-        onOpenChange={setIsNewMessageDialogOpen}
-        selectedUser={selectedUser}
-        onUserChange={setSelectedUser}
-        onStartConversation={handleStartNewConversation}
-        currentUserRole={role}
-        currentUserId={userId}
-        allUsers={allUsers || []}
-        loadingUsers={loadingUsers}
+    <SidebarProvider defaultOpen={true}>
+      <ComingSoonPage 
+        title="Messagerie Ultra Agency" 
+        icon={<MessageSquare className="h-16 w-16 text-purple-400" />}
+        description="Notre système de messagerie interne sera bientôt disponible. Vous pourrez communiquer avec les créateurs, agents et managers directement depuis la plateforme."
       />
-    </MessagesLayout>
+    </SidebarProvider>
   );
 };
 

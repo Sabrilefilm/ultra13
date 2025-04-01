@@ -8,6 +8,7 @@ import { DashboardModals } from "@/components/layout/DashboardModals";
 import { useDashboardActions } from "@/hooks/use-dashboard-actions";
 import { LogoutButton } from "@/components/layout/LogoutButton";
 import { useAppVersion } from "@/hooks/use-app-version";
+import { MobileNavigation } from "@/components/mobile/MobileNavigation";
 
 interface UltraDashboardProps {
   username: string;
@@ -85,6 +86,12 @@ export const UltraDashboard: React.FC<UltraDashboardProps> = ({
           {children}
         </DashboardContent>
       </div>
+      
+      <MobileNavigation 
+        role={role} 
+        currentPage={currentPage || ''} 
+        onOpenMenu={() => onAction('toggleMobileMenu')} 
+      />
       
       <DashboardModals
         username={username}

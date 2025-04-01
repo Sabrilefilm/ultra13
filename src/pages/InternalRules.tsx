@@ -1,208 +1,192 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
+import { UltraSidebar } from "@/components/layout/UltraSidebar";
 import { useIndexAuth } from "@/hooks/use-index-auth";
-import { usePlatformSettings } from "@/hooks/use-platform-settings";
-import { useAccountManagement } from "@/hooks/use-account-management";
-import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
-import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Shield, BookOpen, ClipboardList } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { motion } from "framer-motion";
-import { FileText, Shield, UserCheck, Lightbulb } from "lucide-react";
-import { EquipmentRecommendations } from "@/components/rules/EquipmentRecommendations";
-import { SocialCommunityLinks } from "@/components/layout/SocialCommunityLinks";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+
+interface Rule {
+  id: string;
+  title: string;
+  description: string;
+  rule_type: string;
+}
 
 const InternalRules = () => {
-  const {
-    toast
-  } = useToast();
-  const {
-    isAuthenticated,
-    username,
-    role,
-    userId,
-    handleLogout
-  } = useIndexAuth();
-  const {
-    platformSettings,
-    handleUpdateSettings
-  } = usePlatformSettings(role);
-  const {
-    handleCreateAccount
-  } = useAccountManagement();
+  const navigate = useNavigate();
+  const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
+  const [activeTab, setActiveTab] = useState("general");
 
-  // Inactivity timer for automatic logout
-  const {
-    showWarning,
-    dismissWarning,
-    formattedTime
-  } = useInactivityTimer({
-    timeout: 120000,
-    // 2 minutes
-    onTimeout: () => {
-      handleLogout();
-      toast({
-        title: "Déconnexion automatique",
-        description: "Vous avez été déconnecté en raison d'inactivité."
-      });
+  const { data: rules, isLoading } = useQuery({
+    queryKey: ["internal-rules"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("creator_rules")
+        .select("*")
+        .order("rule_type", { ascending: true });
+
+      if (error) throw error;
+      return data as Rule[];
     },
-    warningTime: 30000,
-    onWarning: () => {}
   });
-  
-  // Animations config
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { 
-        duration: 0.6,
-        ease: "easeOut"
-      }
-    }
-  };
-  
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2
-      }
-    }
-  };
-  
+
   if (!isAuthenticated) {
     window.location.href = '/';
     return null;
   }
-  
-  return <SidebarProvider defaultOpen={true}>
-      <UltraDashboard username={username} role={role || ''} userId={userId || ''} onLogout={handleLogout} platformSettings={platformSettings} handleCreateAccount={handleCreateAccount} handleUpdateSettings={handleUpdateSettings} showWarning={showWarning} dismissWarning={dismissWarning} formattedTime={formattedTime} currentPage="internal-rules" />
-      
-      <motion.div 
-        className="p-6 md:ml-64 space-y-6"
-        variants={staggerContainer}
-        initial="hidden"
-        animate="visible"
-      >
-        <motion.div variants={fadeInUp}>
-          <Card className="bg-white dark:bg-slate-900 shadow-lg border-purple-100 dark:border-purple-900/30">
-            <CardHeader className="bg-gradient-to-r from-purple-50 to-white dark:from-purple-950/30 dark:to-slate-950 bg-slate-950">
-              <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Shield className="h-6 w-6 text-purple-500" />
-                Règlement Interne Ultra
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 bg-gray-950">
-              <Tabs defaultValue="general" className="w-full">
-                <TabsList className="grid grid-cols-4 mb-6 bg-indigo-950">
-                  <TabsTrigger value="general" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
-                    Règles Générales
-                  </TabsTrigger>
-                  <TabsTrigger value="creators" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
-                    Créateurs
-                  </TabsTrigger>
-                  <TabsTrigger value="staff" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
-                    Staff
-                  </TabsTrigger>
-                  <TabsTrigger value="equipment" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white flex items-center gap-1">
-                    <Lightbulb className="h-4 w-4" />
-                    Équipement
-                  </TabsTrigger>
-                </TabsList>
-                
-                <ScrollArea className="h-[600px] rounded-md border border-purple-100 dark:border-purple-900/30 p-4">
-                  <TabsContent value="general" className="space-y-4">
-                    <div className="space-y-6">
-                      <h3 className="text-xl font-semibold text-purple-700 dark:text-purple-300 border-b border-purple-100 dark:border-purple-800 pb-2">Règles Générales pour Tous les Membres</h3>
-                      
-                      <div className="space-y-4">
-                        <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border-l-4 border-purple-500">
-                          <h4 className="font-medium mb-2 text-purple-800 dark:text-purple-200">1. Respect Mutuel</h4>
-                          <p className="text-gray-700 dark:text-gray-300">Tous les membres de l'agence Ultra doivent se traiter avec respect, indépendamment de leur rôle ou de leur statut.</p>
-                        </div>
-                        
-                        <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border-l-4 border-purple-500">
-                          <h4 className="font-medium mb-2 text-purple-800 dark:text-purple-200">2. Communication</h4>
-                          <p className="text-gray-700 dark:text-gray-300">La communication doit rester professionnelle et constructive dans tous les canaux officiels.</p>
-                        </div>
-                        
-                        <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border-l-4 border-purple-500">
-                          <h4 className="font-medium mb-2 text-purple-800 dark:text-purple-200">3. Confidentialité</h4>
-                          <p className="text-gray-700 dark:text-gray-300">Les informations internes de l'agence ne doivent pas être partagées avec des personnes extérieures.</p>
-                        </div>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="creators" className="space-y-4">
-                    <div className="space-y-6">
-                      <h3 className="text-xl font-semibold text-purple-700 dark:text-purple-300 border-b border-purple-100 dark:border-purple-800 pb-2">Règles pour les Créateurs</h3>
-                      
-                      <div className="space-y-4">
-                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border-l-4 border-blue-500">
-                          <h4 className="font-medium mb-2 text-blue-800 dark:text-blue-200">1. Horaires de Live</h4>
-                          <p className="text-gray-700 dark:text-gray-300">Les créateurs doivent respecter leurs horaires de live programmés et signaler tout changement au moins 24h à l'avance.</p>
-                        </div>
-                        
-                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border-l-4 border-blue-500">
-                          <h4 className="font-medium mb-2 text-blue-800 dark:text-blue-200">2. Contenu</h4>
-                          <p className="text-gray-700 dark:text-gray-300">Le contenu doit être approprié et conforme aux règles de la plateforme TikTok.</p>
-                        </div>
-                        
-                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border-l-4 border-blue-500">
-                          <h4 className="font-medium mb-2 text-blue-800 dark:text-blue-200">3. Matchs</h4>
-                          <p className="text-gray-700 dark:text-gray-300">Les créateurs doivent participer aux matchs programmés par leur agent. En cas d'impossibilité, ils doivent en informer leur agent au moins 48h à l'avance.</p>
-                        </div>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="staff" className="space-y-4">
-                    <div className="space-y-6">
-                      <h3 className="text-xl font-semibold text-purple-700 dark:text-purple-300 border-b border-purple-100 dark:border-purple-800 pb-2">Règles pour le Staff (Agents et Managers)</h3>
-                      
-                      <div className="space-y-4">
-                        <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border-l-4 border-green-500">
-                          <h4 className="font-medium mb-2 text-green-800 dark:text-green-200">1. Encadrement</h4>
-                          <p className="text-gray-700 dark:text-gray-300">Les agents doivent assurer un suivi régulier de leurs créateurs et les accompagner dans leur progression.</p>
-                        </div>
-                        
-                        <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border-l-4 border-green-500">
-                          <h4 className="font-medium mb-2 text-green-800 dark:text-green-200">2. Organisation</h4>
-                          <p className="text-gray-700 dark:text-gray-300">Les matchs doivent être planifiés au moins une semaine à l'avance et correctement communiqués aux créateurs concernés.</p>
-                        </div>
-                        
-                        <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border-l-4 border-green-500">
-                          <h4 className="font-medium mb-2 text-green-800 dark:text-green-200">3. Rapports</h4>
-                          <p className="text-gray-700 dark:text-gray-300">Les agents doivent soumettre un rapport hebdomadaire sur les performances de leurs créateurs et les activités réalisées.</p>
-                        </div>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="equipment" className="space-y-4">
-                    <EquipmentRecommendations role={role || ''} />
-                  </TabsContent>
-                </ScrollArea>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </motion.div>
+
+  // Only founder, manager, agent can view internal rules
+  if (role !== "founder" && role !== "manager" && role !== "agent" && role !== "ambassadeur") {
+    window.location.href = '/';
+    return null;
+  }
+
+  const generalRules = rules?.filter(r => r.rule_type === "general") || [];
+  const disciplinaryRules = rules?.filter(r => r.rule_type === "disciplinary") || [];
+  const comportementRules = rules?.filter(r => r.rule_type === "comportement") || [];
+
+  return (
+    <SidebarProvider defaultOpen={true}>
+      <div className="min-h-screen flex bg-gradient-to-br from-slate-900 to-slate-950 text-white">
+        <UltraSidebar
+          username={username}
+          role={role || ''}
+          userId={userId || ''}
+          onLogout={handleLogout}
+          currentPage="internal-rules"
+        />
         
-        <motion.div variants={fadeInUp} className="mt-6">
-          <SocialCommunityLinks />
-        </motion.div>
-        
-        <motion.div variants={fadeInUp} className="text-center text-sm text-gray-500 dark:text-gray-400">
-          <p className="text-center">Le règlement interne est sujet à modification. Dernière mise à jour: {new Date().toLocaleDateString('fr-FR')}</p>
-        </motion.div>
-      </motion.div>
-    </SidebarProvider>;
+        <div className="flex-1 p-4 overflow-y-auto">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate("/")}
+                  className="h-10 w-10 bg-white/5 hover:bg-white/10 text-white"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <h1 className="text-2xl font-bold text-white flex items-center">
+                  <Shield className="h-6 w-6 mr-2 text-purple-400" />
+                  Règlement Interne
+                </h1>
+              </div>
+            </div>
+
+            <Card className="bg-slate-800/90 backdrop-blur-sm border-purple-500/20 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-purple-900/30 to-indigo-900/30 pb-2">
+                <CardTitle className="text-xl text-white flex items-center">
+                  <BookOpen className="h-5 w-5 mr-2 text-purple-400" />
+                  Règlement d'Ultra Agency
+                </CardTitle>
+              </CardHeader>
+              
+              <CardContent className="p-0">
+                <Tabs defaultValue="general" value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="w-full justify-start bg-slate-800/50 border-b border-slate-700/50 rounded-none p-0">
+                    <TabsTrigger 
+                      value="general" 
+                      className="data-[state=active]:bg-slate-700 rounded-none border-r border-slate-700/30 py-3 flex-1"
+                    >
+                      Règles Générales
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="disciplinary" 
+                      className="data-[state=active]:bg-slate-700 rounded-none border-r border-slate-700/30 py-3 flex-1"
+                    >
+                      Règles Disciplinaires
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="comportement" 
+                      className="data-[state=active]:bg-slate-700 rounded-none py-3 flex-1"
+                    >
+                      Comportement
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <div className="p-6">
+                    <TabsContent value="general" className="mt-0">
+                      {isLoading ? (
+                        <div className="flex justify-center py-8">
+                          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+                        </div>
+                      ) : generalRules.length > 0 ? (
+                        <div className="space-y-6">
+                          {generalRules.map((rule) => (
+                            <div key={rule.id} className="border-b border-slate-700/30 pb-4 last:border-none">
+                              <h3 className="text-lg font-semibold mb-2 text-white">{rule.title}</h3>
+                              <p className="text-slate-300 whitespace-pre-line">{rule.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-slate-400">
+                          <ClipboardList className="h-12 w-12 mx-auto mb-4 text-slate-500" />
+                          <p>Aucune règle générale n'a été définie.</p>
+                        </div>
+                      )}
+                    </TabsContent>
+                    
+                    <TabsContent value="disciplinary" className="mt-0">
+                      {isLoading ? (
+                        <div className="flex justify-center py-8">
+                          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+                        </div>
+                      ) : disciplinaryRules.length > 0 ? (
+                        <div className="space-y-6">
+                          {disciplinaryRules.map((rule) => (
+                            <div key={rule.id} className="border-b border-slate-700/30 pb-4 last:border-none">
+                              <h3 className="text-lg font-semibold mb-2 text-white">{rule.title}</h3>
+                              <p className="text-slate-300 whitespace-pre-line">{rule.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-slate-400">
+                          <ClipboardList className="h-12 w-12 mx-auto mb-4 text-slate-500" />
+                          <p>Aucune règle disciplinaire n'a été définie.</p>
+                        </div>
+                      )}
+                    </TabsContent>
+                    
+                    <TabsContent value="comportement" className="mt-0">
+                      {isLoading ? (
+                        <div className="flex justify-center py-8">
+                          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+                        </div>
+                      ) : comportementRules.length > 0 ? (
+                        <div className="space-y-6">
+                          {comportementRules.map((rule) => (
+                            <div key={rule.id} className="border-b border-slate-700/30 pb-4 last:border-none">
+                              <h3 className="text-lg font-semibold mb-2 text-white">{rule.title}</h3>
+                              <p className="text-slate-300 whitespace-pre-line">{rule.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-slate-400">
+                          <ClipboardList className="h-12 w-12 mx-auto mb-4 text-slate-500" />
+                          <p>Aucune règle de comportement n'a été définie.</p>
+                        </div>
+                      )}
+                    </TabsContent>
+                  </div>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
 };
+
 export default InternalRules;

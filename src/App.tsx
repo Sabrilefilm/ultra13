@@ -24,6 +24,8 @@ import { RouteGuard } from "@/components/RouteGuard";
 import { DashboardView } from "@/components/dashboard/DashboardView";
 import Matches from "./pages/Matches";
 import ExternalMatches from "./pages/ExternalMatches";
+import Contract from "./pages/Contract";
+import PersonalInfo from "./pages/PersonalInfo";
 
 function App() {
   return (
@@ -139,7 +141,7 @@ function App() {
         <Route
           path="/creator-rewards"
           element={
-            <RouteGuard allowedRoles={["founder", "manager", "creator"]}>
+            <RouteGuard allowedRoles={["founder", "manager", "creator", "ambassadeur"]}>
               <CreatorRewards />
             </RouteGuard>
           }
@@ -171,7 +173,7 @@ function App() {
         <Route
           path="/matches"
           element={
-            <RouteGuard allowedRoles={["founder", "manager", "agent", "creator"]}>
+            <RouteGuard allowedRoles={["founder", "manager", "agent", "creator", "ambassadeur"]}>
               <Matches />
             </RouteGuard>
           }
@@ -199,8 +201,24 @@ function App() {
         <Route
           path="/agent-creators/:agentId"
           element={
-            <RouteGuard allowedRoles={["founder", "manager"]}>
+            <RouteGuard allowedRoles={["founder", "manager", "agent"]}>
               <AgentCreators />
+            </RouteGuard>
+          }
+        />
+        <Route
+          path="/contract"
+          element={
+            <RouteGuard allowedRoles={["founder", "manager", "agent", "creator", "ambassadeur"]}>
+              <Contract />
+            </RouteGuard>
+          }
+        />
+        <Route
+          path="/personal-info"
+          element={
+            <RouteGuard>
+              <PersonalInfo />
             </RouteGuard>
           }
         />

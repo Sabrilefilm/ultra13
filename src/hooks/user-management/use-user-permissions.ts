@@ -15,9 +15,13 @@ export const useUserPermissions = (userRole: string) => {
     
     // Définit qui peut modifier les rôles et sous quelles conditions
     const canChangeRole = (userToChange: { role: string }, newRole: string): boolean => {
-      if (isFounder) return true;
-      // Managers can only change users to 'agent' role
-      if (isManager && userToChange.role === 'creator' && newRole === 'agent') return true;
+      if (isFounder) return true; // Founder can change to any role
+      
+      // Managers can change users to 'agent', 'creator', or 'ambassadeur' roles
+      if (isManager && (newRole === 'agent' || newRole === 'creator' || newRole === 'ambassadeur')) {
+        return true;
+      }
+      
       return false;
     };
     

@@ -16,7 +16,8 @@ import {
   BarChart2,
   UserPlus,
   Key,
-  Diamond
+  Diamond,
+  Shell
 } from "lucide-react";
 import { SidebarItem } from "./types";
 
@@ -57,7 +58,7 @@ export const navigationItems: SidebarItem[] = [
     label: "Matchs",
     action: "navigateTo",
     data: "matches",
-    roles: ["founder", "manager", "agent", "creator"] 
+    roles: ["founder", "manager", "agent", "creator", "ambassadeur"] 
   }, 
   {
     icon: Briefcase,
@@ -70,7 +71,7 @@ export const navigationItems: SidebarItem[] = [
     icon: Award,
     label: "Programme de Récompenses",
     action: "navigateTo",
-    data: role => role === "creator" ? "creator-rewards" : "rewards-management",
+    data: role => role === "creator" || role === "ambassadeur" ? "creator-rewards" : "rewards-management",
     roles: ["founder", "manager", "creator", "agent", "ambassadeur"]
   },
   {
@@ -99,7 +100,7 @@ export const navigationItems: SidebarItem[] = [
     icon: Settings,
     label: "Règles",
     action: "navigateTo",
-    data: role => role === "creator" ? "creator-rules" : "internal-rules",
+    data: role => role === "creator" || role === "ambassadeur" ? "creator-rules" : "internal-rules",
     roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
   }, 
   {
@@ -123,6 +124,13 @@ export const navigationItems: SidebarItem[] = [
     data: "agency-assignment",
     roles: ["founder", "manager"],
     animated: true
+  },
+  {
+    icon: Shell,
+    label: "Mon Contrat",
+    action: "navigateTo",
+    data: "contract",
+    roles: ["creator", "agent", "manager", "ambassadeur"],
   }
 ];
 
