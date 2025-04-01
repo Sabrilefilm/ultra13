@@ -5,9 +5,11 @@ import { SidebarUserProfile } from "./sidebar/SidebarUserProfile";
 import { SidebarLogout } from "./sidebar/SidebarLogout";
 import { SidebarLogo } from "./SidebarLogo";
 import { Sidebar } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { getNavigationItems } from "./sidebar/navigationItems";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSidebar } from "@/hooks/use-sidebar";
 
 interface SidebarToggleProps {
   collapsed: boolean;
@@ -70,11 +72,7 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
   version,
   children
 }: UltraSidebarProps) => {
-  const [collapsed, setCollapsed] = useState(false);
-  
-  const handleToggle = () => {
-    setCollapsed(!collapsed);
-  };
+  const { collapsed, toggleSidebar } = useSidebar();
   
   const handleMobileClose = () => {
     if (setMobileMenuOpen) {
@@ -93,7 +91,7 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
   
   const navigationItems = getNavigationItems(role, currentPage);
 
-  return (
+  const sidebarContent = (
     <div className="flex">
       <Sidebar 
         className={`fixed h-full bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-lg z-50 flex flex-col border-r border-purple-800/50 transition-all duration-300 ${
@@ -103,7 +101,7 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
         <div className="flex justify-between items-center p-4 border-b border-purple-800/30">
           {!collapsed && <SidebarLogo />}
           <div className="flex items-center">
-            <SidebarToggle collapsed={collapsed} onToggle={handleToggle} />
+            <SidebarToggle collapsed={collapsed} onToggle={toggleSidebar} />
             {isMobileOpen && (
               <SidebarMobileClose onClose={handleMobileClose} className="md:hidden ml-2" />
             )}
@@ -137,5 +135,14 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
         {children}
       </div>
     </div>
+  );
+
+  // Wrap the sidebar content with SidebarProvider
+  return (
+    <SidebarProvider defaultOpen={true}>
+      <div className="flex w-full">
+        {sidebarContent}
+      </div>
+    </SidebarProvider>
   );
 };

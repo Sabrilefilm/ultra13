@@ -7,7 +7,7 @@ const CreatorDashboard = () => {
   const role = localStorage.getItem("userRole");
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 flex w-full">
       <UltraSidebar
         username={localStorage.getItem("username") || ""}
         role={role || ""}
