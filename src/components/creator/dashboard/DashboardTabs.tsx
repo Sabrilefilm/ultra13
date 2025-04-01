@@ -1,9 +1,11 @@
 
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Trophy, Users } from "lucide-react";
+import { Calendar, Trophy, Users, Diamond, Clock } from "lucide-react";
 import { CreatorSchedule } from "./CreatorSchedule";
 import { RewardsTab } from "./RewardsTab";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 interface DashboardTabsProps {
   creatorData: any;
@@ -33,6 +35,9 @@ export const DashboardTabs = ({
         </TabsTrigger>
         <TabsTrigger value="parrainages" className="flex-1">
           <Users className="h-4 w-4 mr-2" /> Parrainages
+        </TabsTrigger>
+        <TabsTrigger value="statistiques" className="flex-1">
+          <Diamond className="h-4 w-4 mr-2" /> Statistiques
         </TabsTrigger>
       </TabsList>
       <TabsContent value="schedule">
@@ -75,6 +80,75 @@ export const DashboardTabs = ({
               <p className="text-xs text-indigo-400/70 mt-1">Parrainez d'autres créateurs pour gagner des récompenses !</p>
             </div>
           )}
+        </div>
+      </TabsContent>
+      <TabsContent value="statistiques">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="bg-slate-800/40 border-slate-700/50 backdrop-blur-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-blue-600/20 rounded-full">
+                  <Diamond className="h-6 w-6 text-blue-400" />
+                </div>
+                <div>
+                  <div className="text-xl font-bold text-white">Diamants</div>
+                  <div className="text-sm text-slate-300">Total accumulé</div>
+                </div>
+                <div className="ml-auto text-2xl font-bold text-blue-400">
+                  {totalDiamonds.toLocaleString()}
+                </div>
+              </div>
+              <Progress value={Math.min(100, (totalDiamonds / 50000) * 100)} className="h-2 bg-slate-700" />
+              <div className="mt-2 text-xs text-slate-400 text-right">
+                {Math.round((totalDiamonds / 50000) * 100)}% de l'objectif
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-slate-800/40 border-slate-700/50 backdrop-blur-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-green-600/20 rounded-full">
+                  <Clock className="h-6 w-6 text-green-400" />
+                </div>
+                <div>
+                  <div className="text-xl font-bold text-white">Heures de Live</div>
+                  <div className="text-sm text-slate-300">Ce mois-ci</div>
+                </div>
+                <div className="ml-auto text-2xl font-bold text-green-400">
+                  {weeklyHours}h
+                </div>
+              </div>
+              <Progress value={Math.min(100, (weeklyHours / targetHours) * 100)} className="h-2 bg-slate-700" />
+              <div className="mt-2 text-xs text-slate-400 text-right">
+                {Math.round((weeklyHours / targetHours) * 100)}% de l'objectif ({targetHours}h)
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-slate-800/40 border-slate-700/50 backdrop-blur-sm md:col-span-2">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-purple-600/20 rounded-full">
+                  <Calendar className="h-6 w-6 text-purple-400" />
+                </div>
+                <div>
+                  <div className="text-xl font-bold text-white">Jours de Stream</div>
+                  <div className="text-sm text-slate-300">Ce mois-ci</div>
+                </div>
+                <div className="ml-auto text-2xl font-bold text-purple-400">
+                  {creatorData.schedule?.days || 0} / {targetDays}
+                </div>
+              </div>
+              <Progress 
+                value={Math.min(100, ((creatorData.schedule?.days || 0) / targetDays) * 100)} 
+                className="h-2 bg-slate-700" 
+              />
+              <div className="mt-2 text-xs text-slate-400 text-right">
+                {Math.round(((creatorData.schedule?.days || 0) / targetDays) * 100)}% de l'objectif
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </TabsContent>
     </Tabs>

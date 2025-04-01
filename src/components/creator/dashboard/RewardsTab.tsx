@@ -58,6 +58,46 @@ export const RewardsTab = ({ totalDiamonds }: RewardsTabProps) => {
               </div>
             </CardContent>
           </Card>
+          
+          <Card className="bg-gradient-to-br from-yellow-600/10 to-yellow-400/10 border-yellow-500/20">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-yellow-500/20 rounded-full">
+                  <DiamondIcon className="h-8 w-8 text-yellow-300" />
+                </div>
+                <div>
+                  <div className="text-xl font-bold text-white">Or</div>
+                  <div className="text-sm text-yellow-300">25,000 - 50,000 diamants</div>
+                </div>
+              </div>
+              <Progress value={Math.min(100, (totalDiamonds / 50000) * 100)} className="h-2 bg-slate-700" />
+              <div className="mt-4 text-sm text-slate-300">
+                {totalDiamonds >= 25000 
+                  ? "Niveau débloqué ! 🎉" 
+                  : `${25000 - totalDiamonds} diamants restants pour débloquer`}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-br from-blue-600/10 to-blue-400/10 border-blue-500/20">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-blue-500/20 rounded-full">
+                  <DiamondIcon className="h-8 w-8 text-blue-300" />
+                </div>
+                <div>
+                  <div className="text-xl font-bold text-white">Diamant</div>
+                  <div className="text-sm text-blue-300">50,000+ diamants</div>
+                </div>
+              </div>
+              <Progress value={Math.min(100, (totalDiamonds / 100000) * 100)} className="h-2 bg-slate-700" />
+              <div className="mt-4 text-sm text-slate-300">
+                {totalDiamonds >= 50000 
+                  ? "Niveau débloqué ! 🎉" 
+                  : `${50000 - totalDiamonds} diamants restants pour débloquer`}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </CardContent>
     </Card>

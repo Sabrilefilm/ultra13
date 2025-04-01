@@ -108,6 +108,7 @@ export const useAgencyMembers = (agentId: string) => {
       
       if (error) throw error;
       
+      toast.success("Créateur assigné avec succès");
       await fetchAssignedCreators();
       await fetchUnassignedCreators();
       return true;
@@ -127,6 +128,7 @@ export const useAgencyMembers = (agentId: string) => {
       
       if (error) throw error;
       
+      toast.success("Créateur retiré avec succès");
       await fetchAssignedCreators();
       await fetchUnassignedCreators();
       return true;

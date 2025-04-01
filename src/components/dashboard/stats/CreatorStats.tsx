@@ -6,12 +6,15 @@ import { StatsCardGrid } from "./components/StatsCardGrid";
 import { UpdateNotice } from "./components/UpdateNotice";
 import { ObjectiveWarning } from "./components/ObjectiveWarning";
 import { PerformanceStats } from "./components/PerformanceStats";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface CreatorStatsProps {
   userId?: string;
 }
 
 const CreatorStats: React.FC<CreatorStatsProps> = ({ userId }) => {
+  const navigate = useNavigate();
   const {
     liveSchedule,
     monthlyHours,
@@ -21,13 +24,25 @@ const CreatorStats: React.FC<CreatorStatsProps> = ({ userId }) => {
     daysColor,
     diamondsText,
     showWarning,
-    navigate,
+    navigate: statsNavigate,
     totalDiamonds,
     performanceMetrics
   } = useCreatorDashboardStats(userId);
   
   return (
     <div className="space-y-6">
+      <div className="flex items-center gap-2 mb-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate('/')}
+          className="h-10 w-10"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h2 className="text-2xl font-bold">Statistiques du Créateur</h2>
+      </div>
+      
       <StatsCardGrid 
         monthlyHours={monthlyHours}
         requiredHours={requiredHours}
