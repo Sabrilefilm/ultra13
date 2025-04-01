@@ -45,7 +45,15 @@ export const useAgencyMembers = (agentId: string) => {
       
       const { data, error } = await supabase
         .from("user_accounts")
-        .select("*")
+        .select(`
+          *,
+          live_schedules (
+            hours, days
+          ),
+          profiles (
+            total_diamonds
+          )
+        `)
         .eq("role", "creator")
         .eq("agent_id", finalAgentId);
       
@@ -72,7 +80,15 @@ export const useAgencyMembers = (agentId: string) => {
       
       const { data, error } = await supabase
         .from("user_accounts")
-        .select("*")
+        .select(`
+          *,
+          live_schedules (
+            hours, days
+          ),
+          profiles (
+            total_diamonds
+          )
+        `)
         .eq("role", "creator")
         .is("agent_id", null);
       

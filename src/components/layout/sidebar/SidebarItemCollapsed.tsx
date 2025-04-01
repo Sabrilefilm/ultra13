@@ -8,7 +8,7 @@ export const SidebarItemCollapsed: React.FC<SidebarItemProps> = ({ item, isActiv
     const baseClass = "w-full flex items-center justify-center px-3 py-2 text-sm rounded-md";
     
     if (isActive) {
-      return `${baseClass} ${item.animated ? 'bg-gradient-to-r from-blue-500 to-blue-700 text-white animate-pulse' : 'bg-purple-900/50 text-white'}`;
+      return `${baseClass} ${item.animated ? 'bg-gradient-to-r from-blue-600 to-blue-800 text-white animate-pulse' : 'bg-blue-800 text-white'}`;
     }
     
     return `${baseClass} text-slate-300 hover:bg-slate-700/50 hover:text-white`;

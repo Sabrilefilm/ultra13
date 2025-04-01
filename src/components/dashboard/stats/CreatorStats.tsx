@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useCreatorDashboardStats } from "@/hooks/use-creator-dashboard-stats";
 import { StatsCardGrid } from "./components/StatsCardGrid";
@@ -8,6 +8,7 @@ import { ObjectiveWarning } from "./components/ObjectiveWarning";
 import { PerformanceStats } from "./components/PerformanceStats";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
 
 interface CreatorStatsProps {
   userId?: string;
@@ -15,6 +16,26 @@ interface CreatorStatsProps {
 
 const CreatorStats: React.FC<CreatorStatsProps> = ({ userId }) => {
   const navigate = useNavigate();
+  const [role, setRole] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (userId) {
+        const { data, error } = await supabase
+          .from("user_accounts")
+          .select("role")
+          .eq("id", userId)
+          .single();
+          
+        if (!error && data) {
+          setRole(data.role);
+        }
+      }
+    };
+    
+    fetchUserRole();
+  }, [userId]);
+  
   const {
     liveSchedule,
     monthlyHours,
@@ -64,10 +85,20 @@ const CreatorStats: React.FC<CreatorStatsProps> = ({ userId }) => {
       
       <UpdateNotice />
       
-      <ObjectiveWarning 
-        show={showWarning} 
-        onContactClick={() => navigate('/messages')} 
-      />
+      {role !== "agent" && (
+        <ObjectiveWarning 
+          show={showWarning} 
+          onContactClick={() => navigate('/messages')} 
+        />
+      )}
+      
+      {role === "agent" && (
+        <div className="flex justify-end mt-4">
+          <Button onClick={() => navigate('/creator-stats')} className="bg-blue-600 hover:bg-blue-700">
+            Voir tous mes créateurs
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

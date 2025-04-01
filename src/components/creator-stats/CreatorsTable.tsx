@@ -2,7 +2,7 @@
 import React from "react";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { PencilLine, Diamond, UserMinus } from "lucide-react";
+import { PencilLine, Diamond, UserMinus, Eye } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/ui/pagination";
 
@@ -85,6 +85,8 @@ export const CreatorsTable: React.FC<CreatorsTableProps> = ({
     );
   }
 
+  const isAgent = role === 'agent';
+
   return (
     <div className="space-y-4">
       <div className="w-full overflow-x-auto">
@@ -116,34 +118,47 @@ export const CreatorsTable: React.FC<CreatorsTableProps> = ({
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => onEditSchedule(creator)}
-                    >
-                      <PencilLine className="h-4 w-4 mr-1" />
-                      {isMobile ? '' : 'Modifier les horaires'}
-                    </Button>
-                    
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="border-purple-500 text-purple-500 hover:bg-purple-100 hover:text-purple-700"
-                      onClick={() => onEditDiamonds(creator)}
-                    >
-                      <Diamond className="h-4 w-4 mr-1" />
-                      {isMobile ? '' : 'Modifier les diamants'}
-                    </Button>
-                    
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="text-red-500 border-red-500 hover:bg-red-100 hover:text-red-700"
-                      onClick={() => onRemoveCreator(creator)}
-                    >
-                      <UserMinus className="h-4 w-4 mr-1" />
-                      {isMobile ? '' : 'Retirer'}
-                    </Button>
+                    {isAgent ? (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => onEditSchedule(creator)}
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        {isMobile ? '' : 'Voir les détails'}
+                      </Button>
+                    ) : (
+                      <>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => onEditSchedule(creator)}
+                        >
+                          <PencilLine className="h-4 w-4 mr-1" />
+                          {isMobile ? '' : 'Modifier les horaires'}
+                        </Button>
+                        
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="border-purple-500 text-purple-500 hover:bg-purple-100 hover:text-purple-700"
+                          onClick={() => onEditDiamonds(creator)}
+                        >
+                          <Diamond className="h-4 w-4 mr-1" />
+                          {isMobile ? '' : 'Modifier les diamants'}
+                        </Button>
+                        
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="text-red-500 border-red-500 hover:bg-red-100 hover:text-red-700"
+                          onClick={() => onRemoveCreator(creator)}
+                        >
+                          <UserMinus className="h-4 w-4 mr-1" />
+                          {isMobile ? '' : 'Retirer'}
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>

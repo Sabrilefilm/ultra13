@@ -51,7 +51,7 @@ export const navigationItems: SidebarItem[] = [
     label: "Utilisateurs",
     action: "navigateTo",
     data: "user-management",
-    roles: ["founder", "manager", "agent", "ambassadeur"]
+    roles: ["founder", "manager"], // Removed "agent" and "ambassadeur" from this item
   }, 
   {
     icon: Trophy,

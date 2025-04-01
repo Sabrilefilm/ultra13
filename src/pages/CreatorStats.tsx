@@ -9,10 +9,14 @@ import { SearchBar } from "@/components/accounts/SearchBar";
 import { StatsHeader } from "@/components/creator-stats/StatsHeader";
 import { StatsSummaryCards } from "@/components/creator-stats/StatsSummaryCards";
 import { ResetActionsCard } from "@/components/creator-stats/ResetActionsCard";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const pageSize = 10;
 
 const CreatorStats = () => {
+  const navigate = useNavigate();
   const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -75,6 +79,18 @@ const CreatorStats = () => {
         currentPage="creator-stats"
       >
         <div className="p-6 max-w-7xl mx-auto">
+          <div className="flex items-center gap-2 mb-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/')}
+              className="h-10 w-10"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h2 className="text-2xl font-bold">Statistiques des Créateurs</h2>
+          </div>
+          
           <StatsHeader 
             totalCreators={totalCreators}
             totalActiveCreators={totalActiveCreators}
@@ -91,10 +107,12 @@ const CreatorStats = () => {
               value={search} 
               onChange={handleSearch} 
             />
-            <ResetActionsCard
-              onResetSchedules={resetAllSchedules}
-              onResetDiamonds={resetAllDiamonds}
-            />
+            {role !== "agent" && (
+              <ResetActionsCard
+                onResetSchedules={resetAllSchedules}
+                onResetDiamonds={resetAllDiamonds}
+              />
+            )}
           </div>
 
           <CreatorsTable

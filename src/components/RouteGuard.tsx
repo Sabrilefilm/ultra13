@@ -16,7 +16,14 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({ children, allowedRoles }
   }
 
   if (allowedRoles && !allowedRoles.includes(role || '')) {
-    return <Navigate to="/dashboard" replace />;
+    // Redirect to appropriate page based on role
+    if (role === 'creator') {
+      return <Navigate to="/dashboard" replace />;
+    } else if (role === 'agent') {
+      return <Navigate to="/creator-stats" replace />;
+    } else {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
   return <>{children}</>;

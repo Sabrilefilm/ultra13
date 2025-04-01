@@ -28,7 +28,7 @@ export const RoleStats = ({ role, userId }: RoleStatsProps) => {
   }
 
   if (role === 'agent') {
-    return <AgentStats />;
+    return <AgentStats userId={userId} />;
   }
 
   return null;
