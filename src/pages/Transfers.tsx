@@ -12,6 +12,7 @@ import { TransferTabs } from '@/components/transfers/TransferTabs';
 import { TransferTable } from '@/components/transfers/TransferTable';
 import { TransferEmptyState } from '@/components/transfers/TransferEmptyState';
 import { useTransferRequests } from '@/components/transfers/hooks/useTransferRequests';
+import { BackButton } from '@/components/ui/back-button';
 
 const Transfers = () => {
   const navigate = useNavigate();
@@ -95,15 +96,16 @@ const Transfers = () => {
           userId={userId}
           onLogout={handleLogout}
           currentPage="transfers"
-        />
-        
-        <div className="flex-1 flex flex-col">
-          <TransferHeader 
-            role={role} 
-            onOpenTransferDialog={() => setShowTransferDialog(true)} 
-          />
-          
-          <div className="flex-1 p-4 max-w-6xl mx-auto w-full">
+        >
+          <div className="w-full max-w-6xl mx-auto p-4">
+            <div className="flex items-center mb-4">
+              <BackButton className="mr-4" />
+              <TransferHeader 
+                role={role} 
+                onOpenTransferDialog={() => setShowTransferDialog(true)} 
+              />
+            </div>
+            
             <Card className="shadow-md border-purple-100 dark:border-purple-900/30">
               <TransferTabs 
                 selectedTab={selectedTab} 
@@ -128,7 +130,7 @@ const Transfers = () => {
               </CardContent>
             </Card>
           </div>
-        </div>
+        </UltraSidebar>
 
         <TransferRequestDialog
           isOpen={showTransferDialog}

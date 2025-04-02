@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { UltraSidebar } from "@/components/layout/UltraSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { BackButton } from "@/components/ui/back-button";
 
 const NotificationManagement = () => {
   const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
@@ -45,8 +46,11 @@ const NotificationManagement = () => {
         onLogout={handleLogout}
         currentPage="notifications"
       >
-        <div className="p-6 max-w-7xl mx-auto">
-          <h1 className="text-2xl font-bold mb-6">Gestion des notifications</h1>
+        <div className="w-full max-w-6xl mx-auto p-6">
+          <div className="flex items-center mb-6">
+            <BackButton className="mr-4" />
+            <h1 className="text-2xl font-bold mb-6">Gestion des notifications</h1>
+          </div>
           
           {loading ? (
             <div className="flex justify-center items-center h-64">
@@ -57,8 +61,8 @@ const NotificationManagement = () => {
               {/* Notification list */}
             </div>
           ) : (
-            <div className="text-center p-8 bg-slate-100 dark:bg-slate-800 rounded-lg">
-              <p className="text-slate-600 dark:text-slate-300">Aucune notification disponible.</p>
+            <div className="text-center p-8 bg-slate-800 rounded-lg">
+              <p className="text-slate-300">Aucune notification disponible.</p>
             </div>
           )}
         </div>

@@ -8,6 +8,7 @@ import { Footer } from "@/components/layout/Footer";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BackButton } from "@/components/ui/back-button";
 
 const RewardsManagement = () => {
   const navigate = useNavigate();
@@ -39,14 +40,7 @@ const RewardsManagement = () => {
       
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/")}
-            className="h-10 w-10 bg-slate-800/50 hover:bg-slate-700/50"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <BackButton />
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <Diamond className="h-6 w-6 text-purple-400" />
             Programme de Récompenses

@@ -8,6 +8,7 @@ import { Shell, Download, FileText, Diamond, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { generateContractPDF } from "@/utils/contract-utils";
 import { toast } from "@/hooks/use-toast";
+import { BackButton } from "@/components/ui/back-button";
 
 const Contract = () => {
   const {
@@ -69,15 +70,16 @@ const Contract = () => {
             userId={userId || ''} 
             onLogout={handleLogout} 
             currentPage="contract" 
-          />
-          
-          <div className="flex-1 flex flex-col items-center justify-center p-6">
-            <div className="w-full max-w-4xl mx-auto">
+          >
+            <div className="w-full max-w-4xl mx-auto p-6">
               <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-white flex items-center">
-                  <Shell className="h-6 w-6 mr-2 text-purple-400" />
-                  Mon Contrat
-                </h1>
+                <div className="flex items-center">
+                  <BackButton className="mr-4" />
+                  <h1 className="text-2xl font-bold text-white flex items-center">
+                    <Shell className="h-6 w-6 mr-2 text-purple-400" />
+                    Mon Contrat
+                  </h1>
+                </div>
                 <Button 
                   variant="outline" 
                   onClick={handleDownloadContract} 
@@ -182,7 +184,7 @@ const Contract = () => {
                 </CardContent>
               </Card>
             </div>
-          </div>
+          </UltraSidebar>
         </div>
       </div>
     </SidebarProvider>

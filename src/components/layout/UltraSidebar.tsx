@@ -88,33 +88,35 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
   const navigationItems = getNavigationItems(role, currentPage);
   
   return (
-    <div className="flex h-full">
-      <Sidebar className={`fixed h-full bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-lg z-50 flex flex-col border-r border-purple-800/50 transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}>
-        <div className="flex justify-between items-center p-4 border-b border-purple-800/30">
-          {!collapsed && <SidebarLogo />}
-          <div className="flex items-center">
-            <SidebarToggle collapsed={collapsed} onToggle={toggleSidebar} />
-            {isMobileOpen && <SidebarMobileClose onClose={handleMobileClose} className="md:hidden ml-2" />}
+    <div className="flex flex-col h-full">
+      <div className="flex h-full">
+        <Sidebar className={`fixed h-full bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-lg z-50 flex flex-col border-r border-purple-800/50 transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}>
+          <div className="flex justify-between items-center p-4 border-b border-purple-800/30">
+            {!collapsed && <SidebarLogo />}
+            <div className="flex items-center">
+              <SidebarToggle collapsed={collapsed} onToggle={toggleSidebar} />
+              {isMobileOpen && <SidebarMobileClose onClose={handleMobileClose} className="md:hidden ml-2" />}
+            </div>
           </div>
+          
+          <SidebarUserProfile username={username} role={role} collapsed={collapsed} />
+          
+          <div className="flex-1 overflow-y-auto py-4">
+            <SidebarNavigation 
+              items={navigationItems} 
+              currentPage={currentPage} 
+              role={role} 
+              onClick={handleSidebarItemClick} 
+              collapsed={collapsed} 
+            />
+          </div>
+          
+          <SidebarLogout onLogout={onLogout} collapsed={collapsed} username={username} role={role} />
+        </Sidebar>
+        
+        <div className={`flex-1 transition-all duration-300 mx-auto ${collapsed ? 'ml-16' : 'ml-64'}`}>
+          {children}
         </div>
-        
-        <SidebarUserProfile username={username} role={role} collapsed={collapsed} />
-        
-        <div className="flex-1 overflow-y-auto py-4">
-          <SidebarNavigation 
-            items={navigationItems} 
-            currentPage={currentPage} 
-            role={role} 
-            onClick={handleSidebarItemClick} 
-            collapsed={collapsed} 
-          />
-        </div>
-        
-        <SidebarLogout onLogout={onLogout} collapsed={collapsed} username={username} role={role} />
-      </Sidebar>
-      
-      <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-16' : 'ml-64'} w-full`}>
-        {children}
       </div>
     </div>
   );
