@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Plus, UsersRound, FileSpreadsheet, HomeIcon } from "lucide-react";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { UserSearchBar } from "@/components/UserSearchBar";
