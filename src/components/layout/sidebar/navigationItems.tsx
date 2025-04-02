@@ -17,7 +17,8 @@ import {
   UserPlus,
   Key,
   Diamond,
-  Shell
+  Shell,
+  UserCog
 } from "lucide-react";
 import { SidebarItem } from "./types";
 
@@ -118,11 +119,11 @@ export const navigationItems: SidebarItem[] = [
     roles: ["founder"]
   },
   {
-    icon: Users,
+    icon: UserCog,
     label: "Gestion Agence",
     action: "navigateTo",
     data: "agency-assignment",
-    roles: ["founder", "manager"],
+    roles: ["founder", "manager", "agent"],
     animated: true
   },
   {

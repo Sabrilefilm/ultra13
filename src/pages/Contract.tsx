@@ -1,218 +1,278 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UltraSidebar } from "@/components/layout/UltraSidebar";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shell, Download, FileText, Diamond, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { generateContractPDF } from "@/utils/contract-utils";
-import { toast } from "@/hooks/use-toast";
-import { BackButton } from "@/components/ui/back-button";
+import { ArrowLeft, Download, FileText } from "lucide-react";
+import { jsPDF } from "jspdf";
+import { useNavigate } from "react-router-dom";
+import { MobileMenu } from "@/components/mobile/MobileMenu";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { MobileNavigation } from "@/components/mobile/MobileNavigation";
+import agencyLogo from "/public/logo.png";
 
 const Contract = () => {
-  const {
-    isAuthenticated,
-    username,
-    role,
-    userId,
-    handleLogout
-  } = useIndexAuth();
-  
+  const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const [downloading, setDownloading] = useState(false);
+
   if (!isAuthenticated) {
-    window.location.href = '/';
+    navigate('/');
     return null;
   }
-  
-  const roleText = () => {
-    switch (role) {
-      case 'creator':
-        return "Créateur";
-      case 'agent':
-        return "Agent";
-      case 'manager':
-        return "Manager";
-      case 'ambassadeur':
-        return "Ambassadeur";
-      default:
-        return "Utilisateur";
-    }
-  };
-  
-  const handleDownloadContract = () => {
+
+  const handleDownloadPDF = () => {
+    setDownloading(true);
+    
     try {
-      generateContractPDF({
-        username: username || '',
-        role: roleText(),
-        userId: userId || ''
-      });
-      toast({
-        title: "Téléchargement du contrat",
-        description: "Votre contrat a été généré avec succès",
-      });
+      const doc = new jsPDF();
+      
+      // Add logo
+      const imgWidth = 30;
+      const imgHeight = 15;
+      doc.addImage(agencyLogo, 'PNG', (doc.internal.pageSize.getWidth() - imgWidth) / 2, 10, imgWidth, imgHeight);
+      
+      // Title
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text("CONTRAT DE CRÉATEUR PHOCÉEN AGENCY", doc.internal.pageSize.getWidth() / 2, 35, { align: 'center' });
+      
+      // Parties
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text("Entre :", 20, 45);
+      doc.text("Phocéen Agency, ci-après dénommée \"l'Agence\", et", 20, 55);
+      doc.text(`${username}, ci-après dénommé "le Créateur",`, 20, 65);
+      doc.text("Il a été convenu ce qui suit :", 20, 75);
+      
+      // Sections
+      doc.setFont('helvetica', 'bold');
+      doc.text("1. OBJET DU CONTRAT", 20, 85);
+      doc.setFont('helvetica', 'normal');
+      doc.text("Phocéen Agency propose un programme d'accompagnement destiné aux créateurs de contenu sur", 20, 95);
+      doc.text("les réseaux sociaux.", 20, 102);
+      doc.text("Cet accompagnement inclut :", 20, 112);
+      doc.text("- La formation à la création de contenu en direct (live streaming).", 20, 122);
+      doc.text("- L'aide au développement de l'audience.", 20, 129);
+      doc.text("- L'accompagnement pour le placement de produits.", 20, 136);
+      doc.text("- Un programme de récompense basé sur les performances.", 20, 143);
+      doc.text("Ce contrat ne constitue ni un CDD, ni un CDI, ni tout autre type de contrat de travail. Il s'agit d'une", 20, 153);
+      doc.text("collaboration basée sur des objectifs et des performances.", 20, 160);
+      
+      // More sections would follow with similar formatting...
+      doc.setFont('helvetica', 'bold');
+      doc.text("2. CONDITIONS D'ÉLIGIBILITÉ", 20, 170);
+      doc.setFont('helvetica', 'normal');
+      doc.text("Pour intégrer Phocéen Agency, les critères suivants doivent être remplis :", 20, 180);
+      doc.text("- Âge minimum : 18 ans.", 20, 190);
+      doc.text("- Minimum 500 abonnés sur TikTok.", 20, 197);
+      doc.text("- Autorisation pour les personnes en situation de handicap.", 20, 204);
+      doc.text("- Posséder un téléphone mobile et WhatsApp.", 20, 211);
+      
+      // Add a second page
+      doc.addPage();
+      
+      // Continue with remaining sections
+      doc.text("- Avoir au moins un match off par mois.", 20, 20);
+      doc.text("- Présentation correcte et tenue respectueuse.", 20, 27);
+      doc.text("- Interdiction de montrer des enfants mineurs sous une apparence inappropriée.", 20, 34);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text("3. RÉMUNÉRATION & PROGRAMME DE RÉCOMPENSES", 20, 45);
+      doc.setFont('helvetica', 'normal');
+      doc.text("La rémunération est basée sur le système \"Ultra\". Les créateurs sont payés selon :", 20, 55);
+      doc.text("- Nombre de jours et d'heures de streaming.", 20, 65);
+      doc.text("- Respect des objectifs.", 20, 72);
+      doc.text("- Nombre de diamants collectés.", 20, 79);
+      doc.text("Modalités de paiement :", 20, 89);
+      doc.text("- TikTok (commission de 50%)", 20, 99);
+      doc.text("- PayPal (48 à 72 heures)", 20, 106);
+      doc.text("- Carte cadeau (3 à 7 jours)", 20, 113);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text("4. ENGAGEMENTS DU CRÉATEUR", 20, 124);
+      doc.setFont('helvetica', 'normal');
+      doc.text("Le Créateur s'engage à respecter les règles TikTok, produire du contenu conforme aux valeurs", 20, 134);
+      doc.text("de l'Agence et se conformer aux exigences de participation.", 20, 141);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text("5. RESPONSABILITÉS", 20, 152);
+      doc.setFont('helvetica', 'normal');
+      doc.text("L'Agence n'est pas responsable en cas de harcèlement. Toute menace doit être signalée aux autorités.", 20, 162);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text("6. HIÉRARCHIE AU SEIN DE L'AGENCE", 20, 173);
+      doc.setFont('helvetica', 'normal');
+      doc.text("Évolution possible : Agent > Ambassadeur > Manager > Directeur > Fondateur.", 20, 183);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text("7. RÉSILIATION", 20, 194);
+      doc.setFont('helvetica', 'normal');
+      doc.text("Le contrat peut être résilié par l'Agence ou le Créateur avec notification écrite.", 20, 204);
+      doc.text("Délai de 30 jours avant départ officiel.", 20, 211);
+      
+      doc.text("Contact : contact@phoceenagency.fr", 20, 225);
+      
+      // Signature
+      doc.text(`Fait à ______________, le __/__/____`, 20, 240);
+      
+      doc.text("Signature du Créateur", 40, 260);
+      doc.text("Signature de l'Agence", 140, 260);
+      
+      // Save the PDF
+      doc.save(`Contrat_Phoceen_Agency_${username}.pdf`);
     } catch (error) {
-      console.error("Erreur lors du téléchargement:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur de téléchargement",
-        description: "Une erreur est survenue lors de la génération du contrat",
-      });
+      console.error("Error generating PDF:", error);
+    } finally {
+      setDownloading(false);
     }
   };
-  
+
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 to-slate-950 text-white">
-        <div className="flex w-full">
-          <UltraSidebar 
-            username={username} 
-            role={role || ''} 
-            userId={userId || ''} 
-            onLogout={handleLogout} 
-            currentPage="contract" 
-          >
-            <div className="w-full max-w-4xl mx-auto p-4 md:p-6">
-              <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
-                <div className="flex items-center">
-                  <BackButton className="mr-4" />
-                  <h1 className="text-2xl font-bold text-white flex items-center">
-                    <Shell className="h-6 w-6 mr-2 text-purple-400" />
-                    Mon Contrat
-                  </h1>
-                </div>
-                <Button 
-                  variant="outline" 
-                  onClick={handleDownloadContract} 
-                  className="flex items-center gap-2 bg-slate-800/80 border-slate-700/50 hover:bg-slate-700 text-white"
-                >
-                  <Download className="h-4 w-4" />
-                  Télécharger le contrat
-                </Button>
-              </div>
-              
-              <Card className="bg-slate-800/90 border-purple-500/20 w-full">
-                <CardHeader className="bg-gradient-to-r from-purple-900/30 to-indigo-900/30">
-                  <div className="flex items-center justify-between flex-wrap gap-4">
-                    <CardTitle className="flex items-center">
-                      <FileText className="h-5 w-5 text-purple-400 mr-2" />
-                      CONTRAT DE CRÉATEUR PHOCÉEN AGENCY
-                    </CardTitle>
-                    <img 
-                      src="https://phoceenagency.fr/wp-content/uploads/2023/12/logo-PA-blanc.png" 
-                      alt="Phocéen Agency Logo" 
-                      className="h-12 object-contain"
-                    />
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4 md:p-6">
-                  <div className="space-y-6 text-sm md:text-base">
-                    <div className="text-center mb-6">
-                      <p className="text-slate-300">Entre :</p>
-                      <p className="text-slate-300">Phocéen Agency, ci-après dénommée "l'Agence", et</p>
-                      <p className="text-slate-300">[{username}], ci-après dénommé "le Créateur",</p>
-                      <p className="text-slate-300">Il a été convenu ce qui suit :</p>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold border-b border-slate-700 pb-2">1. OBJET DU CONTRAT</h3>
-                      <p className="text-slate-300">
-                        Phocéen Agency propose un programme d'accompagnement destiné aux créateurs de contenu sur les réseaux sociaux.
-                      </p>
-                      <p className="text-slate-300">Cet accompagnement inclut :</p>
-                      <ul className="space-y-1 pl-5 list-disc text-slate-300">
-                        <li>La formation à la création de contenu en direct (live streaming).</li>
-                        <li>L'aide au développement de l'audience.</li>
-                        <li>L'accompagnement pour le placement de produits.</li>
-                        <li>Un programme de récompense basé sur les performances.</li>
-                      </ul>
-                      <p className="text-slate-300">
-                        Ce contrat ne constitue ni un CDD, ni un CDI, ni tout autre type de contrat de travail. Il s'agit d'une collaboration basée
-                        sur des objectifs et des performances.
-                      </p>
-                      
-                      <h3 className="text-lg font-semibold border-b border-slate-700 pb-2 mt-6">2. CONDITIONS D'ÉLIGIBILITÉ</h3>
-                      <p className="text-slate-300">
-                        Pour intégrer Phocéen Agency, les critères suivants doivent être remplis :
-                      </p>
-                      <ul className="space-y-1 pl-5 list-disc text-slate-300">
-                        <li>Âge minimum : 18 ans.</li>
-                        <li>Minimum 500 abonnés sur TikTok.</li>
-                        <li>Autorisation pour les personnes en situation de handicap.</li>
-                        <li>Posséder un téléphone mobile et WhatsApp.</li>
-                        <li>Avoir au moins un match off par mois.</li>
-                        <li>Présentation correcte et tenue respectueuse.</li>
-                        <li>Interdiction de montrer des enfants mineurs sous une apparence inappropriée.</li>
-                      </ul>
-                      
-                      <h3 className="text-lg font-semibold border-b border-slate-700 pb-2 mt-6">3. RÉMUNÉRATION & PROGRAMME DE RÉCOMPENSES</h3>
-                      <p className="text-slate-300">
-                        La rémunération est basée sur le système "Ultra". Les créateurs sont payés selon :
-                      </p>
-                      <ul className="space-y-1 pl-5 list-disc text-slate-300">
-                        <li>Nombre de jours et d'heures de streaming.</li>
-                        <li>Respect des objectifs.</li>
-                        <li>Nombre de diamants collectés.</li>
-                      </ul>
-                      <p className="text-slate-300">Modalités de paiement :</p>
-                      <ul className="space-y-1 pl-5 list-disc text-slate-300">
-                        <li>TikTok (commission de 50%)</li>
-                        <li>PayPal (48 à 72 heures)</li>
-                        <li>Carte cadeau (3 à 7 jours)</li>
-                      </ul>
-                      
-                      <h3 className="text-lg font-semibold border-b border-slate-700 pb-2 mt-6">4. ENGAGEMENTS DU CRÉATEUR</h3>
-                      <p className="text-slate-300">
-                        Le Créateur s'engage à respecter les règles TikTok, produire du contenu conforme aux valeurs de l'Agence et se
-                        conformer aux exigences de participation.
-                      </p>
-                      
-                      <h3 className="text-lg font-semibold border-b border-slate-700 pb-2 mt-6">5. RESPONSABILITÉS</h3>
-                      <p className="text-slate-300">
-                        L'Agence n'est pas responsable en cas de harcèlement. Toute menace doit être signalée aux autorités.
-                      </p>
-                      
-                      <h3 className="text-lg font-semibold border-b border-slate-700 pb-2 mt-6">6. HIÉRARCHIE AU SEIN DE L'AGENCE</h3>
-                      <p className="text-slate-300">
-                        Évolution possible : Agent > Ambassadeur > Manager > Directeur > Fondateur.
-                      </p>
-                      
-                      <h3 className="text-lg font-semibold border-b border-slate-700 pb-2 mt-6">7. RÉSILIATION</h3>
-                      <p className="text-slate-300">
-                        Le contrat peut être résilié par l'Agence ou le Créateur avec notification écrite. Délai de 30 jours avant départ officiel.
-                      </p>
-                      <p className="text-slate-300 mt-4">
-                        Contact : contact@phoceenagency.fr
-                      </p>
-                      
-                      <div className="mt-6 pt-6 border-t border-slate-700/50 flex flex-wrap justify-between gap-4">
-                        <div>
-                          <p className="text-slate-300">Fait à ______________, le __/__/____</p>
-                        </div>
-                        <div className="flex flex-col gap-6">
-                          <div className="text-slate-300">
-                            <p>Signature Phocéen Agency</p>
-                            <div className="h-16 w-40 border border-slate-600 rounded-md mt-2"></div>
-                          </div>
-                          <div className="text-slate-300">
-                            <p>Signature {username}</p>
-                            <div className="h-16 w-40 border border-slate-600 rounded-md mt-2"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="pt-6 mt-8 border-t border-slate-700/50">
-                      <div className="italic text-slate-400 text-sm">
-                        Ce document est une version simplifiée du contrat. Pour obtenir le contrat complet, veuillez utiliser
-                        le bouton "Télécharger le contrat".
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 text-white">
+        {isMobile && (
+          <MobileMenu 
+            username={username}
+            role={role}
+            currentPage="/contract"
+            onLogout={handleLogout}
+          />
+        )}
+        
+        <div className="flex h-full">
+          <UltraSidebar
+            username={username}
+            role={role}
+            userId={userId}
+            onLogout={handleLogout}
+            currentPage="contract"
+          />
+          
+          <div className="flex-1 w-full max-w-5xl mx-auto p-4 md:p-6">
+            <div className="mb-6 flex items-center">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate("/")}
+                className="h-10 w-10 mr-4"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <h1 className="text-2xl font-bold text-white">Contrat de Collaboration - Phocéen Agency</h1>
             </div>
-          </UltraSidebar>
+            
+            <Card className="bg-slate-800/90 backdrop-blur-sm border-purple-900/30 shadow-lg">
+              <CardHeader className="border-b border-slate-700/50 bg-gradient-to-r from-slate-800 to-slate-900">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl font-semibold text-white flex items-center">
+                    <FileText className="h-5 w-5 mr-2 text-purple-400" />
+                    Contrat
+                  </CardTitle>
+                  <Button 
+                    onClick={handleDownloadPDF} 
+                    disabled={downloading}
+                    className="bg-purple-600 hover:bg-purple-700"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    {downloading ? "Téléchargement..." : "Télécharger PDF"}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="flex justify-center mb-6">
+                  <img src={agencyLogo} alt="Phocéen Agency Logo" className="h-16" />
+                </div>
+                
+                <div className="space-y-6 text-slate-200">
+                  <h2 className="text-xl font-bold text-center">CONTRAT DE CRÉATEUR PHOCÉEN AGENCY</h2>
+                  
+                  <p>Entre :</p>
+                  <p>Phocéen Agency, ci-après dénommée "l'Agence", et</p>
+                  <p>{username}, ci-après dénommé "le Créateur",</p>
+                  <p>Il a été convenu ce qui suit :</p>
+                  
+                  <div>
+                    <h3 className="text-lg font-bold">1. OBJET DU CONTRAT</h3>
+                    <p>Phocéen Agency propose un programme d'accompagnement destiné aux créateurs de contenu sur les réseaux sociaux.</p>
+                    <p>Cet accompagnement inclut :</p>
+                    <ul className="list-disc pl-6 mt-2 space-y-1">
+                      <li>La formation à la création de contenu en direct (live streaming).</li>
+                      <li>L'aide au développement de l'audience.</li>
+                      <li>L'accompagnement pour le placement de produits.</li>
+                      <li>Un programme de récompense basé sur les performances.</li>
+                    </ul>
+                    <p className="mt-2">Ce contrat ne constitue ni un CDD, ni un CDI, ni tout autre type de contrat de travail. Il s'agit d'une collaboration basée sur des objectifs et des performances.</p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-bold">2. CONDITIONS D'ÉLIGIBILITÉ</h3>
+                    <p>Pour intégrer Phocéen Agency, les critères suivants doivent être remplis :</p>
+                    <ul className="list-disc pl-6 mt-2 space-y-1">
+                      <li>Âge minimum : 18 ans.</li>
+                      <li>Minimum 500 abonnés sur TikTok.</li>
+                      <li>Autorisation pour les personnes en situation de handicap.</li>
+                      <li>Posséder un téléphone mobile et WhatsApp.</li>
+                      <li>Avoir au moins un match off par mois.</li>
+                      <li>Présentation correcte et tenue respectueuse.</li>
+                      <li>Interdiction de montrer des enfants mineurs sous une apparence inappropriée.</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-bold">3. RÉMUNÉRATION & PROGRAMME DE RÉCOMPENSES</h3>
+                    <p>La rémunération est basée sur le système "Ultra". Les créateurs sont payés selon :</p>
+                    <ul className="list-disc pl-6 mt-2 space-y-1">
+                      <li>Nombre de jours et d'heures de streaming.</li>
+                      <li>Respect des objectifs.</li>
+                      <li>Nombre de diamants collectés.</li>
+                    </ul>
+                    <p className="mt-2">Modalités de paiement :</p>
+                    <ul className="list-disc pl-6 mt-2 space-y-1">
+                      <li>TikTok (commission de 50%)</li>
+                      <li>PayPal (48 à 72 heures)</li>
+                      <li>Carte cadeau (3 à 7 jours)</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-bold">4. ENGAGEMENTS DU CRÉATEUR</h3>
+                    <p>Le Créateur s'engage à respecter les règles TikTok, produire du contenu conforme aux valeurs de l'Agence et se conformer aux exigences de participation.</p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-bold">5. RESPONSABILITÉS</h3>
+                    <p>L'Agence n'est pas responsable en cas de harcèlement. Toute menace doit être signalée aux autorités.</p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-bold">6. HIÉRARCHIE AU SEIN DE L'AGENCE</h3>
+                    <p>Évolution possible : Agent {'>'} Ambassadeur {'>'} Manager {'>'} Directeur {'>'} Fondateur.</p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-bold">7. RÉSILIATION</h3>
+                    <p>Le contrat peut être résilié par l'Agence ou le Créateur avec notification écrite. Délai de 30 jours avant départ officiel.</p>
+                  </div>
+                  
+                  <div className="pt-4">
+                    <p>Contact : contact@phoceenagency.fr</p>
+                    <p className="mt-4">Fait à ______________, le __/__/____</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
+        
+        <MobileNavigation 
+          role={role}
+          currentPage="contract"
+          onOpenMenu={() => {}}
+        />
       </div>
     </SidebarProvider>
   );

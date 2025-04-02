@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
@@ -20,6 +20,11 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   onLogout
 }) => {
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+  
+  const handleClose = () => {
+    setIsOpen(false);
+  };
   
   const menuItems = [
     {
@@ -40,6 +45,11 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
     {
       label: "Utilisateurs",
       path: "/user-management",
+      roles: ["founder", "manager"]
+    },
+    {
+      label: "Gestion Agence",
+      path: "/agency-assignment",
       roles: ["founder", "manager", "agent"]
     },
     {
@@ -76,8 +86,13 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   
   const filteredItems = menuItems.filter(item => item.roles.includes(role));
   
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    handleClose();
+  };
+  
   return (
-    <Sheet>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button 
           variant="outline" 
@@ -89,7 +104,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
       </SheetTrigger>
       <SheetContent 
         side="left" 
-        className="w-[300px] p-0 bg-black/70 backdrop-blur-lg border-r border-purple-800/30"
+        className="w-full sm:w-[300px] p-0 bg-black/70 backdrop-blur-lg border-r border-purple-800/30"
       >
         <div className="flex flex-col h-full">
           <div className="p-4 border-b border-slate-700/50">
@@ -101,12 +116,12 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
           
           <div className="flex-1 overflow-auto py-4 px-2">
             <div className="grid gap-2">
-              {filteredItems.map((item) => (
+              {filteredItems.map((item, index) => (
                 <motion.div
                   key={item.label}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.2, delay: index * 0.05 }}
                   className="w-full"
                 >
                   <Button
@@ -116,7 +131,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                         ? "bg-gradient-to-r from-purple-800/50 to-blue-800/50 text-white" 
                         : "text-slate-300 hover:text-white hover:bg-slate-800/50"
                     }`}
-                    onClick={() => navigate(item.path)}
+                    onClick={() => handleNavigate(item.path)}
                   >
                     {item.label}
                   </Button>
