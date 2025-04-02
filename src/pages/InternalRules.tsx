@@ -62,9 +62,9 @@ const InternalRules = () => {
           currentPage="internal-rules"
         />
         
-        <div className="flex-1 p-4 overflow-y-auto">
+        <div className="flex-1 p-0 overflow-y-auto">
           <div className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between p-4 bg-slate-800/50">
               <div className="flex items-center gap-4">
                 <Button
                   variant="ghost"
@@ -81,7 +81,7 @@ const InternalRules = () => {
               </div>
             </div>
 
-            <Card className="bg-slate-800/90 backdrop-blur-sm border-purple-500/20 shadow-lg">
+            <Card className="bg-slate-800/90 backdrop-blur-sm border-purple-500/20 shadow-lg rounded-none md:rounded-lg">
               <CardHeader className="bg-gradient-to-r from-purple-900/30 to-indigo-900/30 pb-2">
                 <CardTitle className="text-xl text-white flex items-center">
                   <BookOpen className="h-5 w-5 mr-2 text-purple-400" />

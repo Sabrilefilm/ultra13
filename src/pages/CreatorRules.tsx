@@ -115,13 +115,13 @@ const CreatorRules = () => {
         currentPage="creator-rules"
       >
         <motion.div 
-          className="p-6 space-y-6"
+          className="p-0 space-y-6"
           variants={staggerContainer}
           initial="hidden"
           animate="visible"
         >
           <motion.div variants={fadeInUp}>
-            <Card className="bg-white dark:bg-slate-900 shadow-lg border-purple-100 dark:border-purple-900/30 max-w-5xl mx-auto">
+            <Card className="bg-white dark:bg-slate-900 shadow-lg border-purple-100 dark:border-purple-900/30 max-w-5xl mx-auto rounded-none md:rounded-lg">
               <CardHeader className="bg-gradient-to-r from-purple-50 to-white dark:from-purple-950/30 dark:to-slate-950 bg-slate-950">
                 <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <Shield className="h-6 w-6 text-purple-500" />

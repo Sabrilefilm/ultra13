@@ -51,47 +51,20 @@ export const useUserRoles = (refetch: () => void) => {
     try {
       const { userId, newRole, currentRole } = pendingRoleChange;
       
-      // Get user's current manager ID (if user is being changed by a manager)
-      const userInfo = await supabase
-        .from("user_accounts")
-        .select("manager_id")
-        .eq("id", userId)
-        .single();
-      
-      const currentManagerId = userInfo.data?.manager_id;
-      
-      // Get the current logged-in user
-      const currentUser = JSON.parse(localStorage.getItem("userInfo") || "{}");
-      const currentUserId = currentUser.id;
-      const currentUserRole = currentUser.role;
-      
-      // Set up update data
-      const updateData: Record<string, any> = { role: newRole };
-      
-      // Logic for automatically adding to manager's team when changing roles
-      if (currentUserRole === 'manager' && ['creator', 'agent', 'ambassadeur'].includes(newRole)) {
-        // If a manager is changing someone's role, add that user to their team
-        updateData.manager_id = currentUserId;
+      // Vérifier que le rôle est valide
+      if (!["founder", "manager", "agent", "creator", "ambassadeur"].includes(newRole)) {
+        toast({
+          variant: "destructive",
+          title: "Erreur!",
+          description: `Le rôle '${newRole}' n'est pas valide.`,
+        });
+        return;
       }
       
-      // Special case: if changing FROM manager TO another role, and this was done by a founder
-      if (currentRole === 'manager' && newRole !== 'manager' && currentUserRole === 'founder') {
-        // Clear any team assignments this manager had
-        await supabase
-          .from("user_accounts")
-          .update({ manager_id: null })
-          .eq("manager_id", userId);
-      }
-      
-      // If changing to manager role, clear their own manager
-      if (newRole === 'manager') {
-        updateData.manager_id = null;
-      }
-      
-      // Make the role change
+      // Mettre à jour le rôle de l'utilisateur sans utiliser de colonne manager_id
       const { error } = await supabase
         .from("user_accounts")
-        .update(updateData)
+        .update({ role: newRole })
         .eq("id", userId);
 
       if (error) {

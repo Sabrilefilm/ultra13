@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, Home, Users, MessageSquare, Book, FileText, User, Bell, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -30,56 +30,67 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
     {
       label: "Accueil",
       path: "/",
-      roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
-    },
-    {
-      label: "Tableau de bord",
-      path: "/dashboard",
+      icon: Home,
       roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
     },
     {
       label: "Messages",
       path: "/messages",
+      icon: MessageSquare,
       roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
     },
     {
       label: "Utilisateurs",
       path: "/user-management",
+      icon: Users,
       roles: ["founder", "manager"]
     },
     {
       label: "Gestion Agence",
       path: "/agency-assignment",
+      icon: Users,
       roles: ["founder", "manager", "agent"]
     },
     {
       label: "Créateurs",
       path: "/creator-stats",
+      icon: Users,
       roles: ["founder", "manager", "agent"]
     },
     {
       label: "Transferts",
       path: "/transfers",
+      icon: ArrowLeft,
       roles: ["founder", "manager", "creator"]
     },
     {
       label: "Formations",
       path: "/training",
+      icon: Book,
       roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
     },
     {
       label: "Règles",
       path: role === "creator" || role === "ambassadeur" ? "/creator-rules" : "/internal-rules",
+      icon: Book,
       roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
     },
     {
       label: "Contrat",
       path: "/contract",
+      icon: FileText,
       roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
     },
     {
       label: "Infos personnelles",
       path: "/personal-info",
+      icon: User,
+      roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
+    },
+    {
+      label: "Notifications",
+      path: "/notifications",
+      icon: Bell,
       roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
     }
   ];
@@ -133,6 +144,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                     }`}
                     onClick={() => handleNavigate(item.path)}
                   >
+                    <item.icon className="h-4 w-4 mr-2" />
                     {item.label}
                   </Button>
                 </motion.div>

@@ -12,7 +12,7 @@ export const BackButton: React.FC<BackButtonProps> = ({ className = "" }) => {
   const navigate = useNavigate();
 
   const handleGoBack = () => {
-    navigate("/");
+    navigate("/");  // Toujours rediriger vers la page d'accueil
   };
 
   return (

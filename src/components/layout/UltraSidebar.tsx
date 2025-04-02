@@ -132,11 +132,15 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
         </div>
       </div>
       
-      <MobileNavigation 
-        role={role} 
-        currentPage={currentPage || ''} 
-        onOpenMenu={() => {}} 
-      />
+      {isMobile && (
+        <MobileNavigation 
+          role={role} 
+          currentPage={currentPage || ''} 
+          onOpenMenu={() => {
+            if (onAction) onAction('toggleMobileMenu');
+          }} 
+        />
+      )}
     </div>
   );
 };
