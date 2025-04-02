@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { SidebarNavigation } from "./sidebar/SidebarNavigation";
 import { SidebarUserProfile } from "./sidebar/SidebarUserProfile";
 import { SidebarLogout } from "./sidebar/SidebarLogout";
@@ -10,6 +10,9 @@ import { getNavigationItems } from "./sidebar/navigationItems";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/hooks/use-sidebar";
+import { MobileMenu } from "@/components/mobile/MobileMenu";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { MobileNavigation } from "@/components/mobile/MobileNavigation";
 
 interface SidebarToggleProps {
   collapsed: boolean;
@@ -69,6 +72,7 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
   children
 }: UltraSidebarProps) => {
   const { collapsed, toggleSidebar } = useSidebar();
+  const isMobile = useIsMobile();
   
   const handleMobileClose = () => {
     if (setMobileMenuOpen) {
@@ -89,8 +93,17 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
   
   return (
     <div className="flex flex-col h-full">
+      {isMobile && (
+        <MobileMenu 
+          username={username}
+          role={role}
+          currentPage={currentPage}
+          onLogout={onLogout}
+        />
+      )}
+      
       <div className="flex h-full">
-        <Sidebar className={`fixed h-full bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-lg z-50 flex flex-col border-r border-purple-800/50 transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}>
+        <Sidebar className={`fixed h-full bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-lg z-50 flex flex-col border-r border-purple-800/50 transition-all duration-300 ${collapsed ? "w-16" : "w-64"} hidden md:flex`}>
           <div className="flex justify-between items-center p-4 border-b border-purple-800/30">
             {!collapsed && <SidebarLogo />}
             <div className="flex items-center">
@@ -114,10 +127,16 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
           <SidebarLogout onLogout={onLogout} collapsed={collapsed} username={username} role={role} />
         </Sidebar>
         
-        <div className={`flex-1 transition-all duration-300 mx-auto ${collapsed ? 'ml-16' : 'ml-64'}`}>
+        <div className={`flex-1 transition-all duration-300 w-full max-w-full mx-auto ${collapsed ? 'md:ml-16' : 'md:ml-64'}`}>
           {children}
         </div>
       </div>
+      
+      <MobileNavigation 
+        role={role} 
+        currentPage={currentPage || ''} 
+        onOpenMenu={() => {}} 
+      />
     </div>
   );
 };

@@ -24,11 +24,11 @@ export const generateContractPDF = (contractInfo: ContractInfo) => {
   // Add title
   doc.setFontSize(16);
   doc.setTextColor(0, 0, 0);
-  doc.text("CONTRAT DE COLLABORATION", 105, 40, { align: "center" });
+  doc.text("CONTRAT DE CRÉATEUR PHOCÉEN AGENCY", 105, 40, { align: "center" });
   
   // Add subtitle
   doc.setFontSize(12);
-  doc.text(`Entre Ultra Agency et ${username} (${role})`, 105, 50, { align: "center" });
+  doc.text(`Entre Phocéen Agency et ${username} (${role})`, 105, 50, { align: "center" });
   
   // Add contract details
   doc.setFontSize(10);
@@ -36,95 +36,102 @@ export const generateContractPDF = (contractInfo: ContractInfo) => {
   // Article 1
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text("Article 1 - Objet du Contrat", 20, 70);
+  doc.text("1. OBJET DU CONTRAT", 20, 70);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   const article1Text = 
-    `Ce contrat définit les conditions de collaboration entre Ultra Agency et le ${role.toLowerCase()}. ` +
-    `Cette collaboration vise à promouvoir le développement professionnel du ${role.toLowerCase()} sur ` +
-    `la plateforme TikTok tout en respectant les directives et objectifs fixés par Ultra Agency.`;
+    `Phocéen Agency propose un programme d'accompagnement destiné aux créateurs de contenu sur les réseaux sociaux. ` +
+    `Cet accompagnement inclut la formation à la création de contenu en direct (live streaming), l'aide au développement ` +
+    `de l'audience, l'accompagnement pour le placement de produits, et un programme de récompense basé sur les performances. ` +
+    `Ce contrat ne constitue ni un CDD, ni un CDI, ni tout autre type de contrat de travail. Il s'agit d'une collaboration ` +
+    `basée sur des objectifs et des performances.`;
   
   doc.text(doc.splitTextToSize(article1Text, 170), 20, 80);
   
   // Article 2
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text("Article 2 - Rémunération", 20, 110);
+  doc.text("2. CONDITIONS D'ÉLIGIBILITÉ", 20, 110);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   const article2Text = 
-    `Le ${role.toLowerCase()} sera rémunéré selon le programme de récompenses basé sur les diamants. ` +
-    `Le paiement sera effectué une fois le seuil minimum atteint, conformément au Programme de Récompenses en vigueur.`;
+    `Pour intégrer Phocéen Agency, les critères suivants doivent être remplis : Âge minimum 18 ans, ` +
+    `minimum 500 abonnés sur TikTok, autorisation pour les personnes en situation de handicap, ` +
+    `posséder un téléphone mobile et WhatsApp, avoir au moins un match off par mois, ` +
+    `présentation correcte et tenue respectueuse, interdiction de montrer des enfants mineurs sous une apparence inappropriée.`;
   
   doc.text(doc.splitTextToSize(article2Text, 170), 20, 120);
-  
-  // Programme de Récompenses
-  autoTable(doc, {
-    startY: 135,
-    head: [["Diamants", "Récompense"]],
-    body: [
-      ["36,000 diamants", "10€"],
-      ["100,000 diamants", "30€"],
-      ["300,000 diamants", "100€"],
-    ],
-    theme: 'grid',
-    styles: { fontSize: 10, cellPadding: 5 },
-    headStyles: { fillColor: [100, 50, 150] },
-  });
   
   // Article 3
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text("Article 3 - Obligations", 20, 180);
+  doc.text("3. RÉMUNÉRATION & PROGRAMME DE RÉCOMPENSES", 20, 140);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  const article3Text = `Le ${role.toLowerCase()} s'engage à :`;
-  doc.text(article3Text, 20, 190);
+  const article3Text = 
+    `La rémunération est basée sur le système "Ultra". Les créateurs sont payés selon : nombre de jours ` +
+    `et d'heures de streaming, respect des objectifs, nombre de diamants collectés.`;
   
-  // List of obligations
-  const obligations = [
-    "• Effectuer 7 jours et 15 heures de live par semaine",
-    "• Respecter le règlement intérieur d'Ultra Agency",
-    "• Maintenir une image professionnelle sur la plateforme",
-    "• Participer aux événements organisés par Ultra Agency",
-    "• Informer l'agence de tout problème ou difficulté"
-  ];
+  doc.text(doc.splitTextToSize(article3Text, 170), 20, 150);
   
-  doc.text(obligations, 25, 200);
+  const paymentText = `Modalités de paiement : TikTok (commission de 50%), PayPal (48 à 72 heures), Carte cadeau (3 à 7 jours)`;
+  doc.text(doc.splitTextToSize(paymentText, 170), 20, 160);
   
   // Article 4
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text("Article 4 - Durée", 20, 230);
+  doc.text("4. ENGAGEMENTS DU CRÉATEUR", 20, 175);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   const article4Text = 
-    `Ce contrat est conclu pour une durée indéterminée, avec possibilité de résiliation par l'une ou ` +
-    `l'autre des parties moyennant un préavis d'une semaine.`;
+    `Le Créateur s'engage à respecter les règles TikTok, produire du contenu conforme aux valeurs de l'Agence ` +
+    `et se conformer aux exigences de participation.`;
   
-  doc.text(doc.splitTextToSize(article4Text, 170), 20, 240);
+  doc.text(doc.splitTextToSize(article4Text, 170), 20, 185);
   
   // Article 5
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text("Article 5 - Informations de l'Agence", 20, 260);
+  doc.text("5. RESPONSABILITÉS", 20, 200);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  const agencyInfo = [
-    "Phocéen Agency",
-    "Adresse: 16 Rue Fort Notre Dame, 13001 Marseille",
-    "Email: contact@phoceenagency.fr",
-    "Site web: https://phoceenagency.fr"
-  ];
+  const article5Text = 
+    `L'Agence n'est pas responsable en cas de harcèlement. Toute menace doit être signalée aux autorités.`;
   
-  doc.text(agencyInfo, 20, 270);
+  doc.text(doc.splitTextToSize(article5Text, 170), 20, 210);
+  
+  // Article 6
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("6. HIÉRARCHIE AU SEIN DE L'AGENCE", 20, 225);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  const article6Text = 
+    `Évolution possible : Agent > Ambassadeur > Manager > Directeur > Fondateur.`;
+  
+  doc.text(doc.splitTextToSize(article6Text, 170), 20, 235);
+  
+  // Article 7
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("7. RÉSILIATION", 20, 250);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  const article7Text = 
+    `Le contrat peut être résilié par l'Agence ou le Créateur avec notification écrite. ` +
+    `Délai de 30 jours avant départ officiel.`;
+  
+  doc.text(doc.splitTextToSize(article7Text, 170), 20, 260);
+  
+  // Contact information
+  doc.setFontSize(10);
+  doc.text("Contact : contact@phoceenagency.fr", 20, 275);
   
   // Signature fields
-  doc.setFontSize(10);
-  doc.text("Date: __________________", 20, 290);
-  doc.text("Signature du créateur:", 20, 300);
-  doc.text("Signature de l'agence:", 120, 300);
+  doc.text("Fait à ________________, le ___/___/______", 20, 290);
+  doc.text("Signature Phocéen Agency:", 20, 300);
+  doc.text("Signature du créateur:", 120, 300);
   
   // Save the PDF
-  doc.save(`Contrat_Ultra_Agency_${username}.pdf`);
+  doc.save(`Contrat_Phoceen_Agency_${username}.pdf`);
 };
