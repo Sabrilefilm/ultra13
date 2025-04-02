@@ -1,348 +1,379 @@
 
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { UltraSidebar } from "@/components/layout/UltraSidebar";
-import { useIndexAuth } from "@/hooks/use-index-auth";
-import { Button } from "@/components/ui/button";
-import { 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardContent 
-} from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { supabase } from "@/lib/supabase";
-import { ArrowLeft, Clock, Calendar, Diamond, Mail, Phone, MessageCircle, User, Edit } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { MobileMenu } from "@/components/mobile/MobileMenu";
-import { MobileNavigation } from "@/components/mobile/MobileNavigation";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { UpcomingMatches } from '@/components/dashboard/UpcomingMatches';
+import { Loading } from '@/components/ui/loading';
+import { ArrowLeft, User, Calendar, Trophy, Award, Diamond, BookOpen } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { MobileMenu } from '@/components/mobile/MobileMenu';
+import { toast } from 'sonner';
 
 interface Creator {
   id: string;
   username: string;
   role: string;
-  email: string | null;
+  diamonds_count: number;
   agent_id: string | null;
-  live_schedules?: { hours?: number; days?: number }[];
-  profiles?: { total_diamonds?: number }[];
-  creator_contacts?: {
-    phone?: string;
-    whatsapp?: string;
-    email?: string;
-    discord?: string;
-    other?: string;
-  }[];
+  last_active: string | null;
+  weekly_hours: number;
+  matches_won: number;
+  matches_lost: number;
 }
 
 const CreatorDetails = () => {
   const { creatorId } = useParams<{ creatorId: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
-  const isMobile = useIsMobile();
-  
   const [creator, setCreator] = useState<Creator | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [agentName, setAgentName] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
+  const isMobile = useIsMobile();
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
   
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/');
-      return;
-    }
-
-    if (!['founder', 'manager', 'agent'].includes(role)) {
-      toast({
-        title: "Accès refusé",
-        description: "Vous n'avez pas les permissions nécessaires pour accéder à cette page.",
-        variant: "destructive",
-      });
-      navigate('/dashboard');
-      return;
-    }
+    const storedRole = localStorage.getItem('userRole');
+    const storedUsername = localStorage.getItem('userId');
+    setUserRole(storedRole);
+    setUsername(storedUsername);
     
     fetchCreatorDetails();
-  }, [isAuthenticated, role, navigate, creatorId]);
+  }, [creatorId]);
   
   const fetchCreatorDetails = async () => {
-    if (!creatorId) return;
-    
     try {
       setLoading(true);
       
-      const { data, error } = await supabase
-        .from("user_accounts")
-        .select(`
-          id,
-          username,
-          role,
-          email,
-          agent_id,
-          live_schedules (
-            hours,
-            days
-          ),
-          profiles (
-            total_diamonds
-          ),
-          creator_contacts (
-            phone,
-            whatsapp,
-            email,
-            discord,
-            other
-          )
-        `)
-        .eq("id", creatorId)
+      // Fetch creator details
+      const { data: creatorData, error: creatorError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', creatorId)
         .single();
-        
-      if (error) throw error;
       
-      if (data) {
-        setCreator(data as Creator);
+      if (creatorError) throw creatorError;
+      
+      if (creatorData) {
+        setCreator(creatorData as Creator);
+        
+        // Fetch agent name if there's an agent_id
+        if (creatorData.agent_id) {
+          const { data: agentData, error: agentError } = await supabase
+            .from('users')
+            .select('username')
+            .eq('id', creatorData.agent_id)
+            .single();
+          
+          if (!agentError && agentData) {
+            setAgentName(agentData.username);
+          }
+        }
       }
     } catch (error) {
-      console.error("Error fetching creator details:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de récupérer les détails du créateur",
-        variant: "destructive",
-      });
+      console.error('Error fetching creator details:', error);
+      toast.error('Erreur lors du chargement des informations');
     } finally {
       setLoading(false);
     }
   };
   
-  const handleEditCreator = () => {
-    // Naviguer vers la page d'édition du créateur
-    navigate(`/edit-creator/${creatorId}`);
-  };
-  
-  // Calcul des objectifs
-  const requiredHours = 20;
-  const requiredDays = 10;
-  
-  const hourProgress = creator?.live_schedules?.[0]?.hours ? 
-    Math.min(100, (creator.live_schedules[0].hours / requiredHours) * 100) : 0;
-    
-  const dayProgress = creator?.live_schedules?.[0]?.days ? 
-    Math.min(100, (creator.live_schedules[0].days / requiredDays) * 100) : 0;
-  
-  const getProgressColor = (progress: number) => {
-    if (progress < 40) return "text-red-500";
-    if (progress < 70) return "text-yellow-500";
-    return "text-green-500";
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userRole');
+    navigate('/');
   };
   
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-900 to-slate-950">
-        <div className="animate-spin h-12 w-12 border-4 border-indigo-500 border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <Loading size="large" text="Chargement des informations du créateur..." />
       </div>
     );
   }
   
   if (!creator) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-900 to-slate-950">
-        <Card className="max-w-md bg-slate-800/90 border-purple-900/30">
-          <CardContent className="p-6 text-center">
-            <p className="text-white">Créateur non trouvé</p>
-            <Button 
-              className="mt-4 bg-purple-600 hover:bg-purple-700"
-              onClick={() => navigate("/agency-assignment")}
-            >
-              Retour
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4">
+        <div className="text-red-400 text-6xl mb-4">😕</div>
+        <h1 className="text-2xl font-bold text-white mb-4">Créateur non trouvé</h1>
+        <p className="text-gray-400 mb-6">Le créateur que vous recherchez n'existe pas ou a été supprimé.</p>
+        <Button onClick={() => navigate(-1)} variant="outline" className="flex items-center gap-2">
+          <ArrowLeft className="h-4 w-4" /> Retour
+        </Button>
       </div>
     );
   }
-
+  
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-950 text-white">
-        {isMobile && (
-          <MobileMenu 
-            username={username}
-            role={role}
-            currentPage="/creator-details"
-            onLogout={handleLogout}
-          />
-        )}
-        
-        <div className="flex">
-          <UltraSidebar
-            username={username}
-            role={role}
-            userId={userId}
-            onLogout={handleLogout}
-            currentPage="agency-assignment"
-          />
-          
-          <div className="flex-1 p-4 md:p-6 w-full max-w-full mx-auto">
-            <div className="max-w-6xl mx-auto space-y-6">
-              <div className="flex items-center gap-4 mb-6">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => navigate("/agency-assignment")}
-                  className="h-10 w-10 bg-white/5 hover:bg-white/10 text-white"
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-                <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                  <User className="h-6 w-6 text-indigo-400" />
-                  Détails du créateur
-                </h1>
-                
-                <div className="ml-auto">
-                  <Button
-                    onClick={handleEditCreator}
-                    className="bg-indigo-600 hover:bg-indigo-700"
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Modifier
-                  </Button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Profil du créateur */}
-                <Card className="bg-gradient-to-br from-slate-900 to-slate-950 border-indigo-800/30 shadow-lg overflow-hidden lg:col-span-1">
-                  <CardHeader className="bg-gradient-to-r from-indigo-950/50 to-slate-950/70 pb-4 border-b border-indigo-900/20">
-                    <CardTitle className="text-xl font-bold text-white">
-                      Profil
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="flex flex-col items-center text-center">
-                      <div className="h-24 w-24 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-bold mb-4">
-                        {creator.username.charAt(0).toUpperCase()}
-                      </div>
-                      <h2 className="text-2xl font-bold text-white mb-1">{creator.username}</h2>
-                      <p className="text-indigo-400 mb-4">Créateur</p>
-                      
-                      <div className="w-full mt-6 space-y-4">
-                        {creator.creator_contacts && creator.creator_contacts[0]?.email && (
-                          <div className="flex items-center bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
-                            <Mail className="h-5 w-5 text-indigo-400 mr-3" />
-                            <div>
-                              <p className="text-sm text-slate-400">Email</p>
-                              <p className="text-white">{creator.creator_contacts[0].email}</p>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {creator.creator_contacts && creator.creator_contacts[0]?.phone && (
-                          <div className="flex items-center bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
-                            <Phone className="h-5 w-5 text-indigo-400 mr-3" />
-                            <div>
-                              <p className="text-sm text-slate-400">Téléphone</p>
-                              <p className="text-white">{creator.creator_contacts[0].phone}</p>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {creator.creator_contacts && creator.creator_contacts[0]?.whatsapp && (
-                          <div className="flex items-center bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
-                            <MessageCircle className="h-5 w-5 text-indigo-400 mr-3" />
-                            <div>
-                              <p className="text-sm text-slate-400">WhatsApp</p>
-                              <p className="text-white">{creator.creator_contacts[0].whatsapp}</p>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {creator.creator_contacts && creator.creator_contacts[0]?.discord && (
-                          <div className="flex items-center bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
-                            <MessageCircle className="h-5 w-5 text-indigo-400 mr-3" />
-                            <div>
-                              <p className="text-sm text-slate-400">Discord</p>
-                              <p className="text-white">{creator.creator_contacts[0].discord}</p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Statistiques du créateur */}
-                <Card className="bg-gradient-to-br from-slate-900 to-slate-950 border-indigo-800/30 shadow-lg overflow-hidden lg:col-span-2">
-                  <CardHeader className="bg-gradient-to-r from-indigo-950/50 to-slate-950/70 pb-4 border-b border-indigo-900/20">
-                    <CardTitle className="text-xl font-bold text-white">
-                      Statistiques
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                      <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-blue-900/20 p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="text-lg font-medium text-white">Heures</h3>
-                          <Clock className="h-5 w-5 text-blue-400" />
-                        </div>
-                        <p className="text-3xl font-bold text-white mb-2">
-                          {creator.live_schedules?.[0]?.hours || 0}
-                          <span className="text-sm text-slate-400 ml-1">/ {requiredHours}</span>
-                        </p>
-                        <Progress value={hourProgress} className="h-2 bg-slate-700" />
-                        <p className={`text-right mt-1 text-sm ${getProgressColor(hourProgress)}`}>
-                          {hourProgress.toFixed(0)}%
-                        </p>
-                      </Card>
-                      
-                      <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-green-900/20 p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="text-lg font-medium text-white">Jours</h3>
-                          <Calendar className="h-5 w-5 text-green-400" />
-                        </div>
-                        <p className="text-3xl font-bold text-white mb-2">
-                          {creator.live_schedules?.[0]?.days || 0}
-                          <span className="text-sm text-slate-400 ml-1">/ {requiredDays}</span>
-                        </p>
-                        <Progress value={dayProgress} className="h-2 bg-slate-700" />
-                        <p className={`text-right mt-1 text-sm ${getProgressColor(dayProgress)}`}>
-                          {dayProgress.toFixed(0)}%
-                        </p>
-                      </Card>
-                      
-                      <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-pink-900/20 p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="text-lg font-medium text-white">Diamants</h3>
-                          <Diamond className="h-5 w-5 text-pink-400" />
-                        </div>
-                        <p className="text-3xl font-bold text-white mb-2">
-                          {creator.profiles?.[0]?.total_diamonds || 0}
-                        </p>
-                        <p className="text-sm text-slate-400 mt-2">
-                          Valeur estimée: {((creator.profiles?.[0]?.total_diamonds || 0) * 0.01).toFixed(2)} €
-                        </p>
-                      </Card>
-                    </div>
-                    
-                    <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
-                      <h3 className="text-lg font-medium text-white mb-3">Notes et informations supplémentaires</h3>
-                      <p className="text-slate-300">
-                        {creator.creator_contacts?.[0]?.other || "Aucune note disponible pour ce créateur."}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-[#111827] text-white">
+      {isMobile && username && userRole && (
+        <MobileMenu 
+          username={username} 
+          role={userRole} 
+          currentPage="/creator-details" 
+          onLogout={handleLogout} 
+        />
+      )}
+      
+      <Header role={userRole || ''} username={username || ''} />
+      
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex items-center mb-6">
+          <Button 
+            variant="ghost" 
+            className="mr-4 text-white/80 hover:text-white hover:bg-white/10"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Retour
+          </Button>
+          <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+            Détails du Créateur
+          </h1>
         </div>
         
-        <MobileNavigation 
-          role={role}
-          currentPage="agency-assignment"
-          onOpenMenu={() => {}}
-        />
+        <Card className="bg-slate-800/90 backdrop-blur-sm border border-purple-800/30 rounded-xl overflow-hidden shadow-md mb-6">
+          <CardHeader className="bg-gradient-to-r from-purple-900/20 to-indigo-900/20 pb-2">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center text-white text-2xl font-bold">
+                  {creator.username.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <CardTitle className="text-xl md:text-2xl text-white">
+                    {creator.username}
+                  </CardTitle>
+                  <p className="text-purple-400 text-sm">@{creator.id}</p>
+                </div>
+              </div>
+              <div className="mt-4 md:mt-0 flex flex-wrap gap-3">
+                <div className="px-3 py-1 rounded-full bg-purple-900/40 border border-purple-700/30 text-purple-300 text-xs">
+                  {creator.role === 'creator' ? 'Créateur' : creator.role}
+                </div>
+                {agentName && (
+                  <div className="px-3 py-1 rounded-full bg-blue-900/40 border border-blue-700/30 text-blue-300 text-xs">
+                    Agent: {agentName}
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="w-full grid grid-cols-2 md:grid-cols-3 mb-6 bg-gray-100 dark:bg-slate-800 p-1 rounded-lg">
+                <TabsTrigger 
+                  value="overview" 
+                  className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-purple-700 dark:data-[state=active]:text-purple-300 data-[state=active]:shadow-sm rounded-md text-gray-600 dark:text-gray-300"
+                >
+                  Aperçu
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="stats" 
+                  className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-purple-700 dark:data-[state=active]:text-purple-300 data-[state=active]:shadow-sm rounded-md text-gray-600 dark:text-gray-300"
+                >
+                  Statistiques
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="matches" 
+                  className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-purple-700 dark:data-[state=active]:text-purple-300 data-[state=active]:shadow-sm rounded-md text-gray-600 dark:text-gray-300"
+                >
+                  Matchs
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="overview" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card className="bg-slate-700/50 border-slate-600/30">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-purple-900/60 flex items-center justify-center">
+                        <User className="h-5 w-5 text-purple-300" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-400">Identifiant</p>
+                        <p className="text-white font-medium">{creator.id}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="bg-slate-700/50 border-slate-600/30">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-green-900/60 flex items-center justify-center">
+                        <Diamond className="h-5 w-5 text-green-300" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-400">Diamants</p>
+                        <p className="text-white font-medium">{creator.diamonds_count || 0}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="bg-slate-700/50 border-slate-600/30">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-900/60 flex items-center justify-center">
+                        <Calendar className="h-5 w-5 text-blue-300" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-400">Heures Hebdo</p>
+                        <p className="text-white font-medium">{creator.weekly_hours || 0}h</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="bg-slate-700/50 border-slate-600/30">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-yellow-900/60 flex items-center justify-center">
+                        <Trophy className="h-5 w-5 text-yellow-300" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-400">Matchs Gagnés</p>
+                        <p className="text-white font-medium">{creator.matches_won || 0}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="bg-slate-700/50 border-slate-600/30">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-red-900/60 flex items-center justify-center">
+                        <Trophy className="h-5 w-5 text-red-300" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-400">Matchs Perdus</p>
+                        <p className="text-white font-medium">{creator.matches_lost || 0}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="bg-slate-700/50 border-slate-600/30">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-indigo-900/60 flex items-center justify-center">
+                        <Award className="h-5 w-5 text-indigo-300" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-400">Récompenses</p>
+                        <p className="text-white font-medium">0</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <Card className="bg-slate-700/50 border-slate-600/30">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Informations Agent</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    {agentName ? (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-blue-900/60 flex items-center justify-center">
+                          <User className="h-5 w-5 text-blue-300" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-400">Agent assigné</p>
+                          <p className="text-white font-medium">{agentName}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-yellow-400">Aucun agent assigné à ce créateur</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="stats" className="space-y-4">
+                <Card className="bg-slate-700/50 border-slate-600/30">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Statistiques Détaillées</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="text-lg font-semibold mb-2">Performance de Lives</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="p-4 bg-slate-800/80 rounded-lg">
+                            <p className="text-gray-400 text-sm">Heures Hebdo</p>
+                            <p className="text-xl font-bold">{creator.weekly_hours || 0}h</p>
+                            <div className="mt-2 h-2 bg-slate-700 rounded-full">
+                              <div 
+                                className="h-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" 
+                                style={{ width: `${Math.min(100, (creator.weekly_hours || 0) / 15 * 100)}%` }}
+                              ></div>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">Objectif: 15h</p>
+                          </div>
+                          
+                          <div className="p-4 bg-slate-800/80 rounded-lg">
+                            <p className="text-gray-400 text-sm">Dernière Activité</p>
+                            <p className="text-xl font-bold">
+                              {creator.last_active ? new Date(creator.last_active).toLocaleDateString() : 'Inconnue'}
+                            </p>
+                          </div>
+                          
+                          <div className="p-4 bg-slate-800/80 rounded-lg">
+                            <p className="text-gray-400 text-sm">Total Diamants</p>
+                            <p className="text-xl font-bold">{creator.diamonds_count || 0}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-lg font-semibold mb-2">Performance de Matchs</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="p-4 bg-slate-800/80 rounded-lg">
+                            <p className="text-gray-400 text-sm">Ratio de Victoires</p>
+                            <p className="text-xl font-bold">
+                              {creator.matches_won + creator.matches_lost > 0 
+                                ? Math.round((creator.matches_won / (creator.matches_won + creator.matches_lost)) * 100) 
+                                : 0}%
+                            </p>
+                            <div className="mt-2 h-2 bg-slate-700 rounded-full">
+                              <div 
+                                className="h-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" 
+                                style={{ 
+                                  width: `${creator.matches_won + creator.matches_lost > 0 
+                                    ? Math.round((creator.matches_won / (creator.matches_won + creator.matches_lost)) * 100) 
+                                    : 0}%` 
+                                }}
+                              ></div>
+                            </div>
+                          </div>
+                          
+                          <div className="p-4 bg-slate-800/80 rounded-lg flex items-center justify-between">
+                            <div>
+                              <p className="text-gray-400 text-sm">Matchs Gagnés</p>
+                              <p className="text-xl font-bold text-green-400">{creator.matches_won || 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-sm">Matchs Perdus</p>
+                              <p className="text-xl font-bold text-red-400">{creator.matches_lost || 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-sm">Total</p>
+                              <p className="text-xl font-bold">{(creator.matches_won || 0) + (creator.matches_lost || 0)}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="matches" className="space-y-4">
+                <UpcomingMatches role={userRole || ''} creatorId={creator.id} />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       </div>
-    </SidebarProvider>
+      
+      <Footer role={userRole || ''} />
+    </div>
   );
 };
 

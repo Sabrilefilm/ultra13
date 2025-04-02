@@ -1,30 +1,30 @@
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
+import App from './App'
 import './index.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Dashboard from './pages/Dashboard.tsx';
-import CreatorRulesPage from './pages/CreatorRulesPage.tsx';
-import UserManagement from './pages/UserManagement.tsx';
-import Login from './pages/Login.tsx';
-import CreatorStats from './pages/CreatorStatsPage.tsx';
-import CreatorPerformance from './pages/CreatorPerformancePage.tsx';
-import InternalRules from './pages/InternalRules.tsx';
-import TransfersPage from './pages/TransfersPage.tsx';
-import Transfers from './pages/Transfers.tsx';
-import Training from './pages/Training.tsx';
-import Messages from './pages/Messages.tsx';
-import Penalties from './pages/Penalties.tsx';
-import TeamManagement from './pages/TeamManagement.tsx';
-import NotificationManagement from './pages/NotificationManagement.tsx';
-import NotFound from './pages/NotFound.tsx';
-import Contract from './pages/Contract.tsx';
-import PersonalInfoPage from './pages/PersonalInfoPage.tsx';
-import AgencyAssignment from './pages/AgencyAssignment.tsx';
-import AgencyMembers from './pages/AgencyMembers.tsx';
-import CreatorAgencyManagement from './pages/CreatorAgencyManagement.tsx';
-import CreatorDetails from './pages/CreatorDetails.tsx';
+import Dashboard from './pages/Matches';
+import CreatorRulesPage from './pages/CreatorRules';
+import UserManagement from './pages/UserManagement';
+import Login from './pages/Index';
+import CreatorStats from './pages/CreatorStats';
+import CreatorPerformance from './pages/CreatorStats';
+import InternalRules from './pages/InternalRules';
+import TransfersPage from './pages/Transfers';
+import Transfers from './pages/Transfers';
+import Training from './pages/Training';
+import Messages from './pages/Messages';
+import Penalties from './pages/Penalties';
+import TeamManagement from './pages/TeamManagement';
+import NotificationManagement from './pages/NotificationManagement';
+import NotFound from './pages/NotFound';
+import Contract from './pages/Contract';
+import PersonalInfoPage from './pages/PersonalInfo';
+import AgencyAssignment from './pages/AgencyAssignment';
+import AgencyMembers from './pages/AgentCreators';
+import CreatorAgencyManagement from './pages/AgencyAssignment';
+import CreatorDetails from './pages/CreatorDetails';
 
 // Toasts
 import { Toaster } from '@/components/ui/toaster';
