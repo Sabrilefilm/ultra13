@@ -26,6 +26,9 @@ import CreatorAgencyManagement from './pages/AgencyAssignment';
 import CreatorDetails from './pages/CreatorDetails';
 import Matches from './pages/Matches';
 import ManagerDashboard from './pages/ManagerDashboard';
+import Ambassador from './pages/Ambassador';
+import RewardsManagement from './pages/RewardsManagement';
+import CreatorRewards from './pages/CreatorRewards';
 
 // Toasts
 import { Toaster } from '@/components/ui/toaster';
@@ -65,6 +68,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <Route path="/creator-details/:creatorId" element={<CreatorDetails />} />
             <Route path="/matches" element={<Matches />} />
             <Route path="/manager-dashboard" element={<ManagerDashboard />} />
+            <Route path="/ambassador" element={<Ambassador />} />
+            <Route path="/creator-rewards" element={<CreatorRewards />} />
+            <Route path="/rewards-management" element={<RewardsManagement />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />

@@ -21,8 +21,11 @@ export const SidebarItemCollapsed: React.FC<SidebarItemProps> = ({ item, isActiv
     const data = typeof item.data === 'function' ? item.data('') : item.data;
     
     if (item.action === "navigateTo" && typeof data === 'string') {
-      // Utiliser navigate de react-router-dom au lieu d'une action personnalisée
-      navigate(data);
+      if (data.startsWith('/')) {
+        navigate(data);
+      } else {
+        navigate(`/${data}`);
+      }
     } else {
       onClick(item.action, data);
     }

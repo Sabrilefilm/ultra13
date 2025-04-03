@@ -35,15 +35,15 @@ export const navigationItems: SidebarItem[] = [
     icon: BarChart2,
     label: "Espace Manager",
     action: "navigateTo",
-    data: "/manager-dashboard",  // Correction de la route en ajoutant le slash
-    roles: ["founder", "manager"], // Only manager and founder can access
+    data: "/manager-dashboard",
+    roles: ["founder", "manager"],
     animated: true
   },
   {
     icon: UserPlus,
     label: "Espace Ambassadeur",
     action: "navigateTo",
-    data: "/ambassador",  // Correction de la route en ajoutant le slash
+    data: "/ambassador",
     roles: ["founder", "ambassadeur"],
     animated: true
   },
@@ -51,42 +51,42 @@ export const navigationItems: SidebarItem[] = [
     icon: Users,
     label: "Utilisateurs",
     action: "navigateTo",
-    data: "user-management",
-    roles: ["founder", "manager"], // Removed "agent" and "ambassadeur" from this item
+    data: "/user-management",
+    roles: ["founder", "manager"],
   }, 
   {
     icon: Trophy,
     label: "Matchs",
     action: "navigateTo",
-    data: "matches",
+    data: "/matches",
     roles: ["founder", "manager", "agent", "creator", "ambassadeur"] 
   }, 
   {
     icon: Briefcase,
     label: "Transferts",
     action: "navigateTo",
-    data: "transfers",
+    data: "/transfers",
     roles: ["founder", "manager", "creator", "ambassadeur"]
   }, 
   {
     icon: Award,
     label: "Programme de Récompenses",
     action: "navigateTo",
-    data: role => role === "creator" || role === "ambassadeur" ? "creator-rewards" : "rewards-management",
+    data: role => role === "creator" || role === "ambassadeur" ? "/creator-rewards" : "/rewards-management",
     roles: ["founder", "manager", "creator", "agent", "ambassadeur"]
   },
   {
     icon: Pen,
     label: "Mes Créateurs",
     action: "navigateTo",
-    data: "creator-stats",
+    data: "/creator-stats",
     roles: ["founder", "manager", "agent"] 
   },
   {
     icon: MessageSquare,
     label: "Messagerie",
     action: "navigateTo",
-    data: "messages",
+    data: "/messages",
     roles: ["founder", "manager", "agent", "creator", "ambassadeur"],
     animated: true
   },
@@ -94,7 +94,7 @@ export const navigationItems: SidebarItem[] = [
     icon: Bookmark,
     label: "Sanctions",
     action: "navigateTo",
-    data: "penalties",
+    data: "/penalties",
     roles: ["founder", "manager", "ambassadeur"]
   }, 
   {
@@ -108,21 +108,21 @@ export const navigationItems: SidebarItem[] = [
     icon: BookOpen,
     label: "Nos Formations",
     action: "navigateTo",
-    data: "training",
+    data: "/training",
     roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
   },
   {
     icon: FileSpreadsheet,
     label: "Importation Excel",
     action: "navigateTo",
-    data: "creator-import",
+    data: "/creator-import",
     roles: ["founder"]
   },
   {
     icon: UserCog,
     label: "Gestion Agence",
     action: "navigateTo",
-    data: "agency-assignment",
+    data: "/agency-assignment",
     roles: ["founder", "manager", "agent"],
     animated: true
   },
@@ -130,7 +130,7 @@ export const navigationItems: SidebarItem[] = [
     icon: Shell,
     label: "Mon Contrat",
     action: "navigateTo",
-    data: "contract",
+    data: "/contract",
     roles: ["creator", "agent", "manager", "ambassadeur"],
   }
 ];

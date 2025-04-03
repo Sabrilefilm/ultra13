@@ -3,6 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, LogOut } from "lucide-react";
+import { RedesignedDashContent } from "@/components/dashboard/RedesignedDashContent";
 
 interface DashboardContentProps {
   username: string;
@@ -53,7 +54,16 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
         </div>
         
         <div className="flex-1">
-          {children}
+          {currentPage === 'dashboard' && onAction ? (
+            <RedesignedDashContent 
+              username={username}
+              role={role}
+              currentPage={currentPage}
+              onAction={onAction}
+            />
+          ) : (
+            children
+          )}
         </div>
       </div>
     </div>
