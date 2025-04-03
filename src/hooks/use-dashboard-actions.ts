@@ -12,6 +12,10 @@ export const useDashboardActions = ({ onLogout }: { onLogout: () => void }) => {
   const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
   const [isRewardSettingsModalOpen, setIsRewardSettingsModalOpen] = useState(false);
   const [isLiveScheduleModalOpen, setIsLiveScheduleModalOpen] = useState(false);
+  const [isScheduleMatchModalOpen, setIsScheduleMatchModalOpen] = useState(false);
+  const [isSponsorshipModalOpen, setIsSponsorshipModalOpen] = useState(false);
+  const [showSponsorshipList, setShowSponsorshipList] = useState(false);
+  const [isCreatePosterModalOpen, setIsCreatePosterModalOpen] = useState(false);
   const [selectedCreatorId, setSelectedCreatorId] = useState<string>("");
   
   const onAction = useCallback((action: string, data?: any) => {
@@ -44,6 +48,22 @@ export const useDashboardActions = ({ onLogout }: { onLogout: () => void }) => {
         setIsLiveScheduleModalOpen(true);
         break;
         
+      case "openScheduleMatch":
+        setIsScheduleMatchModalOpen(true);
+        break;
+        
+      case "openSponsorshipForm":
+        setIsSponsorshipModalOpen(true);
+        break;
+        
+      case "openSponsorshipList":
+        setShowSponsorshipList(true);
+        break;
+        
+      case "openCreatePoster":
+        setIsCreatePosterModalOpen(true);
+        break;
+        
       case "logout":
         onLogout();
         navigate('/');
@@ -62,6 +82,14 @@ export const useDashboardActions = ({ onLogout }: { onLogout: () => void }) => {
       setIsRewardSettingsModalOpen,
       isLiveScheduleModalOpen,
       setIsLiveScheduleModalOpen,
+      isScheduleMatchModalOpen,
+      setIsScheduleMatchModalOpen,
+      isSponsorshipModalOpen,
+      setIsSponsorshipModalOpen,
+      showSponsorshipList,
+      setShowSponsorshipList,
+      isCreatePosterModalOpen,
+      setIsCreatePosterModalOpen
     },
     sidebarStates: {
       mobileMenuOpen,
