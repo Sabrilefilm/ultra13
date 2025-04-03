@@ -41,5 +41,36 @@ export const scheduleService = {
       console.error("Error resetting schedules:", error);
       throw error;
     }
+  },
+  
+  async checkAndResetMonthlySchedules() {
+    try {
+      const today = new Date();
+      // Si nous sommes le premier jour du mois
+      if (today.getDate() === 1) {
+        const lastResetKey = "last_schedule_reset";
+        // Récupérer la dernière date de réinitialisation
+        const lastResetStr = localStorage.getItem(lastResetKey);
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        
+        // Format de la date de dernière réinitialisation: YYYY-MM
+        const thisMonthStr = `${currentYear}-${currentMonth + 1}`;
+        
+        // Si nous n'avons pas encore réinitialisé ce mois-ci
+        if (lastResetStr !== thisMonthStr) {
+          console.log("Réinitialisation mensuelle des horaires...");
+          await this.resetAllSchedules();
+          // Enregistrer que nous avons fait la réinitialisation ce mois-ci
+          localStorage.setItem(lastResetKey, thisMonthStr);
+          console.log("Réinitialisation mensuelle terminée");
+          return true;
+        }
+      }
+      return false;
+    } catch (error) {
+      console.error("Error in monthly schedule check:", error);
+      return false;
+    }
   }
 };
