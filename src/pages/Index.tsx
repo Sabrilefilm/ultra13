@@ -51,7 +51,7 @@ const Index = () => {
         description: "Vous avez été déconnecté en raison d'inactivité.",
       });
     },
-    warningTime: 60000, // Afficher l'avertissement 60 secondes avant
+    warningTime: 30000, // Afficher l'avertissement 30 secondes avant
     onWarning: () => {
       // L'avertissement est géré par le hook et affiché via showWarning
     }
