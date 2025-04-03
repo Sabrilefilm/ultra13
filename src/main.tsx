@@ -30,36 +30,44 @@ import Matches from './pages/Matches';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from './providers/AuthProvider';
 
+// Ajout de React Query
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+// Création du client de requêtes
+const queryClient = new QueryClient();
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/" element={<App />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/creator-rules" element={<CreatorRulesPage />} />
-          <Route path="/internal-rules" element={<InternalRules />} />
-          <Route path="/user-management" element={<UserManagement />} />
-          <Route path="/creator-stats" element={<CreatorStats />} />
-          <Route path="/creator-performance/:userId" element={<CreatorPerformance />} />
-          <Route path="/transfers-dashboard" element={<TransfersPage />} />
-          <Route path="/transfers" element={<Transfers />} />
-          <Route path="/training" element={<Training />} />
-          <Route path="/messages" element={<Messages />} />
-          <Route path="/penalties" element={<Penalties />} />
-          <Route path="/team" element={<TeamManagement />} />
-          <Route path="/notifications" element={<NotificationManagement />} />
-          <Route path="/contract" element={<Contract />} />
-          <Route path="/personal-info" element={<PersonalInfoPage />} />
-          <Route path="/agency-assignment" element={<CreatorAgencyManagement />} />
-          <Route path="/agency-assignment/:agentId" element={<AgencyAssignment />} />
-          <Route path="/agency-members/:agentId" element={<AgencyMembers />} />
-          <Route path="/creator-details/:creatorId" element={<CreatorDetails />} />
-          <Route path="/matches" element={<Matches />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
-      </AuthProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<App />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/creator-rules" element={<CreatorRulesPage />} />
+            <Route path="/internal-rules" element={<InternalRules />} />
+            <Route path="/user-management" element={<UserManagement />} />
+            <Route path="/creator-stats" element={<CreatorStats />} />
+            <Route path="/creator-performance/:userId" element={<CreatorPerformance />} />
+            <Route path="/transfers-dashboard" element={<TransfersPage />} />
+            <Route path="/transfers" element={<Transfers />} />
+            <Route path="/training" element={<Training />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/penalties" element={<Penalties />} />
+            <Route path="/team" element={<TeamManagement />} />
+            <Route path="/notifications" element={<NotificationManagement />} />
+            <Route path="/contract" element={<Contract />} />
+            <Route path="/personal-info" element={<PersonalInfoPage />} />
+            <Route path="/agency-assignment" element={<CreatorAgencyManagement />} />
+            <Route path="/agency-assignment/:agentId" element={<AgencyAssignment />} />
+            <Route path="/agency-members/:agentId" element={<AgencyMembers />} />
+            <Route path="/creator-details/:creatorId" element={<CreatorDetails />} />
+            <Route path="/matches" element={<Matches />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </AuthProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   </React.StrictMode>,
 )
