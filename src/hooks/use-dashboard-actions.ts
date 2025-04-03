@@ -1,63 +1,59 @@
 
-import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-interface UseDashboardActionsProps {
-  onLogout: () => void;
-}
-
-export function useDashboardActions({ onLogout }: UseDashboardActionsProps) {
+export const useDashboardActions = ({ onLogout }: { onLogout: () => void }) => {
+  const navigate = useNavigate();
+  
+  // Mobile sidebar state
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Modal states
   const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
   const [isRewardSettingsModalOpen, setIsRewardSettingsModalOpen] = useState(false);
   const [isLiveScheduleModalOpen, setIsLiveScheduleModalOpen] = useState(false);
-  const [isScheduleMatchModalOpen, setIsScheduleMatchModalOpen] = useState(false);
   const [selectedCreatorId, setSelectedCreatorId] = useState<string>("");
-  const [isSponsorshipModalOpen, setIsSponsorshipModalOpen] = useState(false);
-  const [showSponsorshipList, setShowSponsorshipList] = useState(false);
-  const [isCreatePosterModalOpen, setIsCreatePosterModalOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
-  const navigate = useNavigate();
-
   const onAction = useCallback((action: string, data?: any) => {
+    // Reset mobile menu immediately for better UX when an action is triggered
+    setMobileMenuOpen(false);
+    
     switch (action) {
-      case 'openCreateAccount':
+      case "navigateTo":
+        if (typeof data === 'string' && data.startsWith('/')) {
+          navigate(data);
+        } else {
+          console.error('Invalid navigation path:', data);
+        }
+        break;
+        
+      case "toggleMobileMenu":
+        setMobileMenuOpen(prevState => !prevState);
+        break;
+        
+      case "openCreateAccount":
         setIsCreateAccountModalOpen(true);
         break;
-      case 'openRewardSettings':
+        
+      case "openRewardSettings":
         setIsRewardSettingsModalOpen(true);
         break;
-      case 'openLiveSchedule':
+        
+      case "openLiveSchedule":
         setSelectedCreatorId(data);
         setIsLiveScheduleModalOpen(true);
         break;
-      case 'openScheduleMatch':
-        setIsScheduleMatchModalOpen(true);
+        
+      case "logout":
+        onLogout();
+        navigate('/');
         break;
-      case 'openSponsorshipForm':
-        setIsSponsorshipModalOpen(true);
-        break;
-      case 'openSponsorshipList':
-        setShowSponsorshipList(true);
-        break;
-      case 'openCreatePoster':
-        setIsCreatePosterModalOpen(true);
-        break;
-      case 'navigateTo':
-        navigate(data === 'dashboard' ? '/' : `/${data}`);
-        break;
-      case 'toggleSidebar':
-        setSidebarCollapsed(!sidebarCollapsed);
-        break;
-      case 'toggleMobileMenu':
-        setMobileMenuOpen(!mobileMenuOpen);
-        break;
+        
       default:
-        break;
+        console.warn(`Action '${action}' not implemented`);
     }
-  }, [navigate, sidebarCollapsed]);
-
+  }, [navigate, onLogout]);
+  
   return {
     modalStates: {
       isCreateAccountModalOpen,
@@ -66,22 +62,12 @@ export function useDashboardActions({ onLogout }: UseDashboardActionsProps) {
       setIsRewardSettingsModalOpen,
       isLiveScheduleModalOpen,
       setIsLiveScheduleModalOpen,
-      isScheduleMatchModalOpen,
-      setIsScheduleMatchModalOpen,
-      isSponsorshipModalOpen,
-      setIsSponsorshipModalOpen,
-      showSponsorshipList,
-      setShowSponsorshipList,
-      isCreatePosterModalOpen,
-      setIsCreatePosterModalOpen,
     },
     sidebarStates: {
-      sidebarCollapsed,
       mobileMenuOpen,
       setMobileMenuOpen
     },
     selectedCreatorId,
-    onAction,
-    onLogout
+    onAction
   };
-}
+};

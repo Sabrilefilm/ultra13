@@ -35,7 +35,7 @@ export const navigationItems: SidebarItem[] = [
     icon: BarChart2,
     label: "Espace Manager",
     action: "navigateTo",
-    data: "manager-dashboard",
+    data: "/manager-dashboard",  // Correction de la route en ajoutant le slash
     roles: ["founder", "manager"], // Only manager and founder can access
     animated: true
   },
@@ -43,7 +43,7 @@ export const navigationItems: SidebarItem[] = [
     icon: UserPlus,
     label: "Espace Ambassadeur",
     action: "navigateTo",
-    data: "ambassador",
+    data: "/ambassador",  // Correction de la route en ajoutant le slash
     roles: ["founder", "ambassadeur"],
     animated: true
   },

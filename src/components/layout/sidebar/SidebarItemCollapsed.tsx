@@ -2,8 +2,11 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { SidebarItemProps } from "./types";
+import { useNavigate } from "react-router-dom";
 
 export const SidebarItemCollapsed: React.FC<SidebarItemProps> = ({ item, isActive, onClick }) => {
+  const navigate = useNavigate();
+  
   const getItemClass = (item: SidebarItemProps['item'], isActive: boolean) => {
     const baseClass = "w-full flex items-center justify-center px-3 py-2 text-sm rounded-md";
     
@@ -16,7 +19,13 @@ export const SidebarItemCollapsed: React.FC<SidebarItemProps> = ({ item, isActiv
 
   const handleClick = () => {
     const data = typeof item.data === 'function' ? item.data('') : item.data;
-    onClick(item.action, data);
+    
+    if (item.action === "navigateTo" && typeof data === 'string') {
+      // Utiliser navigate de react-router-dom au lieu d'une action personnalisée
+      navigate(data);
+    } else {
+      onClick(item.action, data);
+    }
   };
 
   return (

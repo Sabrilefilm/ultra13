@@ -25,6 +25,7 @@ import AgencyMembers from './pages/AgentCreators';
 import CreatorAgencyManagement from './pages/AgencyAssignment';
 import CreatorDetails from './pages/CreatorDetails';
 import Matches from './pages/Matches';
+import ManagerDashboard from './pages/ManagerDashboard';
 
 // Toasts
 import { Toaster } from '@/components/ui/toaster';
@@ -63,6 +64,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <Route path="/agency-members/:agentId" element={<AgencyMembers />} />
             <Route path="/creator-details/:creatorId" element={<CreatorDetails />} />
             <Route path="/matches" element={<Matches />} />
+            <Route path="/manager-dashboard" element={<ManagerDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />
