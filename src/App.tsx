@@ -1,4 +1,5 @@
-import { Route, Routes, Navigate, useEffect } from "react-router-dom";
+
+import { Route, Routes, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "./pages/Index";
 import Penalties from "./pages/Penalties";
@@ -25,17 +26,8 @@ import Matches from "./pages/Matches";
 import ExternalMatches from "./pages/ExternalMatches";
 import Contract from "./pages/Contract";
 import PersonalInfo from "./pages/PersonalInfo";
-import { scheduleService } from "./services/schedule/schedule-service";
 
 function App() {
-  useEffect(() => {
-    const checkMonthlyReset = async () => {
-      await scheduleService.checkAndResetMonthlySchedules();
-    };
-    
-    checkMonthlyReset();
-  }, []);
-
   return (
     <>
       <Routes>

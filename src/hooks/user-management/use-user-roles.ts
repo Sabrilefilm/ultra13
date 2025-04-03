@@ -49,11 +49,10 @@ export const useUserRoles = (refetch: () => void) => {
     if (!pendingRoleChange) return;
 
     try {
-      const { userId, newRole } = pendingRoleChange;
+      const { userId, newRole, currentRole } = pendingRoleChange;
       
       // Vérifier que le rôle est valide
-      const validRoles = ["founder", "manager", "agent", "creator", "ambassadeur"];
-      if (!validRoles.includes(newRole)) {
+      if (!["founder", "manager", "agent", "creator", "ambassadeur"].includes(newRole)) {
         toast({
           variant: "destructive",
           title: "Erreur!",
@@ -62,7 +61,7 @@ export const useUserRoles = (refetch: () => void) => {
         return;
       }
       
-      // Mettre à jour uniquement le rôle sans référence à manager_id
+      // Mettre à jour le rôle de l'utilisateur sans utiliser de colonne manager_id
       const { error } = await supabase
         .from("user_accounts")
         .update({ role: newRole })

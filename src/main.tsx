@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Dashboard from './pages/Matches';
 import CreatorRulesPage from './pages/CreatorRules';
 import UserManagement from './pages/UserManagement';
 import Login from './pages/Index';
@@ -24,7 +25,6 @@ import AgencyAssignment from './pages/AgencyAssignment';
 import AgencyMembers from './pages/AgentCreators';
 import CreatorAgencyManagement from './pages/AgencyAssignment';
 import CreatorDetails from './pages/CreatorDetails';
-import Matches from './pages/Matches';
 
 // Toasts
 import { Toaster } from '@/components/ui/toaster';
@@ -37,6 +37,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/creator-rules" element={<CreatorRulesPage />} />
           <Route path="/internal-rules" element={<InternalRules />} />
           <Route path="/user-management" element={<UserManagement />} />
@@ -55,7 +56,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="/agency-assignment/:agentId" element={<AgencyAssignment />} />
           <Route path="/agency-members/:agentId" element={<AgencyMembers />} />
           <Route path="/creator-details/:creatorId" element={<CreatorDetails />} />
-          <Route path="/matches" element={<Matches />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />

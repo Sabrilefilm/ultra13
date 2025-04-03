@@ -25,9 +25,9 @@ import { SidebarItem } from "./types";
 export const navigationItems: SidebarItem[] = [
   {
     icon: Home,
-    label: "Accueil",
+    label: "Tableau de bord",
     action: "navigateTo",
-    data: "/",
+    data: "dashboard",
     roles: ["founder", "manager", "agent", "creator", "ambassadeur"],
     animated: true
   }, 
@@ -101,7 +101,7 @@ export const navigationItems: SidebarItem[] = [
     icon: Settings,
     label: "Règles",
     action: "navigateTo",
-    data: role => role === "creator" || role === "ambassadeur" ? "/creator-rules" : "/internal-rules",
+    data: role => role === "creator" || role === "ambassadeur" ? "creator-rules" : "internal-rules",
     roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
   }, 
   {
