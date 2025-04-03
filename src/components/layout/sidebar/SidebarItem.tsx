@@ -2,11 +2,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { SidebarItemProps } from "./types";
-import { useNavigate } from "react-router-dom";
 
 export const SidebarItem: React.FC<SidebarItemProps> = ({ item, isActive, onClick }) => {
-  const navigate = useNavigate();
-  
   const getItemClass = (item: SidebarItemProps['item'], isActive: boolean) => {
     const baseClass = "w-full flex items-center justify-start px-3 py-2 text-sm rounded-md";
     
@@ -19,16 +16,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({ item, isActive, onClic
 
   const handleClick = () => {
     const data = typeof item.data === 'function' ? item.data('') : item.data;
-    
-    if (item.action === "navigateTo" && typeof data === 'string') {
-      if (data.startsWith('/')) {
-        navigate(data);
-      } else {
-        navigate(`/${data}`);
-      }
-    } else {
-      onClick(item.action, data);
-    }
+    onClick(item.action, data);
   };
 
   return (

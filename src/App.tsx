@@ -1,4 +1,3 @@
-
 import { Route, Routes, Navigate, useEffect } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "./pages/Index";
