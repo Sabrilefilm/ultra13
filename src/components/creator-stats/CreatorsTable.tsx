@@ -123,6 +123,7 @@ export const CreatorsTable: React.FC<CreatorsTableProps> = ({
                         variant="outline" 
                         size="sm"
                         onClick={() => onEditSchedule(creator)}
+                        className="bg-indigo-900/30 border-indigo-700/30 hover:bg-indigo-800/40 text-white"
                       >
                         <Eye className="h-4 w-4 mr-1" />
                         {isMobile ? '' : 'Voir les détails'}

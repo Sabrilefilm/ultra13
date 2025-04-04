@@ -1,6 +1,7 @@
 
 import { supabase } from "@/lib/supabase";
 import { ScheduleCreator } from "@/hooks/creator-stats/use-schedule-editing";
+import { toast } from "sonner";
 
 export const scheduleService = {
   async updateSchedule(creator: ScheduleCreator, hours: number, days: number) {
@@ -30,12 +31,15 @@ export const scheduleService = {
 
   async resetAllSchedules() {
     try {
+      console.log("Starting monthly schedule reset...");
       const { error } = await supabase
         .from("live_schedules")
         .update({ hours: 0, days: 0 })
         .not("creator_id", "is", null);
       
       if (error) throw error;
+      console.log("Monthly schedule reset complete!");
+      toast.success("Réinitialisation des horaires effectuée");
       return true;
     } catch (error) {
       console.error("Error resetting schedules:", error);
@@ -48,6 +52,7 @@ export const scheduleService = {
       const today = new Date();
       // Si nous sommes le premier jour du mois
       if (today.getDate() === 1) {
+        console.log("Today is the first day of the month, checking if reset is needed...");
         const lastResetKey = "last_schedule_reset";
         // Récupérer la dernière date de réinitialisation
         const lastResetStr = localStorage.getItem(lastResetKey);
@@ -65,7 +70,11 @@ export const scheduleService = {
           localStorage.setItem(lastResetKey, thisMonthStr);
           console.log("Réinitialisation mensuelle terminée");
           return true;
+        } else {
+          console.log("Monthly reset already performed this month");
         }
+      } else {
+        console.log(`Today is day ${today.getDate()}, not performing monthly reset`);
       }
       return false;
     } catch (error) {
