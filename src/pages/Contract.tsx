@@ -11,7 +11,8 @@ import { useNavigate } from "react-router-dom";
 import { MobileMenu } from "@/components/mobile/MobileMenu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileNavigation } from "@/components/mobile/MobileNavigation";
-import agencyLogo from "/public/logo.png";
+// Fix: Changed from "/public/logo.png" to just using the relative path
+import agencyLogo from "../assets/logo.png";
 
 const Contract = () => {
   const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
