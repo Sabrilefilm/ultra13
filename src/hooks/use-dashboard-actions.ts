@@ -56,7 +56,7 @@ export function useDashboardActions({ onLogout }: UseDashboardActionsProps) {
       default:
         break;
     }
-  }, [navigate, sidebarCollapsed]);
+  }, [navigate, sidebarCollapsed, mobileMenuOpen]);
 
   return {
     modalStates: {

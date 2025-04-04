@@ -93,20 +93,24 @@ export const UltraDashboard: React.FC<UltraDashboardProps> = ({
         onOpenMenu={() => onAction('toggleMobileMenu')} 
       />
       
-      {/* Pass an empty object for any missing props to avoid TypeScript errors */}
       <DashboardModals
         username={username}
         role={role}
         modalStates={{
-          ...modalStates,
-          isScheduleMatchModalOpen: false,
-          setIsScheduleMatchModalOpen: () => {},
-          isSponsorshipModalOpen: false,
-          setIsSponsorshipModalOpen: () => {},
-          isSponsorshipListModalOpen: false,
-          setIsSponsorshipListModalOpen: () => {},
-          isCreatePosterModalOpen: false,
-          setIsCreatePosterModalOpen: () => {},
+          isCreateAccountModalOpen: modalStates.isCreateAccountModalOpen,
+          setIsCreateAccountModalOpen: modalStates.setIsCreateAccountModalOpen,
+          isRewardSettingsModalOpen: modalStates.isRewardSettingsModalOpen,
+          setIsRewardSettingsModalOpen: modalStates.setIsRewardSettingsModalOpen,
+          isLiveScheduleModalOpen: modalStates.isLiveScheduleModalOpen,
+          setIsLiveScheduleModalOpen: modalStates.setIsLiveScheduleModalOpen,
+          isScheduleMatchModalOpen: modalStates.isScheduleMatchModalOpen,
+          setIsScheduleMatchModalOpen: modalStates.setIsScheduleMatchModalOpen,
+          isSponsorshipModalOpen: modalStates.isSponsorshipModalOpen,
+          setIsSponsorshipModalOpen: modalStates.setIsSponsorshipModalOpen,
+          showSponsorshipList: modalStates.showSponsorshipList,
+          setShowSponsorshipList: modalStates.setShowSponsorshipList,
+          isCreatePosterModalOpen: modalStates.isCreatePosterModalOpen,
+          setIsCreatePosterModalOpen: modalStates.setIsCreatePosterModalOpen
         }}
         selectedCreatorId={selectedCreatorId}
         platformSettings={platformSettings}

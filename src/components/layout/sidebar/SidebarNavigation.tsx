@@ -15,7 +15,8 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps & { collapsed: b
 
   const isItemActive = (item: any) => {
     if (typeof item.data === 'function') {
-      return currentPage === item.data(role);
+      const route = item.data(role);
+      return currentPage === route;
     }
     return currentPage === item.data;
   };

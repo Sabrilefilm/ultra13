@@ -1,6 +1,6 @@
 
 import { Route, Routes, Navigate } from "react-router-dom";
-import { useEffect } from "react"; // Fixed import - useEffect comes from React, not react-router-dom
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "./pages/Index";
 import Penalties from "./pages/Penalties";
