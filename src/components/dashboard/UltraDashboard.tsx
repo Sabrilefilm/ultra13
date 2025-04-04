@@ -93,10 +93,21 @@ export const UltraDashboard: React.FC<UltraDashboardProps> = ({
         onOpenMenu={() => onAction('toggleMobileMenu')} 
       />
       
+      {/* Pass an empty object for any missing props to avoid TypeScript errors */}
       <DashboardModals
         username={username}
         role={role}
-        modalStates={modalStates}
+        modalStates={{
+          ...modalStates,
+          isScheduleMatchModalOpen: false,
+          setIsScheduleMatchModalOpen: () => {},
+          isSponsorshipModalOpen: false,
+          setIsSponsorshipModalOpen: () => {},
+          isSponsorshipListModalOpen: false,
+          setIsSponsorshipListModalOpen: () => {},
+          isCreatePosterModalOpen: false,
+          setIsCreatePosterModalOpen: () => {},
+        }}
         selectedCreatorId={selectedCreatorId}
         platformSettings={platformSettings}
         handleCreateAccount={handleCreateAccount}

@@ -24,11 +24,11 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   const navigate = useNavigate();
   
   const handleBackClick = () => {
-    navigate('/'); // Toujours rediriger vers l'accueil
+    navigate('/'); // Always redirect to home
   };
   
   return (
-    <div className="flex-1 p-0 md:p-0 overflow-y-auto">
+    <div className="flex-1 p-4 md:p-6 overflow-y-auto">
       <div className="flex flex-col h-full">
         <div className="flex justify-between items-center p-4 md:hidden border-b border-slate-700/30">
           <Button 
