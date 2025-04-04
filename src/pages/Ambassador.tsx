@@ -1,4 +1,3 @@
-
 import React from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UltraSidebar } from "@/components/layout/UltraSidebar";
@@ -8,6 +7,7 @@ import { Users, Diamond, Clock, Calendar, Award, ArrowLeft, HomeIcon } from "luc
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Footer } from "@/components/layout/Footer";
+import { BackButton } from "@/components/ui/back-button";
 
 const Ambassador = () => {
   const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
@@ -50,20 +50,13 @@ const Ambassador = () => {
           <div className="max-w-6xl mx-auto">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-4">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => navigate("/dashboard")}
-                  className="h-10 w-10 bg-white/5 hover:bg-white/10 text-white"
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
+                <BackButton />
                 <h1 className="text-2xl font-bold text-white">Espace Ambassadeur 🏆</h1>
               </div>
               
               <Button
                 variant="outline"
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate("/")}
                 className="flex items-center gap-2 bg-slate-800/80 border-slate-700/50 hover:bg-slate-700 text-white"
               >
                 <HomeIcon className="h-4 w-4" />
