@@ -1,17 +1,14 @@
-
 import React from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
 interface StatsHeaderProps {
   totalCreators: number;
   totalActiveCreators: number;
   onViewTypeChange: (type: "all" | "week" | "month") => void;
   viewType: "all" | "week" | "month";
 }
-
 export const StatsHeader: React.FC<StatsHeaderProps> = ({
   totalCreators,
   totalActiveCreators,
@@ -19,20 +16,8 @@ export const StatsHeader: React.FC<StatsHeaderProps> = ({
   viewType
 }) => {
   const navigate = useNavigate();
-  
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate('/')}
-          className="h-10 w-10"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-2xl font-bold">Statistiques des créateurs</h1>
-      </div>
+  return <div className="space-y-4">
+      
       
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <div>
@@ -48,6 +33,5 @@ export const StatsHeader: React.FC<StatsHeaderProps> = ({
           </TabsList>
         </Tabs>
       </div>
-    </div>
-  );
+    </div>;
 };
