@@ -25,7 +25,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   const navigate = useNavigate();
   
   const handleBackClick = () => {
-    navigate('/'); // Always redirect to home
+    navigate('/'); // Redirige toujours vers l'accueil (index)
   };
   
   return (
