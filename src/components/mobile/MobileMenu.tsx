@@ -115,7 +115,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
       </SheetTrigger>
       <SheetContent 
         side="left" 
-        className="w-full sm:w-[300px] p-0 bg-black/70 backdrop-blur-lg border-r border-purple-800/30"
+        className="w-full sm:w-[300px] p-0 bg-black/50 backdrop-blur-lg border-r border-purple-800/30"
       >
         <div className="flex flex-col h-full">
           <div className="p-4 border-b border-slate-700/50">

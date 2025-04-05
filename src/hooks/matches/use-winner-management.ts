@@ -68,54 +68,44 @@ export const useWinnerManagement = (creatorId: string) => {
 
   // Célébration pour quand notre créateur principal gagne
   const celebrateMainCreatorWin = () => {
-    // Animation de confettis pendant 2 minutes pour notre créateur
-    const duration = 2 * 60 * 1000;
-    const animationEnd = Date.now() + duration;
-    const defaults = { 
-      startVelocity: 30, 
-      spread: 360, 
-      ticks: 60, 
-      zIndex: 999,
-      gravity: 0.5,
-      drift: 0,
-      colors: ['#9b87f5', '#7E69AB', '#D6BCFA', '#F1F0FB'], // Couleurs dans la palette demandée
-    };
+    try {
+      // Animation de confettis pendant 2 secondes (au lieu de 2 minutes)
+      const duration = 2 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { 
+        startVelocity: 30, 
+        spread: 360, 
+        ticks: 60, 
+        zIndex: 100,
+        gravity: 0.5,
+        drift: 0,
+        colors: ['#9b87f5', '#7E69AB', '#D6BCFA', '#F1F0FB'], // Couleurs dans la palette demandée
+      };
 
-    function randomInRange(min: number, max: number) {
-      return Math.random() * (max - min) + min;
-    }
-
-    const interval = setInterval(function() {
-      const timeLeft = animationEnd - Date.now();
-
-      if (timeLeft <= 0) {
-        return clearInterval(interval);
+      function randomInRange(min: number, max: number) {
+        return Math.random() * (max - min) + min;
       }
 
-      const particleCount = 100;
+      // Lancer les confettis une seule fois au lieu d'un intervalle
+      confetti({
+        ...defaults,
+        particleCount: 100,
+        origin: { x: randomInRange(0.2, 0.4), y: 0.1 }
+      });
+      confetti({
+        ...defaults,
+        particleCount: 100,
+        origin: { x: randomInRange(0.6, 0.8), y: 0.1 }
+      });
 
-      confetti({
-        ...defaults,
-        particleCount,
-        origin: { x: randomInRange(0.1, 0.3), y: 0 }
+      toast({
+        title: "🎉 VICTOIRE! 🏆",
+        description: "Notre créateur a remporté le match!",
+        className: "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300 text-purple-800"
       });
-      confetti({
-        ...defaults,
-        particleCount,
-        origin: { x: randomInRange(0.4, 0.6), y: 0 }
-      });
-      confetti({
-        ...defaults,
-        particleCount,
-        origin: { x: randomInRange(0.7, 0.9), y: 0 }
-      });
-    }, 100);
-
-    toast({
-      title: "🎉 VICTOIRE! 🏆",
-      description: "Notre créateur a remporté le match!",
-      className: "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300 text-purple-800"
-    });
+    } catch (error) {
+      console.error("Erreur d'animation:", error);
+    }
   };
 
   // Animation pour quand un autre créateur gagne
