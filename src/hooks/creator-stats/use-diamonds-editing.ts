@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Creator } from '../diamonds/use-diamond-fetch';
 import { diamondsService } from '@/services/diamonds/diamonds-service';
@@ -21,7 +20,6 @@ export function useDiamondsEditing(onSuccess: () => Promise<void>) {
     selectedCreator: null
   });
 
-  // Additional flags for external state mapping
   const isEditingDiamonds = state.isOpen;
   const diamondAmount = state.diamondAmount;
   const operationType = state.operationType;
@@ -71,14 +69,12 @@ export function useDiamondsEditing(onSuccess: () => Promise<void>) {
     try {
       setState(prev => ({ ...prev, isSaving: true }));
       
-      // Update to match new function signature with the correct parameters
       await diamondsService.updateDiamonds(
         state.selectedCreator, 
         state.diamondAmount, 
         state.operationType
       );
       
-      // Message de confirmation en fonction de l'opération
       const actionText = state.operationType === 'set' 
         ? 'définis à' 
         : state.operationType === 'add' 

@@ -104,7 +104,11 @@ class DiamondsService {
    * @param amount Montant des diamants
    * @param operation Type d'opération ('add', 'subtract', ou 'set')
    */
-  async updateDiamonds(creator: Creator | string, amount: number, operation: 'add' | 'subtract' | 'set' = 'set') {
+  async updateDiamonds(
+    creator: Creator | string, 
+    amount: number, 
+    operation: 'add' | 'subtract' | 'set' = 'set'
+  ) {
     try {
       const creatorId = typeof creator === 'string' ? creator : creator.id;
       let newAmount = amount;
@@ -112,8 +116,8 @@ class DiamondsService {
       if (operation !== 'set') {
         // Récupérer le montant actuel
         const { data, error: fetchError } = await supabase
-          .from('creators')
-          .select('monthly_diamonds')
+          .from('profiles')
+          .select('monthly_diamonds, total_diamonds')
           .eq('id', creatorId)
           .single();
           
@@ -130,9 +134,10 @@ class DiamondsService {
       }
       
       const { error } = await supabase
-        .from('creators')
+        .from('profiles')
         .update({
-          monthly_diamonds: newAmount
+          monthly_diamonds: newAmount,
+          updated_at: new Date().toISOString()
         })
         .eq('id', creatorId);
         
