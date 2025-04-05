@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,11 +31,26 @@ export function QuickDiamondsMenu({ creatorId, onSuccess }: QuickDiamondsMenuPro
     setIsSubmitting(true);
     
     try {
-      // Utiliser la fonction updateDiamonds avec la bonne signature
+      // Get the current diamonds amount first
+      const { data, error: fetchError } = await diamondsService.getCurrentDiamonds(creatorId);
+      
+      if (fetchError) {
+        throw fetchError;
+      }
+      
+      const currentAmount = data?.monthly_diamonds || 0;
+      let newAmount = amount;
+      
+      // Calculate new amount based on operation
+      if (activeTab === 'add') {
+        newAmount = currentAmount + amount;
+      } else {
+        newAmount = Math.max(0, currentAmount - amount);
+      }
+      
       const success = await diamondsService.updateDiamonds(
         creatorId, 
-        amount, 
-        activeTab // 'add' ou 'subtract'
+        newAmount
       );
       
       if (success) {

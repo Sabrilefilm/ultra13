@@ -1,7 +1,8 @@
+
 import { supabase } from '@/lib/supabase';
 import { Creator } from '@/hooks/diamonds/use-diamond-fetch';
 
-class DiamondsService {
+class CreatorStatsService {
   /**
    * Vérifie et réinitialise les compteurs de diamants mensuels si nécessaire
    */
@@ -101,41 +102,18 @@ class DiamondsService {
    * Met à jour le nombre de diamants d'un créateur en fonction de l'opération
    * @param creator Créateur ou ID du créateur
    * @param amount Montant des diamants
-   * @param operation Type d'opération ('add', 'subtract', ou 'set')
    */
   async updateDiamonds(
     creator: Creator | string, 
-    amount: number, 
-    operation: 'add' | 'subtract' | 'set' = 'set'
+    amount: number
   ) {
     try {
       const creatorId = typeof creator === 'string' ? creator : creator.id;
-      let newAmount = amount;
-      
-      if (operation !== 'set') {
-        // Récupérer le montant actuel
-        const { data, error: fetchError } = await supabase
-          .from('profiles')
-          .select('monthly_diamonds, total_diamonds')
-          .eq('id', creatorId)
-          .single();
-          
-        if (fetchError) throw fetchError;
-        
-        const currentAmount = data?.monthly_diamonds || 0;
-        
-        // Calculer le nouveau montant
-        if (operation === 'add') {
-          newAmount = currentAmount + amount;
-        } else if (operation === 'subtract') {
-          newAmount = Math.max(0, currentAmount - amount);
-        }
-      }
       
       const { error } = await supabase
         .from('profiles')
         .update({
-          monthly_diamonds: newAmount,
+          monthly_diamonds: amount,
           updated_at: new Date().toISOString()
         })
         .eq('id', creatorId);
@@ -167,6 +145,75 @@ class DiamondsService {
       return false;
     }
   }
+  
+  /**
+   * Récupère la liste des créateurs
+   */
+  async fetchCreators(userRole: string, username: string) {
+    try {
+      // Effectuer la requête en fonction du rôle
+      let query = supabase
+        .from('creators')
+        .select('*');
+      
+      // Filtrer en fonction du rôle de l'utilisateur
+      if (userRole === 'agent') {
+        query = query.eq('agent', username);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      
+      return data || [];
+    } catch (error) {
+      console.error("Erreur lors de la récupération des créateurs:", error);
+      return [];
+    }
+  }
+  
+  /**
+   * Supprime un créateur
+   */
+  async removeCreator(creatorId: string) {
+    try {
+      const { error } = await supabase
+        .from('creators')
+        .delete()
+        .eq('id', creatorId);
+        
+      if (error) throw error;
+      
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de la suppression du créateur:", error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Réinitialise tous les horaires des créateurs
+   */
+  async resetAllSchedules() {
+    try {
+      const { error } = await supabase
+        .from('live_schedules')
+        .update({ 
+          hours: 0,
+          days: 0,
+          updated_at: new Date().toISOString()
+        });
+        
+      if (error) throw error;
+      
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de la réinitialisation des horaires:", error);
+      return false;
+    }
+  }
 }
 
-export const diamondsService = new DiamondsService();
+// Export the service instance
+export const creatorStatsService = new CreatorStatsService();
+

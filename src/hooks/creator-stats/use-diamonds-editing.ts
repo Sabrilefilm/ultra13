@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Creator } from '../diamonds/use-diamond-fetch';
 import { diamondsService } from '@/services/diamonds/diamonds-service';
@@ -69,11 +70,32 @@ export function useDiamondsEditing(onSuccess: () => Promise<void>) {
     try {
       setState(prev => ({ ...prev, isSaving: true }));
       
-      await diamondsService.updateDiamonds(
-        state.selectedCreator, 
-        state.diamondAmount, 
-        state.operationType
+      // Get current diamonds amount
+      const { data, error: fetchError } = await diamondsService.getCurrentDiamonds(state.selectedCreator.id);
+      
+      if (fetchError) {
+        throw fetchError;
+      }
+      
+      const currentAmount = data?.monthly_diamonds || 0;
+      let newAmount = state.diamondAmount;
+      
+      // Calculate the new amount based on operation type
+      if (state.operationType === 'add') {
+        newAmount = currentAmount + state.diamondAmount;
+      } else if (state.operationType === 'subtract') {
+        newAmount = Math.max(0, currentAmount - state.diamondAmount);
+      }
+      
+      // Update diamonds with the calculated amount
+      const success = await diamondsService.updateDiamonds(
+        state.selectedCreator.id, 
+        newAmount
       );
+      
+      if (!success) {
+        throw new Error("Failed to update diamonds");
+      }
       
       const actionText = state.operationType === 'set' 
         ? 'définis à' 

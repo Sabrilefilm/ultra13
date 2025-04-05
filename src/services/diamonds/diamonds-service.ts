@@ -1,8 +1,25 @@
-
 import { supabase } from '@/lib/supabase';
 import { Creator } from '@/hooks/diamonds/use-diamond-fetch';
 
 class DiamondsService {
+  /**
+   * Récupère le nombre actuel de diamants pour un créateur
+   */
+  async getCurrentDiamonds(creatorId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('monthly_diamonds')
+        .eq('id', creatorId)
+        .single();
+        
+      return { data, error };
+    } catch (error) {
+      console.error("Erreur lors de la récupération des diamants:", error);
+      return { data: null, error };
+    }
+  }
+
   /**
    * Vérifie et réinitialise les compteurs de diamants mensuels si nécessaire
    */
@@ -99,44 +116,21 @@ class DiamondsService {
   }
 
   /**
-   * Met à jour le nombre de diamants d'un créateur en fonction de l'opération
+   * Met à jour le nombre de diamants d'un créateur
    * @param creator Créateur ou ID du créateur
    * @param amount Montant des diamants
-   * @param operation Type d'opération ('add', 'subtract', ou 'set')
    */
   async updateDiamonds(
     creator: Creator | string, 
-    amount: number, 
-    operation: 'add' | 'subtract' | 'set' = 'set'
+    amount: number
   ) {
     try {
       const creatorId = typeof creator === 'string' ? creator : creator.id;
-      let newAmount = amount;
-      
-      if (operation !== 'set') {
-        // Récupérer le montant actuel
-        const { data, error: fetchError } = await supabase
-          .from('profiles')
-          .select('monthly_diamonds, total_diamonds')
-          .eq('id', creatorId)
-          .single();
-          
-        if (fetchError) throw fetchError;
-        
-        const currentAmount = data?.monthly_diamonds || 0;
-        
-        // Calculer le nouveau montant
-        if (operation === 'add') {
-          newAmount = currentAmount + amount;
-        } else if (operation === 'subtract') {
-          newAmount = Math.max(0, currentAmount - amount);
-        }
-      }
       
       const { error } = await supabase
         .from('profiles')
         .update({
-          monthly_diamonds: newAmount,
+          monthly_diamonds: amount,
           updated_at: new Date().toISOString()
         })
         .eq('id', creatorId);
