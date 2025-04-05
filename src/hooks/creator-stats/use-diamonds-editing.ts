@@ -71,6 +71,7 @@ export function useDiamondsEditing(onSuccess: () => Promise<void>) {
     try {
       setState(prev => ({ ...prev, isSaving: true }));
       
+      // Update to match new function signature with the correct parameters
       await diamondsService.updateDiamonds(
         state.selectedCreator, 
         state.diamondAmount, 

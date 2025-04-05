@@ -51,7 +51,7 @@ export const QuickDiamondsMenu: React.FC<QuickDiamondsMenuProps> = ({
         diamonds_goal: 0
       };
       
-      // Use the diamondsService to update diamonds
+      // Use the diamondsService to update diamonds with correct parameters
       await diamondsService.updateDiamonds(creator, diamondAmount, operationType);
       
       // Update the display immediately for better user experience

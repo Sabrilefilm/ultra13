@@ -1,5 +1,6 @@
 
 import { supabase } from '@/lib/supabase';
+import { Creator } from '@/hooks/diamonds/use-diamond-fetch';
 
 class DiamondsService {
   /**
@@ -98,14 +99,40 @@ class DiamondsService {
   }
 
   /**
-   * Met à jour le nombre de diamants d'un créateur
+   * Met à jour le nombre de diamants d'un créateur en fonction de l'opération
+   * @param creator Créateur ou ID du créateur
+   * @param amount Montant des diamants
+   * @param operation Type d'opération ('add', 'subtract', ou 'set')
    */
-  async updateDiamonds(creatorId: string, amount: number) {
+  async updateDiamonds(creator: Creator | string, amount: number, operation: 'add' | 'subtract' | 'set' = 'set') {
     try {
+      const creatorId = typeof creator === 'string' ? creator : creator.id;
+      let newAmount = amount;
+      
+      if (operation !== 'set') {
+        // Récupérer le montant actuel
+        const { data, error: fetchError } = await supabase
+          .from('creators')
+          .select('monthly_diamonds')
+          .eq('id', creatorId)
+          .single();
+          
+        if (fetchError) throw fetchError;
+        
+        const currentAmount = data?.monthly_diamonds || 0;
+        
+        // Calculer le nouveau montant
+        if (operation === 'add') {
+          newAmount = currentAmount + amount;
+        } else if (operation === 'subtract') {
+          newAmount = Math.max(0, currentAmount - amount);
+        }
+      }
+      
       const { error } = await supabase
         .from('creators')
         .update({
-          monthly_diamonds: amount
+          monthly_diamonds: newAmount
         })
         .eq('id', creatorId);
         
