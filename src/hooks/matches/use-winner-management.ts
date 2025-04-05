@@ -20,11 +20,12 @@ export const useWinnerManagement = (creatorId: string) => {
       if (fetchError) throw fetchError;
       
       // Vérifier si le match est en mode "off" (sans boost)
-      let newStatus;
+      let newStatus = 'completed';  // Par défaut, c'est 'completed'
+      
       if (matchData.status === 'off') {
-        newStatus = 'completed_off';  // Maintenir l'indication que c'était sans boost
-      } else {
-        newStatus = 'completed';
+        // Si le match était en 'off', on utilise le statut 'completed' standard
+        // La contrainte de la table n'accepte pas 'completed_off'
+        console.log("Match was 'off', setting status to 'completed'");
       }
       
       console.log("Setting winner with status:", newStatus);
