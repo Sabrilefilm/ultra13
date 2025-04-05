@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Home, Users, MessageSquare, Book, FileText, User, Bell, ArrowLeft } from "lucide-react";
+import { Menu, Home, Users, MessageSquare, Book, FileText, User, Bell, ArrowLeft, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -44,6 +44,12 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
       path: "/user-management",
       icon: Users,
       roles: ["founder", "manager"]
+    },
+    {
+      label: "Matchs",
+      path: "/matches",
+      icon: Trophy,
+      roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
     },
     {
       label: "Gestion Agence",
@@ -109,6 +115,9 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
           variant="outline" 
           size="icon" 
           className="md:hidden fixed top-4 left-4 z-50 bg-slate-800/60 backdrop-blur-sm border-slate-700"
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent event bubbling
+          }}
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -116,6 +125,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
       <SheetContent 
         side="left" 
         className="w-full sm:w-[300px] p-0 bg-black/50 backdrop-blur-lg border-r border-purple-800/30"
+        onClick={(e) => e.stopPropagation()} // Stop clicks within menu from propagating
       >
         <div className="flex flex-col h-full">
           <div className="p-4 border-b border-slate-700/50">
@@ -142,7 +152,10 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                         ? "bg-gradient-to-r from-purple-800/50 to-blue-800/50 text-white" 
                         : "text-slate-300 hover:text-white hover:bg-slate-800/50"
                     }`}
-                    onClick={() => handleNavigate(item.path)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent event bubbling
+                      handleNavigate(item.path);
+                    }}
                   >
                     <item.icon className="h-4 w-4 mr-2" />
                     {item.label}
@@ -156,7 +169,10 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
             <Button 
               variant="destructive" 
               className="w-full"
-              onClick={onLogout}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent event bubbling
+                onLogout();
+              }}
             >
               Déconnexion
             </Button>

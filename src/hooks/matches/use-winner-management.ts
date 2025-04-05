@@ -19,14 +19,9 @@ export const useWinnerManagement = (creatorId: string) => {
       
       if (fetchError) throw fetchError;
       
-      // Vérifier si le match est en mode "off" (sans boost)
-      let newStatus = 'completed';  // Par défaut, c'est 'completed'
-      
-      if (matchData.status === 'off') {
-        // Si le match était en 'off', on utilise le statut 'completed' standard
-        // La contrainte de la table n'accepte pas 'completed_off'
-        console.log("Match was 'off', setting status to 'completed'");
-      }
+      // Le statut final est toujours 'completed', peu importe le statut précédent
+      // La contrainte de la table n'accepte que certains statuts
+      const newStatus = 'completed';
       
       console.log("Setting winner with status:", newStatus);
       
@@ -70,7 +65,7 @@ export const useWinnerManagement = (creatorId: string) => {
   // Célébration pour quand notre créateur principal gagne
   const celebrateMainCreatorWin = () => {
     try {
-      // Animation de confettis pendant 2 secondes (au lieu de 2 minutes)
+      // Animation de confettis pendant 2 secondes
       const duration = 2 * 1000;
       const animationEnd = Date.now() + duration;
       const defaults = { 
@@ -80,14 +75,14 @@ export const useWinnerManagement = (creatorId: string) => {
         zIndex: 100,
         gravity: 0.5,
         drift: 0,
-        colors: ['#9b87f5', '#7E69AB', '#D6BCFA', '#F1F0FB'], // Couleurs dans la palette demandée
+        colors: ['#9b87f5', '#7E69AB', '#D6BCFA', '#F1F0FB'],
       };
 
       function randomInRange(min: number, max: number) {
         return Math.random() * (max - min) + min;
       }
 
-      // Lancer les confettis une seule fois au lieu d'un intervalle
+      // Lancer les confettis une seule fois
       confetti({
         ...defaults,
         particleCount: 100,
@@ -153,14 +148,17 @@ export const useWinnerManagement = (creatorId: string) => {
       if (fetchError) throw fetchError;
       
       // Déterminer le statut approprié en conservant l'information si le match était avec ou sans boost
-      const newStatus = (data.status === 'completed_off' || data.status === 'off') ? 'off' : 'scheduled';
+      const newStatus = data.status === 'off' || data.status === 'completed' && data.previous_status === 'off' 
+        ? 'off' 
+        : 'scheduled';
       
       const { error } = await supabase
         .from('upcoming_matches')
         .update({
           winner_id: null,
           points: null,
-          status: newStatus
+          status: newStatus,
+          previous_status: null
         })
         .eq('id', matchId);
 

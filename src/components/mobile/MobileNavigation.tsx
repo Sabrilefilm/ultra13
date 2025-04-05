@@ -51,6 +51,10 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
   
   const filteredItems = navItems.filter(item => item.roles.includes(role));
   
+  const handleNavigation = (path: string) => {
+    navigate(path);
+  };
+  
   return (
     <motion.div 
       initial={{ y: 100 }}
@@ -63,7 +67,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
             key={item.label}
             variant="ghost"
             size="sm"
-            onClick={() => navigate(item.path)}
+            onClick={() => handleNavigation(item.path)}
             className={`flex flex-col items-center py-2 px-1 ${
               currentPage === item.path ? "text-purple-500" : "text-slate-400"
             }`}
@@ -76,7 +80,10 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          onClick={onOpenMenu}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent event bubbling
+            onOpenMenu();
+          }}
           className="flex flex-col items-center py-2 px-1 text-slate-400"
         >
           <Menu className="h-5 w-5 mb-1" />

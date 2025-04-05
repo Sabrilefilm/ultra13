@@ -24,7 +24,15 @@ export const SidebarToggle: React.FC<SidebarToggleProps> = ({
   onToggle
 }) => {
   return (
-    <Button variant="ghost" size="icon" onClick={onToggle} className="h-8 w-8 p-0 text-white hover:bg-slate-800">
+    <Button 
+      variant="ghost" 
+      size="icon" 
+      onClick={(e) => {
+        e.stopPropagation(); // Prevent event bubbling
+        onToggle();
+      }} 
+      className="h-8 w-8 p-0 text-white hover:bg-slate-800"
+    >
       <Menu className="h-5 w-5" />
     </Button>
   );
@@ -40,7 +48,15 @@ export const SidebarMobileClose: React.FC<SidebarMobileCloseProps> = ({
   className
 }) => {
   return (
-    <Button variant="ghost" size="icon" onClick={onClose} className={`h-8 w-8 p-0 text-white hover:bg-slate-800 ${className}`}>
+    <Button 
+      variant="ghost" 
+      size="icon" 
+      onClick={(e) => {
+        e.stopPropagation(); // Prevent event bubbling
+        onClose();
+      }} 
+      className={`h-8 w-8 p-0 text-white hover:bg-slate-800 ${className}`}
+    >
       <X className="h-5 w-5" />
     </Button>
   );
@@ -74,7 +90,8 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
   const { collapsed, toggleSidebar } = useSidebar();
   const isMobile = useIsMobile();
   
-  const handleMobileClose = () => {
+  const handleMobileClose = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation(); // Prevent event bubbling
     if (setMobileMenuOpen) {
       setMobileMenuOpen(false);
     }
