@@ -96,6 +96,46 @@ class DiamondsService {
       return false;
     }
   }
+
+  /**
+   * Met à jour le nombre de diamants d'un créateur
+   */
+  async updateDiamonds(creatorId: string, amount: number) {
+    try {
+      const { error } = await supabase
+        .from('creators')
+        .update({
+          monthly_diamonds: amount
+        })
+        .eq('id', creatorId);
+        
+      if (error) throw error;
+      
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour des diamants:", error);
+      return false;
+    }
+  }
+
+  /**
+   * Réinitialise tous les compteurs de diamants
+   */
+  async resetAllDiamonds() {
+    try {
+      const { error } = await supabase
+        .from('creators')
+        .update({ monthly_diamonds: 0 });
+        
+      if (error) throw error;
+      
+      console.log("Tous les compteurs de diamants ont été réinitialisés");
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de la réinitialisation des compteurs:", error);
+      return false;
+    }
+  }
 }
 
 export const diamondsService = new DiamondsService();
