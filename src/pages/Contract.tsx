@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { formatDate } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 export const Contract = () => {
   const { isAuthenticated, username, role, userId } = useAuth();
@@ -14,8 +15,15 @@ export const Contract = () => {
   const [hasDownloaded, setHasDownloaded] = useState(false);
   const [creationDate, setCreationDate] = useState<string | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Si l'utilisateur n'est pas connecté, rediriger vers la page d'accueil
+    if (!isAuthenticated) {
+      navigate('/');
+      return;
+    }
+
     const fetchUserData = async () => {
       if (!userId) return;
       
@@ -40,7 +48,7 @@ export const Contract = () => {
     };
     
     fetchUserData();
-  }, [userId]);
+  }, [userId, isAuthenticated, navigate]);
 
   const handleDownload = async () => {
     try {
@@ -98,7 +106,7 @@ export const Contract = () => {
   };
 
   if (!isAuthenticated) {
-    return <div>Veuillez vous connecter pour accéder à votre contrat.</div>;
+    return null; // On gère la redirection dans le useEffect
   }
 
   return (
@@ -110,20 +118,24 @@ export const Contract = () => {
         </div>
       </div>
       
-      <div className="bg-slate-900/70 backdrop-blur-lg rounded-xl p-6 border border-purple-800/30">
-        <div className="flex justify-between items-center mb-6">
+      <div className="bg-slate-900/70 backdrop-blur-lg rounded-xl p-4 sm:p-6 border border-purple-800/30">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <div>
-            <h2 className="text-xl font-semibold text-white">Contrat de Partenariat</h2>
+            <h2 className="text-xl font-semibold text-white">
+              {role === 'creator' ? 'Contrat de Créateur' : 
+               role === 'agent' ? 'Contrat d\'Agent' : 
+               role === 'manager' ? 'Contrat de Manager' : 'Contrat de Partenariat'}
+            </h2>
             <p className="text-slate-400">Fait à Marseille, le {creationDate ? formatDate(creationDate) : 'N/A'}</p>
           </div>
           
-          <div className="flex space-x-2">
-            <Button onClick={handleDownload}>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button onClick={handleDownload} className="w-full sm:w-auto">
               {hasDownloaded ? "Téléchargement effectué" : "Télécharger le contrat"}
             </Button>
             
             {!hasApproved && (
-              <Button onClick={handleApprove} variant="default">
+              <Button onClick={handleApprove} variant="default" className="w-full sm:w-auto">
                 J'approuve le contrat
               </Button>
             )}
@@ -136,7 +148,7 @@ export const Contract = () => {
           </div>
         </div>
         
-        <div className="prose prose-invert max-w-none">
+        <div className="prose prose-invert max-w-none overflow-auto">
           <ContractDocument username={username} role={role} date={creationDate ? formatDate(creationDate) : 'N/A'} />
         </div>
       </div>

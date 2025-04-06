@@ -75,46 +75,46 @@ const Matches = () => {
         formattedTime={formattedTime}
         currentPage="matches"
       >
-        <div className="flex justify-center w-full p-6 md:ml-0 bg-slate-900">
-          <div className="w-full max-w-6xl space-y-6">
+        <div className="flex justify-center w-full p-2 sm:p-4 md:p-6 md:ml-0 bg-slate-900">
+          <div className="w-full max-w-6xl space-y-4 sm:space-y-6">
             <Card className="bg-slate-900/90 shadow-lg border-purple-900/30">
-              <CardHeader className="bg-gradient-to-r from-purple-950/50 to-slate-900/50 border-b border-purple-900/20">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-2xl font-bold text-white flex items-center gap-2">
-                    <Trophy className="h-6 w-6 text-purple-500" />
+              <CardHeader className="bg-gradient-to-r from-purple-950/50 to-slate-900/50 border-b border-purple-900/20 p-3 sm:p-4 md:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <CardTitle className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+                    <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
                     <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
-                      Gestion des Matchs ✨
+                      Gestion des Matchs
                     </span>
                   </CardTitle>
                   
                   {['founder', 'manager', 'agent'].includes(role || '') && (
                     <Button 
-                      className="bg-purple-600 hover:bg-purple-700 text-white shadow-md"
+                      className="bg-purple-600 hover:bg-purple-700 text-white shadow-md w-full sm:w-auto"
                       onClick={() => setIsMatchDialogOpen(true)}
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Nouveau match 🎮
+                      Nouveau match
                     </Button>
                   )}
                 </div>
               </CardHeader>
-              <CardContent className="p-6 text-white">
-                <div className="flex border-b border-slate-700 mb-6">
+              <CardContent className="p-3 sm:p-4 md:p-6 text-white">
+                <div className="flex overflow-x-auto border-b border-slate-700 mb-4 sm:mb-6">
                   <Button
                     variant={activeTab === 'upcoming' ? 'default' : 'ghost'}
-                    className={`relative rounded-none ${activeTab === 'upcoming' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white' : 'text-gray-400 hover:text-white'}`}
+                    className={`relative rounded-none flex-1 px-2 sm:px-4 ${activeTab === 'upcoming' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white' : 'text-gray-400 hover:text-white'}`}
                     onClick={() => setActiveTab('upcoming')}
                   >
-                    <CalendarDays className="mr-2 h-4 w-4" />
-                    Matchs à venir ({upcomingMatches.length})
+                    <CalendarDays className="mr-1 sm:mr-2 h-4 w-4" />
+                    <span className="text-xs sm:text-sm">À venir ({upcomingMatches.length})</span>
                   </Button>
                   <Button
                     variant={activeTab === 'past' ? 'default' : 'ghost'}
-                    className={`relative rounded-none ${activeTab === 'past' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white' : 'text-gray-400 hover:text-white'}`}
+                    className={`relative rounded-none flex-1 px-2 sm:px-4 ${activeTab === 'past' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white' : 'text-gray-400 hover:text-white'}`}
                     onClick={() => setActiveTab('past')}
                   >
-                    <Clock className="mr-2 h-4 w-4" />
-                    Matchs passés ({pastMatches.length})
+                    <Clock className="mr-1 sm:mr-2 h-4 w-4" />
+                    <span className="text-xs sm:text-sm">Passés ({pastMatches.length})</span>
                   </Button>
                 </div>
                 
@@ -123,7 +123,7 @@ const Matches = () => {
                     <div className="animate-spin h-8 w-8 border-4 border-purple-500 rounded-full border-t-transparent"></div>
                   </div>
                 ) : activeTab === 'upcoming' ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {upcomingMatches.length > 0 ? (
                       upcomingMatches.map(match => (
                         <MatchCard 
@@ -140,18 +140,18 @@ const Matches = () => {
                         />
                       ))
                     ) : (
-                      <div className="bg-slate-800/90 backdrop-blur-sm border border-purple-700/20 rounded-xl p-6 text-center">
+                      <div className="bg-slate-800/90 backdrop-blur-sm border border-purple-700/20 rounded-xl p-4 sm:p-6 text-center">
                         <div className="flex justify-center">
-                          <Users className="h-12 w-12 mx-auto mb-3 text-purple-500 opacity-70" />
-                          <Sparkles className="h-5 w-5 text-yellow-400 animate-pulse" />
+                          <Users className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-2 sm:mb-3 text-purple-500 opacity-70" />
+                          <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400 animate-pulse" />
                         </div>
-                        <h3 className="text-xl font-medium mb-2 text-white">Aucun match à venir</h3>
-                        <p className="text-gray-400">Cliquez sur "Nouveau match" pour en créer un</p>
+                        <h3 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2 text-white">Aucun match à venir</h3>
+                        <p className="text-gray-400 text-sm">Cliquez sur "Nouveau match" pour en créer un</p>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {pastMatches.length > 0 ? (
                       pastMatches.map(match => (
                         <MatchCard 
@@ -168,13 +168,13 @@ const Matches = () => {
                         />
                       ))
                     ) : (
-                      <div className="bg-slate-800/90 backdrop-blur-sm border border-purple-700/20 rounded-xl p-6 text-center">
+                      <div className="bg-slate-800/90 backdrop-blur-sm border border-purple-700/20 rounded-xl p-4 sm:p-6 text-center">
                         <div className="flex justify-center">
-                          <Clock className="h-12 w-12 mx-auto mb-3 text-purple-500 opacity-70" />
-                          <Sparkles className="h-5 w-5 text-yellow-400 animate-pulse" />
+                          <Clock className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-2 sm:mb-3 text-purple-500 opacity-70" />
+                          <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400 animate-pulse" />
                         </div>
-                        <h3 className="text-xl font-medium mb-2 text-white">Aucun match passé</h3>
-                        <p className="text-gray-400">L'historique des matchs apparaîtra ici.</p>
+                        <h3 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2 text-white">Aucun match passé</h3>
+                        <p className="text-gray-400 text-sm">L'historique des matchs apparaîtra ici.</p>
                       </div>
                     )}
                   </div>

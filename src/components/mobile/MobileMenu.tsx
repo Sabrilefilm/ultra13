@@ -1,9 +1,9 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu, Home, Users, MessageSquare, Book, FileText, User, Bell, ArrowLeft, Trophy } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 
 interface MobileMenuProps {
@@ -20,7 +20,13 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   onLogout
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  
+  // Réinitialiser l'état du menu lors du changement de route
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
   
   const handleClose = () => {
     setIsOpen(false);
@@ -108,6 +114,10 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
     handleClose();
   };
   
+  const isCurrentPage = (path: string) => {
+    return location.pathname === path || currentPage === path;
+  };
+  
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
@@ -121,10 +131,11 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
       </SheetTrigger>
       <SheetContent 
         side="left" 
-        className="w-full sm:w-[300px] p-0 bg-black/50 backdrop-blur-lg border-r border-purple-800/30 overflow-y-auto"
+        className="w-full sm:w-[300px] p-0 bg-black/80 backdrop-blur-lg border-r border-purple-800/30 overflow-y-auto"
+        onCloseAutoFocus={(e) => e.preventDefault()}
       >
         <div className="flex flex-col h-full">
-          <div className="p-4 border-b border-slate-700/50">
+          <div className="p-4 border-b border-slate-700/50 bg-gradient-to-r from-purple-900/50 to-slate-900/50">
             <h2 className="text-xl font-bold text-white">Menu</h2>
             <p className="text-sm text-slate-400">
               Connecté en tant que <span className="text-purple-400">{username}</span>
@@ -144,7 +155,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                   <Button
                     variant="ghost"
                     className={`w-full justify-start text-left ${
-                      currentPage === item.path 
+                      isCurrentPage(item.path)
                         ? "bg-gradient-to-r from-purple-800/50 to-blue-800/50 text-white" 
                         : "text-slate-300 hover:text-white hover:bg-slate-800/50"
                     }`}
