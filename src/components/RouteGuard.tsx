@@ -12,18 +12,11 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({ children, allowedRoles }
   const { isAuthenticated, role } = useIndexAuth();
 
   if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/not-found" replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(role || '')) {
-    // Redirect to appropriate page based on role
-    if (role === 'creator') {
-      return <Navigate to="/dashboard" replace />;
-    } else if (role === 'agent') {
-      return <Navigate to="/creator-stats" replace />;
-    } else {
-      return <Navigate to="/dashboard" replace />;
-    }
+    return <Navigate to="/not-found" replace />;
   }
 
   return <>{children}</>;

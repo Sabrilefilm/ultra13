@@ -80,10 +80,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent event bubbling
-            onOpenMenu();
-          }}
+          onClick={onOpenMenu}
           className="flex flex-col items-center py-2 px-1 text-slate-400"
         >
           <Menu className="h-5 w-5 mb-1" />

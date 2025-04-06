@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { SidebarNavigation } from "./sidebar/SidebarNavigation";
 import { SidebarUserProfile } from "./sidebar/SidebarUserProfile";
 import { SidebarLogout } from "./sidebar/SidebarLogout";
@@ -89,9 +89,17 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
 }: UltraSidebarProps) => {
   const { collapsed, toggleSidebar } = useSidebar();
   const isMobile = useIsMobile();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleOpenMobileMenu = () => {
+    setMobileMenuOpen(true);
+    if (setMobileMenuOpen) {
+      setMobileMenuOpen(true);
+    }
+  };
   
-  const handleMobileClose = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation(); // Prevent event bubbling
+  const handleMobileClose = () => {
+    setMobileMenuOpen(false);
     if (setMobileMenuOpen) {
       setMobileMenuOpen(false);
     }
@@ -101,9 +109,7 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
     if (onAction) {
       onAction(action, data);
     }
-    if (setMobileMenuOpen) {
-      setMobileMenuOpen(false);
-    }
+    handleMobileClose();
   };
   
   const navigationItems = getNavigationItems(role, currentPage);
@@ -122,11 +128,8 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
       <div className="flex h-full">
         <Sidebar className={`fixed h-full bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-lg z-50 flex flex-col border-r border-purple-800/50 transition-all duration-300 ${collapsed ? "w-16" : "w-64"} hidden md:flex`}>
           <div className="flex justify-between items-center p-4 border-b border-purple-800/30">
-            {!collapsed && <SidebarLogo />}
-            <div className="flex items-center">
-              <SidebarToggle collapsed={collapsed} onToggle={toggleSidebar} />
-              {isMobileOpen && <SidebarMobileClose onClose={handleMobileClose} className="md:hidden ml-2" />}
-            </div>
+            <SidebarLogo collapsed={collapsed} />
+            <SidebarToggle collapsed={collapsed} onToggle={toggleSidebar} />
           </div>
           
           <SidebarUserProfile username={username} role={role} collapsed={collapsed} />
@@ -153,9 +156,7 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
         <MobileNavigation 
           role={role} 
           currentPage={currentPage || ''} 
-          onOpenMenu={() => {
-            if (onAction) onAction('toggleMobileMenu');
-          }} 
+          onOpenMenu={handleOpenMobileMenu} 
         />
       )}
     </div>

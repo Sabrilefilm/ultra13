@@ -1,4 +1,3 @@
-
 import { Route, Routes, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -27,6 +26,7 @@ import Matches from "./pages/Matches";
 import ExternalMatches from "./pages/ExternalMatches";
 import Contract from "./pages/Contract";
 import PersonalInfo from "./pages/PersonalInfo";
+import NotFound from "./pages/NotFound";
 import { scheduleService } from "./services/schedule/schedule-service";
 
 function App() {
@@ -42,6 +42,7 @@ function App() {
     <>
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/not-found" element={<NotFound />} />
         <Route
           path="/dashboard"
           element={
@@ -232,7 +233,7 @@ function App() {
             </RouteGuard>
           }
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
     </>

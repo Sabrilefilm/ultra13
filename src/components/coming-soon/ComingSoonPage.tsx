@@ -15,7 +15,7 @@ interface ComingSoonPageProps {
 export const ComingSoonPage: React.FC<ComingSoonPageProps> = ({
   title,
   icon = <MessageSquare className="h-16 w-16 text-purple-400" />,
-  redirectSeconds = 59,
+  redirectSeconds = 10,
   description = "Cette fonctionnalité sera bientôt disponible."
 }) => {
   const navigate = useNavigate();
@@ -83,6 +83,6 @@ export const ComingSoonPage: React.FC<ComingSoonPageProps> = ({
       <div className="mt-8 text-slate-500 text-sm">
         © Ultra Agency - {new Date().getFullYear()}
       </div>
-    </div>
+    </motion.div>
   );
 };
