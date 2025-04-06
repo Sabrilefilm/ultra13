@@ -83,6 +83,6 @@ export const ComingSoonPage: React.FC<ComingSoonPageProps> = ({
       <div className="mt-8 text-slate-500 text-sm">
         © Ultra Agency - {new Date().getFullYear()}
       </div>
-    </motion.div>
+    </div>
   );
 };
