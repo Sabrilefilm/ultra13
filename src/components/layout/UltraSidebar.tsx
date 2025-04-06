@@ -83,25 +83,25 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
   currentPage = "",
   onAction,
   isMobileOpen,
-  setMobileMenuOpen,
+  setMobileMenuOpen: setParentMobileMenuOpen, // Renamed prop to avoid conflict
   version,
   children
 }: UltraSidebarProps) => {
   const { collapsed, toggleSidebar } = useSidebar();
   const isMobile = useIsMobile();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setLocalMobileMenuOpen] = useState(false); // Renamed local state setter
 
   const handleOpenMobileMenu = () => {
-    setMobileMenuOpen(true);
-    if (setMobileMenuOpen) {
-      setMobileMenuOpen(true);
+    setLocalMobileMenuOpen(true);
+    if (setParentMobileMenuOpen) {
+      setParentMobileMenuOpen(true);
     }
   };
   
   const handleMobileClose = () => {
-    setMobileMenuOpen(false);
-    if (setMobileMenuOpen) {
-      setMobileMenuOpen(false);
+    setLocalMobileMenuOpen(false);
+    if (setParentMobileMenuOpen) {
+      setParentMobileMenuOpen(false);
     }
   };
   
