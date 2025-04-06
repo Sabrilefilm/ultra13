@@ -21,8 +21,12 @@ export const SidebarItemCollapsed: React.FC<SidebarItemProps> = ({ item, isActiv
   };
 
   const handleClick = () => {
-    const data = typeof item.data === 'function' ? item.data('') : item.data;
-    onClick(item.action, data);
+    try {
+      const data = typeof item.data === 'function' ? item.data('') : item.data;
+      onClick(item.action, data);
+    } catch (error) {
+      console.error("Error in SidebarItemCollapsed click handler:", error);
+    }
   };
 
   return (

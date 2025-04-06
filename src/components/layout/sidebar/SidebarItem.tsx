@@ -15,8 +15,12 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({ item, isActive, onClic
   };
 
   const handleClick = () => {
-    const data = typeof item.data === 'function' ? item.data('') : item.data;
-    onClick(item.action, data);
+    try {
+      const data = typeof item.data === 'function' ? item.data('') : item.data;
+      onClick(item.action, data);
+    } catch (error) {
+      console.error("Error in SidebarItem click handler:", error);
+    }
   };
 
   return (

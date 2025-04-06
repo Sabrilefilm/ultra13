@@ -13,9 +13,9 @@ export function MessagesHeader({ onNewMessage }: MessagesHeaderProps) {
   const isMobile = useIsMobile();
   
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between p-3 gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b dark:border-gray-700/30">
-      <h1 className="text-lg sm:text-xl font-bold flex items-center gap-2 text-gray-800 dark:text-gray-200">
-        <MessageSquare className="h-5 w-5 text-blue-500" />
+    <div className="flex flex-col sm:flex-row items-center justify-between p-2 sm:p-3 gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b dark:border-gray-700/30">
+      <h1 className="text-md sm:text-xl font-bold flex items-center gap-2 text-gray-800 dark:text-gray-200">
+        <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
         {!isMobile ? "Messagerie Ultra" : "Messages"}
       </h1>
       

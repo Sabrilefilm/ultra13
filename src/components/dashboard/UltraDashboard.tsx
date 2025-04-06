@@ -58,10 +58,9 @@ export const UltraDashboard: React.FC<UltraDashboardProps> = ({
       
       <MobileMenuButton onClick={() => onAction('toggleMobileMenu')} />
       
-      <div className="flex h-full">
-        <div className={`${sidebarStates.mobileMenuOpen ? 'fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden' : 'hidden md:block'}`}>
-          <div className={`${sidebarStates.mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} 
-                          transition-transform duration-300 h-full w-64 md:w-auto z-50`}>
+      <div className="flex h-full w-full">
+        <div className={`md:flex ${sidebarStates.mobileMenuOpen ? 'fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:relative md:inset-auto md:bg-transparent md:backdrop-filter-none' : 'hidden'}`}>
+          <div className={`transform transition-transform duration-300 h-full ${sidebarStates.mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
             <UltraSidebar 
               username={username}
               role={role}
@@ -76,15 +75,17 @@ export const UltraDashboard: React.FC<UltraDashboardProps> = ({
           </div>
         </div>
         
-        <DashboardContent
-          username={username}
-          role={role}
-          currentPage={currentPage}
-          onAction={onAction}
-          onLogout={onLogout}
-        >
-          {children}
-        </DashboardContent>
+        <div className="flex-1 h-full overflow-hidden">
+          <DashboardContent
+            username={username}
+            role={role}
+            currentPage={currentPage}
+            onAction={onAction}
+            onLogout={onLogout}
+          >
+            {children}
+          </DashboardContent>
+        </div>
       </div>
       
       <MobileNavigation 

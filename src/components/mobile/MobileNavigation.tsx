@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Home, Users, MessageSquare, Book, ArrowLeft } from "lucide-react";
+import { Home, Users, MessageSquare, Book, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { motion } from "framer-motion";
@@ -27,11 +27,11 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
       icon: Home,
       label: "Accueil",
       path: "/",
-      roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
+      roles: ["founder", "manager", "agent", "creator", "ambassadeur", "client"]
     },
     {
       icon: Users,
-      label: "Utilisateurs",
+      label: "Équipe",
       path: "/user-management",
       roles: ["founder", "manager", "agent"]
     },
@@ -39,19 +39,13 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
       icon: MessageSquare,
       label: "Messages",
       path: "/messages",
-      roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
+      roles: ["founder", "manager", "agent", "creator", "ambassadeur", "client"]
     },
     {
       icon: Book,
-      label: "Formation",
+      label: "Cours",
       path: "/training",
-      roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
-    },
-    {
-      icon: ArrowLeft,
-      label: "Transferts",
-      path: "/transfers",
-      roles: ["founder", "manager", "creator"]
+      roles: ["founder", "manager", "agent", "creator", "ambassadeur", "client"]
     }
   ];
   
@@ -65,7 +59,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
     <motion.div 
       initial={{ y: 100 }}
       animate={{ y: 0 }}
-      className="fixed bottom-0 left-0 right-0 bg-black/70 backdrop-blur-lg border-t border-purple-800/20 z-50 px-2 py-1 md:hidden"
+      className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-lg border-t border-purple-800/20 z-50 px-2 py-1 md:hidden"
     >
       <div className="flex items-center justify-between">
         {filteredItems.slice(0, 4).map((item) => (
@@ -74,8 +68,11 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
             variant="ghost"
             size="sm"
             onClick={() => handleNavigation(item.path)}
-            className={`flex flex-col items-center py-1 px-1 ${
-              currentPage === item.path ? "text-purple-500" : "text-slate-400"
+            className={`flex flex-col items-center justify-center py-1 px-1 ${
+              currentPage === item.path || 
+              (item.path === '/' && currentPage === 'dashboard') ? 
+              "text-purple-400 bg-purple-900/20" : 
+              "text-slate-400"
             }`}
           >
             <item.icon className="h-4 w-4 mb-1" />
@@ -87,13 +84,9 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
           variant="ghost"
           size="sm"
           onClick={onOpenMenu}
-          className="flex flex-col items-center py-1 px-1 text-slate-400"
+          className="flex flex-col items-center justify-center py-1 px-1 text-slate-400"
         >
-          <div className="h-4 w-4 mb-1 flex flex-col gap-[2px] items-center justify-center">
-            <span className="bg-slate-400 h-[2px] w-3 block"></span>
-            <span className="bg-slate-400 h-[2px] w-3 block"></span>
-            <span className="bg-slate-400 h-[2px] w-3 block"></span>
-          </div>
+          <Menu className="h-4 w-4 mb-1" />
           <span className="text-[10px]">Menu</span>
         </Button>
       </div>

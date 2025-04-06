@@ -1,3 +1,4 @@
+
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AuthView } from "@/components/auth/AuthView";
 import { useInactivityTimer } from "@/hooks/use-inactivity-timer";
@@ -7,10 +8,10 @@ import { useAccountManagement } from "@/hooks/use-account-management";
 import { usePersonalInfoCheck } from "@/hooks/use-personal-info-check";
 import { useToast } from "@/hooks/use-toast";
 import { UltraDashboard } from "@/components/dashboard/UltraDashboard";
-import { Loader2, Rocket } from "lucide-react";
-import { SocialCommunityLinks } from "@/components/layout/SocialCommunityLinks";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAppVersion } from "@/hooks/use-app-version";
+
 const Index = () => {
   const {
     toast
@@ -36,6 +37,7 @@ const Index = () => {
     handleCreateAccount
   } = useAccountManagement();
   usePersonalInfoCheck(isAuthenticated, role);
+  
   useEffect(() => {
     // Démarre l'animation après le chargement
     const timer = setTimeout(() => {
@@ -43,6 +45,7 @@ const Index = () => {
     }, 300);
     return () => clearTimeout(timer);
   }, []);
+  
   const {
     showWarning,
     dismissWarning,
@@ -75,6 +78,7 @@ const Index = () => {
       }} />)}
       </div>;
   };
+  
   if (isLoading) {
     return <div className="min-h-screen bg-[#111827] flex flex-col items-center justify-center">
         <div className="text-white text-center">
@@ -84,20 +88,33 @@ const Index = () => {
         {renderBackground()}
       </div>;
   }
+  
   if (!isAuthenticated) {
-    return <div className="min-h-screen bg-[#111827] flex flex-col items-center justify-center p-4 px-[13px] mx-[240px]">
+    return <div className="min-h-screen bg-[#111827] flex flex-col items-center justify-center p-4">
         <div className="w-full max-w-md">
           <AuthView onLogin={handleLogin} />
-          {/* Suppression de SocialCommunityLinks sur la page de connexion */}
         </div>
         {renderBackground()}
       </div>;
   }
-  return <SidebarProvider defaultOpen={true}>
-      <UltraDashboard username={username} role={role || ''} userId={userId || ''} onLogout={handleLogout} platformSettings={platformSettings} handleCreateAccount={handleCreateAccount} handleUpdateSettings={handleUpdateSettings} showWarning={showWarning} dismissWarning={dismissWarning} formattedTime={formattedTime} currentPage="dashboard" />
-      
-      {/* SocialCommunityLinks conservé uniquement sur le tableau de bord, 
-          intégré directement dans UltraDashboard */}
+  
+  return <SidebarProvider defaultOpen={!window.matchMedia('(max-width: 768px)').matches}>
+      <div className="w-full h-screen">
+        <UltraDashboard 
+          username={username} 
+          role={role || ''} 
+          userId={userId || ''} 
+          onLogout={handleLogout} 
+          platformSettings={platformSettings} 
+          handleCreateAccount={handleCreateAccount} 
+          handleUpdateSettings={handleUpdateSettings} 
+          showWarning={showWarning} 
+          dismissWarning={dismissWarning} 
+          formattedTime={formattedTime} 
+          currentPage="dashboard" 
+        />
+      </div>
     </SidebarProvider>;
 };
+
 export default Index;
