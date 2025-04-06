@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Shield, BookOpen, Lightbulb } from "lucide-react";
 import { EquipmentRecommendations } from "@/components/rules/EquipmentRecommendations";
 import { Button } from "@/components/ui/button";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const CreatorRules = () => {
   const {
@@ -69,38 +70,17 @@ const CreatorRules = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2
+        staggerChildren: 0.15
       }
     }
   };
 
-  // Auto-animating button
-  const pulseAnimation = {
-    scale: [1, 1.05, 1],
-    boxShadow: [
-      "0 0 0 0 rgba(134, 46, 255, 0)",
-      "0 0 0 10px rgba(134, 46, 255, 0.3)",
-      "0 0 0 0 rgba(134, 46, 255, 0)"
-    ],
-    transition: {
-      duration: 2,
-      repeat: Infinity,
-      repeatType: "loop" as const
-    }
-  };
-
   if (!isAuthenticated) {
-    return (
-      <>
-        {username && <UsernameWatermark username={username} />}
-        <p>Vous n'êtes pas connecté.</p>
-      </>
-    );
+    return <p>Vous n'êtes pas connecté.</p>;
   }
 
   return (
-    <>
-      {username && <UsernameWatermark username={username} />}
+    <SidebarProvider defaultOpen={true}>
       <UltraDashboard
         username={username}
         role={role || ''}
@@ -115,109 +95,103 @@ const CreatorRules = () => {
         currentPage="creator-rules"
       >
         <motion.div 
-          className="p-0 space-y-6"
+          className="p-6 space-y-6 min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950"
           variants={staggerContainer}
           initial="hidden"
           animate="visible"
         >
-          <motion.div variants={fadeInUp}>
-            <Card className="bg-white dark:bg-slate-900 shadow-lg border-purple-100 dark:border-purple-900/30 max-w-5xl mx-auto rounded-none md:rounded-lg">
-              <CardHeader className="bg-gradient-to-r from-purple-50 to-white dark:from-purple-950/30 dark:to-slate-950 bg-slate-950">
-                <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <Shield className="h-6 w-6 text-purple-500" />
-                  Règles des Créateurs
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 bg-gray-950">
-                <Tabs defaultValue="general" className="w-full">
-                  <TabsList className="grid grid-cols-3 mb-6 bg-indigo-950">
-                    <TabsTrigger value="general" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
-                      Règles Générales
-                    </TabsTrigger>
-                    <TabsTrigger value="content" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
-                      Contenu
-                    </TabsTrigger>
-                    <TabsTrigger value="equipment" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white flex items-center gap-1">
-                      <Lightbulb className="h-4 w-4" />
-                      Équipement
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  <ScrollArea className="h-[500px] rounded-md border border-purple-100 dark:border-purple-900/30 p-4">
-                    <TabsContent value="general" className="space-y-4">
+          <motion.div variants={fadeInUp} className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <h1 className="text-3xl font-bold tracking-tight flex items-center bg-gradient-to-r from-purple-400 to-indigo-300 bg-clip-text text-transparent">
+                <Shield className="h-8 w-8 mr-3 text-purple-400" />
+                Règles des Créateurs ✨
+              </h1>
+            </div>
+            
+            <Tabs defaultValue="general" className="w-full">
+              <TabsList className="bg-slate-800/80 p-1.5 flex mb-8 rounded-lg border border-purple-900/30 shadow-md shadow-purple-900/10">
+                <TabsTrigger value="general" className="flex-1 rounded-md py-2.5 data-[state=active]:bg-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Règles Générales 📝
+                </TabsTrigger>
+                <TabsTrigger value="equipment" className="flex-1 rounded-md py-2.5 data-[state=active]:bg-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <Lightbulb className="h-4 w-4 mr-2" />
+                  Matériel Recommandé 🔧
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="general" className="pt-2 space-y-6">
+                <Card className="bg-gradient-to-r from-slate-800 to-slate-900 border-purple-800/30">
+                  <CardHeader>
+                    <CardTitle className="text-xl text-white">Règles Générales pour les Créateurs</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[500px] pr-4">
                       <div className="space-y-6">
-                        <h3 className="text-xl font-semibold text-purple-700 dark:text-purple-300 border-b border-purple-100 dark:border-purple-800 pb-2">Règles Générales pour les Créateurs</h3>
+                        <div className="p-4 bg-purple-900/20 border border-purple-800/30 rounded-lg">
+                          <h3 className="text-lg font-semibold mb-2 text-white">1. Qualité des Contenus</h3>
+                          <p className="text-slate-300">
+                            Veillez à ce que tous vos contenus soient de haute qualité, tant sur le plan technique 
+                            (vidéo, audio) que sur le fond. Évitez les contenus flous, mal éclairés ou avec un son 
+                            de mauvaise qualité.
+                          </p>
+                        </div>
                         
-                        <div className="space-y-4">
-                          <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border-l-4 border-purple-500">
-                            <h4 className="font-medium mb-2 text-purple-800 dark:text-purple-200">1. Respect des Horaires</h4>
-                            <p className="text-gray-700 dark:text-gray-300">Les créateurs doivent respecter leurs horaires de live programmés et signaler tout changement au moins 24h à l'avance.</p>
-                          </div>
-                          
-                          <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border-l-4 border-purple-500">
-                            <h4 className="font-medium mb-2 text-purple-800 dark:text-purple-200">2. Communication</h4>
-                            <p className="text-gray-700 dark:text-gray-300">La communication avec les agents doit être régulière et transparente.</p>
-                          </div>
-                          
-                          <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border-l-4 border-purple-500">
-                            <h4 className="font-medium mb-2 text-purple-800 dark:text-purple-200">3. Participation aux Matchs</h4>
-                            <p className="text-gray-700 dark:text-gray-300">Les créateurs doivent participer aux matchs programmés par leur agent. En cas d'impossibilité, ils doivent en informer leur agent au moins 48h à l'avance.</p>
-                          </div>
+                        <div className="p-4 bg-purple-900/20 border border-purple-800/30 rounded-lg">
+                          <h3 className="text-lg font-semibold mb-2 text-white">2. Régularité</h3>
+                          <p className="text-slate-300">
+                            Maintenez un calendrier de publication régulier. Vos abonnés apprécient la constance et 
+                            s'attendent à voir vos contenus à des moments précis.
+                          </p>
+                        </div>
+                        
+                        <div className="p-4 bg-purple-900/20 border border-purple-800/30 rounded-lg">
+                          <h3 className="text-lg font-semibold mb-2 text-white">3. Respect de la Communauté</h3>
+                          <p className="text-slate-300">
+                            Traitez votre audience avec respect. Évitez les propos discriminatoires, offensants ou 
+                            inappropriés. Soyez constructif dans vos interactions.
+                          </p>
+                        </div>
+                        
+                        <div className="p-4 bg-purple-900/20 border border-purple-800/30 rounded-lg">
+                          <h3 className="text-lg font-semibold mb-2 text-white">4. Droits d'Auteur</h3>
+                          <p className="text-slate-300">
+                            Respectez scrupuleusement les droits d'auteur. N'utilisez pas de contenus (musiques, 
+                            images, vidéos) sans autorisation. Utilisez des ressources libres de droits ou obtenez 
+                            les autorisations nécessaires.
+                          </p>
+                        </div>
+                        
+                        <div className="p-4 bg-purple-900/20 border border-purple-800/30 rounded-lg">
+                          <h3 className="text-lg font-semibold mb-2 text-white">5. Communication avec l'Agence</h3>
+                          <p className="text-slate-300">
+                            Maintenez une communication claire et régulière avec votre agent. Informez-le de 
+                            vos projets, de vos difficultés éventuelles et de vos succès.
+                          </p>
+                        </div>
+                        
+                        <div className="p-4 bg-purple-900/20 border border-purple-800/30 rounded-lg">
+                          <h3 className="text-lg font-semibold mb-2 text-white">6. Utilisation de la Marque Ultra</h3>
+                          <p className="text-slate-300">
+                            Lorsque vous représentez Ultra Agency, assurez-vous d'utiliser correctement 
+                            les éléments de marque (logo, couleurs, typographie). En cas de doute, consultez 
+                            votre agent.
+                          </p>
                         </div>
                       </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="content" className="space-y-4">
-                      <div className="space-y-6">
-                        <h3 className="text-xl font-semibold text-purple-700 dark:text-purple-300 border-b border-purple-100 dark:border-purple-800 pb-2">Règles de Contenu</h3>
-                        
-                        <div className="space-y-4">
-                          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border-l-4 border-blue-500">
-                            <h4 className="font-medium mb-2 text-blue-800 dark:text-blue-200">1. Qualité du Contenu</h4>
-                            <p className="text-gray-700 dark:text-gray-300">Le contenu doit être de haute qualité et respecter les valeurs de l'agence.</p>
-                          </div>
-                          
-                          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border-l-4 border-blue-500">
-                            <h4 className="font-medium mb-2 text-blue-800 dark:text-blue-200">2. Respect des Directives TikTok</h4>
-                            <p className="text-gray-700 dark:text-gray-300">Le contenu doit être approprié et conforme aux règles de la plateforme TikTok.</p>
-                          </div>
-                          
-                          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border-l-4 border-blue-500">
-                            <h4 className="font-medium mb-2 text-blue-800 dark:text-blue-200">3. Représentation de l'Agence</h4>
-                            <p className="text-gray-700 dark:text-gray-300">En tant que créateur de Ultra, vous représentez l'agence lors de vos lives et dans votre contenu.</p>
-                          </div>
-                        </div>
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="equipment" className="space-y-4">
-                      <EquipmentRecommendations role={role || ''} />
-                    </TabsContent>
-                  </ScrollArea>
-                </Tabs>
-              </CardContent>
-            </Card>
-          </motion.div>
-          
-          <motion.div variants={fadeInUp} className="flex justify-center mt-6">
-            <motion.div animate={pulseAnimation}>
-              <Button 
-                size="lg" 
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-                onClick={() => window.location.href = '/training'}
-              >
-                <BookOpen className="mr-2 h-5 w-5" />
-                Accéder aux Formations
-              </Button>
-            </motion.div>
-          </motion.div>
-          
-          <motion.div variants={fadeInUp} className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
-            <p className="text-center">Les règles des créateurs sont sujettes à modification. Dernière mise à jour: {new Date().toLocaleDateString('fr-FR')}</p>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="equipment" className="pt-2 space-y-6">
+                <EquipmentRecommendations role={role || ''} />
+              </TabsContent>
+            </Tabs>
           </motion.div>
         </motion.div>
       </UltraDashboard>
-    </>
+    </SidebarProvider>
   );
 };
 
