@@ -2,10 +2,16 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { SidebarItemProps } from "./types";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export const SidebarItemCollapsed: React.FC<SidebarItemProps> = ({ item, isActive, onClick }) => {
   const getItemClass = (item: SidebarItemProps['item'], isActive: boolean) => {
-    const baseClass = "w-full flex items-center justify-center px-3 py-2 text-sm rounded-md";
+    const baseClass = "w-full flex items-center justify-center p-1.5 text-sm rounded-md";
     
     if (isActive) {
       return `${baseClass} ${item.animated ? 'bg-gradient-to-r from-blue-600 to-blue-800 text-white animate-pulse' : 'bg-blue-800 text-white'}`;
@@ -20,12 +26,21 @@ export const SidebarItemCollapsed: React.FC<SidebarItemProps> = ({ item, isActiv
   };
 
   return (
-    <Button 
-      variant="ghost" 
-      className={getItemClass(item, isActive)}
-      onClick={handleClick}
-    >
-      <item.icon className="h-5 w-5" />
-    </Button>
+    <TooltipProvider>
+      <Tooltip delayDuration={300}>
+        <TooltipTrigger asChild>
+          <Button 
+            variant="ghost" 
+            className={getItemClass(item, isActive)}
+            onClick={handleClick}
+          >
+            <item.icon className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="right">
+          <p>{item.label}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };

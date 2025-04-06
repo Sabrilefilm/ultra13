@@ -5,7 +5,7 @@ import { SidebarItemProps } from "./types";
 
 export const SidebarItem: React.FC<SidebarItemProps> = ({ item, isActive, onClick }) => {
   const getItemClass = (item: SidebarItemProps['item'], isActive: boolean) => {
-    const baseClass = "w-full flex items-center justify-start px-3 py-2 text-sm rounded-md";
+    const baseClass = "w-full flex items-center justify-start px-2 py-1.5 text-sm rounded-md";
     
     if (isActive) {
       return `${baseClass} ${item.animated ? 'bg-gradient-to-r from-blue-600 to-blue-800 text-white animate-pulse' : 'bg-blue-800 text-white'}`;
@@ -25,8 +25,8 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({ item, isActive, onClic
       className={getItemClass(item, isActive)}
       onClick={handleClick}
     >
-      <item.icon className="h-5 w-5 mr-3" />
-      <span>{item.label}</span>
+      <item.icon className="h-4 w-4 mr-2" />
+      <span className="text-sm">{item.label}</span>
     </Button>
   );
 };

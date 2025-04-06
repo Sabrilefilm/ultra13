@@ -31,28 +31,28 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
   };
 
   return (
-    <div className="border-b border-gray-200 dark:border-gray-800 p-3 sm:p-4 flex flex-wrap gap-3 sm:gap-4 items-center justify-between shadow-md bg-gray-800">
+    <div className="border-b border-gray-200 dark:border-gray-800 p-2 sm:p-4 flex flex-wrap gap-2 sm:gap-4 items-center justify-between shadow-md bg-gray-800">
       <div className="flex items-center space-x-2">
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={() => navigate("/")} 
-          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 h-8 w-8 p-0"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-lg sm:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600">
+        <h1 className="text-base sm:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600">
           {isMobile ? "Transferts" : "Gestion des Transferts"}
         </h1>
       </div>
       
-      <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+      <div className="flex flex-nowrap items-center gap-2 w-full sm:w-auto">
         {(role === 'creator' || role === 'agent') && (
           <Button 
             onClick={onOpenTransferDialog} 
-            className={`${getRoleButtonClass()} shadow-md transition-all duration-200 w-full sm:w-auto`}
+            className={`${getRoleButtonClass()} shadow-md transition-all duration-200 py-1 h-8 text-xs w-full sm:w-auto`}
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-1 h-3 w-3" />
             {isMobile ? "Demande" : "Demande de transfert"}
           </Button>
         )}
@@ -61,9 +61,9 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
           <Button 
             onClick={onExportData} 
             variant="outline" 
-            className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-950/50 w-full sm:w-auto"
+            className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-950/50 py-1 h-8 text-xs w-full sm:w-auto"
           >
-            <Download className="mr-2 h-4 w-4" />
+            <Download className="mr-1 h-3 w-3" />
             {isMobile ? "Exporter" : "Exporter les données"}
           </Button>
         )}
