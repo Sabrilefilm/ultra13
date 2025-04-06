@@ -2,7 +2,7 @@
 import React from "react";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { PencilLine, Diamond, UserMinus, Eye } from "lucide-react";
+import { PencilLine, Diamond, UserMinus, Eye, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/ui/pagination";
 
@@ -79,8 +79,19 @@ export const CreatorsTable: React.FC<CreatorsTableProps> = ({
 
   if (creators.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        Aucun créateur n'est assigné à votre compte
+      <div className="text-center py-8 text-muted-foreground space-y-4 border border-slate-700/30 rounded-md p-6 bg-slate-800/30">
+        <p>Aucun créateur n'est assigné à votre compte actuellement</p>
+        {onRefreshData && (
+          <Button 
+            onClick={onRefreshData} 
+            variant="outline" 
+            size="sm"
+            className="mt-2"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Actualiser les données
+          </Button>
+        )}
       </div>
     );
   }
@@ -175,6 +186,20 @@ export const CreatorsTable: React.FC<CreatorsTableProps> = ({
             totalPages={totalPages} 
             onPageChange={onPageChange} 
           />
+        </div>
+      )}
+      
+      {onRefreshData && (
+        <div className="flex justify-end mt-2">
+          <Button 
+            onClick={onRefreshData} 
+            variant="outline" 
+            size="sm"
+            className="text-xs"
+          >
+            <RefreshCw className="h-3 w-3 mr-1" />
+            Actualiser
+          </Button>
         </div>
       )}
     </div>

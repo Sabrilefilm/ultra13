@@ -13,10 +13,11 @@ export const MobileMenuButton: React.FC<MobileMenuButtonProps> = ({ onClick }) =
       <Button 
         variant="outline" 
         size="sm"
-        className="bg-slate-800/80 backdrop-blur-sm border-slate-700 h-9 w-9 p-0 shadow-lg"
+        className="bg-slate-800/90 backdrop-blur-sm border-slate-700 h-9 w-9 p-0 shadow-lg"
         onClick={onClick}
+        aria-label="Menu"
       >
-        <MenuIcon className="h-4 w-4" />
+        <MenuIcon className="h-4 w-4 text-white" />
       </Button>
     </div>
   );

@@ -13,7 +13,7 @@ export const TransferEmptyState: React.FC<TransferEmptyStateProps> = ({
   onOpenTransferDialog
 }) => {
   return (
-    <div className="flex flex-col items-center justify-center py-6 sm:py-10">
+    <div className="flex flex-col items-center justify-center py-4 sm:py-8">
       <div className="w-12 h-12 sm:w-16 sm:h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mb-3 shadow-inner">
         <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-purple-500 dark:text-purple-400" />
       </div>

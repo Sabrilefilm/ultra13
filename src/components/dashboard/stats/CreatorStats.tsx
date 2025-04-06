@@ -9,6 +9,7 @@ import { PerformanceStats } from "./components/PerformanceStats";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
+import { BackButton } from "@/components/ui/back-button";
 
 interface CreatorStatsProps {
   userId?: string;
@@ -53,14 +54,7 @@ const CreatorStats: React.FC<CreatorStatsProps> = ({ userId }) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate('/')}
-          className="h-10 w-10"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+        <BackButton />
         <h2 className="text-2xl font-bold">Statistiques du Créateur</h2>
       </div>
       

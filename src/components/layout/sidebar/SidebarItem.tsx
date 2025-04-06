@@ -17,7 +17,13 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({ item, isActive, onClic
   const handleClick = () => {
     try {
       const data = typeof item.data === 'function' ? item.data('') : item.data;
-      onClick(item.action, data);
+      if (item.action === 'navigate' && typeof data === 'string') {
+        // Ensure data starts with a valid path character
+        const path = data.startsWith('/') ? data : `/${data}`;
+        onClick(item.action, path);
+      } else {
+        onClick(item.action, data);
+      }
     } catch (error) {
       console.error("Error in SidebarItem click handler:", error);
     }

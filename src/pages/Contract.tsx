@@ -14,6 +14,7 @@ export const Contract = () => {
   const [hasApproved, setHasApproved] = useState(false);
   const [hasDownloaded, setHasDownloaded] = useState(false);
   const [creationDate, setCreationDate] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -28,14 +29,23 @@ export const Contract = () => {
       if (!userId) return;
       
       try {
-        // Récupérer la date de création du compte
+        setIsLoading(true);
+        // Récupérer la date de création du compte et les informations de contrat
         const { data, error } = await supabase
-          .from('users')
+          .from('user_accounts')
           .select('created_at, contract_approved, contract_downloaded')
           .eq('id', userId)
           .single();
         
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching user data:', error);
+          toast({
+            title: "Erreur",
+            description: "Impossible de récupérer les informations utilisateur",
+            variant: "destructive"
+          });
+          return;
+        }
         
         if (data) {
           setCreationDate(data.created_at);
@@ -44,17 +54,19 @@ export const Contract = () => {
         }
       } catch (error) {
         console.error('Erreur lors de la récupération des informations:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     
     fetchUserData();
-  }, [userId, isAuthenticated, navigate]);
+  }, [userId, isAuthenticated, navigate, toast]);
 
   const handleDownload = async () => {
     try {
       // Marquer le contrat comme téléchargé
       const { error } = await supabase
-        .from('users')
+        .from('user_accounts')
         .update({ contract_downloaded: true })
         .eq('id', userId);
       
@@ -83,7 +95,7 @@ export const Contract = () => {
     try {
       // Marquer le contrat comme approuvé
       const { error } = await supabase
-        .from('users')
+        .from('user_accounts')
         .update({ contract_approved: true })
         .eq('id', userId);
       
@@ -107,6 +119,16 @@ export const Contract = () => {
 
   if (!isAuthenticated) {
     return null; // On gère la redirection dans le useEffect
+  }
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-6 max-w-4xl flex justify-center items-center min-h-[60vh]">
+        <div className="animate-pulse text-center">
+          <p className="text-gray-400">Chargement du contrat...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

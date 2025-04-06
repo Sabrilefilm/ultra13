@@ -6,13 +6,14 @@ import { ArrowLeft } from "lucide-react";
 
 interface BackButtonProps {
   className?: string;
+  returnTo?: string;
 }
 
-export const BackButton: React.FC<BackButtonProps> = ({ className = "" }) => {
+export const BackButton: React.FC<BackButtonProps> = ({ className = "", returnTo = "/" }) => {
   const navigate = useNavigate();
 
   const handleGoBack = () => {
-    navigate("/");  // Always redirect to the home page (index)
+    navigate(returnTo);
   };
 
   return (
