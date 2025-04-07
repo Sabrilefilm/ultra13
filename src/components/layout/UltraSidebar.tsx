@@ -13,6 +13,7 @@ import { useSidebar } from "@/hooks/use-sidebar";
 import { MobileMenu } from "@/components/mobile/MobileMenu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileNavigation } from "@/components/mobile/MobileNavigation";
+import { LastLoginInfo } from "@/components/layout/LastLoginInfo";
 
 interface SidebarToggleProps {
   collapsed: boolean;
@@ -73,6 +74,7 @@ interface UltraSidebarProps {
   setMobileMenuOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   version?: string;
   children?: React.ReactNode;
+  lastLogin?: string | null;
 }
 
 export const UltraSidebar: React.FC<UltraSidebarProps> = ({
@@ -85,7 +87,8 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
   isMobileOpen,
   setMobileMenuOpen: setParentMobileMenuOpen,
   version,
-  children
+  children,
+  lastLogin
 }: UltraSidebarProps) => {
   const { collapsed, toggleSidebar } = useSidebar();
   const isMobile = useIsMobile();

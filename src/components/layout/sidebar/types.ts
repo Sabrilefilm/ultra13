@@ -1,4 +1,3 @@
-
 import { ReactNode } from "react";
 
 export interface NavigationItem {
@@ -22,9 +21,9 @@ export interface UltraSidebarProps {
   setMobileMenuOpen?: (isOpen: boolean) => void;
   version?: string;
   children?: React.ReactNode;
+  lastLogin?: string | null;
 }
 
-// Add missing interfaces for the sidebar components
 export interface SidebarUserProfileProps {
   username: string;
   role: string;
