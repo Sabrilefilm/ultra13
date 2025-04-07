@@ -10,8 +10,9 @@ import { StatsHeader } from "@/components/creator-stats/StatsHeader";
 import { StatsSummaryCards } from "@/components/creator-stats/StatsSummaryCards";
 import { ResetActionsCard } from "@/components/creator-stats/ResetActionsCard";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { HomeIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const pageSize = 10;
 
@@ -46,7 +47,13 @@ const CreatorStats = () => {
   useEffect(() => {
     // Force refresh when component mounts
     fetchCreators();
-  }, [fetchCreators]);
+    console.log("CreatorStats mounted - forcing refresh");
+  }, []);
+
+  const handleRefetch = () => {
+    fetchCreators();
+    toast("Données actualisées");
+  };
 
   if (!isAuthenticated) {
     return null;
@@ -83,15 +90,26 @@ const CreatorStats = () => {
         onLogout={handleLogout}
         currentPage="creator-stats"
       >
-        <div className="p-6 max-w-7xl mx-auto">
-          <StatsHeader 
-            totalCreators={totalCreators}
-            totalActiveCreators={totalActiveCreators}
-            onViewTypeChange={handleViewTypeChange}
-            viewType={viewType}
-            onRefresh={fetchCreators}
-            isLoading={isLoading}
-          />
+        <div className="p-6 max-w-4xl mx-auto">
+          <div className="flex justify-between items-center mb-4">
+            <StatsHeader 
+              totalCreators={totalCreators}
+              totalActiveCreators={totalActiveCreators}
+              onViewTypeChange={handleViewTypeChange}
+              viewType={viewType}
+              onRefresh={handleRefetch}
+              isLoading={isLoading}
+            />
+            
+            <Button
+              variant="outline"
+              onClick={() => navigate("/")}
+              className="flex items-center gap-2 bg-slate-800/80 border-slate-700/50 hover:bg-slate-700 text-white"
+            >
+              <HomeIcon className="h-4 w-4" />
+              Retour à l'accueil
+            </Button>
+          </div>
 
           <div className="my-6">
             <StatsSummaryCards creators={creators} />

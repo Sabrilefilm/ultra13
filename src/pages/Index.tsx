@@ -26,6 +26,7 @@ const Index = () => {
     role,
     userId,
     isLoading,
+    lastLogin,
     handleLogout,
     handleLogin
   } = useIndexAuth();
@@ -111,7 +112,8 @@ const Index = () => {
           showWarning={showWarning} 
           dismissWarning={dismissWarning} 
           formattedTime={formattedTime} 
-          currentPage="dashboard" 
+          currentPage="dashboard"
+          lastLogin={lastLogin}
         />
       </div>
     </SidebarProvider>;

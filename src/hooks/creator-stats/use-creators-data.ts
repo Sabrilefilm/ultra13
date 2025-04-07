@@ -15,16 +15,17 @@ export const useCreatorsData = (
   const [loading, setLoading] = useState<boolean>(true);
   const [totalCreators, setTotalCreators] = useState<number>(0);
   const [totalActiveCreators, setTotalActiveCreators] = useState<number>(0);
+  const [lastFetched, setLastFetched] = useState<Date>(new Date());
 
   const fetchCreators = useCallback(async () => {
     try {
       setLoading(true);
       // Get user data from the auth context
-      const userRole = localStorage.getItem('role') || '';
+      const userRole = localStorage.getItem('userRole') || '';
       const username = localStorage.getItem('username') || '';
       const userId = localStorage.getItem('userId') || '';
       
-      console.log("Fetching creators with:", { userRole, username, userId });
+      console.log("Fetching creators with:", { userRole, username, userId, currentPage, pageSize, searchQuery, viewType });
       
       let data;
       if (userRole === 'founder' || userRole === 'manager') {
@@ -45,7 +46,10 @@ export const useCreatorsData = (
           .eq("role", "creator")
           .order('username');
         
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase error:", error);
+          throw error;
+        }
         data = creatorData;
       } else if (userRole === 'agent') {
         const { data: creatorData, error } = await supabase
@@ -66,13 +70,23 @@ export const useCreatorsData = (
           .eq("agent_id", userId)
           .order('username');
         
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase error:", error);
+          throw error;
+        }
         data = creatorData;
       }
       
       console.log("Creators fetched:", data?.length || 0, data);
       
       if (data && data.length > 0) {
+        // Filter by search query if provided
+        if (searchQuery && searchQuery.trim() !== '') {
+          data = data.filter(creator => 
+            creator.username.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+        }
+        
         setCreators(data as Creator[]);
         setTotalCreators(data.length);
         setTotalActiveCreators(data.filter(creator => creator.live_schedules?.[0]?.hours > 0).length);
@@ -82,6 +96,8 @@ export const useCreatorsData = (
         setTotalCreators(0);
         setTotalActiveCreators(0);
       }
+      
+      setLastFetched(new Date());
     } catch (error) {
       console.error("Error fetching creators:", error);
       toast.error("Erreur lors du chargement des créateurs");
@@ -91,8 +107,9 @@ export const useCreatorsData = (
   }, [currentPage, pageSize, searchQuery, viewType]);
 
   useEffect(() => {
+    console.log("useEffect triggered in useCreatorsData");
     fetchCreators();
-  }, [fetchCreators]);
+  }, [fetchCreators, currentPage, pageSize, searchQuery, viewType]);
 
   const handleEditSchedule = useCallback((creator: Creator) => {
     // Implementation would go here
@@ -141,6 +158,7 @@ export const useCreatorsData = (
     handleRemoveCreator,
     resetAllSchedules,
     resetAllDiamonds,
-    fetchCreators
+    fetchCreators,
+    lastFetched
   };
 };

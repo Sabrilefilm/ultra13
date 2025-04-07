@@ -1,12 +1,12 @@
+
 import React from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UltraSidebar } from "@/components/layout/UltraSidebar";
 import { useIndexAuth } from "@/hooks/use-index-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Diamond, Clock, Calendar, Award, ArrowLeft, HomeIcon } from "lucide-react";
+import { Users, Diamond, Clock, Calendar, Award, HomeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Footer } from "@/components/layout/Footer";
 import { BackButton } from "@/components/ui/back-button";
 
 const Ambassador = () => {
@@ -23,21 +23,9 @@ const Ambassador = () => {
     return null;
   }
 
-  const usernameWatermark = (
-    <div className="fixed inset-0 pointer-events-none select-none z-0 flex items-center justify-center">
-      <div className="w-full h-full flex items-center justify-center rotate-[-30deg]">
-        <p className="text-slate-200/10 text-[6vw] font-bold whitespace-nowrap">
-          {username?.toUpperCase()}
-        </p>
-      </div>
-    </div>
-  );
-
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex bg-gradient-to-br from-slate-900 to-slate-950 text-white">
-        {usernameWatermark}
-        
         <UltraSidebar
           username={username}
           role={role || ''}
@@ -47,7 +35,7 @@ const Ambassador = () => {
         />
 
         <div className="flex-1 p-4 overflow-y-auto">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-4">
                 <BackButton />
@@ -112,7 +100,7 @@ const Ambassador = () => {
                   </Card>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-6">
                   <Card className="bg-slate-800/90 border-purple-500/20">
                     <CardHeader className="bg-gradient-to-r from-purple-900/30 to-indigo-900/30">
                       <CardTitle className="flex items-center">
@@ -169,8 +157,6 @@ const Ambassador = () => {
                 </div>
               </CardContent>
             </Card>
-            
-            <Footer role={role} />
           </div>
         </div>
       </div>

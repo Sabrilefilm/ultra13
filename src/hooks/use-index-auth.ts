@@ -20,6 +20,7 @@ export const useIndexAuth = () => {
   });
   const [userId, setUserId] = useState<string | null>(() => localStorage.getItem('userId') || null);
   const [isLoading, setIsLoading] = useState(false);
+  const [lastLogin, setLastLogin] = useState<string | null>(null);
 
   const { toast } = useToast();
 
@@ -32,8 +33,11 @@ export const useIndexAuth = () => {
       if (userId) {
         localStorage.setItem('userId', userId);
       }
+      if (lastLogin) {
+        localStorage.setItem('lastLogin', lastLogin);
+      }
     }
-  }, [isAuthenticated, role, username, userId]);
+  }, [isAuthenticated, role, username, userId, lastLogin]);
 
   const playNotificationSound = useCallback(() => {
     const audio = new Audio('/notification.mp3');
@@ -48,8 +52,26 @@ export const useIndexAuth = () => {
     setRole(null);
     setUsername("");
     setUserId(null);
+    setLastLogin(null);
     localStorage.clear();
   }, []);
+
+  const updateLastLogin = async (userId: string) => {
+    const now = new Date().toISOString();
+    try {
+      await supabase
+        .from('user_accounts')
+        .update({ last_active: now })
+        .eq('id', userId);
+      
+      setLastLogin(now);
+      localStorage.setItem('lastLogin', now);
+      return now;
+    } catch (error) {
+      console.error('Error updating last login:', error);
+      return null;
+    }
+  };
 
   const handleLogin = useCallback(async (username: string, password: string) => {
     if (!username) {
@@ -74,6 +96,11 @@ export const useIndexAuth = () => {
         setUsername("Sabri"); // Garder l'original pour l'affichage
         setUserId("founder-special-id"); // Special ID for founder
         setIsAuthenticated(true);
+        
+        // Set last login time
+        setLastLogin(new Date().toISOString());
+        localStorage.setItem('lastLogin', new Date().toISOString());
+        
         playNotificationSound();
         toast({
           title: "Connexion réussie",
@@ -98,10 +125,8 @@ export const useIndexAuth = () => {
           setIsAuthenticated(true);
           
           // Update last active timestamp
-          await supabase
-            .from('user_accounts')
-            .update({ last_active: new Date().toISOString() })
-            .eq('id', data.id);
+          const lastLoginTime = await updateLastLogin(data.id);
+          setLastLogin(lastLoginTime);
             
           playNotificationSound();
           toast({
@@ -133,6 +158,7 @@ export const useIndexAuth = () => {
     role,
     userId,
     isLoading,
+    lastLogin,
     handleLogout,
     handleLogin,
   };

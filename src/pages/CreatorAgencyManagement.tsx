@@ -19,11 +19,9 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { supabase } from "@/lib/supabase";
-import { ArrowLeft, UserRound, UserPlus, UserMinus, Clock, Calendar, Diamond } from "lucide-react";
+import { ArrowLeft, UserRound, UserPlus, UserMinus, Clock, Calendar, Diamond, HomeIcon, RefreshCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { MobileMenu } from "@/components/mobile/MobileMenu";
-import { MobileNavigation } from "@/components/mobile/MobileNavigation";
+import { BackButton } from "@/components/ui/back-button";
 
 interface Creator {
   id: string;
@@ -41,7 +39,6 @@ const CreatorAgencyManagement = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
-  const isMobile = useIsMobile();
   
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState<string>("");
@@ -138,7 +135,7 @@ const CreatorAgencyManagement = () => {
         .eq("agent_id", selectedAgentId);
         
       if (assignedError) throw assignedError;
-      
+      console.log("Assigned creators:", assignedData);
       setAssignedCreators(assignedData || []);
       
       // Si l'utilisateur est un fondateur ou un manager, récupérer aussi les créateurs non assignés
@@ -160,7 +157,7 @@ const CreatorAgencyManagement = () => {
           .is("agent_id", null);
           
         if (unassignedError) throw unassignedError;
-        
+        console.log("Unassigned creators:", unassignedData);
         setUnassignedCreators(unassignedData || []);
       }
     } catch (error) {
@@ -249,48 +246,11 @@ const CreatorAgencyManagement = () => {
     // Naviguer vers la page de détails du créateur
     navigate(`/creator-details/${creatorId}`);
   };
-  
-  const watermarkStyle = {
-    position: 'fixed' as 'fixed',
-    inset: 0,
-    pointerEvents: 'none' as 'none',
-    userSelect: 'none' as 'none',
-    zIndex: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  };
-  
-  const watermarkTextStyle = {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transform: 'rotate(-30deg)',
-    color: 'rgba(255, 255, 255, 0.05)',
-    fontSize: '6vw',
-    fontWeight: 'bold',
-    whiteSpace: 'nowrap' as 'nowrap',
-  };
 
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-950 text-white">
-        {isMobile && (
-          <MobileMenu 
-            username={username}
-            role={role}
-            currentPage="/agency-assignment"
-            onLogout={handleLogout}
-          />
-        )}
-        
-        <div style={watermarkStyle}>
-          <div style={watermarkTextStyle}>
-            {username?.toUpperCase()}
-          </div>
-        </div>
+        {/* Watermark removed */}
         
         <div className="flex">
           <UltraSidebar
@@ -301,30 +261,46 @@ const CreatorAgencyManagement = () => {
             currentPage="agency-assignment"
           />
           
-          <div className="flex-1 p-4 md:p-6 w-full max-w-full mx-auto">
-            <div className="max-w-6xl mx-auto space-y-6">
-              <div className="flex items-center gap-4 mb-6">
+          <div className="flex-1 p-4 md:p-6 overflow-y-auto">
+            <div className="max-w-4xl mx-auto space-y-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-4">
+                  <BackButton />
+                  <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+                    <span className="text-2xl mr-2">👥</span>
+                    Gestion des équipes d'agence
+                  </h1>
+                </div>
+                
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => navigate("/dashboard")}
-                  className="h-10 w-10 bg-white/5 hover:bg-white/10 text-white"
+                  variant="outline"
+                  onClick={() => navigate("/")}
+                  className="flex items-center gap-2 bg-slate-800/80 border-slate-700/50 hover:bg-slate-700 text-white"
                 >
-                  <ArrowLeft className="h-5 w-5" />
+                  <HomeIcon className="h-4 w-4" />
+                  Retour à l'accueil
                 </Button>
-                <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                  <span className="text-2xl mr-2">👥</span>
-                  Gestion des équipes d'agence
-                </h1>
               </div>
 
               <Card className="bg-gradient-to-br from-slate-900 to-slate-950 border-indigo-800/30 shadow-lg overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-indigo-950/50 to-slate-950/70 pb-6 border-b border-indigo-900/20">
-                  <CardTitle className="text-xl md:text-2xl font-bold flex items-center gap-2">
-                    <span className="text-white opacity-80">🔍</span>
-                    <span className="bg-gradient-to-r from-indigo-300 to-blue-300 bg-clip-text text-transparent">
-                      Sélectionner un agent
-                    </span>
+                  <CardTitle className="text-xl md:text-2xl font-bold flex items-center gap-2 justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-white opacity-80">🔍</span>
+                      <span className="bg-gradient-to-r from-indigo-300 to-blue-300 bg-clip-text text-transparent">
+                        Sélectionner un agent
+                      </span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={fetchCreators}
+                      className="bg-slate-800/80 border-slate-700/50 hover:bg-slate-700 text-white"
+                      disabled={loading || !selectedAgentId}
+                    >
+                      <RefreshCcw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
+                      Actualiser
+                    </Button>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
@@ -357,164 +333,144 @@ const CreatorAgencyManagement = () => {
               </Card>
 
               {selectedAgentId && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Créateurs assignés */}
-                  <Card className="bg-gradient-to-br from-slate-900 to-slate-950 border-indigo-800/30 shadow-lg overflow-hidden">
-                    <CardHeader className="bg-gradient-to-r from-indigo-950/50 to-slate-950/70 pb-4 border-b border-indigo-900/20">
-                      <CardTitle className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <UserRound className="h-5 w-5 text-indigo-400" />
-                          <span className="text-lg font-medium text-white">
-                            Créateurs assignés ({assignedCreators.length})
-                          </span>
-                        </div>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4">
-                      {loading ? (
-                        <div className="flex justify-center py-8">
-                          <div className="animate-spin h-8 w-8 border-4 border-indigo-500 border-t-transparent rounded-full" />
-                        </div>
-                      ) : assignedCreators.length === 0 ? (
-                        <div className="text-center py-8 text-gray-400 bg-slate-800/50 rounded-lg border border-slate-700/30 p-6">
-                          Aucun créateur assigné à cet agent
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {assignedCreators.map((creator) => (
-                            <Card key={creator.id} className="bg-slate-700/70 border-purple-800/30 overflow-hidden">
-                              <div className="p-4">
-                                <div className="flex justify-between items-center">
-                                  <div className="flex-1">
-                                    <p className="font-medium text-white text-lg">{creator.username}</p>
-                                    <div className="flex items-center gap-4 mt-2 text-sm text-gray-300">
-                                      <div className="flex items-center gap-1">
-                                        <Clock className="h-4 w-4 text-blue-400" />
-                                        <span>{creator.live_schedules?.[0]?.hours || 0} heures</span>
-                                      </div>
-                                      <div className="flex items-center gap-1">
-                                        <Calendar className="h-4 w-4 text-green-400" />
-                                        <span>{creator.live_schedules?.[0]?.days || 0} jours</span>
-                                      </div>
-                                      <div className="flex items-center gap-1">
-                                        <Diamond className="h-4 w-4 text-pink-400" />
-                                        <span>{creator.profiles?.[0]?.total_diamonds || 0} diamants</span>
-                                      </div>
+                <Card className="bg-gradient-to-br from-slate-900 to-slate-950 border-indigo-800/30 shadow-lg overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-indigo-950/50 to-slate-950/70 pb-4 border-b border-indigo-900/20">
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <UserRound className="h-5 w-5 text-indigo-400" />
+                        <span className="text-lg font-medium text-white">
+                          Créateurs assignés ({assignedCreators.length})
+                        </span>
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    {loading ? (
+                      <div className="flex justify-center py-8">
+                        <div className="animate-spin h-8 w-8 border-4 border-indigo-500 border-t-transparent rounded-full" />
+                      </div>
+                    ) : assignedCreators.length === 0 ? (
+                      <div className="text-center py-8 text-gray-400 bg-slate-800/50 rounded-lg border border-slate-700/30 p-6">
+                        Aucun créateur assigné à cet agent
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {assignedCreators.map((creator) => (
+                          <Card key={creator.id} className="bg-slate-700/70 border-purple-800/30 overflow-hidden">
+                            <div className="p-4">
+                              <div className="flex justify-between items-center">
+                                <div className="flex-1">
+                                  <p className="font-medium text-white text-lg">{creator.username}</p>
+                                  <div className="flex items-center gap-4 mt-2 text-sm text-gray-300">
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-4 w-4 text-blue-400" />
+                                      <span>{creator.live_schedules?.[0]?.hours || 0} heures</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Calendar className="h-4 w-4 text-green-400" />
+                                      <span>{creator.live_schedules?.[0]?.days || 0} jours</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Diamond className="h-4 w-4 text-pink-400" />
+                                      <span>{creator.profiles?.[0]?.total_diamonds || 0} diamants</span>
                                     </div>
                                   </div>
-                                  <div className="flex gap-2">
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleViewCreatorDetails(creator.id)}
+                                    className="bg-slate-800/50 border-slate-700/50 hover:bg-slate-700 text-white"
+                                  >
+                                    Détails
+                                  </Button>
+                                  {(role === 'founder' || role === 'manager') && (
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => handleViewCreatorDetails(creator.id)}
-                                      className="bg-slate-800/50 border-slate-700/50 hover:bg-slate-700 text-white"
+                                      onClick={() => handleRemoveCreator(creator.id)}
+                                      className="bg-red-900/30 border-red-800/50 hover:bg-red-800/50 text-white"
                                     >
-                                      Détails
+                                      <UserMinus className="h-4 w-4 mr-1" />
+                                      Retirer
                                     </Button>
-                                    {(role === 'founder' || role === 'manager') && (
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleRemoveCreator(creator.id)}
-                                        className="bg-red-900/30 border-red-800/50 hover:bg-red-800/50 text-white"
-                                      >
-                                        <UserMinus className="h-4 w-4 mr-1" />
-                                        Retirer
-                                      </Button>
-                                    )}
-                                  </div>
+                                  )}
                                 </div>
                               </div>
-                            </Card>
-                          ))}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
-                  {/* Créateurs non assignés - seulement pour les fondateurs et managers */}
-                  {(role === 'founder' || role === 'manager') && (
-                    <Card className="bg-gradient-to-br from-slate-900 to-slate-950 border-indigo-800/30 shadow-lg overflow-hidden">
-                      <CardHeader className="bg-gradient-to-r from-indigo-950/50 to-slate-950/70 pb-4 border-b border-indigo-900/20">
-                        <CardTitle className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <UserPlus className="h-5 w-5 text-indigo-400" />
-                            <span className="text-lg font-medium text-white">
-                              Créateurs non assignés ({unassignedCreators.length})
-                            </span>
-                          </div>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-4">
-                        {loading ? (
-                          <div className="flex justify-center py-8">
-                            <div className="animate-spin h-8 w-8 border-4 border-indigo-500 border-t-transparent rounded-full" />
-                          </div>
-                        ) : unassignedCreators.length === 0 ? (
-                          <div className="text-center py-8 text-gray-400 bg-slate-800/50 rounded-lg border border-slate-700/30 p-6">
-                            Tous les créateurs sont assignés
-                          </div>
-                        ) : (
-                          <div className="space-y-3">
-                            {unassignedCreators.map((creator) => (
-                              <Card key={creator.id} className="bg-slate-700/70 border-purple-800/30 overflow-hidden">
-                                <div className="p-4">
-                                  <div className="flex justify-between items-center">
-                                    <div className="flex-1">
-                                      <p className="font-medium text-white text-lg">{creator.username}</p>
-                                      <div className="flex items-center gap-4 mt-2 text-sm text-gray-300">
-                                        <div className="flex items-center gap-1">
-                                          <Clock className="h-4 w-4 text-blue-400" />
-                                          <span>{creator.live_schedules?.[0]?.hours || 0} heures</span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                          <Calendar className="h-4 w-4 text-green-400" />
-                                          <span>{creator.live_schedules?.[0]?.days || 0} jours</span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                          <Diamond className="h-4 w-4 text-pink-400" />
-                                          <span>{creator.profiles?.[0]?.total_diamonds || 0} diamants</span>
-                                        </div>
-                                      </div>
+              {selectedAgentId && (role === 'founder' || role === 'manager') && (
+                <Card className="bg-gradient-to-br from-slate-900 to-slate-950 border-indigo-800/30 shadow-lg overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-indigo-950/50 to-slate-950/70 pb-4 border-b border-indigo-900/20">
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <UserPlus className="h-5 w-5 text-indigo-400" />
+                        <span className="text-lg font-medium text-white">
+                          Créateurs non assignés ({unassignedCreators.length})
+                        </span>
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    {loading ? (
+                      <div className="flex justify-center py-8">
+                        <div className="animate-spin h-8 w-8 border-4 border-indigo-500 border-t-transparent rounded-full" />
+                      </div>
+                    ) : unassignedCreators.length === 0 ? (
+                      <div className="text-center py-8 text-gray-400 bg-slate-800/50 rounded-lg border border-slate-700/30 p-6">
+                        Tous les créateurs sont assignés
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {unassignedCreators.map((creator) => (
+                          <Card key={creator.id} className="bg-slate-700/70 border-purple-800/30 overflow-hidden">
+                            <div className="p-4">
+                              <div className="flex justify-between items-center">
+                                <div className="flex-1">
+                                  <p className="font-medium text-white text-lg">{creator.username}</p>
+                                  <div className="flex items-center gap-4 mt-2 text-sm text-gray-300">
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-4 w-4 text-blue-400" />
+                                      <span>{creator.live_schedules?.[0]?.hours || 0} heures</span>
                                     </div>
-                                    <div className="flex gap-2">
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleViewCreatorDetails(creator.id)}
-                                        className="bg-slate-800/50 border-slate-700/50 hover:bg-slate-700 text-white"
-                                      >
-                                        Détails
-                                      </Button>
-                                      <Button
-                                        size="sm"
-                                        onClick={() => handleAssignCreator(creator.id)}
-                                        className="bg-purple-600 hover:bg-purple-700 text-white"
-                                      >
-                                        <UserPlus className="h-4 w-4 mr-1" />
-                                        Assigner
-                                      </Button>
+                                    <div className="flex items-center gap-1">
+                                      <Calendar className="h-4 w-4 text-green-400" />
+                                      <span>{creator.live_schedules?.[0]?.days || 0} jours</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Diamond className="h-4 w-4 text-pink-400" />
+                                      <span>{creator.profiles?.[0]?.total_diamonds || 0} diamants</span>
                                     </div>
                                   </div>
                                 </div>
-                              </Card>
-                            ))}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleAssignCreator(creator.id)}
+                                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                                >
+                                  <UserPlus className="h-4 w-4 mr-1" />
+                                  Assigner
+                                </Button>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               )}
             </div>
           </div>
         </div>
-        
-        <MobileNavigation 
-          role={role}
-          currentPage="agency-assignment"
-          onOpenMenu={() => {}}
-        />
       </div>
     </SidebarProvider>
   );

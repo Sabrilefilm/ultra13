@@ -9,6 +9,7 @@ import { useDashboardActions } from "@/hooks/use-dashboard-actions";
 import { LogoutButton } from "@/components/layout/LogoutButton";
 import { useAppVersion } from "@/hooks/use-app-version";
 import { MobileNavigation } from "@/components/mobile/MobileNavigation";
+import { LastLoginInfo } from "@/components/layout/LastLoginInfo";
 
 interface UltraDashboardProps {
   username: string;
@@ -23,6 +24,7 @@ interface UltraDashboardProps {
   formattedTime: string;
   currentPage?: string;
   children?: React.ReactNode;
+  lastLogin?: string | null;
 }
 
 export const UltraDashboard: React.FC<UltraDashboardProps> = ({
@@ -37,7 +39,8 @@ export const UltraDashboard: React.FC<UltraDashboardProps> = ({
   dismissWarning,
   formattedTime,
   currentPage = 'dashboard',
-  children
+  children,
+  lastLogin = null
 }) => {
   const {
     modalStates,
@@ -50,7 +53,7 @@ export const UltraDashboard: React.FC<UltraDashboardProps> = ({
 
   return (
     <div className="flex flex-col h-screen w-full bg-gradient-to-br from-slate-900 to-slate-950 text-white overflow-hidden">
-      <UsernameWatermark username={username} />
+      {/* No watermark here for cleaner design */}
       
       <div className="fixed top-0 right-0 m-4 z-50 hidden md:block">
         <LogoutButton onLogout={onLogout} username={username} />
@@ -71,11 +74,18 @@ export const UltraDashboard: React.FC<UltraDashboardProps> = ({
               setMobileMenuOpen={sidebarStates.setMobileMenuOpen}
               version={version}
               onAction={onAction}
+              lastLogin={lastLogin}
             />
           </div>
         </div>
         
         <div className="flex-1 h-full overflow-hidden">
+          <div className="max-w-4xl mx-auto px-4 pt-4">
+            {['founder', 'manager', 'agent', 'ambassadeur'].includes(role) && lastLogin && (
+              <LastLoginInfo lastLogin={lastLogin} username={username} />
+            )}
+          </div>
+
           <DashboardContent
             username={username}
             role={role}

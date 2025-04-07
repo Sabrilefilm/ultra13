@@ -13,6 +13,8 @@ import { TransferTable } from '@/components/transfers/TransferTable';
 import { TransferEmptyState } from '@/components/transfers/TransferEmptyState';
 import { useTransferRequests } from '@/components/transfers/hooks/useTransferRequests';
 import { BackButton } from '@/components/ui/back-button';
+import { Button } from '@/components/ui/button';
+import { HomeIcon } from 'lucide-react';
 
 const Transfers = () => {
   const navigate = useNavigate();
@@ -89,7 +91,7 @@ const Transfers = () => {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-950 text-white flex">
         <UltraSidebar 
           username={username}
           role={role}
@@ -97,16 +99,27 @@ const Transfers = () => {
           onLogout={handleLogout}
           currentPage="transfers"
         >
-          <div className="w-full max-w-6xl mx-auto p-4 md:p-6">
-            <div className="flex items-center mb-4 flex-wrap gap-3">
-              <BackButton className="mr-4" />
-              <TransferHeader 
-                role={role} 
-                onOpenTransferDialog={() => setShowTransferDialog(true)} 
-              />
+          <div className="w-full max-w-4xl mx-auto p-4 md:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <BackButton className="mr-2" />
+                <TransferHeader 
+                  role={role} 
+                  onOpenTransferDialog={() => setShowTransferDialog(true)} 
+                />
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={() => navigate("/")}
+                className="flex items-center gap-2 bg-slate-800/80 border-slate-700/50 hover:bg-slate-700 text-white"
+              >
+                <HomeIcon className="h-4 w-4" />
+                Retour à l'accueil
+              </Button>
             </div>
             
-            <Card className="shadow-md border-purple-100 dark:border-purple-900/30">
+            <Card className="shadow-md border-purple-900/30 bg-slate-800/90 backdrop-blur-sm">
               <TransferTabs 
                 selectedTab={selectedTab} 
                 onTabChange={setSelectedTab} 
