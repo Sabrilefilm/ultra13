@@ -142,7 +142,13 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
         
         <div className="flex-1 overflow-y-auto py-2">
           <SidebarNavigation 
-            items={navigationItems} 
+            items={navigationItems.map(item => ({
+              icon: () => item.icon,
+              label: item.title,
+              action: 'navigate',
+              data: item.href || '',
+              roles: item.roles || []
+            }))} 
             currentPage={currentPage} 
             role={role} 
             onClick={handleSidebarItemClick} 

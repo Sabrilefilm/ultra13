@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Home,
@@ -15,7 +14,7 @@ import {
   FileSpreadsheet,
   UsersRound,
   CalendarRange,
-  FileContract,
+  FileText,
   User,
   Gift
 } from "lucide-react";
@@ -70,7 +69,7 @@ export const getNavigationItems = (role: string, currentPage: string): Navigatio
     },
     {
       title: "Contrat",
-      icon: <FileContract className="h-5 w-5" />,
+      icon: <FileText className="h-5 w-5" />,
       href: "/contract",
       mobileFriendly: true,
       roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
