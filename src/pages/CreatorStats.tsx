@@ -43,6 +43,11 @@ const CreatorStats = () => {
     }
   }, [isAuthenticated, role]);
 
+  useEffect(() => {
+    // Force refresh when component mounts
+    fetchCreators();
+  }, [fetchCreators]);
+
   if (!isAuthenticated) {
     return null;
   }
@@ -79,23 +84,13 @@ const CreatorStats = () => {
         currentPage="creator-stats"
       >
         <div className="p-6 max-w-7xl mx-auto">
-          <div className="flex items-center gap-2 mb-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate('/')}
-              className="h-10 w-10"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h2 className="text-2xl font-bold">Statistiques des Créateurs</h2>
-          </div>
-          
           <StatsHeader 
             totalCreators={totalCreators}
             totalActiveCreators={totalActiveCreators}
             onViewTypeChange={handleViewTypeChange}
             viewType={viewType}
+            onRefresh={fetchCreators}
+            isLoading={isLoading}
           />
 
           <div className="my-6">

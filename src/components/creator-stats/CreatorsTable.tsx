@@ -77,7 +77,9 @@ export const CreatorsTable: React.FC<CreatorsTableProps> = ({
     );
   }
 
-  if (creators.length === 0) {
+  console.log("CreatorsTable - creators:", creators);
+
+  if (!creators || creators.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground space-y-4 border border-slate-700/30 rounded-md p-6 bg-slate-800/30">
         <p>Aucun créateur n'est assigné à votre compte actuellement</p>

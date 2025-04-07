@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { creatorStatsService } from "@/services/creator-stats-service";
 import { Creator } from "./types";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 export const useCreatorsData = (
   currentPage: number = 1, 
@@ -21,12 +22,66 @@ export const useCreatorsData = (
       // Get user data from the auth context
       const userRole = localStorage.getItem('role') || '';
       const username = localStorage.getItem('username') || '';
+      const userId = localStorage.getItem('userId') || '';
       
-      const data = await creatorStatsService.fetchCreators(userRole, username);
+      console.log("Fetching creators with:", { userRole, username, userId });
       
-      setCreators(data);
-      setTotalCreators(data.length);
-      setTotalActiveCreators(data.filter(creator => creator.live_schedules?.[0]?.hours > 0).length);
+      let data;
+      if (userRole === 'founder' || userRole === 'manager') {
+        const { data: creatorData, error } = await supabase
+          .from("user_accounts")
+          .select(`
+            id,
+            username,
+            role,
+            agent_id,
+            live_schedules (
+              hours, days
+            ),
+            profiles (
+              total_diamonds
+            )
+          `)
+          .eq("role", "creator")
+          .order('username');
+        
+        if (error) throw error;
+        data = creatorData;
+      } else if (userRole === 'agent') {
+        const { data: creatorData, error } = await supabase
+          .from("user_accounts")
+          .select(`
+            id,
+            username,
+            role,
+            agent_id,
+            live_schedules (
+              hours, days
+            ),
+            profiles (
+              total_diamonds
+            )
+          `)
+          .eq("role", "creator")
+          .eq("agent_id", userId)
+          .order('username');
+        
+        if (error) throw error;
+        data = creatorData;
+      }
+      
+      console.log("Creators fetched:", data?.length || 0, data);
+      
+      if (data && data.length > 0) {
+        setCreators(data as Creator[]);
+        setTotalCreators(data.length);
+        setTotalActiveCreators(data.filter(creator => creator.live_schedules?.[0]?.hours > 0).length);
+      } else {
+        console.log("No creators found for this user");
+        setCreators([]);
+        setTotalCreators(0);
+        setTotalActiveCreators(0);
+      }
     } catch (error) {
       console.error("Error fetching creators:", error);
       toast.error("Erreur lors du chargement des créateurs");
