@@ -1,3 +1,4 @@
+
 import { Route, Routes, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -11,15 +12,18 @@ import Messages from "./pages/Messages";
 import Transfers from "./pages/Transfers";
 import CreatorStats from "./pages/CreatorStats";
 import CreatorImport from "./pages/CreatorImport";
+import CreatorImportDashboard from "./pages/CreatorImportDashboard";
 import Training from "./pages/Training";
 import CreatorDiamonds from "./pages/CreatorDiamonds";
 import CreatorRewards from "./pages/CreatorRewards";
 import Ambassador from "./pages/Ambassador";
+import AmbassadorDashboard from "./pages/AmbassadorDashboard";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import AgentCreators from "./pages/AgentCreators";
 import TeamManagement from "./pages/TeamManagement";
 import RewardsManagement from "./pages/RewardsManagement";
 import AgencyAssignment from "./pages/AgencyAssignment";
+import AgencyManagementDashboard from "./pages/AgencyManagementDashboard";
 import { RouteGuard } from "@/components/RouteGuard";
 import { DashboardView } from "@/components/dashboard/DashboardView";
 import Matches from "./pages/Matches";
@@ -134,6 +138,14 @@ function App() {
           }
         />
         <Route
+          path="/creator-import-dashboard"
+          element={
+            <RouteGuard allowedRoles={["founder"]}>
+              <CreatorImportDashboard />
+            </RouteGuard>
+          }
+        />
+        <Route
           path="/training"
           element={
             <RouteGuard>
@@ -174,6 +186,14 @@ function App() {
           }
         />
         <Route
+          path="/ambassador-dashboard"
+          element={
+            <RouteGuard allowedRoles={["founder", "ambassadeur"]}>
+              <AmbassadorDashboard />
+            </RouteGuard>
+          }
+        />
+        <Route
           path="/manager-dashboard"
           element={
             <RouteGuard allowedRoles={["founder", "manager"]}>
@@ -198,6 +218,14 @@ function App() {
           element={
             <RouteGuard allowedRoles={["founder", "manager"]}>
               <AgencyAssignment />
+            </RouteGuard>
+          }
+        />
+        <Route
+          path="/agency-management"
+          element={
+            <RouteGuard allowedRoles={["founder", "manager"]}>
+              <AgencyManagementDashboard />
             </RouteGuard>
           }
         />
