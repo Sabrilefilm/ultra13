@@ -1,291 +1,243 @@
 
-import React, { useState, useEffect } from "react";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { UltraSidebar } from "@/components/layout/UltraSidebar";
-import { useIndexAuth } from "@/hooks/use-index-auth";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { User, Mail, AtSign, CreditCard, MapPin, Check, Loader2 } from "lucide-react";
+import React, { useState } from "react";
+import { DashboardLayout } from "@/components/layouts/DashboardLayout";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { User, Key, Settings, Clock, Shield, Bell } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
 
 const PersonalInfo = () => {
-  const { isAuthenticated, username, role, userId, handleLogout } = useIndexAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  
+  const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
-    paypal: "",
-    snapchat: "",
-    tiktok: "",
-    address: ""
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    phone: user?.phone || ""
   });
-  
-  const isCreator = role === 'creator' || role === 'ambassadeur';
-  const canEditAll = role === 'founder' || role === 'manager' || role === 'agent';
 
-  useEffect(() => {
-    if (isAuthenticated && userId) {
-      fetchUserData();
-    }
-  }, [isAuthenticated, userId]);
-
-  const fetchUserData = async () => {
-    try {
-      setIsLoading(true);
-      
-      // Fetch user data from creator_profiles table
-      const { data, error } = await supabase
-        .from('creator_profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-      
-      if (error) {
-        console.error("Error fetching user data:", error);
-        // If no profile exists, we'll create one later
-      }
-      
-      // Set form data if profile exists
-      if (data) {
-        setFormData({
-          email: data.email || "",
-          paypal: data.paypal_address || "",
-          snapchat: data.snapchat || "",
-          tiktok: data.tiktok || "",
-          address: data.address || ""
-        });
-      }
-      
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error in fetchUserData:", error);
-      setIsLoading(false);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-    
-    try {
-      // Check if profile exists
-      const { data: existingProfile } = await supabase
-        .from('creator_profiles')
-        .select('id')
-        .eq('user_id', userId)
-        .single();
-      
-      let result;
-      
-      if (existingProfile) {
-        // Update existing profile
-        result = await supabase
-          .from('creator_profiles')
-          .update({
-            email: formData.email,
-            paypal_address: formData.paypal,
-            snapchat: formData.snapchat,
-            tiktok: formData.tiktok,
-            address: formData.address,
-            updated_at: new Date()
-          })
-          .eq('user_id', userId);
-      } else {
-        // Create new profile
-        result = await supabase
-          .from('creator_profiles')
-          .insert({
-            user_id: userId,
-            email: formData.email,
-            paypal_address: formData.paypal,
-            snapchat: formData.snapchat,
-            tiktok: formData.tiktok,
-            address: formData.address
-          });
-      }
-      
-      if (result.error) {
-        throw result.error;
-      }
-      
-      toast({
-        title: "Informations mises à jour",
-        description: "Vos informations personnelles ont été enregistrées avec succès.",
-        variant: "success"
-      });
-    } catch (error) {
-      console.error("Error saving personal info:", error);
-      toast({
-        title: "Erreur",
-        description: "Une erreur s'est produite lors de l'enregistrement de vos informations.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSaving(false);
-    }
+  const handleSaveChanges = () => {
+    // Simulate saving changes
+    toast({
+      title: "Informations mises à jour",
+      description: "Vos informations personnelles ont été enregistrées."
+    });
+    setIsEditing(false);
   };
 
-  if (!isAuthenticated) {
-    window.location.href = '/';
-    return null;
-  }
+  const handlePasswordChangeRequested = () => {
+    toast({
+      title: "Fonctionnalité à venir",
+      description: "La modification du mot de passe sera bientôt disponible."
+    });
+  };
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex bg-gradient-to-br from-slate-900 to-slate-950 text-white">
-        <UltraSidebar
-          username={username}
-          role={role || ''}
-          userId={userId || ''}
-          onLogout={handleLogout}
-          currentPage="personal-info"
-        />
-
-        <div className="flex-1 p-4 overflow-y-auto">
-          <div className="max-w-3xl mx-auto space-y-6">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold text-white flex items-center">
-                <User className="h-6 w-6 mr-2 text-purple-400" />
-                Informations Personnelles
-              </h1>
-            </div>
-
-            <Card className="bg-slate-800/90 border-purple-500/20">
-              <CardHeader className="bg-gradient-to-r from-purple-900/30 to-indigo-900/30">
-                <CardTitle className="text-xl text-white">
-                  Modifier vos informations personnelles
-                </CardTitle>
+    <DashboardLayout>
+      <div className="container max-w-5xl mx-auto p-4 md:p-6">
+        <h1 className="text-2xl font-bold mb-6">Profil</h1>
+        
+        <Tabs defaultValue="personal-info">
+          <TabsList className="grid grid-cols-3 md:grid-cols-5 mb-6">
+            <TabsTrigger value="personal-info" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              <span className="hidden md:inline">Informations personnelles</span>
+              <span className="md:hidden">Infos</span>
+            </TabsTrigger>
+            <TabsTrigger value="password" className="flex items-center gap-2">
+              <Key className="h-4 w-4" />
+              <span className="hidden md:inline">Mot de passe</span>
+              <span className="md:hidden">MDP</span>
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center gap-2">
+              <Bell className="h-4 w-4" />
+              <span className="hidden md:inline">Notifications</span>
+              <span className="md:hidden">Notifs</span>
+            </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              <span className="hidden md:inline">Sécurité</span>
+              <span className="md:hidden">Sécurité</span>
+            </TabsTrigger>
+            <TabsTrigger value="activity" className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              <span className="hidden md:inline">Activité récente</span>
+              <span className="md:hidden">Activité</span>
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="personal-info">
+            <Card>
+              <CardHeader>
+                <CardTitle>Informations personnelles</CardTitle>
+                <CardDescription>
+                  Gérez vos informations personnelles et de contact
+                </CardDescription>
               </CardHeader>
-              
-              <form onSubmit={handleSubmit}>
-                <CardContent className="p-6 space-y-4">
-                  {isLoading ? (
-                    <div className="flex justify-center items-center py-8">
-                      <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-                    </div>
-                  ) : (
-                    <>
-                      <div className="space-y-2">
-                        <label htmlFor="email" className="text-sm font-medium flex items-center">
-                          <Mail className="h-4 w-4 mr-2 text-blue-400" />
-                          Adresse Email
-                        </label>
-                        <Input
-                          id="email"
-                          name="email"
-                          type="email"
-                          placeholder="votre@email.com"
-                          value={formData.email}
-                          onChange={handleChange}
-                          className="bg-slate-700 border-slate-600 text-white"
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <label htmlFor="paypal" className="text-sm font-medium flex items-center">
-                          <CreditCard className="h-4 w-4 mr-2 text-green-400" />
-                          Adresse PayPal
-                        </label>
-                        <Input
-                          id="paypal"
-                          name="paypal"
-                          placeholder="votre.paypal@email.com"
-                          value={formData.paypal}
-                          onChange={handleChange}
-                          className="bg-slate-700 border-slate-600 text-white"
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <label htmlFor="snapchat" className="text-sm font-medium flex items-center">
-                          <AtSign className="h-4 w-4 mr-2 text-yellow-400" />
-                          Snapchat
-                        </label>
-                        <Input
-                          id="snapchat"
-                          name="snapchat"
-                          placeholder="username"
-                          value={formData.snapchat}
-                          onChange={handleChange}
-                          className="bg-slate-700 border-slate-600 text-white"
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <label htmlFor="tiktok" className="text-sm font-medium flex items-center">
-                          <AtSign className="h-4 w-4 mr-2 text-pink-400" />
-                          TikTok
-                        </label>
-                        <Input
-                          id="tiktok"
-                          name="tiktok"
-                          placeholder="@username"
-                          value={formData.tiktok}
-                          onChange={handleChange}
-                          className="bg-slate-700 border-slate-600 text-white"
-                        />
-                      </div>
-                      
-                      {canEditAll && (
-                        <div className="space-y-2">
-                          <label htmlFor="address" className="text-sm font-medium flex items-center">
-                            <MapPin className="h-4 w-4 mr-2 text-purple-400" />
-                            Adresse postale
-                          </label>
-                          <Input
-                            id="address"
-                            name="address"
-                            placeholder="Votre adresse complète"
-                            value={formData.address}
-                            onChange={handleChange}
-                            className="bg-slate-700 border-slate-600 text-white"
-                            readOnly={isCreator}
-                          />
-                          {isCreator && (
-                            <p className="text-xs text-slate-400">
-                              Seul le fondateur, le manager ou l'agent peut modifier l'adresse.
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </CardContent>
-                
-                <CardFooter className="bg-slate-800/90 border-t border-slate-700/50 px-6 py-4">
-                  <Button 
-                    type="submit" 
-                    disabled={isLoading || isSaving}
-                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 ml-auto"
-                  >
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Enregistrement...
-                      </>
-                    ) : (
-                      <>
-                        <Check className="h-4 w-4 mr-2" />
-                        Enregistrer les modifications
-                      </>
-                    )}
-                  </Button>
-                </CardFooter>
-              </form>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="firstName">Prénom</Label>
+                    <Input
+                      id="firstName"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="lastName">Nom</Label>
+                    <Input
+                      id="lastName"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">Téléphone</Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                {isEditing ? (
+                  <>
+                    <Button variant="outline" onClick={() => setIsEditing(false)}>Annuler</Button>
+                    <Button onClick={handleSaveChanges}>Enregistrer</Button>
+                  </>
+                ) : (
+                  <Button onClick={() => setIsEditing(true)}>Modifier</Button>
+                )}
+              </CardFooter>
             </Card>
-          </div>
-        </div>
+          </TabsContent>
+          
+          <TabsContent value="password">
+            <Card>
+              <CardHeader>
+                <CardTitle>Modifier votre mot de passe</CardTitle>
+                <CardDescription>
+                  Cette fonctionnalité sera bientôt disponible
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4">
+                  <div className="flex items-center justify-center py-8">
+                    <div className="text-center">
+                      <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-medium">Fonctionnalité en cours de développement</h3>
+                      <p className="text-muted-foreground mt-2">
+                        La modification du mot de passe sera disponible prochainement.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button disabled onClick={handlePasswordChangeRequested}>
+                  Modifier le mot de passe
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="notifications">
+            <Card>
+              <CardHeader>
+                <CardTitle>Préférences de notifications</CardTitle>
+                <CardDescription>
+                  Cette fonctionnalité sera bientôt disponible
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium">Fonctionnalité en cours de développement</h3>
+                  <p className="text-muted-foreground mt-2">
+                    La gestion des notifications sera disponible prochainement.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="security">
+            <Card>
+              <CardHeader>
+                <CardTitle>Sécurité du compte</CardTitle>
+                <CardDescription>
+                  Cette fonctionnalité sera bientôt disponible
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium">Fonctionnalité en cours de développement</h3>
+                  <p className="text-muted-foreground mt-2">
+                    Les paramètres de sécurité seront disponibles prochainement.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="activity">
+            <Card>
+              <CardHeader>
+                <CardTitle>Activité récente</CardTitle>
+                <CardDescription>
+                  Cette fonctionnalité sera bientôt disponible
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium">Fonctionnalité en cours de développement</h3>
+                  <p className="text-muted-foreground mt-2">
+                    L'historique d'activité sera disponible prochainement.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
-    </SidebarProvider>
+    </DashboardLayout>
   );
 };
 

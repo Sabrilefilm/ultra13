@@ -17,10 +17,8 @@ import {
 import { NavigationItem } from "./types";
 
 export const getNavigationItems = (role: string, currentPage: string): NavigationItem[] => {
-  let items: NavigationItem[] = [];
-  
-  // Items accessibles par tous les rôles
-  const commonItems: NavigationItem[] = [
+  // Main top-level navigation items (visible first)
+  const mainItems: NavigationItem[] = [
     {
       title: "Accueil",
       icon: <Home className="h-5 w-5" />,
@@ -36,16 +34,16 @@ export const getNavigationItems = (role: string, currentPage: string): Navigatio
       roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
     },
     {
-      title: "Formation",
-      icon: <GraduationCap className="h-5 w-5" />,
-      href: "/training",
+      title: "Tournois",
+      icon: <Calendar className="h-5 w-5" />,
+      href: "/matches",
       mobileFriendly: true,
       roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
     },
     {
-      title: "Tournois",
-      icon: <Calendar className="h-5 w-5" />,
-      href: "/matches",
+      title: "Formation",
+      icon: <GraduationCap className="h-5 w-5" />,
+      href: "/training",
       mobileFriendly: true,
       roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
     },
@@ -65,8 +63,8 @@ export const getNavigationItems = (role: string, currentPage: string): Navigatio
     }
   ];
   
-  // Espaces unifiés pour les différents rôles
-  const allSpaces: NavigationItem = {
+  // All spaces unified under one dropdown
+  const spacesItem: NavigationItem = {
     title: "Espaces",
     icon: <Layout className="h-5 w-5" />,
     mobileFriendly: false,
@@ -74,27 +72,16 @@ export const getNavigationItems = (role: string, currentPage: string): Navigatio
     children: []
   };
   
-  // Ajout des espaces spécifiques selon le rôle
+  // Add spaces based on role
   if (["founder", "manager", "agent"].includes(role)) {
-    allSpaces.children?.push({
+    spacesItem.children?.push({
       title: "Gestion des utilisateurs",
       icon: <UserCog className="h-5 w-5" />,
       href: "/user-management",
       roles: ["founder", "manager", "agent"]
     });
-  }
-  
-  if (["founder", "manager"].includes(role)) {
-    allSpaces.children?.push({
-      title: "Horaires live",
-      icon: <Calendar className="h-5 w-5" />,
-      href: "/schedule",
-      roles: ["founder", "manager"]
-    });
-  }
-  
-  if (["founder", "manager", "agent"].includes(role)) {
-    allSpaces.children?.push({
+    
+    spacesItem.children?.push({
       title: "Statistiques créateurs",
       icon: <Settings className="h-5 w-5" />,
       href: "/creator-stats",
@@ -102,8 +89,17 @@ export const getNavigationItems = (role: string, currentPage: string): Navigatio
     });
   }
   
+  if (["founder", "manager"].includes(role)) {
+    spacesItem.children?.push({
+      title: "Horaires live",
+      icon: <Calendar className="h-5 w-5" />,
+      href: "/schedule",
+      roles: ["founder", "manager"]
+    });
+  }
+  
   if (role === "founder") {
-    allSpaces.children?.push({
+    spacesItem.children?.push({
       title: "Import des données",
       icon: <Settings className="h-5 w-5" />,
       href: "/creator-import-dashboard",
@@ -112,7 +108,7 @@ export const getNavigationItems = (role: string, currentPage: string): Navigatio
   }
   
   if (["founder", "manager", "ambassadeur"].includes(role)) {
-    allSpaces.children?.push({
+    spacesItem.children?.push({
       title: "Pénalités",
       icon: <DollarSign className="h-5 w-5" />,
       href: "/penalties",
@@ -121,7 +117,7 @@ export const getNavigationItems = (role: string, currentPage: string): Navigatio
   }
   
   if (["founder", "ambassadeur"].includes(role)) {
-    allSpaces.children?.push({
+    spacesItem.children?.push({
       title: "Espace ambassadeur",
       icon: <Settings className="h-5 w-5" />,
       href: "/ambassador-dashboard",
@@ -130,14 +126,14 @@ export const getNavigationItems = (role: string, currentPage: string): Navigatio
   }
   
   if (["founder", "manager"].includes(role)) {
-    allSpaces.children?.push({
+    spacesItem.children?.push({
       title: "Espace manager",
       icon: <Settings className="h-5 w-5" />,
       href: "/manager-dashboard",
       roles: ["founder", "manager"]
     });
     
-    allSpaces.children?.push({
+    spacesItem.children?.push({
       title: "Gestion d'agence",
       icon: <Settings className="h-5 w-5" />,
       href: "/agency-management",
@@ -146,7 +142,7 @@ export const getNavigationItems = (role: string, currentPage: string): Navigatio
   }
   
   if (["founder", "manager", "creator"].includes(role)) {
-    allSpaces.children?.push({
+    spacesItem.children?.push({
       title: "Transfert",
       icon: <PlaneTakeoff className="h-5 w-5" />,
       href: "/transfers",
@@ -154,13 +150,11 @@ export const getNavigationItems = (role: string, currentPage: string): Navigatio
     });
   }
   
-  // On n'ajoute l'élément Espaces que s'il a des enfants
-  if (allSpaces.children && allSpaces.children.length > 0) {
-    items.push(allSpaces);
+  // Only add spaces item if it has children
+  const items = [...mainItems];
+  if (spacesItem.children && spacesItem.children.length > 0) {
+    items.push(spacesItem);
   }
-  
-  // On ajoute les éléments communs
-  items = [...items, ...commonItems];
   
   return items;
 };

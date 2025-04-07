@@ -5,7 +5,6 @@ import { SidebarUserProfile } from "./sidebar/SidebarUserProfile";
 import { SidebarLogout } from "./sidebar/SidebarLogout";
 import { SidebarLogo } from "./SidebarLogo";
 import { Sidebar } from "@/components/ui/sidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { getNavigationItems } from "./sidebar/navigationItems";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,8 +12,7 @@ import { useSidebar } from "@/hooks/use-sidebar";
 import { MobileMenu } from "@/components/mobile/MobileMenu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileNavigation } from "@/components/mobile/MobileNavigation";
-import { LastLoginInfo } from "@/components/layout/LastLoginInfo";
-import { NavigationItem } from "./sidebar/types";
+import { NavigationItem, SidebarItem } from "./sidebar/types";
 
 interface SidebarToggleProps {
   collapsed: boolean;
@@ -78,15 +76,15 @@ interface UltraSidebarProps {
   lastLogin?: string | null;
 }
 
-// Fonction pour transformer les NavigationItem en SidebarItem
+// Function to transform NavigationItem to SidebarItem
 const mapNavigationItemsToSidebarItems = (
   items: NavigationItem[]
-): any[] => {
+): SidebarItem[] => {
   return items.map(item => ({
-    icon: () => item.icon,
+    icon: (() => item.icon) as React.ComponentType<any>,
     label: item.title,
     action: item.href ? 'navigate' : 'toggle',
-    data: item.href || '',
+    data: item.href || item.title,
     roles: item.roles || [],
     children: item.children ? mapNavigationItemsToSidebarItems(item.children) : undefined
   }));

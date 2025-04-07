@@ -24,7 +24,7 @@ export const RedesignedDashContent: React.FC<RedesignedDashContentProps> = ({
     if (currentPage === 'dashboard') {
       if (role === 'founder') {
         return (
-          <>
+          <div className="w-full max-w-5xl mx-auto space-y-6">
             <FounderDashboard
               onCreateAccount={() => onAction('openCreateAccount')}
               onConfigureRewards={() => onAction('openRewardSettings')}
@@ -37,11 +37,11 @@ export const RedesignedDashContent: React.FC<RedesignedDashContentProps> = ({
             <div className="mt-6">
               <SocialCommunityLinks />
             </div>
-          </>
+          </div>
         );
       } else if (role === 'creator') {
         return (
-          <>
+          <div className="w-full max-w-5xl mx-auto space-y-6">
             <CreatorDashboard 
               onOpenSponsorshipForm={() => onAction('openSponsorshipForm')}
               onOpenSponsorshipList={() => onAction('openSponsorshipList')}
@@ -51,24 +51,30 @@ export const RedesignedDashContent: React.FC<RedesignedDashContentProps> = ({
             <div className="mt-6">
               <SocialCommunityLinks compact={true} />
             </div>
-          </>
+          </div>
         );
       } else {
         return (
-          <StandardDashboardContent
-            username={username}
-            role={role}
-            onAction={onAction}
-          />
+          <div className="w-full max-w-5xl mx-auto space-y-6">
+            <StandardDashboardContent
+              username={username}
+              role={role}
+              onAction={onAction}
+            />
+          </div>
         );
       }
     } else {
-      return <PlaceholderPageContent currentPage={currentPage} />;
+      return (
+        <div className="w-full max-w-5xl mx-auto space-y-6">
+          <PlaceholderPageContent currentPage={currentPage} />
+        </div>
+      );
     }
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="max-w-full w-full mx-auto p-4 md:p-6 space-y-6 overflow-x-hidden">
       <DashboardHeader currentPage={currentPage} role={role} />
       {renderContent()}
     </div>
