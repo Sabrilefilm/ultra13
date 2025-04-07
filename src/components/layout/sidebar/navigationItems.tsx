@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Home,
@@ -6,43 +7,24 @@ import {
   Book,
   MessageCircle,
   PlaneTakeoff,
-  Diamond,
   Calendar,
   GraduationCap,
-  BarChart3,
-  Award,
-  FileSpreadsheet,
-  UsersRound,
-  CalendarRange,
   FileText,
   User,
-  Gift
+  Settings,
+  Layout
 } from "lucide-react";
 import { NavigationItem } from "./types";
 
 export const getNavigationItems = (role: string, currentPage: string): NavigationItem[] => {
   let items: NavigationItem[] = [];
   
-  // Items accessible by all roles
+  // Items accessibles par tous les rôles
   const commonItems: NavigationItem[] = [
     {
       title: "Accueil",
       icon: <Home className="h-5 w-5" />,
       href: "/",
-      mobileFriendly: true,
-      roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
-    },
-    {
-      title: "Règles internes",
-      icon: <Book className="h-5 w-5" />,
-      href: "/internal-rules",
-      mobileFriendly: true,
-      roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
-    },
-    {
-      title: "Règles créateurs",
-      icon: <Book className="h-5 w-5" />,
-      href: "/creator-rules",
       mobileFriendly: true,
       roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
     },
@@ -62,7 +44,7 @@ export const getNavigationItems = (role: string, currentPage: string): Navigatio
     },
     {
       title: "Tournois",
-      icon: <CalendarRange className="h-5 w-5" />,
+      icon: <Calendar className="h-5 w-5" />,
       href: "/matches",
       mobileFriendly: true,
       roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
@@ -75,7 +57,7 @@ export const getNavigationItems = (role: string, currentPage: string): Navigatio
       roles: ["founder", "manager", "agent", "creator", "ambassadeur"]
     },
     {
-      title: "Informations personnelles",
+      title: "Profil",
       icon: <User className="h-5 w-5" />,
       href: "/personal-info",
       mobileFriendly: true,
@@ -83,122 +65,102 @@ export const getNavigationItems = (role: string, currentPage: string): Navigatio
     }
   ];
   
-  // Items for founder role
-  const founderItems: NavigationItem[] = [
-    {
+  // Espaces unifiés pour les différents rôles
+  const allSpaces: NavigationItem = {
+    title: "Espaces",
+    icon: <Layout className="h-5 w-5" />,
+    mobileFriendly: false,
+    roles: ["founder", "manager", "agent", "creator", "ambassadeur"],
+    children: []
+  };
+  
+  // Ajout des espaces spécifiques selon le rôle
+  if (["founder", "manager", "agent"].includes(role)) {
+    allSpaces.children?.push({
       title: "Gestion des utilisateurs",
       icon: <UserCog className="h-5 w-5" />,
       href: "/user-management",
-      mobileFriendly: false,
       roles: ["founder", "manager", "agent"]
-    },
-    {
-      title: "Pénalités",
-      icon: <DollarSign className="h-5 w-5" />,
-      href: "/penalties",
-      mobileFriendly: false,
-      roles: ["founder", "manager", "ambassadeur"]
-    },
-    {
+    });
+  }
+  
+  if (["founder", "manager"].includes(role)) {
+    allSpaces.children?.push({
       title: "Horaires live",
       icon: <Calendar className="h-5 w-5" />,
       href: "/schedule",
-      mobileFriendly: false,
       roles: ["founder", "manager"]
-    },
-    {
-      title: "Statistiques créateurs",
-      icon: <BarChart3 className="h-5 w-5" />,
-      href: "/creator-stats",
-      mobileFriendly: false,
-      roles: ["founder", "manager", "agent"]
-    },
-    {
-      title: "Import des données",
-      icon: <FileSpreadsheet className="h-5 w-5" />,
-      href: "/creator-import-dashboard",
-      mobileFriendly: false,
-      roles: ["founder"]
-    },
-    {
-      title: "Diamants créateurs",
-      icon: <Diamond className="h-5 w-5" />,
-      href: "/creator-diamonds",
-      mobileFriendly: false,
-      roles: ["founder", "manager", "agent"]
-    },
-    {
-      title: "Espace ambassadeur",
-      icon: <Award className="h-5 w-5" />,
-      href: "/ambassador-dashboard",
-      mobileFriendly: false,
-      roles: ["founder", "ambassadeur"]
-    },
-    {
-      title: "Espace manager",
-      icon: <UsersRound className="h-5 w-5" />,
-      href: "/manager-dashboard",
-      mobileFriendly: false,
-      roles: ["founder", "manager"]
-    },
-    {
-      title: "Gestion d'agence",
-      icon: <UsersRound className="h-5 w-5" />,
-      href: "/agency-management",
-      mobileFriendly: false,
-      roles: ["founder", "manager"]
-    },
-    {
-      title: "Récompenses créateurs",
-      icon: <Gift className="h-5 w-5" />,
-      href: "/creator-rewards",
-      mobileFriendly: true,
-      roles: ["founder", "manager", "creator", "ambassadeur"]
-    },
-    {
-      title: "Gestion des récompenses",
-      icon: <Gift className="h-5 w-5" />,
-      href: "/rewards-management",
-      mobileFriendly: false,
-      roles: ["founder", "manager"]
-    }
-  ];
+    });
+  }
   
-  // Items for creator role
-  const creatorItems: NavigationItem[] = [
-    {
+  if (["founder", "manager", "agent"].includes(role)) {
+    allSpaces.children?.push({
+      title: "Statistiques créateurs",
+      icon: <Settings className="h-5 w-5" />,
+      href: "/creator-stats",
+      roles: ["founder", "manager", "agent"]
+    });
+  }
+  
+  if (role === "founder") {
+    allSpaces.children?.push({
+      title: "Import des données",
+      icon: <Settings className="h-5 w-5" />,
+      href: "/creator-import-dashboard",
+      roles: ["founder"]
+    });
+  }
+  
+  if (["founder", "manager", "ambassadeur"].includes(role)) {
+    allSpaces.children?.push({
+      title: "Pénalités",
+      icon: <DollarSign className="h-5 w-5" />,
+      href: "/penalties",
+      roles: ["founder", "manager", "ambassadeur"]
+    });
+  }
+  
+  if (["founder", "ambassadeur"].includes(role)) {
+    allSpaces.children?.push({
+      title: "Espace ambassadeur",
+      icon: <Settings className="h-5 w-5" />,
+      href: "/ambassador-dashboard",
+      roles: ["founder", "ambassadeur"]
+    });
+  }
+  
+  if (["founder", "manager"].includes(role)) {
+    allSpaces.children?.push({
+      title: "Espace manager",
+      icon: <Settings className="h-5 w-5" />,
+      href: "/manager-dashboard",
+      roles: ["founder", "manager"]
+    });
+    
+    allSpaces.children?.push({
+      title: "Gestion d'agence",
+      icon: <Settings className="h-5 w-5" />,
+      href: "/agency-management",
+      roles: ["founder", "manager"]
+    });
+  }
+  
+  if (["founder", "manager", "creator"].includes(role)) {
+    allSpaces.children?.push({
       title: "Transfert",
       icon: <PlaneTakeoff className="h-5 w-5" />,
       href: "/transfers",
-      mobileFriendly: true,
       roles: ["founder", "manager", "creator"]
-    }
-  ];
-  
-  // Add common items
-  items = [...commonItems];
-  
-  // Add role-specific items
-  if (role === "founder") {
-    items = [...items, ...founderItems];
+    });
   }
   
-  if (role === "manager") {
-    items = [...items, ...founderItems.filter(item => item.roles.includes("manager"))];
+  // On n'ajoute l'élément Espaces que s'il a des enfants
+  if (allSpaces.children && allSpaces.children.length > 0) {
+    items.push(allSpaces);
   }
   
-  if (role === "agent") {
-    items = [...items, ...founderItems.filter(item => item.roles.includes("agent"))];
-  }
-  
-  if (role === "creator") {
-    items = [...items, ...creatorItems];
-    items = [...items, ...founderItems.filter(item => item.roles.includes("creator"))];
-  }
-  
-  if (role === "ambassadeur") {
-    items = [...items, ...founderItems.filter(item => item.roles.includes("ambassadeur"))];
-  }
+  // On ajoute les éléments communs
+  items = [...items, ...commonItems];
   
   return items;
 };

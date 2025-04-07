@@ -22,7 +22,13 @@ export const SidebarItemCollapsed: React.FC<SidebarItemProps> = ({ item, isActiv
 
   const handleClick = () => {
     try {
-      const data = typeof item.data === 'function' ? item.data('') : item.data;
+      if (item.action === 'toggle' && typeof item.data === 'string') {
+        // Action spéciale pour les items avec enfants
+        onClick('toggle', item.data);
+        return;
+      }
+      
+      const data = typeof item.data === 'function' ? item.data(item.roles[0] || '') : item.data;
       if (item.action === 'navigate' && typeof data === 'string') {
         // Ensure data starts with a valid path character
         const path = data.startsWith('/') ? data : `/${data}`;

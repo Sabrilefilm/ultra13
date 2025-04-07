@@ -14,6 +14,7 @@ import { MobileMenu } from "@/components/mobile/MobileMenu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileNavigation } from "@/components/mobile/MobileNavigation";
 import { LastLoginInfo } from "@/components/layout/LastLoginInfo";
+import { NavigationItem } from "./sidebar/types";
 
 interface SidebarToggleProps {
   collapsed: boolean;
@@ -77,6 +78,20 @@ interface UltraSidebarProps {
   lastLogin?: string | null;
 }
 
+// Fonction pour transformer les NavigationItem en SidebarItem
+const mapNavigationItemsToSidebarItems = (
+  items: NavigationItem[]
+): any[] => {
+  return items.map(item => ({
+    icon: () => item.icon,
+    label: item.title,
+    action: item.href ? 'navigate' : 'toggle',
+    data: item.href || '',
+    roles: item.roles || [],
+    children: item.children ? mapNavigationItemsToSidebarItems(item.children) : undefined
+  }));
+};
+
 export const UltraSidebar: React.FC<UltraSidebarProps> = ({
   username,
   role,
@@ -120,6 +135,7 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
   };
   
   const navigationItems = getNavigationItems(role, currentPage);
+  const sidebarItems = mapNavigationItemsToSidebarItems(navigationItems);
   
   return (
     <div className="flex h-full w-full">
@@ -142,13 +158,7 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
         
         <div className="flex-1 overflow-y-auto py-2">
           <SidebarNavigation 
-            items={navigationItems.map(item => ({
-              icon: () => item.icon,
-              label: item.title,
-              action: 'navigate',
-              data: item.href || '',
-              roles: item.roles || []
-            }))} 
+            items={sidebarItems} 
             currentPage={currentPage} 
             role={role} 
             onClick={handleSidebarItemClick} 

@@ -9,9 +9,8 @@ import {
   Loader2, 
   Eye, 
   EyeOff, 
-  Sparkles,
-  Star,
-  AlertTriangle
+  AlertTriangle,
+  User
 } from "lucide-react";
 import { useState, FormEvent, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -185,207 +184,172 @@ export const LoginForm = ({
     }
   };
 
-  // Animation des étoiles flottantes
-  const renderStars = () => {
-    return Array(8).fill(0).map((_, i) => (
-      <div 
-        key={i} 
-        className={`absolute text-purple-300/20 dark:text-purple-500/20 animate-ping-slow z-0
-          ${i % 2 === 0 ? 'animate-float-slow' : 'animate-float-slower'}`}
-        style={{
-          top: `${Math.random() * 100}%`,
-          left: `${Math.random() * 100}%`,
-          animationDelay: `${i * 0.5}s`,
-          transform: `scale(${0.5 + Math.random() * 0.5})`,
-          opacity: 0.3 + Math.random() * 0.7
-        }}
-      >
-        {i % 2 === 0 ? 
-          <Sparkles className="w-6 h-6" /> : 
-          <Star className="w-5 h-5" />
-        }
-      </div>
-    ));
-  };
-
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 to-indigo-950 text-white p-4 relative overflow-hidden">
-      {/* Background Animation */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 opacity-30 bg-fixed">
-          <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-30"></div>
-        </div>
-        <div className="absolute top-1/4 -right-20 w-64 h-64 rounded-full filter blur-[80px] bg-purple-600/20"></div>
-        <div className="absolute bottom-1/4 -left-20 w-80 h-80 rounded-full filter blur-[80px] bg-indigo-600/20"></div>
-      </div>
-      
-      <div className="absolute inset-0 overflow-hidden">
-        {renderStars()}
-        <div className="absolute top-0 right-0 w-72 h-72 bg-purple-500/10 rounded-full -mr-36 -mt-36 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-indigo-500/10 rounded-full -ml-36 -mb-36 blur-3xl"></div>
-      </div>
-      
-      <div className="w-full max-w-md mx-auto space-y-8 relative z-10">
-        <div 
-          className={`text-center space-y-6 transition-all duration-700 ${showAnimation ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-          style={{ transitionDelay: '0.1s' }}
-        >
-          <div className="flex flex-col items-center justify-center space-y-2">
-            <div className="flex flex-col items-center relative animate-float-slow">
-              <div className="relative mb-4">
-                <div className="absolute inset-0 bg-purple-500/30 rounded-full filter blur-xl animate-pulse"></div>
-                <Rocket className="w-16 h-16 text-purple-400 relative z-10" />
-              </div>
-              <div className="relative">
-                <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent drop-shadow-lg">ULTRA</h1>
-                <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 via-blue-500/10 to-indigo-400/20 blur-xl opacity-30 rounded-lg"></div>
-              </div>
-            </div>
-            <p className="text-xl bg-gradient-to-br from-white via-[#38bdf8] to-[#0ea5e9] bg-clip-text text-transparent font-medium tracking-wide">
-              L'AGENCE PHOCÉENNE
-            </p>
-          </div>
-        </div>
+    <div className="flex items-center justify-center min-h-screen w-full bg-gradient-to-br from-blue-900 via-gray-900 to-slate-900 p-4 overflow-hidden relative">
+      {/* Overlay avec motif subtil */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYtMi42ODYgNi02cy0yLjY4Ni02LTYtNmMtMy4zMTQgMC02IDIuNjg2LTYgNnMyLjY4NiA2IDYgNnptMC04Yy0xLjEwNSAwLTIgLjg5NS0yIDJzLjg5NSAyIDIgMiAyLS44OTUgMi0yLS44OTUtMi0yLTJ6Ii8+PC9nPjwvc3ZnPg==')] opacity-5"></div>
 
+      {/* Effets de lumière */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full filter blur-[80px] -mt-20"></div>
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full filter blur-[80px] -mb-20"></div>
+
+      {/* Carte de connexion */}
+      <div className="w-full max-w-md relative z-10">
         <div 
-          className={`bg-slate-800/40 backdrop-blur-xl rounded-xl p-8 space-y-6 shadow-2xl border border-slate-700/50 relative overflow-hidden transition-all duration-700 
-          ${showAnimation ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-          style={{ transitionDelay: '0.3s' }}
+          className={`bg-white dark:bg-slate-800 rounded-xl shadow-xl overflow-hidden transition-all duration-500 ${showAnimation ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
         >
-          {/* Background graphic elements */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/10 rounded-full -ml-16 -mb-16 blur-2xl"></div>
-          
-          <form onSubmit={handleSubmit} className="space-y-4 relative">
+          {/* En-tête avec logo */}
+          <div className="p-6 bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-center border-b border-gray-200 dark:border-slate-700">
+            <div className="flex flex-col items-center justify-center">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-1">
+                ULTRA
+              </h1>
+              <p className="text-slate-600 dark:text-slate-300 font-medium">
+                L'AGENCE PHOCÉENNE
+              </p>
+            </div>
+          </div>
+
+          {/* Formulaire */}
+          <div className="p-6">
+            {/* Titre */}
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-semibold text-white/90">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
                 Espace de travail
               </h2>
-              <p className="text-sm text-white/60 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 Connectez-vous pour accéder à votre tableau de bord
               </p>
             </div>
-            
+
+            {/* Messages d'erreur */}
             {error && (
-              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm flex items-start gap-2">
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm flex items-start gap-2 mb-4">
                 <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                 <div>
                   {error}
                   {lockoutEndTime > Date.now() && countdownTimer && (
-                    <p className="mt-1 text-red-300">Temps restant: {countdownTimer}</p>
+                    <p className="mt-1 font-semibold">Temps restant: {countdownTimer}</p>
                   )}
                 </div>
               </div>
             )}
-            
+
+            {/* Avertissement tentatives restantes */}
             {remainingAttempts <= 2 && remainingAttempts > 0 && (
-              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-400 text-sm flex items-start gap-2">
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg text-amber-600 dark:text-amber-400 text-sm flex items-start gap-2 mb-4">
                 <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                 <div>
                   Attention: il vous reste {remainingAttempts} tentative{remainingAttempts > 1 ? 's' : ''} avant blocage temporaire
                 </div>
               </div>
             )}
-            
-            <div className="space-y-2">
-              <Label htmlFor="username" className="text-white/90">
-                Identifiant
-              </Label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Rocket className="h-5 w-5 text-white/40" />
-                </div>
-                <Input 
-                  id="username" 
-                  type="text" 
-                  placeholder="Votre identifiant" 
-                  value={username} 
-                  onChange={e => setUsername(e.target.value)} 
-                  onKeyPress={handleKeyPress} 
-                  className="bg-slate-700/50 border-slate-600/50 text-white placeholder:text-white/40 h-12 pl-10" 
-                  autoComplete="username" 
-                  disabled={isLoading || lockoutEndTime > Date.now()}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-white/90">
-                Mot de passe
-              </Label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-white/40" />
-                </div>
-                <Input 
-                  id="password" 
-                  type={showPassword ? "text" : "password"} 
-                  placeholder="Votre mot de passe" 
-                  value={password} 
-                  onChange={e => setPassword(e.target.value)} 
-                  onKeyPress={handleKeyPress} 
-                  className="bg-slate-700/50 border-slate-600/50 text-white placeholder:text-white/40 h-12 pl-10 pr-10" 
-                  autoComplete="current-password" 
-                  disabled={isLoading || lockoutEndTime > Date.now()}
-                />
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-7 w-7 p-0 text-white/40 hover:text-white/60" 
-                    onClick={() => setShowPassword(!showPassword)}
+
+            {/* Formulaire */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-gray-700 dark:text-gray-300">
+                  Identifiant
+                </Label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <Input 
+                    id="username" 
+                    type="text" 
+                    placeholder="Votre identifiant" 
+                    value={username} 
+                    onChange={e => setUsername(e.target.value)} 
+                    onKeyPress={handleKeyPress} 
+                    className="pl-10 bg-white dark:bg-slate-900" 
+                    autoComplete="username" 
                     disabled={isLoading || lockoutEndTime > Date.now()}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
+                  />
                 </div>
               </div>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Label htmlFor="password" className="text-gray-700 dark:text-gray-300">
+                    Mot de passe
+                  </Label>
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <Input 
+                    id="password" 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="Votre mot de passe" 
+                    value={password} 
+                    onChange={e => setPassword(e.target.value)} 
+                    onKeyPress={handleKeyPress} 
+                    className="pl-10 pr-10 bg-white dark:bg-slate-900" 
+                    autoComplete="current-password" 
+                    disabled={isLoading || lockoutEndTime > Date.now()}
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" 
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={isLoading || lockoutEndTime > Date.now()}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <Button 
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-5 rounded-md flex items-center justify-center transition-all shadow-lg shadow-blue-500/20 dark:shadow-blue-900/30" 
+                disabled={isLoading || lockoutEndTime > Date.now()} 
+                type="submit"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                ) : (
+                  <>
+                    <span className="font-medium">Se connecter</span>
+                    <ChevronRight className="ml-2 w-4 h-4" />
+                  </>
+                )}
+              </Button>
+            </form>
+
+            {/* Liens d'aide */}
+            <div className="mt-6 flex flex-col gap-3 text-center">
               <Button 
                 variant="link" 
-                className="text-sm text-white/60 hover:text-purple-400 p-0" 
+                className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300" 
                 onClick={onForgotPassword} 
                 type="button" 
                 disabled={isLoading || lockoutEndTime > Date.now()}
               >
                 Mot de passe oublié ?
               </Button>
+              
               <Button 
                 variant="link" 
-                className="text-sm text-white/60 hover:text-purple-400 p-0" 
+                className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300" 
                 onClick={() => window.location.href = 'mailto:Contact@Phoceenagency.fr'} 
                 type="button" 
                 disabled={isLoading}
               >
                 Contacter le support
               </Button>
+
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-2">
+                <Link to="/external-matches" className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 inline-flex items-center">
+                  <span>Accéder aux matchs externes</span>
+                  <ChevronRight className="w-3 h-3 ml-1" />
+                </Link>
+              </div>
             </div>
-
-            <Button 
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-6 flex items-center justify-center group transition-all shadow-lg shadow-purple-900/20" 
-              disabled={isLoading || lockoutEndTime > Date.now()} 
-              type="submit"
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin mr-2" />
-              ) : (
-                <>
-                  <span>Se connecter</span>
-                  <ChevronRight className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </Button>
-          </form>
-
-          <div 
-            className={`flex items-center justify-center transition-all duration-700 ${showAnimation ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-            style={{ transitionDelay: '0.5s' }}
-          >
-            <Link to="/external-matches" className="text-sm text-center text-white/60 hover:text-purple-400 flex items-center gap-1">
-              <span>Accéder aux matchs externes</span>
-              <ChevronRight className="w-3 h-3" />
-            </Link>
           </div>
         </div>
       </div>

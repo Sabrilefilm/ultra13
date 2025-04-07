@@ -38,6 +38,7 @@ export interface SidebarItem {
   data: string | ((role: string) => string);
   roles: string[];
   animated?: boolean;
+  children?: SidebarItem[];
 }
 
 export interface SidebarItemProps {
@@ -51,4 +52,5 @@ export interface SidebarNavigationProps {
   currentPage?: string;
   role: string;
   onClick: (action: string, data?: any) => void;
+  collapsed?: boolean;
 }
