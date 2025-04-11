@@ -10,7 +10,7 @@ export interface AuthContextType {
   role: string | null;
   username: string | null;
   userId: string | null;
-  lastLogin?: string | null; // Add lastLogin property
+  lastLogin: string | null; // Added lastLogin property
 }
 
 export const useAuth = useAuthProvider;

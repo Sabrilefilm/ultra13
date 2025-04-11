@@ -9,8 +9,9 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
   role: string | null;
-  username: string | null; // Added missing property
-  userId: string | null; // Added missing property
+  username: string | null;
+  userId: string | null;
+  lastLogin: string | null; // Add lastLogin property
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -19,8 +20,9 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => null,
   logout: async () => {},
   role: null,
-  username: null, // Initialize with null
-  userId: null, // Initialize with null
+  username: null,
+  userId: null,
+  lastLogin: null, // Initialize with null
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -29,8 +31,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<any>(null);
   const [role, setRole] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [username, setUsername] = useState<string | null>(null); // New state for username
-  const [userId, setUserId] = useState<string | null>(null); // New state for userId
+  const [username, setUsername] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [lastLogin, setLastLogin] = useState<string | null>(null); // Add state for lastLogin
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,6 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userRole = localStorage.getItem('userRole');
     const token = localStorage.getItem('token');
     const username = localStorage.getItem('username');
+    const lastLogin = localStorage.getItem('lastLogin'); // Get lastLogin from localStorage
 
     if (userId && userRole && token) {
       setUser({ id: userId });
@@ -46,6 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUsername(username);
       setUserId(userId);
       setIsAuthenticated(true);
+      if (lastLogin) {
+        setLastLogin(lastLogin); // Set lastLogin if it exists
+      }
     }
 
     // Set up auth state listener
@@ -57,16 +64,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // This would normally get the user's role from database
           const userRole = localStorage.getItem('userRole') || 'creator';
           const username = localStorage.getItem('username');
+          const lastLoginTime = new Date().toISOString(); // Set current time as lastLogin
           
           setUser(session.user);
           setRole(userRole);
           setUsername(username);
           setUserId(session.user.id);
           setIsAuthenticated(true);
+          setLastLogin(lastLoginTime); // Set lastLogin value
           
           localStorage.setItem('userId', session.user.id);
           localStorage.setItem('userRole', userRole);
           localStorage.setItem('token', session.access_token);
+          localStorage.setItem('lastLogin', lastLoginTime); // Store lastLogin in localStorage
           if (username) {
             localStorage.setItem('username', username);
           }
@@ -76,11 +86,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUsername(null);
           setUserId(null);
           setIsAuthenticated(false);
+          setLastLogin(null); // Reset lastLogin on logout
           
           localStorage.removeItem('userId');
           localStorage.removeItem('userRole');
           localStorage.removeItem('token');
           localStorage.removeItem('username');
+          localStorage.removeItem('lastLogin'); // Remove lastLogin from localStorage
           
           navigate('/');
         }
@@ -109,19 +121,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                        email.includes('ambassadeur') ? 'ambassadeur' : 'creator';
       
       const mockUsername = email.split('@')[0]; // Simple username from email
+      const lastLoginTime = new Date().toISOString(); // Set current login time
       
       setUser(data.user);
       setRole(mockRole);
       setUsername(mockUsername);
       setUserId(data.user?.id);
       setIsAuthenticated(true);
+      setLastLogin(lastLoginTime); // Set lastLogin on successful login
       
       localStorage.setItem('userId', data.user?.id || '');
       localStorage.setItem('userRole', mockRole);
       localStorage.setItem('token', data.session?.access_token || '');
       localStorage.setItem('username', mockUsername);
+      localStorage.setItem('lastLogin', lastLoginTime); // Store lastLogin
       
-      return { user: data.user, role: mockRole, username: mockUsername };
+      return { user: data.user, role: mockRole, username: mockUsername, lastLogin: lastLoginTime };
     } catch (error) {
       console.error('Error during login:', error);
       throw error;
@@ -136,11 +151,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUsername(null);
       setUserId(null);
       setIsAuthenticated(false);
+      setLastLogin(null); // Reset lastLogin on logout
       
       localStorage.removeItem('userId');
       localStorage.removeItem('userRole');
       localStorage.removeItem('token');
       localStorage.removeItem('username');
+      localStorage.removeItem('lastLogin'); // Remove lastLogin from localStorage
       
       navigate('/');
     } catch (error) {
@@ -155,7 +172,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     role,
     username,
-    userId
+    userId,
+    lastLogin // Include lastLogin in context value
   };
 
   return (
