@@ -1,8 +1,8 @@
 
 /* ============= Font Imports ============= */
-@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap');
 
 /* ============= Tailwind Directives ============= */
 @tailwind base;
@@ -21,8 +21,8 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
  
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 210 40% 98%;
  
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -30,7 +30,7 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
  
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 262 83% 58%;
     --accent-foreground: 210 40% 98%;
  
     --destructive: 0 62.8% 30.6%;
@@ -38,15 +38,15 @@
  
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 262 83% 58%;
  
-    --radius: 0.5rem;
+    --radius: 0.75rem;
     
     /* Custom colors */
-    --primary-purple: 254 71% 75%;
-    --secondary-purple: 262 31% 54%;
-    --light-purple: 270 67% 90%;
-    --soft-gray: 240 52% 97%;
+    --primary-purple: 262 83% 58%;
+    --secondary-purple: 262 83% 45%;
+    --light-purple: 262 83% 85%;
+    --soft-gray: 220 14% 96%;
   }
  
   .dark {
@@ -59,8 +59,8 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
  
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 210 40% 98%;
  
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -68,7 +68,7 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
  
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 262 83% 58%;
     --accent-foreground: 210 40% 98%;
  
     --destructive: 0 62.8% 30.6%;
@@ -76,7 +76,7 @@
  
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 262 83% 58%;
   }
 }
 
@@ -91,11 +91,11 @@
     position: relative;
     overflow-x: hidden;
     min-height: 100vh;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Montserrat', sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Poppins', sans-serif;
   }
   
   /* Background gradient effect */
@@ -108,27 +108,15 @@
     height: 100%;
     background: linear-gradient(
       135deg,
-      #0d3863 0%,
-      #0a1f36 25%,
-      #1e3a58 50%,
-      #081828 75%,
-      #0d3863 100%
+      #13111C 0%,
+      #171429 25%,
+      #0F0A1F 50%,
+      #191237 75%,
+      #13111C 100%
     );
     background-size: 400% 400%;
     z-index: -1;
     animation: animate-background-shift 30s ease infinite;
-  }
-
-  .dark body::before {
-    background: linear-gradient(
-      135deg,
-      #0a0a0f 0%,
-      #111827 25%,
-      #1e1b4b 50%,
-      #0f172a 75%,
-      #0a0a0f 100%
-    );
-    background-size: 400% 400%;
   }
 }
 
@@ -143,16 +131,16 @@
 .toast {
   background: white;
   color: #333;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   padding: 1rem;
   margin-bottom: 0.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   animation: fadeIn 0.3s ease-in;
-  border-left: 4px solid #9b87f5;
+  border-left: 4px solid #7c3aed;
 }
 
 .dark .toast {
-  background: #1e293b;
+  background: #1a103c;
   color: #e2e8f0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
@@ -171,40 +159,40 @@
 
 /* ============= Card Styles ============= */
 .elegant-card {
-  @apply bg-white/80 backdrop-blur-sm dark:bg-slate-900/80 rounded-xl shadow-md border border-slate-200/50 dark:border-slate-700/50 transition-all duration-300;
+  @apply bg-white/5 backdrop-blur-sm dark:bg-slate-900/40 rounded-xl shadow-md border border-white/10 dark:border-purple-900/30 transition-all duration-300;
 }
 
 .elegant-card:hover {
-  @apply shadow-lg border-purple-200/70 dark:border-purple-700/30;
+  @apply shadow-lg border-purple-500/20 dark:border-purple-500/30;
 }
 
 .elegant-header {
-  @apply bg-gradient-to-r from-purple-50/80 to-indigo-50/80 dark:from-slate-800/80 dark:to-slate-900/80 p-6 border-b border-slate-100 dark:border-slate-800/50 rounded-t-xl;
+  @apply bg-gradient-to-r from-purple-900/20 to-indigo-900/20 dark:from-slate-800/80 dark:to-slate-900/80 p-6 border-b border-purple-500/10 dark:border-slate-800/50 rounded-t-xl;
 }
 
 .elegant-button {
-  @apply bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800 rounded-lg transition-all duration-200;
+  @apply bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600 text-white dark:text-white border border-purple-700 dark:border-purple-600 rounded-lg transition-all duration-200;
 }
 
 .elegant-input {
-  @apply bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-purple-400/30 dark:focus:ring-purple-500/30 focus:border-purple-400 dark:focus:border-purple-600;
+  @apply bg-white/5 dark:bg-slate-800/80 border border-purple-300/20 dark:border-purple-700/30 rounded-lg focus:ring-2 focus:ring-purple-500/30 dark:focus:ring-purple-500/30 focus:border-purple-500 dark:focus:border-purple-600;
 }
 
 /* ============= Dark Mode Helpers ============= */
 .dark .card-dark {
-  @apply bg-dark-card text-dark-text border-dark-border;
+  @apply bg-slate-900/60 text-white border-purple-900/20;
 }
 
 .dark .text-dark {
-  @apply text-dark-text;
+  @apply text-white;
 }
 
 .dark .bg-dark {
-  @apply bg-dark-bg;
+  @apply bg-slate-900;
 }
 
 .dark .border-dark {
-  @apply border-dark-border;
+  @apply border-purple-900/20;
 }
 
 /* ============= Animations ============= */
@@ -324,16 +312,16 @@
 
 /* ============= Typography Effects ============= */
 .agency-text {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Poppins', sans-serif;
   animation: subtle-glow 3s ease-in-out infinite;
-  text-shadow: 0 0 10px rgba(155, 135, 245, 0.5),
-               0 0 20px rgba(155, 135, 245, 0.3),
-               0 0 30px rgba(155, 135, 245, 0.2);
+  text-shadow: 0 0 10px rgba(124, 58, 237, 0.5),
+               0 0 20px rgba(124, 58, 237, 0.3),
+               0 0 30px rgba(124, 58, 237, 0.2);
 }
 
 .agency-title {
-  font-family: 'Playfair Display', serif;
-  @apply text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-500 font-bold;
+  font-family: 'Raleway', sans-serif;
+  @apply text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-violet-500 font-bold;
 }
 
 .shining-text {
@@ -397,69 +385,30 @@
   vertical-align: middle;
 }
 
-/* ============= TikTok Live Elements ============= */
-.tiktok-live-container {
-  @apply bg-gradient-to-br from-pink-500/20 to-purple-600/20 rounded-xl border border-pink-500/30 overflow-hidden relative;
-}
-
-.tiktok-live-badge {
-  @apply bg-gradient-to-r from-pink-500 to-red-500 text-white text-xs px-2 py-0.5 rounded font-bold shadow-sm;
-}
-
-.tiktok-live-pulse {
-  @apply relative;
-}
-
-.tiktok-live-pulse::before {
-  content: "";
-  @apply absolute inset-0 rounded-full bg-red-500 animate-ping-slow;
-  animation-duration: 2s;
-}
-
-/* Emojis 3D Style */
-.emoji-3d {
-  @apply inline-block;
-  text-shadow: 0 1px 0 #ccc, 
-               0 2px 0 #c9c9c9, 
-               0 3px 0 #bbb, 
-               0 4px 0 #b9b9b9, 
-               0 5px 0 #aaa, 
-               0 6px 1px rgba(0,0,0,.1), 
-               0 0 5px rgba(0,0,0,.1), 
-               0 1px 3px rgba(0,0,0,.3), 
-               0 3px 5px rgba(0,0,0,.2), 
-               0 5px 10px rgba(0,0,0,.25), 
-               0 10px 10px rgba(0,0,0,.2), 
-               0 20px 20px rgba(0,0,0,.15);
-}
-
 /* ============= Badge Styles ============= */
 .badge-status {
   @apply px-2 py-0.5 rounded-full text-xs font-medium;
 }
 
 .badge-win {
-  @apply bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 text-green-700
-         dark:from-green-900/20 dark:to-emerald-900/20 dark:border-green-800/30 dark:text-green-400;
+  @apply bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 text-green-400;
 }
 
 .badge-loss {
-  @apply bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 text-red-700
-         dark:from-red-900/20 dark:to-rose-900/20 dark:border-red-800/30 dark:text-red-400;
+  @apply bg-gradient-to-r from-red-500/20 to-rose-500/20 border border-red-500/30 text-red-400;
 }
 
 .badge-pending {
-  @apply bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 text-blue-700
-         dark:from-blue-900/20 dark:to-indigo-900/20 dark:border-blue-800/30 dark:text-blue-400;
+  @apply bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/30 text-blue-400;
 }
 
 /* ============= Component-Specific Styles ============= */
 .match-card {
-  @apply rounded-xl shadow-sm border transition-all duration-300 hover:shadow-md;
+  @apply rounded-xl shadow-sm border border-purple-500/20 transition-all duration-300 hover:shadow-md;
 }
 
 .timer-wrapper {
-  @apply flex flex-col items-center space-y-2 p-2 border rounded-lg backdrop-blur-sm bg-white/50 dark:bg-slate-800/50 shadow-sm;
+  @apply flex flex-col items-center space-y-2 p-2 border border-purple-500/20 rounded-lg backdrop-blur-sm bg-white/5 shadow-sm;
 }
 
 /* ============= Mobile Responsive Styles ============= */
@@ -475,4 +424,29 @@
   .mobile-hidden {
     @apply hidden;
   }
+}
+
+/* Custom classes for the new design */
+.glass-panel {
+  @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-xl;
+}
+
+.glass-button {
+  @apply bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/10 rounded-lg transition-all duration-200;
+}
+
+.neo-glow {
+  box-shadow: 0 0 15px rgba(124, 58, 237, 0.3);
+}
+
+.glass-card {
+  @apply bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-md border border-white/10 rounded-xl shadow-lg;
+}
+
+.glass-input {
+  @apply bg-white/5 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 text-white placeholder-white/50;
+}
+
+.neo-button {
+  @apply bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-medium rounded-lg shadow-lg transition-all duration-200;
 }

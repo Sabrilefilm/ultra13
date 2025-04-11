@@ -1,3 +1,4 @@
+
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Switch } from "./switch";
@@ -20,7 +21,7 @@ export function ThemeToggle() {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
       <Sun className="h-4 w-4 text-gray-400" />
       <Switch 
         checked={isDarkMode} 

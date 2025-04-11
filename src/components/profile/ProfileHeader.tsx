@@ -16,16 +16,16 @@ export function ProfileHeader({ username, role, avatarUrl, lastActive, daysActiv
   const initials = username ? username.slice(0, 2).toUpperCase() : "U";
 
   return (
-    <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+    <div className="flex flex-col md:flex-row items-center md:items-start gap-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6 shadow-neo-glow">
       <div className="flex-shrink-0 flex flex-col items-center">
-        <Avatar className="w-24 h-24">
+        <Avatar className="w-24 h-24 border-2 border-purple-500/30 shadow-neo-glow">
           <AvatarImage src={avatarUrl || ""} />
-          <AvatarFallback className="bg-gradient-to-br from-purple-600 to-indigo-800 text-white text-3xl">
+          <AvatarFallback className="bg-gradient-to-br from-purple-600 to-violet-700 text-white text-3xl">
             {initials}
           </AvatarFallback>
         </Avatar>
         <div className="mt-2">
-          <Badge variant="outline" className="bg-amber-600/20 text-amber-400 border-amber-500/30">
+          <Badge variant="glass" className="shadow-sm">
             {role || "Utilisateur"}
           </Badge>
         </div>
@@ -37,20 +37,20 @@ export function ProfileHeader({ username, role, avatarUrl, lastActive, daysActiv
         
         <div className="mt-4 flex flex-wrap gap-3 justify-center md:justify-start">
           {lastActive && (
-            <div className="flex items-center gap-2 bg-slate-700/50 px-3 py-1 rounded-full">
+            <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
               <CalendarDays className="h-4 w-4 text-blue-400" />
               <span className="text-sm">Dernière activité: {lastActive}</span>
             </div>
           )}
           
           {daysActive > 0 && (
-            <div className="flex items-center gap-2 bg-slate-700/50 px-3 py-1 rounded-full">
+            <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
               <Award className="h-4 w-4 text-amber-400" />
               <span className="text-sm">{daysActive} jours actifs</span>
             </div>
           )}
           
-          <div className="flex items-center gap-2 bg-slate-700/50 px-3 py-1 rounded-full">
+          <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
             <Star className="h-4 w-4 text-emerald-400" />
             <span className="text-sm">Bronze</span>
           </div>

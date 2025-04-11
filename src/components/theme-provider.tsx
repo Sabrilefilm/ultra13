@@ -23,32 +23,35 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
       .dark {
         color-scheme: dark;
       }
-      .dark .bg-white, .dark .bg-white\/10, .dark .bg-white\/20, .dark .bg-white\/30 {
-        background-color: rgba(30, 41, 59, 0.8) !important;
+      .dark body {
+        background-color: #13111C;
+      }
+      .dark .bg-white, .dark .bg-white\\/10, .dark .bg-white\\/20, .dark .bg-white\\/30 {
+        background-color: rgba(23, 20, 41, 0.8) !important;
       }
       .dark .text-white {
         color: #ffffff !important;
       }
-      .dark .border-white\/10 {
-        border-color: rgba(139, 92, 246, 0.3) !important;
+      .dark .border-white\\/10 {
+        border-color: rgba(124, 58, 237, 0.3) !important;
       }
-      .dark .hover\\:bg-white\/10:hover {
-        background-color: rgba(139, 92, 246, 0.2) !important;
+      .dark .hover\\:bg-white\\/10:hover {
+        background-color: rgba(124, 58, 237, 0.2) !important;
       }
-      .dark .hover\\:bg-white\/20:hover {
-        background-color: rgba(139, 92, 246, 0.3) !important;
+      .dark .hover\\:bg-white\\/20:hover {
+        background-color: rgba(124, 58, 237, 0.3) !important;
       }
       .dark .bg-slate-700 {
-        background-color: rgba(51, 65, 85, 0.9) !important;
+        background-color: rgba(35, 29, 61, 0.9) !important;
       }
       .dark .bg-slate-800 {
-        background-color: rgba(30, 41, 59, 0.9) !important;
+        background-color: rgba(23, 20, 41, 0.9) !important;
       }
       .dark .bg-slate-900 {
-        background-color: rgba(15, 23, 42, 0.95) !important;
+        background-color: rgba(19, 17, 28, 0.95) !important;
       }
       .dark .bg-card {
-        background-color: rgba(30, 41, 59, 0.9) !important;
+        background-color: rgba(23, 20, 41, 0.9) !important;
       }
       .dark .text-slate-200 {
         color: rgba(226, 232, 240, 0.95) !important;
@@ -60,13 +63,13 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
         color: rgba(148, 163, 184, 0.95) !important;
       }
       .dark .from-slate-900 {
-        --tw-gradient-from: rgba(15, 23, 42, 0.95) !important;
+        --tw-gradient-from: rgba(19, 17, 28, 0.95) !important;
       }
       .dark .to-slate-950 {
-        --tw-gradient-to: rgba(3, 6, 23, 0.98) !important;
+        --tw-gradient-to: rgba(9, 8, 14, 0.98) !important;
       }
       .dark .border-slate-700\\/50 {
-        border-color: rgba(51, 65, 85, 0.5) !important;
+        border-color: rgba(35, 29, 61, 0.5) !important;
       }
       .dark .border-purple-800\\/30 {
         border-color: rgba(107, 33, 168, 0.3) !important;
@@ -76,6 +79,15 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
       }
       .dark .border-purple-900\\/30 {
         border-color: rgba(88, 28, 135, 0.3) !important;
+      }
+      .neo-shadow {
+        box-shadow: 0 0 15px rgba(124, 58, 237, 0.3);
+      }
+      .neo-card {
+        background-color: rgba(23, 20, 41, 0.8);
+        border-color: rgba(124, 58, 237, 0.2);
+        border-radius: 0.75rem;
+        backdrop-filter: blur(10px);
       }
     `;
     document.head.appendChild(style);

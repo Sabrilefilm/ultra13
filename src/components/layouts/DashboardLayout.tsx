@@ -55,7 +55,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
   return (
     <SidebarProvider defaultOpen={!window.matchMedia('(max-width: 768px)').matches}>
-      <div className="flex h-screen w-full overflow-hidden bg-gradient-to-br from-slate-900 to-slate-950">
+      <div className="flex h-screen w-full overflow-hidden">
         <UltraSidebar
           username={user.username}
           role={user.role || ""}
