@@ -55,7 +55,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
   return (
     <SidebarProvider defaultOpen={!window.matchMedia('(max-width: 768px)').matches}>
-      <div className="w-full h-screen">
+      <div className="flex h-screen w-full overflow-hidden bg-gradient-to-br from-slate-900 to-slate-950">
         <UltraSidebar
           username={user.username}
           role={user.role || ""}
@@ -65,8 +65,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           currentPage={currentPage}
           lastLogin={lastLogin}
         />
+        
         <div className="flex-1 h-full overflow-y-auto">
-          {children}
+          <div className="w-full max-w-full mx-auto">
+            {children}
+          </div>
         </div>
         
         {isMobile && (

@@ -74,7 +74,7 @@ export const RedesignedDashContent: React.FC<RedesignedDashContentProps> = ({
   };
 
   return (
-    <div className="max-w-full w-full mx-auto p-4 md:p-6 space-y-6 overflow-x-hidden">
+    <div className="w-full mx-auto p-4 md:p-6 space-y-6">
       <DashboardHeader currentPage={currentPage} role={role} />
       {renderContent()}
     </div>

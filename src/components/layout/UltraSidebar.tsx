@@ -9,7 +9,6 @@ import { getNavigationItems } from "./sidebar/navigationItems";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/hooks/use-sidebar";
-import { MobileMenu } from "@/components/mobile/MobileMenu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileNavigation } from "@/components/mobile/MobileNavigation";
 import { NavigationItem, SidebarItem } from "./sidebar/types";
@@ -136,40 +135,25 @@ export const UltraSidebar: React.FC<UltraSidebarProps> = ({
   const sidebarItems = mapNavigationItemsToSidebarItems(navigationItems);
   
   return (
-    <div className="flex h-full w-full">
-      {isMobile && (
-        <MobileMenu 
-          username={username}
-          role={role}
-          currentPage={currentPage}
-          onLogout={onLogout}
-        />
-      )}
-      
-      <Sidebar className={`h-full bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-lg z-40 flex flex-col border-r border-purple-800/50 transition-all duration-300 ${collapsed ? "w-16" : "w-64"} md:flex`}>
-        <div className="flex justify-between items-center p-3 border-b border-purple-800/30">
-          <SidebarLogo collapsed={collapsed} />
-          <SidebarToggle collapsed={collapsed} onToggle={toggleSidebar} />
-        </div>
-        
-        <SidebarUserProfile username={username} role={role} collapsed={collapsed} />
-        
-        <div className="flex-1 overflow-y-auto py-2">
-          <SidebarNavigation 
-            items={sidebarItems} 
-            currentPage={currentPage} 
-            role={role} 
-            onClick={handleSidebarItemClick} 
-            collapsed={collapsed} 
-          />
-        </div>
-        
-        <SidebarLogout onLogout={onLogout} collapsed={collapsed} username={username} role={role} />
-      </Sidebar>
-      
-      <div className={`flex-1 transition-all duration-300 max-w-full`}>
-        {children}
+    <Sidebar className="h-full bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-lg flex flex-col border-r border-purple-800/50 transition-all duration-300 md:flex">
+      <div className="flex justify-between items-center p-3 border-b border-purple-800/30">
+        <SidebarLogo collapsed={collapsed} />
+        <SidebarToggle collapsed={collapsed} onToggle={toggleSidebar} />
       </div>
-    </div>
+      
+      <SidebarUserProfile username={username} role={role} collapsed={collapsed} />
+      
+      <div className="flex-1 overflow-y-auto py-2">
+        <SidebarNavigation 
+          items={sidebarItems} 
+          currentPage={currentPage} 
+          role={role} 
+          onClick={handleSidebarItemClick} 
+          collapsed={collapsed} 
+        />
+      </div>
+      
+      <SidebarLogout onLogout={onLogout} collapsed={collapsed} username={username} role={role} />
+    </Sidebar>
   );
 };
