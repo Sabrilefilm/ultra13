@@ -95,10 +95,10 @@ export const LoginForm = ({
   };
 
   return (
-    <div className="w-full min-h-screen flex bg-[#111827]">
+    <div className="w-full min-h-screen flex items-center justify-center bg-[#111827]">
       <LoginBackground />
       
-      <div className={`w-full max-w-md mx-auto z-10 self-center px-4 transition-all duration-500 transform ${showAnimation ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+      <div className={`w-full max-w-md mx-auto z-10 px-4 transition-all duration-500 transform ${showAnimation ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
         <div className="bg-slate-900/90 border border-slate-800/50 backdrop-blur-lg rounded-xl shadow-2xl overflow-hidden">
           <LoginHeader />
           
@@ -156,7 +156,7 @@ export const LoginForm = ({
                 <Button
                   type="submit"
                   disabled={isLoading || isLocked}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors"
+                  className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-800 text-white font-medium py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors"
                 >
                   {isLoading ? (
                     <Loader2 className="h-5 w-5 animate-spin text-white" />
@@ -170,7 +170,7 @@ export const LoginForm = ({
                 <button
                   type="button"
                   onClick={onForgotPassword}
-                  className="text-sm text-blue-400 hover:text-blue-300 text-center focus:outline-none"
+                  className="text-sm text-purple-400 hover:text-purple-300 text-center focus:outline-none"
                 >
                   Mot de passe oublié ?
                 </button>

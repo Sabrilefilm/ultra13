@@ -86,6 +86,10 @@
     @apply border-border;
   }
   
+  html, body, #root {
+    @apply h-full w-full;
+  }
+  
   body {
     @apply bg-background text-foreground font-sans;
     position: relative;
@@ -117,6 +121,19 @@
     background-size: 400% 400%;
     z-index: -1;
     animation: animate-background-shift 30s ease infinite;
+  }
+
+  #root {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .center-container {
+    @apply flex items-center justify-center w-full;
+  }
+
+  .content-container {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 }
 

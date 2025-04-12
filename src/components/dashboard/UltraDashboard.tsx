@@ -61,7 +61,7 @@ export const UltraDashboard: React.FC<UltraDashboardProps> = ({
       
       <MobileMenuButton onClick={() => onAction('toggleMobileMenu')} />
       
-      <div className="flex h-full w-full">
+      <div className="flex flex-1 h-full w-full">
         <div className={`md:flex ${sidebarStates.mobileMenuOpen ? 'fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:relative md:inset-auto md:bg-transparent md:backdrop-filter-none' : 'hidden'}`}>
           <div className={`transform transition-transform duration-300 h-full ${sidebarStates.mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
             <UltraSidebar 
@@ -79,8 +79,8 @@ export const UltraDashboard: React.FC<UltraDashboardProps> = ({
           </div>
         </div>
         
-        <div className="flex-1 h-full overflow-hidden">
-          <div className="max-w-4xl mx-auto px-4 pt-4">
+        <div className="flex-1 h-full overflow-hidden flex flex-col items-center">
+          <div className="w-full max-w-5xl mx-auto px-4 pt-4">
             {['founder', 'manager', 'agent', 'ambassadeur'].includes(role) && lastLogin && (
               <LastLoginInfo lastLogin={lastLogin} username={username} />
             )}
