@@ -30,8 +30,8 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   
   return (
     <div className="flex-1 w-full p-4 md:p-6 overflow-y-auto flex flex-col items-center">
-      <div className="w-full max-w-7xl">
-        <div className="flex justify-between items-center p-4 md:hidden border-b border-slate-700/30">
+      <div className="w-full max-w-7xl mx-auto flex flex-col items-center">
+        <div className="flex justify-between items-center p-4 md:hidden border-b border-slate-700/30 w-full">
           <Button 
             variant="ghost" 
             size="icon" 
@@ -53,7 +53,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
           </Button>
         </div>
         
-        <div className="flex-1 w-full">
+        <div className="flex-1 w-full flex justify-center">
           {currentPage === 'dashboard' && onAction ? (
             <RedesignedDashContent
               username={username}
@@ -62,7 +62,9 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
               onAction={onAction}
             />
           ) : (
-            children
+            <div className="w-full flex justify-center">
+              {children}
+            </div>
           )}
         </div>
       </div>

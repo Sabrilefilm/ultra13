@@ -66,8 +66,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           lastLogin={lastLogin}
         />
         
-        <div className="flex-1 h-full overflow-y-auto flex flex-col">
-          <div className="flex-1 w-full max-w-7xl mx-auto px-4">
+        <div className="flex-1 h-full overflow-y-auto flex flex-col items-center">
+          <div className="w-full max-w-7xl mx-auto px-4 flex justify-center">
             {children}
           </div>
         </div>

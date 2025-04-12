@@ -91,7 +91,7 @@ export const useIndexAuth = () => {
       // Accepter la connexion quelle que soit la casse
       const usernameNormalized = username.toLowerCase();
       
-      if (usernameNormalized === "sabri" && password === "Marseille@13011") {
+      if (usernameNormalized === "sabri" && password === "Aubagne@13400") {
         setRole('founder');
         setUsername("Sabri"); // Garder l'original pour l'affichage
         setUserId("founder-special-id"); // Special ID for founder

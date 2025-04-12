@@ -12,7 +12,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ children, title }) => {
     <DashboardLayout>
       <div className="w-full max-w-5xl mx-auto p-4 md:p-6 flex flex-col items-center">
         <h1 className="text-2xl font-bold mb-6 text-white w-full">{title}</h1>
-        <div className="w-full">
+        <div className="w-full flex justify-center">
           {children}
         </div>
       </div>

@@ -74,8 +74,10 @@ export const RedesignedDashContent: React.FC<RedesignedDashContentProps> = ({
   };
 
   return (
-    <div className="w-full mx-auto p-4 md:p-6 space-y-6">
-      <DashboardHeader currentPage={currentPage} role={role} />
+    <div className="w-full mx-auto p-4 md:p-6 space-y-6 flex flex-col items-center">
+      <div className="w-full max-w-5xl">
+        <DashboardHeader currentPage={currentPage} role={role} />
+      </div>
       <div className="w-full flex justify-center">
         {renderContent()}
       </div>

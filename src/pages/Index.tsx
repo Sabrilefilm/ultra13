@@ -91,8 +91,8 @@ const Index = () => {
   }
   
   if (!isAuthenticated) {
-    return <div className="min-h-screen bg-[#111827] flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md mx-auto">
+    return <div className="min-h-screen w-full bg-[#111827] flex flex-col items-center justify-center p-4">
+        <div className="w-full flex flex-col items-center justify-center">
           <AuthView onLogin={handleLogin} />
         </div>
         {renderBackground()}

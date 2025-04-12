@@ -13,7 +13,7 @@ export const AuthView = ({
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
   
   return (
-    <div className="flex flex-col w-full h-full justify-center">
+    <div className="flex flex-col w-full h-full items-center justify-center">
       <LoginForm 
         onLogin={onLogin} 
         onForgotPassword={() => setIsForgotPasswordModalOpen(true)} 
